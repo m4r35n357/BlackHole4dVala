@@ -117,7 +117,7 @@ def icJson ():
 
 def main ():  # Need to be inside a function to return . . .
     bh = icJson()
-    bh.pR = sqrt(bh.R(bh.r)) / bh.delta(bh.r) if (bh.R(bh.r) >= 0.0) else -sqrt(-bh.R(bh.r)) / delta(bh.r)
+    bh.pR = sqrt(bh.R(bh.r)) / bh.delta(bh.r) if (bh.R(bh.r) >= 0.0) else -sqrt(-bh.R(bh.r)) / bh.delta(bh.r)
     bh.pTh = sqrt(bh.THETA(bh.theta)) if (bh.THETA(bh.theta) >= 0.0) else -sqrt(-bh.THETA(bh.theta))
     h0 = hMax = hMin = bh.h(bh.r,  bh.theta)  # Set up error reporting
 #    bh.print_out(0.0, h0, h0, h0, h0, -180.0)
