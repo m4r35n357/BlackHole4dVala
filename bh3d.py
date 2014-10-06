@@ -19,6 +19,7 @@ class BL(object):
     	self.phi = phi0
     	self.time = simtime
     	self.step = timestep
+        self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.eMax = 30.0
@@ -72,24 +73,25 @@ class BL(object):
 
 # RK4
     def iterate (self, t, r, theta, phi, pR, pTh):
+        hstep = 0.5 * self.step
         a = array('d', [self.tDeriv (t, r, theta, phi, pR, pTh),
                  self.rDeriv (t, r, theta, phi, pR, pTh),
                  self.thetaDeriv (t, r, theta, phi, pR, pTh),
                  self.phiDeriv (t, r, theta, phi, pR, pTh),
                  self.rDotDeriv (t, r, theta, phi, pR, pTh),
                  self.thDotDeriv (t, r, theta, phi, pR, pTh)])
-        b = array('d', [self.tDeriv (t + 0.5 * self.step * a[0], r + 0.5 * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5]),
-                 self.rDeriv (t + 0.5 * self.step * a[0], r + 0.5 * self.step * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5]),
-                 self.thetaDeriv (t + 0.5 * self.step * a[0], r + 0.5 * self.step * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5]),
-                 self.phiDeriv (t + 0.5 * self.step * a[0], r + 0.5 * self.step * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5]),
-                 self.rDotDeriv (t + 0.5 * self.step * a[0], r + 0.5 * self.step * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5]),
-                 self.thDotDeriv (t + 0.5 * self.step * a[0], r + 0.5 * self.step * a[1], theta + 0.5 * self.step * a[2], phi + 0.5 * self.step * a[3], pR + 0.5 * self.step * a[4], pTh + 0.5 * self.step * a[5])])
-        c = array('d', [self.tDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5]),
-                 self.rDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5]),
-                 self.thetaDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5]),
-                 self.phiDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5]),
-                 self.rDotDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5]),
-                 self.thDotDeriv (t + 0.5 * self.step * b[0], r + 0.5 * self.step * b[1], theta + 0.5 * self.step * b[2], phi + 0.5 * self.step * b[3], pR + 0.5 * self.step * b[4], pTh + 0.5 * self.step * b[5])])
+        b = array('d', [self.tDeriv (t + hstep * a[0], r + 0.5 * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+                 self.rDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+                 self.thetaDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+                 self.phiDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+                 self.rDotDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+                 self.thDotDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5])])
+        c = array('d', [self.tDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
+                 self.rDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
+                 self.thetaDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
+                 self.phiDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
+                 self.rDotDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
+                 self.thDotDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5])])
         d = array('d', [self.tDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
                  self.rDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
                  self.thetaDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
@@ -117,13 +119,13 @@ def main ():  # Need to be inside a function to return . . .
     bh = icJson()
     bh.pR = sqrt(bh.R(bh.r)) / bh.delta(bh.r) if (bh.R(bh.r) >= 0.0) else -sqrt(-bh.R(bh.r)) / delta(bh.r)
     bh.pTh = sqrt(bh.THETA(bh.theta)) if (bh.THETA(bh.theta) >= 0.0) else -sqrt(-bh.THETA(bh.theta))
-#    bh.iterate(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
     h0 = hMax = hMin = bh.h(bh.r,  bh.theta)  # Set up error reporting
-    bh.print_out(0.0, h0, h0, h0, h0, -180.0)
+#    bh.print_out(0.0, h0, h0, h0, h0, -180.0)
     n = 1
     while n <= bh.n:
-        bh.iterate(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-#	s.solve()  # Perform one full integration step
+        x = (bh.r**2 + bh.a**2) * sin(bh.theta) * cos(bh.phi)
+        y = (bh.r**2 + bh.a**2) * sin(bh.theta) * sin(bh.phi)
+        z = bh.r * cos(bh.theta)
 	hNow = bh.h(bh.r, bh.theta)		
 	tmp = fabs(hNow - h0)  # Protect logarithm against negative arguments
 	dH = tmp if tmp > 0.0 else 1.0e-18  # Protect logarithm against small arguments
@@ -132,10 +134,14 @@ def main ():  # Need to be inside a function to return . . .
 	elif hNow > hMax:  # High tide
 		hMax = hNow
 	dbValue = 10.0 * log10(dH)
-	bh.print_out(n * bh.step, hNow, h0, hMin, hMax, dbValue)
+#	bh.print_out(n * bh.step, hNow, h0, hMin, hMax, dbValue)
+	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
+	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
+        bh.iterate(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
+        bh.tau += bh.step
 
 if __name__ == "__main__":
     main()
