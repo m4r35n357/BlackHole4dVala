@@ -22,8 +22,10 @@ class BL(object):
         self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = -30.0
+        self.eMax = -0.0
         self.L_aE = self.L - self.a * self.E
+        self.pR = 0.0
+        self.pTh = sqrt(self.Q)
 
 # intermediates
     def sigma (self, r, theta):
@@ -66,7 +68,7 @@ class BL(object):
 
 # derivatives
     def rDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return (r - self.m) * self.P1(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P1(r) / self.delta(r) + (self.m - r) * pR**2 + r
+        return (r - self.m) * self.P1(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P1(r) / self.delta(r) + (self.m - r) * pR**2 + self.mu**2 * r
 
     def thDotDeriv (self, t, r, theta, phi, pR, pTh):
         return cos(theta) * sin(theta) * self.T1(theta) + self.L**2 * cos(theta)**3 / sin(theta)**3
@@ -120,8 +122,6 @@ def icJson ():
 
 def main ():  # Need to be inside a function to return . . .
     bh = icJson()
-    bh.pR = sqrt(bh.R(bh.r)) / bh.delta(bh.r) if (bh.R(bh.r) >= 0.0) else -sqrt(-bh.R(bh.r)) / bh.delta(bh.r)
-    bh.pTh = sqrt(bh.THETA(bh.theta)) if (bh.THETA(bh.theta) >= 0.0) else -sqrt(-bh.THETA(bh.theta))
     h0 = hMax = hMin = bh.h(bh.r,  bh.theta)  # Set up error reporting
     n = 1
     while n <= bh.n:
@@ -139,8 +139,8 @@ def main ():  # Need to be inside a function to return . . .
 	dbValue = 10.0 * log10(dH)
 	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
 	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-#        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+#        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
