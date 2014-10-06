@@ -123,8 +123,9 @@ def main ():  # Need to be inside a function to return . . .
 #    bh.print_out(0.0, h0, h0, h0, h0, -180.0)
     n = 1
     while n <= bh.n:
-        x = (bh.r**2 + bh.a**2) * sin(bh.theta) * cos(bh.phi)
-        y = (bh.r**2 + bh.a**2) * sin(bh.theta) * sin(bh.phi)
+        ra = sqrt(bh.r**2 + bh.a**2)
+        x = ra * sin(bh.theta) * cos(bh.phi)
+        y = ra * sin(bh.theta) * sin(bh.phi)
         z = bh.r * cos(bh.theta)
 	hNow = bh.h(bh.r, bh.theta)		
 	tmp = fabs(hNow - h0)  # Protect logarithm against negative arguments

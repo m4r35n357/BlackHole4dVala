@@ -36,7 +36,6 @@ def main():
 	# get data dimensions
 	line = dataFile.readline()
 	coordinates = loads(line)
-        print >> stderr, coordinates
 	#  set up the scene
 	sphere(pos = (0.0, 0.0, 0.0), radius = horizon, color = colours[9], opacity = 1.0)  # Horizon
 	ellipsoid(pos = (0.0, 0.0, 0.0), length = 4.0, height = 4.0, width = 2.0 * horizon, color = colours[3], opacity = 0.2)  # Ergosphere
@@ -49,7 +48,7 @@ def main():
 	while line:
 		rate(60)
 		coordinates = loads(line)
-		error = coordinates['H']
+		error = coordinates['ER']
 		if error < -120.0:
 			ball.color = colours[2]
 		elif error < -90.0:
