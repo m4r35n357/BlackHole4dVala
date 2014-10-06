@@ -12,7 +12,7 @@ class BL(object):
     	self.a = spin
         self.mu = 1.0
     	self.E = energy
-    	self.Lz = momentum
+    	self.L = momentum
     	self.Q = carter
     	self.r = r0
     	self.theta = theta0
@@ -23,7 +23,7 @@ class BL(object):
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.eMax = -30.0
-        self.L_aE = self.Lz - self.a * self.E
+        self.L_aE = self.L - self.a * self.E
 
 # intermediates
     def sigma (self, r, theta):
@@ -33,16 +33,16 @@ class BL(object):
     	return r**2 - 2.0 * r * self.m + self.a**2
 
     def P1 (self, r):
-    	return (r**2 + self.a**2) * self.E - self.a * self.Lz
+    	return (r**2 + self.a**2) * self.E - self.a * self.L
 
     def P2(self, r):
-    	return self.mu**2 * r**2 + self.L_aE**2 + self.Q
+    	return self.Q + self.L_aE**2 + self.mu**2 * r**2
 
     def R (self, r):
     	return self.P1(r)**2 - self.delta(r) * self.P2(r)
 
     def T1 (self, theta):
-    	return self.a**2 * (self.mu**2 - self.E**2) + self.Lz**2 / sin(theta)**2
+    	return self.L**2 / sin(theta)**2 + self.a**2 * (self.mu**2 - self.E**2) 
 
     def THETA (self, theta):
     	return self.Q - cos(theta)**2 * self.T1(theta)
@@ -56,23 +56,31 @@ class BL(object):
         return (r**2 + self.a**2) * self.P1(r) / self.delta(r) + self.a * self.L_aE + cos(theta)**2 * self.a**2 * self.E
 
     def rDeriv (self, t, r, theta, phi, pR, pTh):
-        return self.delta(r) * pR
+        return pR * self.delta(r)
 
     def thetaDeriv (self, t, r, theta, phi, pR, pTh):
         return pTh
 
     def phiDeriv (self, t, r, theta, phi, pR, pTh):
-        return self.a * self.P1(r) / self.delta(r) + self.L_aE + self.Lz * cos(theta)**2 / sin(theta)**2
+        return self.a * self.P1(r) / self.delta(r) + self.L_aE + self.L * cos(theta)**2 / sin(theta)**2
 
 # derivatives
     def rDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return (r - 1.0) * self.P1(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P1(r) / self.delta(r) + (1.0 - r ) * pR**2 + r
+        return (r - self.m) * self.P1(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P1(r) / self.delta(r) + (self.m - r) * pR**2 + r
 
     def thDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return cos(theta) * sin(theta) * self.T1(theta) + self.Lz**2 * cos(theta)**3 / sin(theta)**3
+        return cos(theta) * sin(theta) * self.T1(theta) + self.L**2 * cos(theta)**3 / sin(theta)**3
 
-# RK4
-    def iterate (self, t, r, theta, phi, pR, pTh):
+# Integrators
+    def euler (self, t, r, theta, phi, pR, pTh):
+        self.t += self.step * self.tDeriv (t, r, theta, phi, pR, pTh)
+        self.r += self.step * self.rDeriv (t, r, theta, phi, pR, pTh)
+        self.theta += self.step * self.thetaDeriv (t, r, theta, phi, pR, pTh)
+        self.phi += self.step * self.phiDeriv (t, r, theta, phi, pR, pTh)
+        self.pR += self.step * self.rDotDeriv (t, r, theta, phi, pR, pTh)
+        self.pTh += self.step * self.thDotDeriv (t, r, theta, phi, pR, pTh)
+
+    def rk4 (self, t, r, theta, phi, pR, pTh):
         hstep = 0.5 * self.step
         a = array('d', [self.tDeriv (t, r, theta, phi, pR, pTh),
                  self.rDeriv (t, r, theta, phi, pR, pTh),
@@ -131,7 +139,8 @@ def main ():  # Need to be inside a function to return . . .
 	dbValue = 10.0 * log10(dH)
 	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
 	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-        bh.iterate(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+#        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
