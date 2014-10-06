@@ -22,7 +22,7 @@ class BL(object):
         self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = 30.0
+        self.eMax = -30.0
         self.L_aE = self.Lz - self.a * self.E
 
 # intermediates
@@ -105,11 +105,6 @@ class BL(object):
         self.pR += self.step * (a[4] + 2.0 * b[4] + 2.0 * c[4] + d[4]) / 6.0
         self.pTh += self.step * (a[5] + 2.0 * b[5] + 2.0 * c[5] + d[5]) / 6.0
 
-    def print_out (self, time, hNow, h0, hMin, hMax, dbValue):
-	print >> stdout, '{"tau":%.9e, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e}' % (-self.step, self.t, self.r, self.theta, self.phi)  # Log data
-	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (time, hNow, h0, hMin, hMax, dbValue)  # Log progress
-
-
 # parse input
 def icJson ():
 	ic = loads(stdin.read())
@@ -120,7 +115,6 @@ def main ():  # Need to be inside a function to return . . .
     bh.pR = sqrt(bh.R(bh.r)) / bh.delta(bh.r) if (bh.R(bh.r) >= 0.0) else -sqrt(-bh.R(bh.r)) / bh.delta(bh.r)
     bh.pTh = sqrt(bh.THETA(bh.theta)) if (bh.THETA(bh.theta) >= 0.0) else -sqrt(-bh.THETA(bh.theta))
     h0 = hMax = hMin = bh.h(bh.r,  bh.theta)  # Set up error reporting
-#    bh.print_out(0.0, h0, h0, h0, h0, -180.0)
     n = 1
     while n <= bh.n:
         ra = sqrt(bh.r**2 + bh.a**2)
@@ -135,7 +129,6 @@ def main ():  # Need to be inside a function to return . . .
 	elif hNow > hMax:  # High tide
 		hMax = hNow
 	dbValue = 10.0 * log10(dH)
-#	bh.print_out(n * bh.step, hNow, h0, hMin, hMax, dbValue)
 	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
 	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
         bh.iterate(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
