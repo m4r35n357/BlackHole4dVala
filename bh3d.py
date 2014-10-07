@@ -22,7 +22,7 @@ class BL(object):
         self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = -0.0
+        self.eMax = -30.0
         self.L_aE = self.L - self.a * self.E
         self.pR = 0.0
         self.pTh = sqrt(self.Q)
@@ -138,9 +138,9 @@ def main ():  # Need to be inside a function to return . . .
 		hMax = hNow
 	dbValue = 10.0 * log10(dH)
 	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
-	print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-#        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+	print >> stderr, '{"tau":%.9f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
+        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+#        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
