@@ -8,6 +8,6 @@
   "theta" : 1.570796327,
   "phi" : 0.0,
   "time" : 100.0,
-  "step" : 0.1,
+  "step" : 0.0001,
   "integratorOrder" : 6
 }
