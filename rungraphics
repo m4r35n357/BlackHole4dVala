@@ -1,0 +1,20 @@
+#!/bin/sh
+
+ic=${1:-''}
+
+d=data
+p=progress
+
+./bh3d.py <$ic >$d 2>$p &
+PID=$!
+sleep 1
+./filegraphics.py $d $ic&
+wait $PID
+set $(wc -l $p)
+if [ $1 -gt 10000 ]
+then
+	./fileprogress.py $p $(($1 / 2000)) &
+else
+	./fileprogress.py $p 1 &
+fi
+

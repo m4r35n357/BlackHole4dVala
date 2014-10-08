@@ -2,7 +2,7 @@
 *.pyc
 .spyderproject
 .idea
-*.*~
+*~
 data
 progress
 profdata
