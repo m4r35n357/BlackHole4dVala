@@ -29,8 +29,8 @@ class BL(object):
 
 # intermediates
     def sigma (self, r, theta):
-#    	return r**2 + self.a**2 * cos(theta)**2
-    	return 1.0
+    	return r**2 + self.a**2 * cos(theta)**2
+#    	return 1.0
 
     def delta (self, r):
     	return r**2 - 2.0 * r * self.m + self.a**2
