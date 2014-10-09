@@ -22,7 +22,7 @@ class BL(object):
         self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = -30.0
+        self.eMax = -00.0
         self.L_aE = self.L - self.a * self.E
         self.pR = 0.0
         self.pTh = sqrt(self.Q)
@@ -97,7 +97,7 @@ class BL(object):
                  self.phiDeriv (t, r, theta, phi, pR, pTh),
                  self.rDotDeriv (t, r, theta, phi, pR, pTh),
                  self.thDotDeriv (t, r, theta, phi, pR, pTh)])
-        b = array('d', [self.tDeriv (t + hstep * a[0], r + 0.5 * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
+        b = array('d', [self.tDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
                  self.rDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
                  self.thetaDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
                  self.phiDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
