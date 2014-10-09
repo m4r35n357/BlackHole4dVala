@@ -71,7 +71,7 @@ class BL(object):
         return pTh / self.sigma(r, theta) 
 
     def phiDeriv (self, t, r, theta, phi, pR, pTh):
-        return - 0.5 * (self.a * self.P1(r) / self.delta(r) - 2.0 * self.a * self.L_aE + self.L * cos(theta)**2 / sin(theta)**2) / self.sigma(r, theta)
+        return - 0.5 * (self.a * self.P1(r) / self.delta(r) + 2.0 * self.a * self.L_aE + self.L * cos(theta)**2 / sin(theta)**2) / self.sigma(r, theta)
 
 # derivatives
     def rDotDeriv (self, t, r, theta, phi, pR, pTh):
@@ -146,8 +146,8 @@ def main ():  # Need to be inside a function to return . . .
 	dbValue = 10.0 * log10(dH)
 	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
 	print >> stderr, '{"tau":%.9f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-#        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+#        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
