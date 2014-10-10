@@ -71,7 +71,7 @@ class BL(object):
         return pTh / self.sigma(r, theta) 
 
     def phiDeriv (self, t, r, theta, phi, pR, pTh):
-        return - 0.5 * (self.a * self.P1(r) / self.delta(r) + self.a * self.L_aE + self.L * cos(theta)**2 / sin(theta)**2) / self.sigma(r, theta)
+        return - 0.5 * (self.a * self.P1(r) / self.delta(r) + self.L_aE + self.L * cos(theta)**2 / sin(theta)**2) / self.sigma(r, theta)
 
 # derivatives
     def rDotDeriv (self, t, r, theta, phi, pR, pTh):
