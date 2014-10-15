@@ -24,8 +24,8 @@ class BL(object):
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.eMax = -00.0
         self.L_aE = self.L - self.a * self.E
-        self.pR = 0.0
-        self.pTh = sqrt(self.Q)
+ 	self.pR = -sqrt(self.R(self.r)) / self.delta(self.r) if self.R(self.r) >= 0.0 else sqrt(-self.R(self.r)) / self.delta(self.r)
+	self.pTh = -sqrt(self.THETA(self.theta)) if self.THETA(self.theta) >= 0.0 else sqrt(-self.THETA(self.theta))
 	if order == 2:  # Second order
 		self.coefficients = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -68,58 +68,44 @@ class BL(object):
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
 
 # intermediates
-    def sigma (self, r, theta):
-    	return r**2 + self.a**2 * cos(theta)**2
-#    	return 1.0
-
     def delta (self, r):
     	return r**2 - 2.0 * r * self.m + self.a**2
 
-    def deltaDash (self, r):
-    	return 2.0 * (r - self.m)
-
-    def P1 (self, r):
+    def P (self, r):
     	return (r**2 + self.a**2) * self.E - self.a * self.L
 
-    def P2 (self, r):
-    	return self.Q + self.L_aE**2 + self.mu**2 * r**2
-
     def R (self, r):
-    	return self.P1(r)**2 - self.delta(r) * self.P2(r)
+    	return self.P(r)**2 - self.delta(r) * (self.Q + self.L_aE**2 + self.mu**2 * r**2)
 
-    def RDash (self, r):
-    	return - self.deltaDash(r) * self.P2(r) + 4.0 * r * self. E * self.P1(r) - 2.0 * r * self.delta(r)
-
-    def T1 (self, theta):
-    	return self.L**2 / sin(theta)**2 + self.a**2 * (self.mu**2 - self.E**2) 
+    def TH (self, theta):
+    	return self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2
 
     def THETA (self, theta):
-    	return self.Q - cos(theta)**2 * self.T1(theta)
+    	return self.Q - cos(theta)**2 * self.TH(theta)
 
 # hamiltonian
     def h (self, r, theta, pR, pTh):
-        return 0.5 * (self.delta(r) * pR**2 + pTh**2 - self.R(r) / self.delta(r) - self.THETA(theta)) / self.sigma(r, theta) - 0.5
+        return 0.5 * (self.delta(r) * pR**2 + pTh**2 - self.R(r) / self.delta(r) - self.THETA(theta)) / (r**2 + self.a**2 * cos(theta)**2) - 0.5
 
 # parameters
     def tDeriv (self, t, r, theta, phi, pR, pTh):
-        return ((r**2 + self.a**2) * self.P1(r) / self.delta(r) + self.a * self.L_aE + cos(theta)**2 * self.a**2 * self.E) / self.sigma(r, theta)
+        return (r**2 + self.a**2) * self.P(r) / self.delta(r) + self.a * self.L_aE + cos(theta)**2 * self.a**2 * self.E
 
     def rDeriv (self, t, r, theta, phi, pR, pTh):
-        return pR * self.delta(r) / self.sigma(r, theta) 
+        return pR * self.delta(r) 
 
     def thetaDeriv (self, t, r, theta, phi, pR, pTh):
-        return pTh / self.sigma(r, theta) 
+        return pTh
 
     def phiDeriv (self, t, r, theta, phi, pR, pTh):
-        return (self.a * self.P1(r) / self.delta(r) + self.L_aE + self.L * cos(theta)**2 / sin(theta)**2) / self.sigma(r, theta)
+        return self.a * self.P(r) / self.delta(r) + self.L_aE + self.L * cos(theta)**2 / sin(theta)**2
 
 # derivatives
     def rDotDeriv (self, t, r, theta, phi, pR, pTh):
-#        return 0.5 * (self.deltaDash(r) * self.R(r) / self.delta(r)**2 - self.RDash(r) / self.delta(r) - self.deltaDash(r) * pR**2) / self.sigma(r, theta)
-        return 0.5 * self.deltaDash(r) * self.P1(r) * self.P1(r) / (self.delta(r) * self.delta(r)) - 2.0 * r * self.E * self.P1(r) / self.delta(r) - 0.5 * self.deltaDash(r) * self.pR * self.pR + r
+        return (r - self.m) * self.P(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P(r) / self.delta(r) - (r - self.m) * self.pR**2 + self.mu**2 * r
 
     def thDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return (cos(theta) * sin(theta) * self.T1(theta) + self.L**2 * cos(theta)**3 / sin(theta)**3) / self.sigma(r, theta) 
+        return cos(theta) * sin(theta) * self.TH(theta) + self.L**2 * cos(theta)**3 / sin(theta)**3
 
 # Integrators
     def sympBase (self, y, t, r, theta, phi, pR, pTh):  # Compose higher orders from this symmetrical second-order symplectic base
@@ -210,11 +196,11 @@ def main ():  # Need to be inside a function to return . . .
 	elif hNow > hMax:  # High tide
 		hMax = hNow
 	dbValue = 10.0 * log10(dH)
-	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (-bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
+	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
 	print >> stderr, '{"tau":%.9f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-#        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 #        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-        bh.solve(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
+#        bh.solve(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
 	if dbValue > bh.eMax:
 		return
 	n += 1
