@@ -19,8 +19,9 @@ def main():
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			ax1.plot(p['tau'], p['H'], 'r.')
+			ax1.plot(p['tau'], p['E'], 'r.')
 			ax2.plot(p['tau'], p['ER'], 'b.')
+			ax2.plot(p['tau'], p['ETh'], 'g.')
 #			ax2.plot(p['lambda'], p['HR'], 'b.')
 #			ax2.plot(p['lambda'], p['HTheta'], 'g.')
 		line = dataFile.readline()

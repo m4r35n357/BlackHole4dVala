@@ -79,11 +79,11 @@ class BL(object):
 	
 # hamiltonian
     def hR (self, r, theta, pR, pTh):
-        print >> stderr, 'pR: ' + str(pR**2) + ', R: ' + str(self.R) + ', Hr: ' + str(10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12))
+#        print >> stderr, 'pR: ' + str(pR**2) + ', R: ' + str(self.R) + ', Hr: ' + str(10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12))
         return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12)
 
     def hTh (self, r, theta, pR, pTh):
-        print >> stderr, 'pTh: ' + str(pTh**2) + ', THETA: ' + str(self.THETA) + ', Hth: ' + str(10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-12))
+#        print >> stderr, 'pTh: ' + str(pTh**2) + ', THETA: ' + str(self.THETA) + ', Hth: ' + str(10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-12))
         return 10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0)
 
     def h (self, r, theta, pR, pTh):
@@ -135,7 +135,7 @@ def main ():  # Need to be inside a function to return . . .
         z = bh.r * cos(bh.theta)
 	hNow = bh.h(bh.r, bh.theta, bh.pR, bh.pTh)		
 	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh), bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
-#	print >> stderr, '{"tau":%.9f, "E":%.1f, "ER":%.1f, "ETh":%.1f}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh))  # Log progress
+	print >> stderr, '{"tau":%.9f, "E":%.1f, "ER":%.1f, "ETh":%.1f}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh))  # Log progress
         bh.tau += bh.step
         bh.solve()
 	if hNow > bh.eMax:
