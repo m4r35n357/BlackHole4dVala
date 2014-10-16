@@ -69,7 +69,6 @@ class BL(object):
     def updateIntermediates (self, r, theta):
 	self.r2 = r * r
 	self.ra2 = self.r2 + self.a**2
-#	self.ra = sqrt(self.ra2)
 	self.delta = r**2 - 2.0 * r * self.m + self.a**2
 	self.P = (r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * r**2
@@ -79,15 +78,13 @@ class BL(object):
 	
 # hamiltonian
     def hR (self, r, theta, pR, pTh):
-#        print >> stderr, 'pR: ' + str(pR**2) + ', R: ' + str(self.R) + ', Hr: ' + str(10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12))
-        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12)
+        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-18)
 
     def hTh (self, r, theta, pR, pTh):
-#        print >> stderr, 'pTh: ' + str(pTh**2) + ', THETA: ' + str(self.THETA) + ', Hth: ' + str(10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-12))
-        return 10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0)
+        return 10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-18)
 
     def h (self, r, theta, pR, pTh):
-        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + fabs(pTh**2 - self.THETA) / 2.0)
+        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-18)
 
 # Integrator
     def sympBase (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
