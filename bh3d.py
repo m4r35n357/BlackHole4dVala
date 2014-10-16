@@ -1,7 +1,7 @@
 #!/usr/bin/env pypy
 
 from sys import stdin, stdout, stderr
-from math import fabs, log10, sqrt, sin, cos
+from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array
 
@@ -22,10 +22,8 @@ class BL(object):
         self.tau = 0.0
         self.t = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = -00.0
+        self.eMax = -30.0
         self.L_aE = self.L - self.a * self.E
- 	self.pR = -sqrt(self.R(self.r)) / self.delta(self.r) if self.R(self.r) >= 0.0 else sqrt(-self.R(self.r)) / self.delta(self.r)
-	self.pTh = -sqrt(self.THETA(self.theta)) if self.THETA(self.theta) >= 0.0 else sqrt(-self.THETA(self.theta))
 	if order == 2:  # Second order
 		self.coefficients = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -68,111 +66,55 @@ class BL(object):
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
 
 # intermediates
-    def delta (self, r):
-    	return r**2 - 2.0 * r * self.m + self.a**2
-
-    def P (self, r):
-    	return (r**2 + self.a**2) * self.E - self.a * self.L
-
-    def R (self, r):
-    	return self.P(r)**2 - self.delta(r) * (self.Q + self.L_aE**2 + self.mu**2 * r**2)
-
-    def TH (self, theta):
-    	return self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2
-
-    def THETA (self, theta):
-    	return self.Q - cos(theta)**2 * self.TH(theta)
-
+    def updateIntermediates (self, r, theta):
+	self.r2 = r * r
+	self.ra2 = self.r2 + self.a**2
+#	self.ra = sqrt(self.ra2)
+	self.delta = r**2 - 2.0 * r * self.m + self.a**2
+	self.P = (r**2 + self.a**2) * self.E - self.a * self.L
+	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * r**2
+	self.R = self.P**2 - self.delta * self.P2
+	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2
+	self.THETA = self.Q - cos(theta)**2 * self.TH
+	
 # hamiltonian
+    def hR (self, r, theta, pR, pTh):
+        print >> stderr, 'pR: ' + str(pR**2) + ', R: ' + str(self.R) + ', Hr: ' + str(10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12))
+        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-12)
+
+    def hTh (self, r, theta, pR, pTh):
+        print >> stderr, 'pTh: ' + str(pTh**2) + ', THETA: ' + str(self.THETA) + ', Hth: ' + str(10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-12))
+        return 10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0)
+
     def h (self, r, theta, pR, pTh):
-        return 0.5 * (self.delta(r) * pR**2 + pTh**2 - self.R(r) / self.delta(r) - self.THETA(theta)) / (r**2 + self.a**2 * cos(theta)**2) - 0.5
+        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + fabs(pTh**2 - self.THETA) / 2.0)
 
-# parameters
-    def tDeriv (self, t, r, theta, phi, pR, pTh):
-        return (r**2 + self.a**2) * self.P(r) / self.delta(r) + self.a * self.L_aE + cos(theta)**2 * self.a**2 * self.E
-
-    def rDeriv (self, t, r, theta, phi, pR, pTh):
-        return pR * self.delta(r) 
-
-    def thetaDeriv (self, t, r, theta, phi, pR, pTh):
-        return pTh
-
-    def phiDeriv (self, t, r, theta, phi, pR, pTh):
-        return self.a * self.P(r) / self.delta(r) + self.L_aE + self.L * cos(theta)**2 / sin(theta)**2
-
-# derivatives
-    def rDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return (r - self.m) * self.P(r)**2 / self.delta(r)**2 - 2.0 * r * self.E * self.P(r) / self.delta(r) - (r - self.m) * self.pR**2 + self.mu**2 * r
-
-    def thDotDeriv (self, t, r, theta, phi, pR, pTh):
-        return cos(theta) * sin(theta) * self.TH(theta) + self.L**2 * cos(theta)**3 / sin(theta)**3
-
-# Integrators
-    def sympBase (self, y, t, r, theta, phi, pR, pTh):  # Compose higher orders from this symmetrical second-order symplectic base
-		halfY = 0.5 * y
-		self.updateQ(halfY, t, r, theta, phi, pR, pTh)
-		self.updateP(y, t, r, theta, phi, pR, pTh)
-		self.updateQ(halfY, t, r, theta, phi, pR, pTh)
+# Integrator
+    def sympBase (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
+	halfY = 0.5 * y
+	self.updateQ(halfY)
+	self.updateP(y)
+	self.updateQ(halfY)
 			
-    def solve (self, t, r, theta, phi, pR, pTh):  # Generalized Symplectic Integrator
+    def solve (self):  # Generalized Symplectic Integrator
 	tmp = len(self.coefficients) - 1
 	for i in range(tmp):  # Composition happens in these loops
-		self.sympBase(self.coefficients[i], t, r, theta, phi, pR, pTh)
+	    self.sympBase(self.coefficients[i])
 	for i in range(tmp, -1, -1):
-		self.sympBase(self.coefficients[i], t, r, theta, phi, pR, pTh)
+	    self.sympBase(self.coefficients[i])
 
-    def updateQ (self, c, t, r, theta, phi, pR, pTh):
-        hstep = c * self.step
-        self.t += hstep * self.tDeriv (t, r, theta, phi, pR, pTh)
-        self.r += hstep * self.rDeriv (t, r, theta, phi, pR, pTh)
-        self.theta += hstep * self.thetaDeriv (t, r, theta, phi, pR, pTh)
-        self.phi += hstep * self.phiDeriv (t, r, theta, phi, pR, pTh)
+    def updateQ (self, c):
+        cstep = c * self.step
+        self.t -= cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
+        self.r += 2.0 * cstep * self.pR
+        self.theta = (self.theta + 2.0 * cstep * self.pTh) % (2.0 * pi)
+        self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
+        self.updateIntermediates(self.r, self.theta)
 
-    def updateP (self, c, t, r, theta, phi, pR, pTh):
-        hstep = c * self.step
-        self.pR += hstep * self.rDotDeriv (t, r, theta, phi, pR, pTh)
-        self.pTh += hstep * self.thDotDeriv (t, r, theta, phi, pR, pTh)
-
-    def euler (self, t, r, theta, phi, pR, pTh):
-        self.t += self.step * self.tDeriv (t, r, theta, phi, pR, pTh)
-        self.r += self.step * self.rDeriv (t, r, theta, phi, pR, pTh)
-        self.theta += self.step * self.thetaDeriv (t, r, theta, phi, pR, pTh)
-        self.phi += self.step * self.phiDeriv (t, r, theta, phi, pR, pTh)
-        self.pR += self.step * self.rDotDeriv (t, r, theta, phi, pR, pTh)
-        self.pTh += self.step * self.thDotDeriv (t, r, theta, phi, pR, pTh)
-
-    def rk4 (self, t, r, theta, phi, pR, pTh):
-        hstep = 0.5 * self.step
-        a = array('d', [self.tDeriv (t, r, theta, phi, pR, pTh),
-                 self.rDeriv (t, r, theta, phi, pR, pTh),
-                 self.thetaDeriv (t, r, theta, phi, pR, pTh),
-                 self.phiDeriv (t, r, theta, phi, pR, pTh),
-                 self.rDotDeriv (t, r, theta, phi, pR, pTh),
-                 self.thDotDeriv (t, r, theta, phi, pR, pTh)])
-        b = array('d', [self.tDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
-                 self.rDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
-                 self.thetaDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
-                 self.phiDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
-                 self.rDotDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5]),
-                 self.thDotDeriv (t + hstep * a[0], r + hstep * a[1], theta + hstep * a[2], phi + hstep * a[3], pR + hstep * a[4], pTh + hstep * a[5])])
-        c = array('d', [self.tDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
-                 self.rDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
-                 self.thetaDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
-                 self.phiDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
-                 self.rDotDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5]),
-                 self.thDotDeriv (t + hstep * b[0], r + hstep * b[1], theta + hstep * b[2], phi + hstep * b[3], pR + hstep * b[4], pTh + hstep * b[5])])
-        d = array('d', [self.tDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
-                 self.rDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
-                 self.thetaDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
-                 self.phiDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
-                 self.rDotDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5]),
-                 self.thDotDeriv (t + self.step * c[0], r + self.step * c[1], theta + self.step * c[2], phi + self.step * c[3], pR + self.step * c[4], pTh + self.step * c[5])])
-        self.t += self.step * (a[0] + 2.0 * b[0] + 2.0 * c[0] + d[0]) / 6.0
-        self.r += self.step * (a[1] + 2.0 * b[1] + 2.0 * c[1] + d[1]) / 6.0
-        self.theta += self.step * (a[2] + 2.0 * b[2] + 2.0 * c[2] + d[2]) / 6.0
-        self.phi += self.step * (a[3] + 2.0 * b[3] + 2.0 * c[3] + d[3]) / 6.0
-        self.pR += self.step * (a[4] + 2.0 * b[4] + 2.0 * c[4] + d[4]) / 6.0
-        self.pTh += self.step * (a[5] + 2.0 * b[5] + 2.0 * c[5] + d[5]) / 6.0
+    def updateP (self, c):
+        cstep = c * self.step
+        self.pR += cstep * (4.0 * self.r * self.E * self.P - 2.0 * self.P2 * (self.r - self.m) - 2.0 * self.mu**2 * self.r * self.delta)
+        self.pTh += cstep * 2.0 * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
 # parse input
 def icJson ():
@@ -181,30 +123,24 @@ def icJson ():
 
 def main ():  # Need to be inside a function to return . . .
     bh = icJson()
-    h0 = hMax = hMin = bh.h(bh.r,  bh.theta, bh.pR, bh.pTh)  # Set up error reporting
+    bh.updateIntermediates(bh.r, bh.theta)
+    bh.pR = sqrt(bh.R) if bh.R >= 0.0 else -sqrt(-bh.R)
+    bh.pTh = sqrt(bh.THETA) if bh.THETA >= 0.0 else -sqrt(-bh.THETA)
     n = 1
     while n <= bh.n:
+        bh.updateIntermediates(bh.r, bh.theta)
         ra = sqrt(bh.r**2 + bh.a**2)
         x = ra * sin(bh.theta) * cos(bh.phi)
         y = ra * sin(bh.theta) * sin(bh.phi)
         z = bh.r * cos(bh.theta)
 	hNow = bh.h(bh.r, bh.theta, bh.pR, bh.pTh)		
-	tmp = fabs(hNow - h0)  # Protect logarithm against negative arguments
-	dH = tmp if tmp > 0.0 else 1.0e-18  # Protect logarithm against small arguments
-	if hNow < hMin:  # Low tide
-		hMin = hNow
-	elif hNow > hMax:  # High tide
-		hMax = hNow
-	dbValue = 10.0 * log10(dH)
-	print >> stdout, '{"tau":%.9e, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bh.tau, hNow, h0, hMin, hMax, dbValue, bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
-	print >> stderr, '{"tau":%.9f, "H":%.9e, "H0":%.9e, "H-":%.9e, "H+":%.9e, "ER":%.1f}' % (bh.tau, hNow, h0, hMin, hMax, dbValue)  # Log progress
-        bh.euler(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-#        bh.rk4(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-#        bh.solve(bh.t, bh.r, bh.theta, bh.phi, bh.pR, bh.pTh)
-	if dbValue > bh.eMax:
+	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh), bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
+#	print >> stderr, '{"tau":%.9f, "E":%.1f, "ER":%.1f, "ETh":%.1f}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh))  # Log progress
+        bh.tau += bh.step
+        bh.solve()
+	if hNow > bh.eMax:
 		return
 	n += 1
-        bh.tau += bh.step
 
 if __name__ == "__main__":
     main()
