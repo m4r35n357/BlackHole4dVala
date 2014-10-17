@@ -13,14 +13,14 @@ def main():
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('Simulation Time')
 	ax1.set_ylabel('Hamiltonian', color='b')
-	ax2 = ax1.twinx()
-	ax2.set_ylabel('Error ratio, dBH0', color='b')
+#	ax2 = ax1.twinx()
+#	ax2.set_ylabel('Error ratio, dBH0', color='b')
 	n = 0
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			ax2.plot(p['tau'], p['ETh'], 'r.')
-			ax2.plot(p['tau'], p['ER'], 'g.')
+			ax1.plot(p['tau'], p['ETh'], 'r.')
+			ax1.plot(p['tau'], p['ER'], 'g.')
 			ax1.plot(p['tau'], p['E'], 'b.')
 		line = dataFile.readline()
 		n += 1
