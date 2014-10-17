@@ -48,7 +48,7 @@ def main():
 	while line:
 		rate(60)
 		coordinates = loads(line)
-		error = coordinates['ER']
+		error = coordinates['E']
 		if error < -120.0:
 			ball.color = colours[2]
 		elif error < -90.0:

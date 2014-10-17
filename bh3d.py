@@ -6,7 +6,6 @@ from json import loads
 from array import array
 
 class BL(object):
-
     def __init__(self, mass, spin, energy, momentum, carter, r0, theta0, phi0, simtime, timestep, order):
     	self.m = mass
     	self.a = spin
