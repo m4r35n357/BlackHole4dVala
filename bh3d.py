@@ -23,6 +23,7 @@ class BL(object):
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.eMax = -30.0
         self.L_aE = self.L - self.a * self.E
+        self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
 	if order == 2:  # Second order
 		self.coefficients = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -124,7 +125,7 @@ def main ():  # Need to be inside a function to return . . .
     bh.pTh = sqrt(bh.THETA) if bh.THETA >= 0.0 else -sqrt(-bh.THETA)
     n = 1
     while n <= bh.n:
-        bh.updateIntermediates(bh.r, bh.theta)
+#        bh.updateIntermediates(bh.r, bh.theta)
         ra = sqrt(bh.r**2 + bh.a**2)
         x = ra * sin(bh.theta) * cos(bh.phi)
         y = ra * sin(bh.theta) * sin(bh.phi)
@@ -134,7 +135,7 @@ def main ():  # Need to be inside a function to return . . .
 	print >> stderr, '{"tau":%.9f, "E":%.1f, "ER":%.1f, "ETh":%.1f}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh))  # Log progress
         bh.tau += bh.step
         bh.solve()
-	if hNow > bh.eMax:
+	if (hNow > bh.eMax) or (bh.r < bh.horizon):
 		return
 	n += 1
 
