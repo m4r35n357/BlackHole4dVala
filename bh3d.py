@@ -19,7 +19,7 @@ class BL(object):
     	self.phi = 0.0
     	self.time = simtime
     	self.step = timestep
-        self.tau = 0.0
+        self.mino = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.L_aE = self.L - self.a * self.E
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
@@ -89,7 +89,7 @@ class BL(object):
 # Symplectic Integrator
     def qUpdate (self, c):
         cstep = c * self.step
-        self.t -= cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
+        self.t += cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
         self.r += cstep * self.pR
         self.theta = (self.theta + cstep * self.pTh) % (2.0 * pi)
         self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
@@ -126,9 +126,9 @@ def main ():  # Need to be inside a function to return . . .
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
-	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.tau, bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
 
-        bl.tau += bl.step
+        bl.mino += bl.step
         bl.solve()
 	if (bl.error > 1.0e-3) or (bl.r < bl.horizon):
 		return bl.error
