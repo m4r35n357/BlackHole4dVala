@@ -65,7 +65,7 @@ class BL(object):
 	else:  # Wrong value for integrator order
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
 
-# intermediates
+# Intermediate parameters
     def updateIntermediates (self):
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
 	self.P = (self.r**2 + self.a**2) * self.E - self.a * self.L
@@ -86,7 +86,7 @@ class BL(object):
         self.error += error
         return 10.0 * log10(error + 1.0e-18)
 
-# Integrator
+# Symplectic Integrator
     def qUpdate (self, c):
         cstep = c * self.step
         self.t -= cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
@@ -113,7 +113,7 @@ class BL(object):
 	for i in range(tmp, -1, -1):
 	    self.stormerVerlet(self.coefficients[i])
 
-# parse input
+# Parse input
 def icJson ():
 	ic = loads(stdin.read())
         return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
@@ -126,16 +126,12 @@ def main ():  # Need to be inside a function to return . . .
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
-        x = ra * sin(bl.theta) * cos(bl.phi)
-        y = ra * sin(bl.theta) * sin(bl.phi)
-        z = bl.r * cos(bl.theta)
-	hNow = bl.h()		
-	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.tau, hNow, bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, x, y, z)  # Log data
+	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.tau, bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
 
         bl.tau += bl.step
         bl.solve()
 	if (bl.error > 1.0e-3) or (bl.r < bl.horizon):
-		return
+		return bl.error
 	n += 1
 
 if __name__ == "__main__":
