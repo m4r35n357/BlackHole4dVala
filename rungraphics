@@ -13,8 +13,8 @@ wait $PID
 set $(wc -l $p)
 if [ $1 -gt 10000 ]
 then
-	./fileprogress.py $p $(($1 / 2000)) &
+	./fileprogress.py $d $(($1 / 2000)) &
 else
-	./fileprogress.py $p 1 &
+	./fileprogress.py $d 1 &
 fi
 
