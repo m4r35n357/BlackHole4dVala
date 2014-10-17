@@ -6,7 +6,7 @@ from json import loads
 from array import array
 
 class BL(object):
-    def __init__(self, mass, spin, energy, momentum, carter, r0, theta0, phi0, simtime, timestep, order):
+    def __init__(self, mass, spin, energy, momentum, carter, r0, theta0, simtime, timestep, order):
     	self.m = mass
     	self.a = spin
         self.mu = 1.0
@@ -15,7 +15,7 @@ class BL(object):
     	self.Q = carter
     	self.r = r0
     	self.theta = theta0
-    	self.phi = phi0
+    	self.phi = 0.0
     	self.time = simtime
     	self.step = timestep
         self.tau = 0.0
@@ -76,7 +76,7 @@ class BL(object):
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2
 	self.THETA = self.Q - cos(theta)**2 * self.TH
 	
-# hamiltonian
+# "Hamiltonians"
     def hR (self, r, theta, pR, pTh):
         return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-18)
 
@@ -87,19 +87,6 @@ class BL(object):
         return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-18)
 
 # Integrator
-    def sympBase (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
-	halfY = 0.5 * y
-	self.updateQ(halfY)
-	self.updateP(y)
-	self.updateQ(halfY)
-			
-    def solve (self):  # Generalized Symplectic Integrator
-	tmp = len(self.coefficients) - 1
-	for i in range(tmp):  # Composition happens in these loops
-	    self.sympBase(self.coefficients[i])
-	for i in range(tmp, -1, -1):
-	    self.sympBase(self.coefficients[i])
-
     def updateQ (self, c):
         cstep = c * self.step
         self.t -= cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
@@ -113,10 +100,23 @@ class BL(object):
         self.pR += cstep * (4.0 * self.r * self.E * self.P - 2.0 * self.P2 * (self.r - self.m) - 2.0 * self.mu**2 * self.r * self.delta)
         self.pTh += cstep * 2.0 * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
+    def sympBase (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
+	halfY = 0.5 * y
+	self.updateQ(halfY)
+	self.updateP(y)
+	self.updateQ(halfY)
+			
+    def solve (self):  # Generalized Symplectic Integrator
+	tmp = len(self.coefficients) - 1
+	for i in range(tmp):  # Composition happens in these loops
+	    self.sympBase(self.coefficients[i])
+	for i in range(tmp, -1, -1):
+	    self.sympBase(self.coefficients[i])
+
 # parse input
 def icJson ():
 	ic = loads(stdin.read())
-        return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['phi'], ic['time'], ic['step'], ic['integratorOrder'])
+        return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
 
 def main ():  # Need to be inside a function to return . . .
     bh = icJson()
@@ -125,14 +125,13 @@ def main ():  # Need to be inside a function to return . . .
     bh.pTh = sqrt(bh.THETA) if bh.THETA >= 0.0 else -sqrt(-bh.THETA)
     n = 1
     while n <= bh.n:
-#        bh.updateIntermediates(bh.r, bh.theta)
         ra = sqrt(bh.r**2 + bh.a**2)
         x = ra * sin(bh.theta) * cos(bh.phi)
         y = ra * sin(bh.theta) * sin(bh.phi)
         z = bh.r * cos(bh.theta)
 	hNow = bh.h(bh.r, bh.theta, bh.pR, bh.pTh)		
 	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh), bh.t, bh.r, bh.theta, bh.phi, x, y, z)  # Log data
-	print >> stderr, '{"tau":%.9f, "E":%.1f, "ER":%.1f, "ETh":%.1f}' % (bh.tau, hNow, bh.hR(bh.r, bh.theta, bh.pR, bh.pTh), bh.hTh(bh.r, bh.theta, bh.pR, bh.pTh))  # Log progress
+
         bh.tau += bh.step
         bh.solve()
 	if (hNow > bh.eMax) or (bh.r < bh.horizon):
