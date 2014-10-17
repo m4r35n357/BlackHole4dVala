@@ -5,7 +5,7 @@ from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array
 
-class BL(object):
+class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     def __init__(self, mass, spin, energy, momentum, carter, r0, theta0, simtime, timestep, order):
     	self.m = 1.0
     	self.a = spin
