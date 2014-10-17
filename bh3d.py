@@ -90,15 +90,15 @@ class BL(object):
     def updateQ (self, c):
         cstep = c * self.step
         self.t -= cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
-        self.r += 1.0 * cstep * self.pR
-        self.theta = (self.theta + 1.0 * cstep * self.pTh) % (2.0 * pi)
+        self.r += cstep * self.pR
+        self.theta = (self.theta + cstep * self.pTh) % (2.0 * pi)
         self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
         self.updateIntermediates(self.r, self.theta)
 
     def updateP (self, c):
         cstep = c * self.step
-        self.pR += 0.5 * cstep * (4.0 * self.r * self.E * self.P - 2.0 * self.P2 * (self.r - self.m) - 2.0 * self.mu**2 * self.r * self.delta)
-        self.pTh += 0.5 * cstep * 2.0 * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
+        self.pR += cstep * (2.0 * self.r * self.E * self.P - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
+        self.pTh += cstep * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
     def sympBase (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	halfY = 0.5 * y
