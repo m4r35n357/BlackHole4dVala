@@ -19,10 +19,10 @@ def main():
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			ax1.plot(p['tau'], p['ETh'], 'r.')
-			ax1.plot(p['tau'], p['ER'], 'g.')
-			ax1.plot(p['tau'], p['E'], 'b.')
-			ax1.plot(p['tau'], p['EC'], 'k.')
+			ax1.plot(p['tau'], p['ETh'], 'r.', markersize=1)
+			ax1.plot(p['tau'], p['ER'], 'g.', markersize=1)
+			ax1.plot(p['tau'], p['E'], 'b.', markersize=2)
+			ax1.plot(p['tau'], p['EC'], 'k.', markersize=2)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
