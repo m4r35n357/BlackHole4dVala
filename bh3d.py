@@ -25,43 +25,43 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
         self.error = 0.0
 	if order == 2:  # Second order
-		self.coefficients = array('d', [1.0])
+		self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
 		cbrt2 = 2.0 ** (1.0 / 3.0)
 		y = 1.0 / (2.0 - cbrt2)
-		self.coefficients = array('d', [y,- y * cbrt2])
+		self.coeff = array('d', [y,- y * cbrt2])
 	elif order == 6:  # Sixth order
-		self.coefficients = array('d', [0.78451361047755726381949763,
-						0.23557321335935813368479318,
-						-1.17767998417887100694641568,
-						1.31518632068391121888424973])
+		self.coeff = array('d', [0.78451361047755726381949763,
+					0.23557321335935813368479318,
+					-1.17767998417887100694641568,
+					1.31518632068391121888424973])
 	elif order == 8:  # Eighth order
-		self.coefficients = array('d', [0.74167036435061295344822780,
-						-0.40910082580003159399730010,
-						0.19075471029623837995387626,
-						-0.57386247111608226665638773,
-						0.29906418130365592384446354,
-						0.33462491824529818378495798,
-						0.31529309239676659663205666,
-						-0.79688793935291635401978884])
+		self.coeff = array('d', [0.74167036435061295344822780,
+					-0.40910082580003159399730010,
+					0.19075471029623837995387626,
+					-0.57386247111608226665638773,
+					0.29906418130365592384446354,
+					0.33462491824529818378495798,
+					0.31529309239676659663205666,
+					-0.79688793935291635401978884])
 	elif order == 10:  # Tenth order
-		self.coefficients = array('d', [0.09040619368607278492161150,
-						0.53591815953030120213784983,
-						0.35123257547493978187517736,
-						-0.31116802097815835426086544,
-						-0.52556314194263510431065549,
-						0.14447909410225247647345695,
-						0.02983588609748235818064083,
-						0.17786179923739805133592238,
-						0.09826906939341637652532377,
-						0.46179986210411860873242126,
-						-0.33377845599881851314531820,
-						0.07095684836524793621031152,
-						0.23666960070126868771909819,
-						-0.49725977950660985445028388,
-						-0.30399616617237257346546356,
-						0.05246957188100069574521612,
-						0.44373380805019087955111365])
+		self.coeff = array('d', [0.09040619368607278492161150,
+					0.53591815953030120213784983,
+					0.35123257547493978187517736,
+					-0.31116802097815835426086544,
+					-0.52556314194263510431065549,
+					0.14447909410225247647345695,
+					0.02983588609748235818064083,
+					0.17786179923739805133592238,
+					0.09826906939341637652532377,
+					0.46179986210411860873242126,
+					-0.33377845599881851314531820,
+					0.07095684836524793621031152,
+					0.23666960070126868771909819,
+					-0.49725977950660985445028388,
+					-0.30399616617237257346546356,
+					0.05246957188100069574521612,
+					0.44373380805019087955111365])
 	else:  # Wrong value for integrator order
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
 
@@ -109,11 +109,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.qUpdate(halfY)
 			
     def solve (self):  # Generalized Symplectic Integrator
-	tmp = len(self.coefficients) - 1
+	tmp = len(self.coeff) - 1
 	for i in range(tmp):  # Composition happens in these loops
-	    self.stormerVerlet(self.coefficients[i])
+	    self.stormerVerlet(self.coeff[i])
 	for i in range(tmp, -1, -1):
-	    self.stormerVerlet(self.coefficients[i])
+	    self.stormerVerlet(self.coeff[i])
 
 # Parse input
 def icJson ():
@@ -129,7 +129,6 @@ def main ():  # Need to be inside a function to return . . .
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
-
         bl.mino += bl.step
         bl.solve()
 	if (bl.error > 1.0e-3) or (bl.r < bl.horizon):
