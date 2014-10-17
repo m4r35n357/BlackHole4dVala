@@ -21,7 +21,6 @@ class BL(object):
     	self.step = timestep
         self.tau = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.eMax = -30.0
         self.L_aE = self.L - self.a * self.E
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
         self.error = 0.0
@@ -67,13 +66,13 @@ class BL(object):
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
 
 # intermediates
-    def updateIntermediates (self, r, theta):
-	self.delta = r**2 - 2.0 * r * self.m + self.a**2
-	self.P = (r**2 + self.a**2) * self.E - self.a * self.L
-	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * r**2
+    def updateIntermediates (self):
+	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
+	self.P = (self.r**2 + self.a**2) * self.E - self.a * self.L
+	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * self.r**2
 	self.R = self.P**2 - self.delta * self.P2
-	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2
-	self.THETA = self.Q - cos(theta)**2 * self.TH
+	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
+	self.THETA = self.Q - cos(self.theta)**2 * self.TH
 	
 # "Hamiltonians"
     def hR (self):
@@ -94,7 +93,7 @@ class BL(object):
         self.r += cstep * self.pR
         self.theta = (self.theta + cstep * self.pTh) % (2.0 * pi)
         self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
-        self.updateIntermediates(self.r, self.theta)
+        self.updateIntermediates()
 
     def qDotUpdate (self, c):
         cstep = c * self.step
@@ -121,7 +120,7 @@ def icJson ():
 
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
-    bl.updateIntermediates(bl.r, bl.theta)
+    bl.updateIntermediates()
     bl.pR = sqrt(bl.R) if bl.R >= 0.0 else -sqrt(-bl.R)
     bl.pTh = sqrt(bl.THETA) if bl.THETA >= 0.0 else -sqrt(-bl.THETA)
     n = 1
@@ -135,7 +134,7 @@ def main ():  # Need to be inside a function to return . . .
 
         bl.tau += bl.step
         bl.solve()
-	if (hNow > bl.eMax) or (bl.r < bl.horizon):
+	if (bl.error > 1.0e-3) or (bl.r < bl.horizon):
 		return
 	n += 1
 
