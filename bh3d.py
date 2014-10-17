@@ -68,8 +68,6 @@ class BL(object):
 
 # intermediates
     def updateIntermediates (self, r, theta):
-	self.r2 = r * r
-	self.ra2 = self.r2 + self.a**2
 	self.delta = r**2 - 2.0 * r * self.m + self.a**2
 	self.P = (r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * r**2
@@ -78,14 +76,14 @@ class BL(object):
 	self.THETA = self.Q - cos(theta)**2 * self.TH
 	
 # "Hamiltonians"
-    def hR (self, r, theta, pR, pTh):
-        return 10.0 * log10(fabs(pR**2 - self.R) / 2.0 + 1.0e-18)
+    def hR (self):
+        return 10.0 * log10(fabs(self.pR**2 - self.R) / 2.0 + 1.0e-18)
 
-    def hTh (self, r, theta, pR, pTh):
-        return 10.0 * log10(fabs(pTh**2 - self.THETA) / 2.0 + 1.0e-18)
+    def hTh (self):
+        return 10.0 * log10(fabs(self.pTh**2 - self.THETA) / 2.0 + 1.0e-18)
 
-    def h (self, r, theta, pR, pTh):
-        error = fabs(pR**2 - self.R) / 2.0 + fabs(pTh**2 - self.THETA) / 2.0
+    def h (self):
+        error = fabs(self.pR**2 - self.R) / 2.0 + fabs(self.pTh**2 - self.THETA) / 2.0
         self.error += error
         return 10.0 * log10(error + 1.0e-18)
 
@@ -132,8 +130,8 @@ def main ():  # Need to be inside a function to return . . .
         x = ra * sin(bl.theta) * cos(bl.phi)
         y = ra * sin(bl.theta) * sin(bl.phi)
         z = bl.r * cos(bl.theta)
-	hNow = bl.h(bl.r, bl.theta, bl.pR, bl.pTh)		
-	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.tau, hNow, bl.hR(bl.r, bl.theta, bl.pR, bl.pTh), bl.hTh(bl.r, bl.theta, bl.pR, bl.pTh), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, x, y, z)  # Log data
+	hNow = bl.h()		
+	print >> stdout, '{"tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.tau, hNow, bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, x, y, z)  # Log data
 
         bl.tau += bl.step
         bl.solve()
