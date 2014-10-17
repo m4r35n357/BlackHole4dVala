@@ -11,8 +11,8 @@ def main():
 	interval = int(argv[2])
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
-	ax1.set_xlabel('Simulation Time')
-	ax1.set_ylabel('Hamiltonian', color='b')
+	ax1.set_xlabel('Proper Time, tau')
+	ax1.set_ylabel('Error, dB', color='b')
 #	ax2 = ax1.twinx()
 #	ax2.set_ylabel('Cumulative Error', color='b')
 	n = 0

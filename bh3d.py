@@ -76,30 +76,32 @@ class BL(object):
 	
 # "Hamiltonians"
     def hR (self):
-        return 10.0 * log10(fabs(self.pR**2 - self.R) / 2.0 + 1.0e-18)
+        return 10.0 * log10(fabs(self.vR**2 - self.R) / 2.0 + 1.0e-18)
 
     def hTh (self):
-        return 10.0 * log10(fabs(self.pTh**2 - self.THETA) / 2.0 + 1.0e-18)
+        return 10.0 * log10(fabs(self.vTh**2 - self.THETA) / 2.0 + 1.0e-18)
 
     def h (self):
-        error = fabs(self.pR**2 - self.R) / 2.0 + fabs(self.pTh**2 - self.THETA) / 2.0
+        error = fabs(self.vR**2 - self.R) / 2.0 + fabs(self.vTh**2 - self.THETA) / 2.0
         self.error += error
         return 10.0 * log10(error + 1.0e-18)
 
-# Symplectic Integrator
+# Coordinate updates
     def qUpdate (self, c):
         cstep = c * self.step
         self.t += cstep * ((self.r**2 + self.a**2) * self.P / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
-        self.r += cstep * self.pR
-        self.theta = (self.theta + cstep * self.pTh) % (2.0 * pi)
+        self.r += cstep * self.vR
+        self.theta = (self.theta + cstep * self.vTh) % (2.0 * pi)
         self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
         self.updateIntermediates()
 
+# Velocity updates
     def qDotUpdate (self, c):
         cstep = c * self.step
-        self.pR += cstep * (2.0 * self.r * self.E * self.P - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
-        self.pTh += cstep * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
+        self.vR += cstep * (2.0 * self.r * self.E * self.P - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
+        self.vTh += cstep * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
+# Symplectic Integrator
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	halfY = 0.5 * y
 	self.qUpdate(halfY)
@@ -121,8 +123,8 @@ def icJson ():
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
     bl.updateIntermediates()
-    bl.pR = sqrt(bl.R) if bl.R >= 0.0 else -sqrt(-bl.R)
-    bl.pTh = sqrt(bl.THETA) if bl.THETA >= 0.0 else -sqrt(-bl.THETA)
+    bl.vR = sqrt(bl.R) if bl.R >= 0.0 else -sqrt(-bl.R)
+    bl.vTh = sqrt(bl.THETA) if bl.THETA >= 0.0 else -sqrt(-bl.THETA)
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
