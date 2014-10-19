@@ -29,7 +29,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	elif order == 4:  # Fourth order
 		cbrt2 = 2.0 ** (1.0 / 3.0)
 		y = 1.0 / (2.0 - cbrt2)
-		self.coeff = array('d', [y,- y * cbrt2])
+		self.coeff = array('d', [y, - y * cbrt2])
 	elif order == 6:  # Sixth order
 		self.coeff = array('d', [0.78451361047755726381949763,
 					0.23557321335935813368479318,
@@ -87,32 +87,30 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         return 10.0 * log10(error + 1.0e-18)
 
 # Coordinate updates
+    def update (self):
+        self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
+        self.phi += self.step * (self.a * self.P1 / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))
+
     def qUpdate (self, c):
-        cstep = c * self.step
-        self.t += cstep * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
-        self.r += cstep * self.vR
-        self.theta += cstep * self.vTh
-        self.phi += cstep * (self.a * self.P1 / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))
+        self.r += c * self.step * self.vR
+        self.theta += c * self.step * self.vTh
         self.updateIntermediates()
 
 # Velocity updates
     def qDotUpdate (self, c):
-        cstep = c * self.step
-        self.vR += cstep * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
-        self.vTh += cstep * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
+        self.vR += c * self.step * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
+        self.vTh += c * self.step * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
 # Symplectic Integrator
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
-	halfY = 0.5 * y
-	self.qUpdate(halfY)
+	self.qUpdate(0.5 * y)
 	self.qDotUpdate(y)
-	self.qUpdate(halfY)
+	self.qUpdate(0.5 * y)
 			
     def solve (self):  # Generalized Symplectic Integrator
-	tmp = len(self.coeff) - 1
-	for i in range(tmp):  # Composition happens in these loops
+	for i in range(len(self.coeff) - 1):  # Composition happens in these loops
 	    self.stormerVerlet(self.coeff[i])
-	for i in range(tmp, -1, -1):
+	for i in range(len(self.coeff) - 1, -1, -1):
 	    self.stormerVerlet(self.coeff[i])
 
 # Parse input
@@ -126,11 +124,12 @@ def main ():  # Need to be inside a function to return . . .
     print >> stderr, '    R: ' + str(bl.R)
     print >> stderr, 'THETA: ' + str(bl.THETA)
     bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
-    bl.vTh = sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
+    bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
+        bl.update()
         bl.solve()
 	if bl.error > 1.0e-0 or bl.r < bl.horizon:
             print >> stderr, 'ABNORMAL TERMINATION'
