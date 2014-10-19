@@ -125,8 +125,8 @@ def icJson ():
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
     bl.updateIntermediates()
-    bl.vR = sqrt(bl.R) if bl.R >= 0.0 else -sqrt(-bl.R)
-    bl.vTh = sqrt(bl.THETA) if bl.THETA >= 0.0 else -sqrt(-bl.THETA)
+    bl.vR = sqrt(bl.R)
+    bl.vTh = sqrt(bl.THETA)
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
