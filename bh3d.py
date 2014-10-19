@@ -119,22 +119,16 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 
 # Parse input
 def icJson ():
-	ic = loads(stdin.read())
-        return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
+    ic = loads(stdin.read())
+    return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
 
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
     bl.updateIntermediates()
     print >> stderr, '    R: ' + str(bl.R)
     print >> stderr, 'THETA: ' + str(bl.THETA)
-    if bl.R < 0.0:
-        print >> stderr, '    R clamped to zero at ' + str(bl.mino) + ',  was ' + str(bl.R)
-        bl.R = 0.0
-    if bl.THETA < 0.0:
-        print >> stderr, 'THETA clamped to zero at ' + str(bl.mino) + ',  was ' + str(bl.THETA)
-        bl.THETA = 0.0
-    bl.vR = -sqrt(bl.R)
-    bl.vTh = sqrt(bl.THETA)
+    bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
+    bl.vTh = sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
     while n <= bl.n:
         ra = sqrt(bl.r**2 + bl.a**2)
