@@ -5,9 +5,9 @@
   "Lz" : 0.0,
   "C" : 14.783,
   "r" : 10.0,
-  "theta" : 1.570796327,
+  "theta" : 1.570796326794896,
   "phi" : 0.0,
   "time" : 50.0,
-  "step" : 0.005,
-  "integratorOrder" : 6
+  "step" : 0.001,
+  "integratorOrder" : 10
 }
