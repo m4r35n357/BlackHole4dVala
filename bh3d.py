@@ -93,8 +93,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.r += cstep * self.vR
         self.theta += cstep * self.vTh
         self.phi += cstep * (self.a * self.P1 / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))
-#        self.theta = (self.theta + cstep * self.vTh) % (2.0 * pi)
-#        self.phi = (self.phi + cstep * (self.a * self.P / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))) % (2.0 * pi)
         self.updateIntermediates()
 
 # Velocity updates
@@ -140,6 +138,7 @@ def main ():  # Need to be inside a function to return . . .
         bl.mino += bl.step
 	n += 1
     print >> stderr, 'NORMAL TERMINATION'
+    return bl.error
 
 if __name__ == "__main__":
     main()
