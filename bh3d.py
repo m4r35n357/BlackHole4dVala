@@ -71,10 +71,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-        self.R = self.R if self.R >= 0.0 else 0.0
+        if self.R < 0.0:
+            print >> stderr, '    R clamped to zero at ' + str(self.mino) + ',  was ' + str(self.R)
+            self.R = 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
-        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
+        if self.THETA < 0.0:
+            print >> stderr, 'THETA clamped to zero at ' + str(self.mino) + ',  was ' + str(self.THETA)
+            self.THETA = 0.0
 	
 # "Hamiltonians"
     def hR (self):
