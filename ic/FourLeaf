@@ -7,7 +7,7 @@
   "r" : 87.65741013420967,
   "theta" : 1.570796327,
   "phi" : 0.0,
-  "time" : 25000.0,
-  "step" : 5.0,
-  "integratorOrder" : 10
+  "time" : 10.0,
+  "step" : 0.01,
+  "integratorOrder" : 4
 }

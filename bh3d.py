@@ -129,7 +129,7 @@ def main ():  # Need to be inside a function to return . . .
     bl.updateIntermediates()
     print >> stderr, '    R: ' + str(bl.R)
     print >> stderr, 'THETA: ' + str(bl.THETA)
-    bl.vR = sqrt(bl.R)
+    bl.vR = -sqrt(bl.R)
     bl.vTh = sqrt(bl.THETA)
     n = 1
     while n <= bl.n:
