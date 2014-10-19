@@ -21,6 +21,8 @@ def main():
 		if (n % interval == 0):
 			ax1.plot(p['mino'], p['r'], 'b.', markersize=2)
 			ax2.plot(p['mino'], p['th'], 'g.', markersize=2)
+			ax1.plot(p['mino'], p['R'], 'b.', markersize=1)
+			ax2.plot(p['mino'], p['THETA'], 'g.', markersize=1)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
