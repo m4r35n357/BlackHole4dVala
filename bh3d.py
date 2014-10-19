@@ -141,6 +141,7 @@ def main ():  # Need to be inside a function to return . . .
 	    return bl.error
         bl.mino += bl.step
 	n += 1
+    print >> stderr, 'NORMAL TERMINATION'
 
 if __name__ == "__main__":
     main()
