@@ -71,14 +71,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-        if self.R < 0.0:
-            print >> stderr, '    R clamped to zero at ' + str(self.mino) + ',  was ' + str(self.R)
-            self.R = 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
-        if self.THETA < 0.0:
-            print >> stderr, 'THETA clamped to zero at ' + str(self.mino) + ',  was ' + str(self.THETA)
-            self.THETA = 0.0
 	
 # "Hamiltonians"
     def hR (self):
@@ -133,6 +127,12 @@ def main ():  # Need to be inside a function to return . . .
     bl.updateIntermediates()
     print >> stderr, '    R: ' + str(bl.R)
     print >> stderr, 'THETA: ' + str(bl.THETA)
+    if bl.R < 0.0:
+        print >> stderr, '    R clamped to zero at ' + str(bl.mino) + ',  was ' + str(bl.R)
+        bl.R = 0.0
+    if bl.THETA < 0.0:
+        print >> stderr, 'THETA clamped to zero at ' + str(bl.mino) + ',  was ' + str(bl.THETA)
+        bl.THETA = 0.0
     bl.vR = -sqrt(bl.R)
     bl.vTh = sqrt(bl.THETA)
     n = 1
@@ -140,7 +140,7 @@ def main ():  # Need to be inside a function to return . . .
         ra = sqrt(bl.r**2 + bl.a**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
         bl.solve()
-	if bl.error > 1.0e-0 or bl.r < bl.horizon or bl.R < 0.0 or bl.THETA < 0.0:
+	if bl.error > 1.0e-0 or bl.r < bl.horizon:
             print >> stderr, 'ABNORMAL TERMINATION'
 	    return bl.error
         bl.mino += bl.step
