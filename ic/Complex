@@ -9,5 +9,5 @@
   "phi" : 0.0,
   "time" : 10.0,
   "step" : 0.01,
-  "integratorOrder" : 10
+  "integratorOrder" : 8
 }
