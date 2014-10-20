@@ -12,9 +12,9 @@ def main():
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('Mino Time, lambda')
-	ax1.set_ylabel('r', color='b')
+	ax1.set_ylabel('r, R(r)', color='b')
 	ax2 = ax1.twinx()
-	ax2.set_ylabel('theta', color='g')
+	ax2.set_ylabel('theta, THETA(theta)', color='g')
 	n = 0
 	while line:
 		p = loads(line)
