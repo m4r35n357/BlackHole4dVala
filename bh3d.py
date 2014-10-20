@@ -21,7 +21,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     	self.step = timestep
         self.mino = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.L_aE = self.L - self.a * self.E
+        self.L_aE2 = (self.L - self.a * self.E)**2
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
         self.error = 0.0
 	if order == 2:  # Second order
@@ -69,7 +69,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     def updateIntermediates (self):
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
-	self.P2 = self.Q + self.L_aE**2 + self.mu**2 * self.r**2
+	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
@@ -89,7 +89,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 # Coordinate updates
     def update (self):
         self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
-        self.phi += self.step * (self.a * self.P1 / self.delta - (self.a * self.E - self.L / sin(self.theta)**2))
+        self.phi += self.step * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.theta)**2)
 
     def qUpdate (self, c):
         self.r += c * self.step * self.vR
