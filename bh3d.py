@@ -68,7 +68,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
 # Intermediate parameters
-    def updateIntermediates (self):
+    def updatePotentials (self):
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
@@ -86,14 +86,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.eCum += e_r + e_th
 	
 # Coordinate updates
-    def update (self):
+    def update_t_phi (self):
         self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
         self.phi += self.step * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.theta)**2)
 
     def qUpdate (self, c):
         self.r += c * self.step * self.vR
         self.theta += c * self.step * self.vTh
-        self.updateIntermediates()
+        self.updatePotentials()
 
 # Velocity updates
     def qDotUpdate (self, c):
@@ -119,7 +119,7 @@ def icJson ():
 
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
-    bl.updateIntermediates()
+    bl.updatePotentials()
     bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
     bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
@@ -127,15 +127,12 @@ def main ():  # Need to be inside a function to return . . .
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.e, bl.eR, bl.eTh, bl.eCum, bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
-        bl.update()
-        bl.solve()
+        bl.update_t_phi()  # Euler's method
+        bl.solve()  # update r and theta with symplectic integrator
 	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
-            print >> stderr, 'ABNORMAL TERMINATION'
-	    return bl.eCum
+	    break
         bl.mino += bl.step
 	n += 1
-    print >> stderr, 'NORMAL TERMINATION'
-    return bl.eCum
 
 if __name__ == "__main__":
     main()
