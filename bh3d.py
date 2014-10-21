@@ -23,7 +23,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.n = simtime / fabs(timestep)  # We can run backwards too!
         self.L_aE2 = (self.L - self.a * self.E)**2
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
-        self.error = 0.0
+        self.eCum = 0.0
 	if order == 2:  # Second order
 		self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -74,18 +74,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
 	
-# "Hamiltonians"
-    def hR (self):
-        return 10.0 * log10(fabs(self.vR**2 - self.R) / 2.0 + 1.0e-18)
-
-    def hTh (self):
-        return 10.0 * log10(fabs(self.vTh**2 - self.THETA) / 2.0 + 1.0e-18)
-
-    def h (self):
-        error = fabs(self.vR**2 - self.R) / 2.0 + fabs(self.vTh**2 - self.THETA) / 2.0
-        self.error += error
-        return 10.0 * log10(error + 1.0e-18)
-
+# Error analysis
+    def errors (self):
+        e_r = abs(self.vR**2 - self.R) / 2.0
+        e_th = abs(self.vTh**2 - self.THETA) / 2.0
+        self.eR = 10.0 * log10(e_r + 1.0e-18)
+        self.eTh = 10.0 * log10(e_th + 1.0e-18)
+        self.e =  10.0 * log10(e_r + e_th + 1.0e-18)
+        self.eCum += e_r + e_th
+	
 # Coordinate updates
     def update (self):
         self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
@@ -127,17 +124,18 @@ def main ():  # Need to be inside a function to return . . .
     bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
     while n <= bl.n:
+        bl.errors()
         ra = sqrt(bl.r**2 + bl.a**2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.h(), bl.hR(), bl.hTh(), 10.0 * log10(bl.error + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.mino * (bl.r**2 + bl.a**2 * cos(bl.theta)**2), bl.e, bl.eR, bl.eTh, bl.eCum, bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
         bl.update()
         bl.solve()
-	if bl.error > 1.0e-0 or bl.r < bl.horizon:
+	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
             print >> stderr, 'ABNORMAL TERMINATION'
-	    return bl.error
+	    return bl.eCum
         bl.mino += bl.step
 	n += 1
     print >> stderr, 'NORMAL TERMINATION'
-    return bl.error
+    return bl.eCum
 
 if __name__ == "__main__":
     main()
