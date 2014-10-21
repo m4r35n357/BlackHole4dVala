@@ -12,17 +12,17 @@ def main():
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('Mino Time, lambda')
-	ax1.set_ylabel('Error, dB', color='b')
-#	ax2 = ax1.twinx()
-#	ax2.set_ylabel('Cumulative Error', color='b')
+	ax1.set_ylabel('r, R(r)', color='b')
+	ax2 = ax1.twinx()
+	ax2.set_ylabel('theta, THETA(theta)', color='g')
 	n = 0
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			ax1.plot(p['mino'], p['ETh'], 'r.', markersize=1)
-			ax1.plot(p['mino'], p['ER'], 'g.', markersize=1)
-			ax1.plot(p['mino'], p['E'], 'b.', markersize=2)
-			ax1.plot(p['mino'], p['EC'], 'k.', markersize=2)
+			ax1.plot(p['mino'], p['r'], 'b.', markersize=2)
+			ax2.plot(p['mino'], p['th'], 'g.', markersize=2)
+			ax1.plot(p['mino'], p['R'], 'b.', markersize=1)
+			ax2.plot(p['mino'], p['THETA'], 'g.', markersize=1)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
