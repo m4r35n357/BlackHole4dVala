@@ -64,6 +64,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 					0.44373380805019087955111365])
 	else:  # Wrong value for integrator order
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
+        self.coefficientsUp = range(len(self.coeff) - 1)
+        self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
 # Intermediate parameters
     def updateIntermediates (self):
@@ -105,9 +107,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.qUpdate(0.5 * y)
 			
     def solve (self):  # Generalized Symplectic Integrator
-	for i in range(len(self.coeff) - 1):  # Composition happens in these loops
+	for i in self.coefficientsUp:  # Composition happens in these loops
 	    self.stormerVerlet(self.coeff[i])
-	for i in range(len(self.coeff) - 1, -1, -1):
+	for i in self.coefficientsDown:
 	    self.stormerVerlet(self.coeff[i])
 
 # Parse input
@@ -118,8 +120,6 @@ def icJson ():
 def main ():  # Need to be inside a function to return . . .
     bl = icJson()
     bl.updateIntermediates()
-    print >> stderr, '    R: ' + str(bl.R)
-    print >> stderr, 'THETA: ' + str(bl.THETA)
     bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
     bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
