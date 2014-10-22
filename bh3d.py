@@ -67,8 +67,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.coefficientsUp = range(len(self.coeff) - 1)
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
-# Intermediate parameters
-    def updatePotentials (self):
+    def updatePotentials (self):  # Intermediate parameters
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
@@ -76,31 +75,27 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
 	
-# Error analysis
-    def errors (self):
+    def errors (self):  # Error analysis
         e_r = abs(self.vR**2 - self.R) / 2.0
         e_th = abs(self.vTh**2 - self.THETA) / 2.0
         self.eR = 10.0 * log10(e_r + 1.0e-18)
         self.eTh = 10.0 * log10(e_th + 1.0e-18)
         self.e =  10.0 * log10(e_r + e_th + 1.0e-18)
-        self.eCum += e_r + e_th
-	
-# Coordinate updates
-    def update_t_phi (self):
+        self.eCum += e_r + e_th	
+
+    def update_t_phi (self):  # t and phi updates
         self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
         self.phi += self.step * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.theta)**2)
 
-    def qUpdate (self, c):
+    def qUpdate (self, c):  # r and theta updates
         self.r += c * self.step * self.vR
         self.theta += c * self.step * self.vTh
         self.updatePotentials()
 
-# Velocity updates
-    def qDotUpdate (self, c):
+    def qDotUpdate (self, c):  # Velocity updates
         self.vR += c * self.step * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
         self.vTh += c * self.step * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
 
-# Symplectic Integrator
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	self.qUpdate(0.5 * y)
 	self.qDotUpdate(y)
@@ -112,13 +107,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	for i in self.coefficientsDown:
 	    self.stormerVerlet(self.coeff[i])
 
-# Parse input
-def icJson ():
-    ic = loads(stdin.read())
-    return BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
-
 def main ():  # Need to be inside a function to return . . .
-    bl = icJson()
+    ic = loads(stdin.read())
+    bl = BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
     bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
     bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
