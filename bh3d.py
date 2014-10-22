@@ -6,10 +6,10 @@ from json import loads
 from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
-    def __init__(self, mass, spin, energy, momentum, carter, r0, theta0, simtime, timestep, order):
+    def __init__(self, mass, spin, pmass, energy, momentum, carter, r0, theta0, simtime, timestep, order):
     	self.m = 1.0
     	self.a = spin
-        self.mu = 1.0
+        self.mu = pmass * pmass
     	self.E = energy
     	self.L = momentum
     	self.Q = carter
@@ -109,7 +109,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
-    bl = BL(ic['M'], ic['a'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
+    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
     bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
     bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
