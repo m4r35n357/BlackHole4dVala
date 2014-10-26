@@ -1,4 +1,5 @@
 # comment
+*.zip
 *.pyc
 .spyderproject
 .idea
@@ -6,4 +7,5 @@
 data
 progress
 profdata
+test
 

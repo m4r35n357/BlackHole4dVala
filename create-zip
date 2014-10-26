@@ -1,4 +1,4 @@
 #!/bin/sh
 
-zip -r foo rungraphics *.py ic; unzip -l foo.zip
+zip -r bh3d rungraphics *.py ic; unzip -l bh3d
 
