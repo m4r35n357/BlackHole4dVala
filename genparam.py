@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import stdout
+from sys import argv, stdout
 from math import fabs, sin, cos, pi
 import numpy as np
 
@@ -48,7 +48,7 @@ class InitialConditions(object):
 	    self.Q -= correction[2]
 
 def main ():
-	ic = InitialConditions(True, 9.0, 12.0, pi / 2.0, -1.0, 1.0, 8)
+	ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi / 2.0, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
 	print >> stdout, ""
 	print >> stdout, "{ \"M\" : " + str(ic.M) + ","
