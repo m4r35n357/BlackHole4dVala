@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
-from sys import stdin, stdout, stderr
-from math import fabs, log10, sqrt, sin, cos, pi
-from json import loads
-from array import array
-import pprint
+from sys import stdout
+from math import fabs, sin, cos, pi
 import numpy as np
-from scipy import linalg
 
 class InitialConditions(object):
 
@@ -46,8 +42,6 @@ class InitialConditions(object):
 	    j = np.array([[2.0 * (self.r0 * self.r0 + self.a * self.a) * p0 + 2.0 * self.a * l_ae * delta0, - 2.0 * self.a * p0 - 2.0 * l_ae * delta0, - delta0],
                           [2.0 * (self.r1 * self.r1 + self.a * self.a) * p1 + 2.0 * self.a * l_ae * delta1, - 2.0 * self.a * p1 - 2.0 * l_ae * delta1, - delta1],
                           [2.0 * cos(self.th0) * cos(self.th0) * self.a * self.a * self.E, - 2.0 * cos(self.th0) * cos(self.th0) * self.L / (sin(self.th0) * sin(self.th0)), 1.0]])
-            print "J:"
-            pprint.pprint(j)
             correction = np.linalg.solve(j, self.qDot())
 	    self.E -= correction[0]
 	    self.L -= correction[1]
