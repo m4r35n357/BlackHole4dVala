@@ -10,9 +10,9 @@ class InitialConditions(object):
         self.M = 1.0        
 	self.mu = 1.0 if (particle == True) else 0.0
         tolerance = 1.0e-6
-	singular = fabs(rMax - rMin) > 2.0 * tolerance;
-	self.r0 = rMin - tolerance if singular else rMin
-	self.r1 = rMax - tolerance if singular else rMax
+	nonsingular = fabs(rMax - rMin) > 2.0 * tolerance;
+	self.r0 = rMin if nonsingular else rMin - tolerance
+	self.r1 = rMax if nonsingular else rMax + tolerance
 	self.th0 = thetaMin if thetaMin > 0.01 else 0.01
         self.a = a
 	self.factorL = factorL
@@ -48,7 +48,7 @@ class InitialConditions(object):
 	    self.Q -= correction[2]
 
 def main ():
-	ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi / 2.0, float(argv[4]), float(argv[5]), 8)
+	ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
 	print >> stdout, "{ \"M\" : " + str(ic.M) + ","
 	print >> stdout, "  \"a\" : " + str(ic.a) + ","
