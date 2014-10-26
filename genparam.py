@@ -50,7 +50,6 @@ class InitialConditions(object):
 def main ():
 	ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi / 2.0, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
-	print >> stdout, ""
 	print >> stdout, "{ \"M\" : " + str(ic.M) + ","
 	print >> stdout, "  \"a\" : " + str(ic.a) + ","
 	print >> stdout, "  \"mu\" : " + str(ic.mu) + ","

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+zip -r foo rungraphics *.py ic; unzip -l foo.zip
+
