@@ -24,24 +24,24 @@ class InitialConditions(object):
         self.Q = 0.0
 
     def rDot (self, r):
-	return ((r * r + self.a * self.a) * self.E - self.a * self.L) * ((r * r + self.a * self.a) * self.E - self.a * self.L) - (r * r - 2.0 * self.M * r + self.a * self.a) * (self.mu * self.mu * r * r + (self.L - self.a * self.E) * (self.L - self.a * self.E) + self.Q)
+	return ((r**2 + self.a**2) * self.E - self.a * self.L)**2 - (r**2 - 2.0 * self.M * r + self.a**2) * (self.mu**2 * r**2 + (self.L - self.a * self.E)**2 + self.Q)
 
     def thDot (self, theta):
-	return self.Q - cos(theta) * cos(theta) * (self.a * self.a * (self.mu * self.mu - self.E * self.E) + self.L * self.L / (sin(theta) * sin(theta)))
+	return self.Q - cos(theta)**2 * (self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2)
 
     def qDot (self):
 	return np.array([self.rDot(self.r0), self.rDot(self.r1), self.thDot(self.th0)])
 
     def solve (self):
-	while np.dot(self.qDot(), self.qDot()) > 1.0e-18:
-            p0 = self.E * (self.r0 * self.r0 + self.a * self.a) - self.a * self.L
-	    p1 = self.E * (self.r1 * self.r1 + self.a * self.a) - self.a * self.L
-	    delta0 = self.r0 * self.r0 - 2.0 * self.M * self.r0 + self.a * self.a
-	    delta1 = self.r1 * self.r1 - 2.0 * self.M * self.r1 + self.a * self.a
+	while np.dot(self.qDot(), self.qDot()) > 1.0e-24:
+            p0 = self.E * (self.r0**2 + self.a**2) - self.a * self.L
+	    p1 = self.E * (self.r1**2 + self.a**2) - self.a * self.L
+	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
+	    delta1 = self.r1**2 - 2.0 * self.M * self.r1 + self.a**2
 	    l_ae = (self.L - self.a * self.E)
-	    j = np.array([[2.0 * (self.r0 * self.r0 + self.a * self.a) * p0 + 2.0 * self.a * l_ae * delta0, - 2.0 * self.a * p0 - 2.0 * l_ae * delta0, - delta0],
-                          [2.0 * (self.r1 * self.r1 + self.a * self.a) * p1 + 2.0 * self.a * l_ae * delta1, - 2.0 * self.a * p1 - 2.0 * l_ae * delta1, - delta1],
-                          [2.0 * cos(self.th0) * cos(self.th0) * self.a * self.a * self.E, - 2.0 * cos(self.th0) * cos(self.th0) * self.L / (sin(self.th0) * sin(self.th0)), 1.0]])
+	    j = np.array([[2.0 * (self.r0**2 + self.a**2) * p0 + 2.0 * self.a * l_ae * delta0, - 2.0 * self.a * p0 - 2.0 * l_ae * delta0, - delta0],
+                          [2.0 * (self.r1**2 + self.a**2) * p1 + 2.0 * self.a * l_ae * delta1, - 2.0 * self.a * p1 - 2.0 * l_ae * delta1, - delta1],
+                          [2.0 * self.a**2 * self.E * cos(self.th0)**2, - 2.0 * self.L * (cos(self.th0) / sin(self.th0))**2, 1.0]])
             correction = np.linalg.solve(j, self.qDot())
 	    self.E -= correction[0]
 	    self.L -= correction[1]
