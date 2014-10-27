@@ -5,7 +5,6 @@ from math import fabs, sin, cos, pi
 import numpy as np
 
 class InitialConditions(object):
-
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL, integrator):
         self.M = 1.0        
 	self.mu = 1.0 if (particle == True) else 0.0
@@ -33,15 +32,16 @@ class InitialConditions(object):
 	return np.array([self.rDot(self.r0), self.rDot(self.r1), self.thDot(self.th0)])
 
     def solve (self):
+        a2 = self.a**2
 	while np.dot(self.qDot(), self.qDot()) > 1.0e-24:
-            p0 = self.E * (self.r0**2 + self.a**2) - self.a * self.L
-	    p1 = self.E * (self.r1**2 + self.a**2) - self.a * self.L
-	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
-	    delta1 = self.r1**2 - 2.0 * self.M * self.r1 + self.a**2
-	    l_ae = (self.L - self.a * self.E)
-	    j = np.array([[2.0 * (self.r0**2 + self.a**2) * p0 + 2.0 * self.a * l_ae * delta0, - 2.0 * self.a * p0 - 2.0 * l_ae * delta0, - delta0],
-                          [2.0 * (self.r1**2 + self.a**2) * p1 + 2.0 * self.a * l_ae * delta1, - 2.0 * self.a * p1 - 2.0 * l_ae * delta1, - delta1],
-                          [2.0 * self.a**2 * self.E * cos(self.th0)**2, - 2.0 * self.L * (cos(self.th0) / sin(self.th0))**2, 1.0]])
+            p0 = self.E * (self.r0**2 + a2) - self.a * self.L
+	    p1 = self.E * (self.r1**2 + a2) - self.a * self.L
+	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + a2
+	    delta1 = self.r1**2 - 2.0 * self.M * self.r1 + a2
+	    l_ae = self.L - self.a * self.E
+	    j = np.array([[2.0 * (self.r0**2 + a2) * p0 + 2.0 * self.a * l_ae * delta0, - 2.0 * self.a * p0 - 2.0 * l_ae * delta0, - delta0],
+                          [2.0 * (self.r1**2 + a2) * p1 + 2.0 * self.a * l_ae * delta1, - 2.0 * self.a * p1 - 2.0 * l_ae * delta1, - delta1],
+                          [2.0 * a2 * self.E * cos(self.th0)**2, - 2.0 * self.L * (cos(self.th0) / sin(self.th0))**2, 1.0]])
             correction = np.linalg.solve(j, self.qDot())
 	    self.E -= correction[0]
 	    self.L -= correction[1]
