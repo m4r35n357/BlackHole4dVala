@@ -72,8 +72,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
+        self.R = self.R if self.R >= 0.0 else 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
+        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
 	
     def errors (self):  # Error analysis
         e_r = abs(self.vR**2 - self.R) / 2.0
@@ -93,8 +95,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.updatePotentials()
 
     def qDotUpdate (self, c):  # Velocity updates
-        self.vR += c * self.step * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu**2 * self.r * self.delta)
-        self.vTh += c * self.step * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * cos(self.theta)**3 / sin(self.theta)**3)
+        self.vR += c * self.step * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu**2 * self.r * self.delta)
+        self.vTh += c * self.step * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * (cos(self.theta) / sin(self.theta))**3)
 
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	self.qUpdate(0.5 * y)
