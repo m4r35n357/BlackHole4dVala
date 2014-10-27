@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from sys import argv, stdout
-from math import fabs, sin, cos, pi
+from math import fabs, sin, cos, pi, sqrt
 import numpy as np
 
 class InitialConditions(object):
@@ -33,7 +33,7 @@ class InitialConditions(object):
 
     def solve (self):
         a2 = self.a**2
-	while np.dot(self.qDot(), self.qDot()) > 1.0e-24:
+	while np.dot(self.qDot(), self.qDot()) > 1.0e-21:
             p0 = self.E * (self.r0**2 + a2) - self.a * self.L
 	    p1 = self.E * (self.r1**2 + a2) - self.a * self.L
 	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + a2
@@ -47,21 +47,32 @@ class InitialConditions(object):
 	    self.L -= correction[1]
 	    self.Q -= correction[2]
 
+    def circular (self):
+        sqrtR = sqrt(self.r1)
+        tmp = sqrt(self.r1**2 - 3.0 * self.r1 + 2.0 * self.a * sqrtR)
+        self.E = (self.r1**2 - 2.0 * self.r1 + self.a * sqrtR) / (self.r1 * tmp)
+        self.L = (self.r1**2 - 2.0 * self.a * sqrtR + self.a**2) / (sqrtR * tmp)
+        self.Q = 0.0
+
 def main ():
-	ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
+    if len(argv) == 6:
+        ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
-	print >> stdout, "{ \"M\" : " + str(ic.M) + ","
-	print >> stdout, "  \"a\" : " + str(ic.a) + ","
-	print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
-	print >> stdout, "  \"E\" : " + str(ic.E) + ","
-	print >> stdout, "  \"Lz\" : " + str(ic.L * ic.factorL) + ","
-	print >> stdout, "  \"C\" : " + str(ic.Q) + ","
-	print >> stdout, "  \"r\" : " + str(ic.r1) + ","
-	print >> stdout, "  \"theta\" : " + str(ic.th0) + ","
-	print >> stdout, "  \"time\" : " + str(ic.duration) + ","
-	print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
-	print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
-	print >> stdout, "}"
+    elif len(argv) == 4:
+        ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
+        ic.circular()
+    print >> stdout, "{ \"M\" : " + str(ic.M) + ","
+    print >> stdout, "  \"a\" : " + str(ic.a) + ","
+    print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
+    print >> stdout, "  \"E\" : " + str(ic.E) + ","
+    print >> stdout, "  \"Lz\" : " + str(ic.L * ic.factorL) + ","
+    print >> stdout, "  \"C\" : " + str(ic.Q) + ","
+    print >> stdout, "  \"r\" : " + str(ic.r1) + ","
+    print >> stdout, "  \"theta\" : " + str(ic.th0) + ","
+    print >> stdout, "  \"time\" : " + str(ic.duration) + ","
+    print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
+    print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
+    print >> stdout, "}"
 
 if __name__ == "__main__":
     main()

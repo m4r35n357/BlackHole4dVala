@@ -72,10 +72,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-        self.R = self.R if self.R >= 0.0 else 0.0
+#        self.R = self.R if self.R >= 0.0 else 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(self.theta)**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
-        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
+#        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
 	
     def errors (self):  # Error analysis
         e_r = abs(self.vR**2 - self.R) / 2.0
