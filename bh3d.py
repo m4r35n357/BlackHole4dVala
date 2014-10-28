@@ -1,6 +1,6 @@
 #!/usr/bin/env pypy
 
-from sys import stdin, stdout, stderr
+from sys import stdin, stdout
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array

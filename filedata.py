@@ -11,7 +11,7 @@ def main():
 	interval = int(argv[2])
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
-	ax1.set_xlabel('Mino Time, lambda')
+	ax1.set_xlabel('tau')
 	ax1.set_ylabel('r, R(r)', color='b')
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('theta, THETA(theta)', color='r')
@@ -19,10 +19,10 @@ def main():
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			ax1.plot(p['mino'], p['r'], 'b.', markersize=2)
-			ax2.plot(p['mino'], p['th'], 'r.', markersize=2)
-			ax1.plot(p['mino'], p['R'], 'g.', markersize=1)
-			ax2.plot(p['mino'], p['THETA'], 'm.', markersize=1)
+			ax1.plot(p['tau'], p['r'], 'b.', markersize=2)
+			ax2.plot(p['tau'], p['th'], 'r.', markersize=2)
+			ax1.plot(p['tau'], p['R'], 'g.', markersize=1)
+			ax2.plot(p['tau'], p['THETA'], 'm.', markersize=1)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
