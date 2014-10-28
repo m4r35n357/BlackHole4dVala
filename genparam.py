@@ -17,7 +17,7 @@ class InitialConditions(object):
 	self.factorL = factorL
 	self.integrator = integrator
         self.duration = 20.0
-        self.timestep = 0.001
+        self.timestep = 0.01
         self.E = 1.0
         self.L = 2.0
         self.Q = 0.0
