@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stdout
+from sys import argv, stdout, stderr
 from math import fabs, sin, cos, pi, sqrt
 import numpy as np
 
@@ -17,7 +17,7 @@ class InitialConditions(object):
 	self.factorL = factorL
 	self.integrator = integrator
         self.duration = 20.0
-        self.timestep = 0.01
+        self.timestep = 0.001
         self.E = 1.0
         self.L = 2.0
         self.Q = 0.0
@@ -61,6 +61,9 @@ def main ():
     elif len(argv) == 4:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
         ic.circular()
+    else:
+        print >> stderr, "Bad input data!"
+        return
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
     print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
