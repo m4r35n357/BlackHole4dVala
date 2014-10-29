@@ -73,10 +73,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-#        self.R = self.R if self.R >= 0.0 else 0.0
+        self.R = self.R if self.R >= 0.0 else 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + (self.L / sin(self.theta))**2
 	self.THETA = self.Q - cos(self.theta)**2 * self.TH
-#        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
+        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
 	
     def errors (self):  # Error analysis
         e_r = abs(self.vR**2 - self.R) / 2.0
@@ -114,8 +114,8 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
-    bl.vR = -sqrt(bl.R if bl.R >= 0.0 else 0.0)
-    bl.vTh = -sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
+    bl.vR = -sqrt(bl.R)
+    bl.vTh = -sqrt(bl.THETA)
     n = 1
     while n <= bl.n:
         bl.errors()
