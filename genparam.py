@@ -54,6 +54,16 @@ class InitialConditions(object):
         self.L = (self.r1**2 - 2.0 * self.a * sqrtR + self.a**2) / (sqrtR * tmp)
         self.Q = 0.0
 
+    def plummet (self):
+        self.L = 0.0
+        self.Q = 0.0
+        a2 = self.a**2
+	while self.rDot(self.r1)**2 > 1.0e-21:
+            p1 = self.E * (self.r1**2 + a2) - self.a * self.L
+	    delta1 = self.r1**2 - 2.0 * self.M * self.r1 + a2
+	    l_ae = self.L - self.a * self.E
+	    self.E -= self.rDot(self.r1) / (2.0 * (self.r1**2 + a2) * p1 + 2.0 * self.a * l_ae * delta1)
+
 def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
@@ -61,6 +71,9 @@ def main ():
     elif len(argv) == 4:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
         ic.circular()
+    elif len(argv) == 3:
+        ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), 1.0, 8)
+        ic.plummet()
     else:
         print >> stderr, "Bad input data!"
         return
