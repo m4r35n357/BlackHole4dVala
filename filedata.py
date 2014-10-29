@@ -21,8 +21,8 @@ def main():
 		if (n % interval == 0):
 			ax1.plot(p['tau'], p['r'], 'b.', markersize=2)
 			ax2.plot(p['tau'], p['th'], 'r.', markersize=2)
-			ax1.plot(p['tau'], p['R'], 'g.', markersize=1)
-			ax2.plot(p['tau'], p['THETA'], 'm.', markersize=1)
+			ax1.plot(p['tau'], p['R'], 'g.', markersize=2)
+			ax2.plot(p['tau'], p['THETA'], 'm.', markersize=2)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
