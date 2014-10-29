@@ -58,11 +58,10 @@ class InitialConditions(object):
         self.L = 0.0
         self.Q = 0.0
         a2 = self.a**2
-	while self.rDot(self.r1)**2 > 1.0e-21:
-            p1 = self.E * (self.r1**2 + a2) - self.a * self.L
+	while self.rDot(self.r1)**2 > 1.0e-12:
+            p1 = self.E * (self.r1**2 + a2)
 	    delta1 = self.r1**2 - 2.0 * self.M * self.r1 + a2
-	    l_ae = self.L - self.a * self.E
-	    self.E -= self.rDot(self.r1) / (2.0 * (self.r1**2 + a2) * p1 + 2.0 * self.a * l_ae * delta1)
+	    self.E -= self.rDot(self.r1) / (2.0 * (self.r1**2 + a2) * p1 - 2.0 * self.a * self.a * self.E * delta1)
 
 def main ():
     if len(argv) == 6:
