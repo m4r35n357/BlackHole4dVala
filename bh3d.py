@@ -15,10 +15,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     	self.Q = carter
         self.t = 0.0
     	self.r = r0
-    	self.theta = theta0
-    	self.phi = 0.0
+    	self.th = theta0
+    	self.ph = 0.0
     	self.time = simtime
-    	self.step = timestep
+    	self.h = timestep
         self.mino = 0.0
         self.tau = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
@@ -74,8 +74,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
         self.R = self.R if self.R >= 0.0 else 0.0
-	self.TH = self.a**2 * (self.mu**2 - self.E**2) + (self.L / sin(self.theta))**2
-	self.THETA = self.Q - cos(self.theta)**2 * self.TH
+	self.TH = self.a**2 * (self.mu**2 - self.E**2) + (self.L / sin(self.th))**2
+	self.THETA = self.Q - cos(self.th)**2 * self.TH
         self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
 	
     def errors (self):  # Error analysis
@@ -87,23 +87,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.eCum += e_r + e_th	
 
     def update_t_phi (self):  # t and phi updates
-        self.t += self.step * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.theta)**2 - self.L))
-        self.phi += self.step * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.theta)**2)
+        self.t += self.h * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.th)**2 - self.L))
+        self.ph += self.h * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.th)**2)
 
     def qUpdate (self, c):  # r and theta updates
-        self.r += c * self.step * self.vR
-        self.theta += c * self.step * self.vTh
+        self.r += c * self.h * self.vR
+        self.th += c * self.h * self.vTh
         self.updatePotentials()
 
     def qDotUpdate (self, c):  # Velocity updates
-        self.vR += c * self.step * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu**2 * self.r * self.delta)
-        self.vTh += c * self.step * (cos(self.theta) * sin(self.theta) * self.TH + self.L**2 * (cos(self.theta) / sin(self.theta))**3)
+        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu**2 * self.r * self.delta)
+        self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L**2 * (cos(self.th) / sin(self.th))**3)
 
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	self.qUpdate(0.5 * y)
 	self.qDotUpdate(y)
 	self.qUpdate(0.5 * y)
-			
+
     def solve (self):  # Generalized Symplectic Integrator
 	for i in self.coefficientsUp:  # Composition happens in these loops
 	    self.stormerVerlet(self.coeff[i])
@@ -120,13 +120,13 @@ def main ():  # Need to be inside a function to return . . .
     while n <= bl.n:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a**2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum + 1.0e-18), bl.t, bl.r, bl.theta, bl.phi, bl.R, bl.THETA, ra * sin(bl.theta) * cos(bl.phi), ra * sin(bl.theta) * sin(bl.phi), bl.r * cos(bl.theta))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum + 1.0e-18), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
 	    break
-        bl.mino += bl.step
-        bl.tau += bl.step * (bl.r**2 + bl.a**2 * cos(bl.theta)**2)
+        bl.mino += bl.h
+        bl.tau += bl.h * (bl.r**2 + bl.a**2 * cos(bl.th)**2)
 	n += 1
 
 if __name__ == "__main__":
