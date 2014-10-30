@@ -3,9 +3,8 @@
 ic=${1:-''}
 
 d=data
-dir='../BlackHole4dPython'
 
-$dir/bh3d.py <$ic >$d &
+../BlackHole4dPython/bh3d.py <$ic >$d &
 PID=$!
 sleep 1
 ./MyOrbit.py $d $ic

@@ -8,5 +8,5 @@
   "theta" : 1.570796327,
   "time" : 10.0,
   "step" : 0.001,
-  "integratorOrder" : 10
+  "integratorOrder" : 8
 }
