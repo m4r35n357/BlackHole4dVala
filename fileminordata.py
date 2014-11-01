@@ -12,9 +12,9 @@ def main():
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('tau', color='k')
-	ax1.set_ylabel('t', color='b')
+	ax1.set_ylabel('t', color='k')
 	ax2 = ax1.twinx()
-	ax2.set_ylabel('phi', color='r')
+	ax2.set_ylabel('phi', color='k')
 	n = 0
 	while line:
 		p = loads(line)
@@ -25,6 +25,7 @@ def main():
 			ax2.plot(p['tau'], p['ph'], 'r.', markersize=2)
 		line = dataFile.readline()
 		n += 1
+#        pyplot.legend(['t', 'r', 'th', 'ph'], loc='best')
 	pyplot.show()
 
 if __name__ == "__main__":

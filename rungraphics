@@ -23,4 +23,5 @@ else
 	./fileprogress.py $d 1 &
 #	./filelissajous.py $d 1 &
 fi
+./filepotential.py potential &
 

@@ -65,12 +65,15 @@ def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
+        rValue = 0.5 * (ic.r0 + ic.r1)
     elif len(argv) == 4:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
         ic.circular()
+        rValue = ic.r1
     elif len(argv) == 3:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), 1.0, 8)
         ic.plummet()
+        rValue = ic.r1
     else:
         print >> stderr, "Bad input data!"
         return
@@ -80,12 +83,16 @@ def main ():
     print >> stdout, "  \"E\" : " + str(ic.E) + ","
     print >> stdout, "  \"Lz\" : " + str(ic.L * ic.factorL) + ","
     print >> stdout, "  \"C\" : " + str(ic.Q) + ","
-    print >> stdout, "  \"r\" : " + str(ic.r1) + ","
-    print >> stdout, "  \"theta\" : " + str(ic.th0) + ","
+    print >> stdout, "  \"r\" : " + str(rValue) + ","
+    print >> stdout, "  \"theta\" : " + str(0.5 * pi) + ","
     print >> stdout, "  \"time\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
     print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
     print >> stdout, "}"
+    for x in range(100, 1000):
+#        print >> stderr, "{ \"r\":" + str(0.0011 * r * ic.r1) + ", \"R\":" + str(ic.rDot(0.0011 * r * ic.r1)) + " }"
+        print >> stderr, "{ \"r\":" + str(0.0011 * x * ic.r1) + ", \"R\":" + str(ic.rDot(0.0011 * x * ic.r1)) + ", \"theta\":" + str(4.0 * 2.0 * 0.0011 * pi * x * ic.th0) + ", \"THETA\":" + str(ic.thDot(2.0 * 0.0011 * pi * x * ic.th0)) + " }"
+#        print >> stderr, str(0.2 * r) + ", " + str(ic.rDot(0.1 * r)) + " " + str(0.01 * pi * r) + ", " + str(ic.rDot(0.01 * pi * r))
 
 if __name__ == "__main__":
     main()

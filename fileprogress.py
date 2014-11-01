@@ -12,7 +12,7 @@ def main():
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('Mino Time, lambda')
-	ax1.set_ylabel('Error, dB', color='b')
+	ax1.set_ylabel('Error, dB', color='k')
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('Cumulative Error', color='k')
 	n = 0
@@ -25,6 +25,7 @@ def main():
 			ax2.plot(p['mino'], p['EC'], 'k.', markersize=2)
 		line = dataFile.readline()
 		n += 1
+#        pyplot.legend(['E', 'Er', 'Eth', 'EC'], loc='best')
 	pyplot.show()
 
 if __name__ == "__main__":
