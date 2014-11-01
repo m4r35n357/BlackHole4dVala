@@ -25,6 +25,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.L_aE2 = (self.L - self.a * self.E)**2
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
         self.eCum = 0.0
+        self.nf = 1.0e-18
 	if order == 2:  # Second order
 		self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -73,17 +74,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
 	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-        self.R = self.R if self.R >= 0.0 else 0.0
 	self.TH = self.a**2 * (self.mu**2 - self.E**2) + (self.L / sin(self.th))**2
 	self.THETA = self.Q - cos(self.th)**2 * self.TH
-        self.THETA = self.THETA if self.THETA >= 0.0 else 0.0
 	
     def errors (self):  # Error analysis
-        e_r = abs(self.vR**2 - self.R) / 2.0
-        e_th = abs(self.vTh**2 - self.THETA) / 2.0
-        self.eR = 10.0 * log10(e_r + 1.0e-18)
-        self.eTh = 10.0 * log10(e_th + 1.0e-18)
-        self.e =  10.0 * log10(e_r + e_th + 1.0e-18)
+        e_r = abs(self.vR**2 - (self.R if self.R >= 0.0 else 0.0)) / 2.0
+        e_th = abs(self.vTh**2 - (self.THETA if self.THETA >= 0.0 else 0.0)) / 2.0
+        self.eR = 10.0 * log10(e_r if e_r >= self.nf else self.nf)
+        self.eTh = 10.0 * log10(e_th if e_th >= self.nf else self.nf)
+        self.e =  10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
         self.eCum += e_r + e_th	
 
     def update_t_phi (self):  # t and phi updates
@@ -114,13 +113,13 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
-    bl.vR = -sqrt(bl.R)
-    bl.vTh = -sqrt(bl.THETA)
+    bl.vR = - sqrt(bl.R if bl.R >= 0.0 else 0.0)
+    bl.vTh = - sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
     n = 1
     while n <= bl.n:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a**2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum + 1.0e-18), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
