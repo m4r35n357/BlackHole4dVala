@@ -89,8 +89,10 @@ def main ():
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
     print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
     print >> stdout, "}"
-    for x in range(100, 1000):
-        print >> stderr, "{ \"r\":" + str(0.0011 * x * ic.r1) + ", \"R\":" + str(ic.rDot(0.0011 * x * ic.r1)) + ", \"theta\":" + str(4.0 * 2.0 * 0.0011 * pi * x * ic.th0) + ", \"THETA\":" + str(ic.thDot(2.0 * 0.0011 * pi * x * ic.th0)) + " }"
+    rscale = 16.0
+    thscale = 0.5 * pi
+    for x in range(0, 1000):
+        print >> stderr, "{ \"r\":" + str(0.001 * x * rscale) + ", \"R\":" + str(ic.rDot(0.001 * x * rscale)) + ", \"theta\":" + str(0.001 * x * rscale) + ", \"THETA\":" + str(ic.thDot(0.5 * pi + 0.001 * x * thscale)) + " }"
 
 if __name__ == "__main__":
     main()
