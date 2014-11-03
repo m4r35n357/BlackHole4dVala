@@ -9,9 +9,17 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     def __init__(self, mass, spin, pmass, energy, momentum, carter, r0, theta0, simtime, timestep, order):
     	self.m = 1.0
     	self.a = spin
-        self.mu = pmass * pmass
+    	self.a2 = self.a**2
+        self.mu2 = pmass * pmass
     	self.E = energy
+        self.E2 = self.E**2
+        self.aE = self.a * self.E
+        self.a2E = self.a2 * self.E
+        self.a2mu2_E2 = self.a2 * (self.mu2 - self.E2)
     	self.L = momentum
+        self.L2 = self.L**2
+        self.aL = self.a * self.L
+        self.L_aE2 = (self.L - self.aE)**2
     	self.Q = carter
         self.t = 0.0
     	self.r = r0
@@ -22,8 +30,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.mino = 0.0
         self.tau = 0.0
         self.n = simtime / fabs(timestep)  # We can run backwards too!
-        self.L_aE2 = (self.L - self.a * self.E)**2
-        self.horizon = self.m * (1.0 + sqrt(1.0 - self.a**2))
+        self.horizon = self.m * (1.0 + sqrt(1.0 - self.a2))
         self.eCum = 0.0
         self.nf = 1.0e-18
 	if order == 2:  # Second order
@@ -70,11 +77,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
     def updatePotentials (self):  # Intermediate parameters
-	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a**2
-	self.P1 = (self.r**2 + self.a**2) * self.E - self.a * self.L
-	self.P2 = self.Q + self.L_aE2 + self.mu**2 * self.r**2
+	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
+	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
+	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-	self.TH = self.a**2 * (self.mu**2 - self.E**2) + (self.L / sin(self.th))**2
+	self.TH = self.a2mu2_E2 + (self.L / sin(self.th))**2
 	self.THETA = self.Q - cos(self.th)**2 * self.TH
 	
     def errors (self):  # Error analysis
@@ -86,8 +93,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.eCum += e_r + e_th	
 
     def update_t_phi (self):  # t and phi updates
-        self.t += self.h * ((self.r**2 + self.a**2) * self.P1 / self.delta - self.a * (self.a * self.E * sin(self.th)**2 - self.L))
-        self.ph += self.h * (self.a * self.P1 / self.delta - self.a * self.E + self.L / sin(self.th)**2)
+        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * sin(self.th)**2)
+        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / sin(self.th)**2)
 
     def qUpdate (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
@@ -95,8 +102,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.updatePotentials()
 
     def qDotUpdate (self, c):  # Velocity updates
-        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu**2 * self.r * self.delta)
-        self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L**2 * (cos(self.th) / sin(self.th))**3)
+        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu2 * self.r * self.delta)
+        self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L2 * (cos(self.th) / sin(self.th))**3)
 
     def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
 	self.qUpdate(0.5 * y)
@@ -125,7 +132,7 @@ def main ():  # Need to be inside a function to return . . .
 	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
 	    break
         bl.mino += bl.h
-        bl.tau += bl.h * (bl.r**2 + bl.a**2 * cos(bl.th)**2)
+        bl.tau += bl.h * (bl.r**2 + bl.a2 * cos(bl.th)**2)
 	n += 1
 
 if __name__ == "__main__":
