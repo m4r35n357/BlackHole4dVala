@@ -47,6 +47,19 @@ class InitialConditions(object):
 	    self.L -= correction[1]
 	    self.Q -= correction[2]
 
+    def polar (self):
+        self.L = 0.0
+        a2 = self.a**2
+	while (self.qDot()[0]**2 + self.qDot()[2]**2) > 1.0e-21:
+            p0 = self.E * (self.r0**2 + a2)
+	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + a2
+            A = 2.0 * (self.r0**2 + a2) * p0 - 2.0 * self.a**2 * self.E * delta0
+            B = - delta0
+            C = 2.0 * a2 * self.E * cos(self.th0)**2
+	    k = np.array([[1.0, -B], [-C, A]]) / (A - B * C)
+	    self.E -= (k[0][0] * self.qDot()[0] + k[0][1] * self.qDot()[2])
+	    self.Q -= (k[1][0] * self.qDot()[0] + k[1][1] * self.qDot()[2])
+
     def circular (self):
         sqrtR = sqrt(self.r1)
         tmp = sqrt(self.r1**2 - 3.0 * self.r1 + 2.0 * self.a * sqrtR)
@@ -66,6 +79,10 @@ def main ():
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
 	ic.solve()
         rValue = 0.5 * (ic.r0 + ic.r1)
+    elif len(argv) == 5:
+        ic = InitialConditions(True, float(argv[1]), float(argv[2]), 0.0, float(argv[3]), float(argv[4]), 8)
+	ic.polar()
+        rValue = ic.r0
     elif len(argv) == 4:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
         ic.circular()
