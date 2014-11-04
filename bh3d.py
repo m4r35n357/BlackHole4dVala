@@ -25,7 +25,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     	self.th = theta0
     	self.time = simtime
     	self.h = timestep
-        self.n = simtime / fabs(timestep)  # We can run backwards too!
+        self.T = simtime
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a2))
         self.t = self.ph = self.mino = self.tau = self.eCum = 0.0
         self.nf = 1.0e-18
@@ -118,18 +118,16 @@ def main ():  # Need to be inside a function to return . . .
     bl.updatePotentials()
     bl.vR = - sqrt(bl.R if bl.R >= 0.0 else 0.0)
     bl.vTh = - sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
-    n = 1
-    while n <= bl.n:
+    while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
-	if bl.eCum > 1.0e-0 or bl.r < bl.horizon:
+	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0 or bl.r < bl.horizon:
 	    break
         bl.mino += bl.h
         bl.tau += bl.h * (bl.r**2 + bl.a2 * cos(bl.th)**2)
-	n += 1
 
 if __name__ == "__main__":
     main()
