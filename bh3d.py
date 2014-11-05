@@ -72,6 +72,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.coefficientsUp = range(len(self.coeff) - 1)
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
+    def clamp (self, potential):
+        return potential if potential >= 0.0 else 0.0
+
     def updatePotentials (self):  # Intermediate parameters
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
 	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
@@ -81,8 +84,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.THETA = self.Q - cos(self.th)**2 * self.TH
 	
     def errors (self):  # Error analysis
-        e_r = abs(self.vR**2 - (self.R if self.R >= 0.0 else 0.0)) / 2.0
-        e_th = abs(self.vTh**2 - (self.THETA if self.THETA >= 0.0 else 0.0)) / 2.0
+        e_r = abs(self.vR**2 - (self.clamp(self.R))) / 2.0
+        e_th = abs(self.vTh**2 - (self.clamp(self.THETA))) / 2.0
         self.eR = 10.0 * log10(e_r if e_r >= self.nf else self.nf)
         self.eTh = 10.0 * log10(e_th if e_th >= self.nf else self.nf)
         self.e =  10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
@@ -116,8 +119,8 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
-    bl.vR = - sqrt(bl.R if bl.R >= 0.0 else 0.0)
-    bl.vTh = - sqrt(bl.THETA if bl.THETA >= 0.0 else 0.0)
+    bl.vR = - sqrt(bl.clamp(bl.R))
+    bl.vTh = - sqrt(bl.clamp(bl.THETA))
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
