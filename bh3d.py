@@ -104,16 +104,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu2 * self.r * self.delta)
         self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L2 * (cos(self.th) / sin(self.th))**3)
 
-    def stormerVerlet (self, y):  # Compose higher orders from this symmetrical second-order symplectic base
-	self.qUpdate(0.5 * y)
-	self.qDotUpdate(y)
-	self.qUpdate(0.5 * y)
-
     def solve (self):  # Generalized Symplectic Integrator
+        def stormerVerlet (y):  # Compose higher orders from this symmetrical second-order symplectic base
+	    self.qUpdate(0.5 * y)
+	    self.qDotUpdate(y)
+	    self.qUpdate(0.5 * y)
 	for i in self.coefficientsUp:  # Composition happens in these loops
-	    self.stormerVerlet(self.coeff[i])
+	    stormerVerlet(self.coeff[i])
 	for i in self.coefficientsDown:
-	    self.stormerVerlet(self.coeff[i])
+	    stormerVerlet(self.coeff[i])
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
