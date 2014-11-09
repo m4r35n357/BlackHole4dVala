@@ -6,6 +6,7 @@ d=data
 p=progress
 
 ./bh3d.py <$ic >$d &
+#./bh3d.rk4.py <$ic >$d &
 PID=$!
 sleep 1
 ./filegraphics.py $d $ic &

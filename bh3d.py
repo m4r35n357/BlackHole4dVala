@@ -123,7 +123,7 @@ def main ():  # Need to be inside a function to return . . .
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.t, bl.ph, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0 or bl.r < bl.horizon:
