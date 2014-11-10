@@ -3,7 +3,7 @@
 from sys import argv, stdout
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
-from subprocess import Popen, check_output, PIPE
+from subprocess import Popen, PIPE
 
 def main():
 	if len(argv) < 2:
@@ -19,13 +19,8 @@ def main():
 			command = str(p['tau']) + ' 2 ' + str(p['r']) + ' ' + str(cos(p['th'])) + ' ' + str(p['t']) + ' ' + str(p['ph']) + ' ' + str(sqrt(p['R'])) + ' ' + str(- sin(p['th']) * sqrt(p['THETA'])) + ' ' + str(p['tDot']) + ' ' + str(p['phDot']) + ' ' + str(-1) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(1) + ' ' + str(-1) + ' ' + str(1) + ' ' + str(0) + ' ' + str(0)
 			print >> stdout, command
 			print >> stdout, ''
-                        filename = 'out.' + str(n) + '.ppm'
-			f = open(filename,'w')
-#			f.write(data) # python will convert \n to os.linesep
-			p2 = Popen(["/home/ian/projects/c/kerr-image/kerr-image"], stdin=PIPE, stdout=f)
-#			data = check_output(["/home/ian/projects/c/kerr-image/kerr-image"], stdin = PIPE)
-			p2.communicate(input=command)[0]
-#			print >> stdout, data
+			f = open('out.' + str(n) + '.ppm','w')
+			Popen(["/home/ian/projects/c/kerr-image/kerr-image"], stdin=PIPE, stdout=f).communicate(input=command)[0]
 			f.close()
 		line = dataFile.readline()
 		n += 1
