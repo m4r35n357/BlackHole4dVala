@@ -1,0 +1,16 @@
+#!/bin/sh
+
+raytracer='/home/ian/projects/c/kerr-image/kerr-image'
+n=0
+./raytrace.py data 100 | while read line
+do
+	(echo -n $line | $raytracer 0 120 >/tmp/tmp1) &
+	(echo -n $line | $raytracer 120 240 >/tmp/tmp2) &
+	(echo -n $line | $raytracer 240 360 >/tmp/tmp3) &
+	(echo -n $line | $raytracer 360 480 >/tmp/tmp4) &
+	wait
+	cat /tmp/tmp1 /tmp/tmp2 /tmp/tmp3 /tmp/tmp4 >out.$n.ppm
+	n=$(expr $n + 1)
+done
+rm -f /tmp/tmp1 /tmp/tmp2 /tmp/tmp3 /tmp/tmp4
+
