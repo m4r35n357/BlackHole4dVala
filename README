@@ -1,0 +1,19 @@
+Kerr Spacetime Geodesic Generator documentation (WIP)
+
+Dependencies:
+pypy
+matplotlib
+VPython
+
+Generate initial conditions:
+
+./genparam.py 11.5 12.5 0.45 1.0 1.0 (min/max r and max theta)
+
+Generate and plot geodesic
+
+./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
+
+Take geodesic data and pass to kerr-image
+
+./raytrace.py 1000 <data | ./raytrace
+
