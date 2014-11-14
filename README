@@ -13,7 +13,7 @@ Generate and plot geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
-Take geodesic data and pass to kerr-image
+Take geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
 
 ./raytrace.py 1000 <data | ./raytrace
 
