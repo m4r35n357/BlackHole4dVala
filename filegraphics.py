@@ -33,12 +33,15 @@ def main():
 	a = parameters['a']
 	m = parameters['M']
 	horizon = m * (1.0 + sqrt(1.0 - a * a));
+	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get data dimensions
 	line = dataFile.readline()
 	coordinates = loads(line)
 	#  set up the scene
-	sphere(pos = (0.0, 0.0, 0.0), radius = horizon, color = colours[9], opacity = 1.0)  # Horizon
-	ellipsoid(pos = (0.0, 0.0, 0.0), length = 4.0, height = 4.0, width = 2.0 * horizon, color = colours[3], opacity = 0.2)  # Ergosphere
+	ellipsoid(pos = (0.0, 0.0, 0.0), length = 2.0 * sqrt(cauchy**2 + a**2), height = 2.0 * sqrt(cauchy**2 + a**2), width = 2.0 * sqrt(cauchy**2), color = colours[3], opacity = 0.2)  # Inner Horizon
+	ellipsoid(pos = (0.0, 0.0, 0.0), length = 2.0 * sqrt(horizon**2 + a**2), height = 2.0 * sqrt(horizon**2 + a**2), width = 2.0 * sqrt(horizon**2), color = colours[7], opacity = 0.2)  # Horizon
+	ellipsoid(pos = (0.0, 0.0, 0.0), length = 2.0 * sqrt(2**2 + a**2), height = 2.0 * sqrt(2**2 + a**2), width = 2.0 * sqrt(horizon**2), color = colours[0], opacity = 0.1)  # Ergosphere
+	ring(pos=(0.0, 0.0, 0.0), axis=(0, 0, 1), radius = a, color = colours[9], thickness=0.01)  # Singularity
 	ring(pos=(0.0, 0.0, 0.0), axis=(0, 0, 1), radius = isco(a), color = colours[6], thickness=0.03)  # ISCO
 #	hSpin = sphere(pos = (horizon, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 #	eSpin = sphere(pos = (2.0, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
