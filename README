@@ -8,9 +8,16 @@ VPython
 
 Sample usage:
 
-Generate initial conditions:
+Run one of the initial conditions files:
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 (min/max r, max theta, spin, Lz multiplier)
+./rungraphics ic/CircleUnstable
+
+
+Generate initial conditions to stdout:
+
+./genparam.py 11.5 12.5 0.45 1.0 1.0
+
+(PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
 
 
 Generate and plot geodesic
