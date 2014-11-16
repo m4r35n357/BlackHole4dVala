@@ -1,6 +1,7 @@
 #!/bin/sh
 
-raytracer='/home/ian/projects/c/kerr-image/kerr-image'
+raytracer=$1
+
 tmp1='/tmp/tmp1'
 tmp2='/tmp/tmp2'
 tmp3='/tmp/tmp3'
