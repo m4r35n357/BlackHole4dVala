@@ -5,15 +5,20 @@ pypy
 matplotlib
 VPython
 
+
+Sample usage:
+
 Generate initial conditions:
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 (min/max r and max theta)
+./genparam.py 11.5 12.5 0.45 1.0 1.0 (min/max r, max theta, spin, Lz multiplier)
+
 
 Generate and plot geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
-Take geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
 
-./raytrace.py 1000 <data | ./raytrace
+Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
+
+./raytrace.py 1000 <data | ./raytrace [PATH-TO-KERR-IMAGE]
 
