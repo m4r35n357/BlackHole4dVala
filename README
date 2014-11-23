@@ -3,12 +3,12 @@ Kerr Spacetime Geodesic Generator documentation (WIP)
 Dependencies:
 pypy
 matplotlib
-VPython
+vpython
 
 
 Sample usage:
 
-Run one of the initial conditions files:
+Run and plot one of the initial conditions files:
 
 ./rungraphics ic/CircleUnstable
 
@@ -20,7 +20,7 @@ Generate initial conditions to stdout:
 (PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
 
 
-Generate and plot geodesic
+Generate, run, and plot geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
