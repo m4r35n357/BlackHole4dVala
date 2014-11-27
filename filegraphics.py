@@ -44,7 +44,10 @@ def main():
 	ellipsoid(pos = (0.0, 0.0, 0.0), length = outer, height = outer, width = 2.0 * horizon, color = colours[7], opacity = 0.2)  # Outer Horizon
         ergo = 2.0 * sqrt(4.0 + a**2)
 	ellipsoid(pos = (0.0, 0.0, 0.0), length = ergo, height = ergo, width = 2.0 * horizon, color = colours[0], opacity = 0.1)  # Ergosphere
-	ring(pos=(0.0, 0.0, 0.0), axis=(0, 0, 1), radius = a, color = colours[0], thickness=0.01)  # Singularity
+        if a > 0.0:
+	    ring(pos=(0.0, 0.0, 0.0), axis=(0, 0, 1), radius = a, color = colours[0], thickness=0.01)  # Singularity
+        else:
+            sphere(pos=(0.0, 0.0, 0.0), radius = 0.05, color = colours[0])  # Singularity
 	ring(pos=(0.0, 0.0, 0.0), axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = colours[6], thickness=0.03)  # ISCO
 #	hSpin = sphere(pos = (horizon, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 #	eSpin = sphere(pos = (2.0, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
