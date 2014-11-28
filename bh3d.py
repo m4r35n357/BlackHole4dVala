@@ -23,7 +23,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     	self.m = 1.0
     	self.a = spin
     	self.a2 = self.a**2
-        self.mu2 = pmass * pmass
+        self.mu2 = pmass**2
     	self.E = energy
         self.E2 = self.E**2
         self.aE = self.a * self.E
@@ -119,14 +119,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L2 * (cos(self.th) / sin(self.th))**3)
 
     def solve (self):  # Generalized Symplectic Integrator
-        def stormerVerlet (y):  # Compose higher orders from this symmetrical second-order symplectic base
+        def sv (y):  # Compose higher orders from this symmetrical second-order symplectic base
 	    self.qUpdate(0.5 * y)
 	    self.qDotUpdate(y)
 	    self.qUpdate(0.5 * y)
 	for i in self.coefficientsUp:  # Composition happens in these loops
-	    stormerVerlet(self.coeff[i])
+	    sv(self.coeff[i])
 	for i in self.coefficientsDown:
-	    stormerVerlet(self.coeff[i])
+	    sv(self.coeff[i])
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
@@ -140,7 +140,7 @@ def main ():  # Need to be inside a function to return . . .
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.t, bl.ph, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
-	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0 or bl.r <= -bl.a:
+	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0:
 	    break
         bl.mino += bl.h
         bl.tau += bl.h * (bl.r**2 + bl.a2 * cos(bl.th)**2)
