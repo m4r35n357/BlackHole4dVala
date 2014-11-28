@@ -38,7 +38,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     	self.th = theta0
     	self.time = simtime
     	self.h = timestep
-        self.T = simtime
+        self.T = abs(simtime)
         self.horizon = self.m * (1.0 + sqrt(1.0 - self.a2))
         self.cauchy = self.m * (1.0 - sqrt(1.0 - self.a2))
         self.t = self.ph = self.mino = self.tau = self.eCum = 0.0
@@ -90,39 +90,41 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         return potential if potential >= 0.0 else 0.0
 
     def updatePotentials (self):  # Intermediate parameters
+        self.sth = sin(self.th)
+        self.cth = cos(self.th)
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
 	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
 	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
-	self.TH = self.a2mu2_E2 + (self.L / sin(self.th))**2
-	self.THETA = self.Q - cos(self.th)**2 * self.TH
+	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
+	self.THETA = self.Q - self.cth**2 * self.TH
 	
     def errors (self):  # Error analysis
-        e_r = abs(self.vR**2 - (self.clamp(self.R))) / 2.0
-        e_th = abs(self.vTh**2 - (self.clamp(self.THETA))) / 2.0
+        e_r = abs(self.vR**2 - self.clamp(self.R)) / 2.0
+        e_th = abs(self.vTh**2 - self.clamp(self.THETA)) / 2.0
         self.eR = 10.0 * log10(e_r if e_r >= self.nf else self.nf)
         self.eTh = 10.0 * log10(e_th if e_th >= self.nf else self.nf)
-        self.e =  10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
+        self.e = 10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
         self.eCum += e_r + e_th	
 
     def update_t_phi (self):  # t and phi updates
-        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * sin(self.th)**2)
-        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / sin(self.th)**2)
+        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth**2)
+        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth**2)
 
-    def qUpdate (self, c):  # r and theta updates
+    def qUp (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
         self.th += c * self.h * self.vTh
         self.updatePotentials()
 
-    def qDotUpdate (self, c):  # Velocity updates
+    def qDotUp (self, c):  # Velocity updates
         self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu2 * self.r * self.delta)
-        self.vTh += c * self.h * (cos(self.th) * sin(self.th) * self.TH + self.L2 * (cos(self.th) / sin(self.th))**3)
+        self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def solve (self):  # Generalized Symplectic Integrator
         def sv (y):  # Compose higher orders from this symmetrical second-order symplectic base
-	    self.qUpdate(0.5 * y)
-	    self.qDotUpdate(y)
-	    self.qUpdate(0.5 * y)
+	    self.qUp(0.5 * y)
+	    self.qDotUp(y)
+	    self.qUp(0.5 * y)
 	for i in self.coefficientsUp:  # Composition happens in these loops
 	    sv(self.coeff[i])
 	for i in self.coefficientsDown:
@@ -137,7 +139,7 @@ def main ():  # Need to be inside a function to return . . .
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.t, bl.ph, ra * sin(bl.th) * cos(bl.ph), ra * sin(bl.th) * sin(bl.ph), bl.r * cos(bl.th))  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.t, bl.ph, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0:
