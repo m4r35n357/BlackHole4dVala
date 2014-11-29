@@ -92,6 +92,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)
         self.cth = cos(self.th)
+        self.sth2 = self.sth**2
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
 	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
 	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
@@ -108,8 +109,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.eCum += e_r + e_th	
 
     def update_t_phi (self):  # t and phi updates
-        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth**2)
-        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth**2)
+        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2)
+        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth2)
 
     def qUp (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
