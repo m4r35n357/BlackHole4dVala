@@ -108,9 +108,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.e = 10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
         self.eCum += e_r + e_th	
 
+    def update_t_phi_Dot (self):  # t and phi updates
+        self.tDot = (self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2
+        self.phDot = self.a * self.P1 / self.delta - self.aE + self.L / self.sth2
+
     def update_t_phi (self):  # t and phi updates
-        self.t += self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2)
-        self.ph += self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth2)
+        self.update_t_phi_Dot()
+        self.t += self.h * self.tDot
+        self.ph += self.h * self.phDot
 
     def qUp (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
@@ -137,10 +142,11 @@ def main ():  # Need to be inside a function to return . . .
     bl.updatePotentials()
     bl.vR = - sqrt(bl.clamp(bl.R))
     bl.vTh = - sqrt(bl.clamp(bl.THETA))
+    bl.update_t_phi_Dot()
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.t, bl.ph, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "R":%.9e, "THETA":%.9e, "tDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' % (bl.mino, bl.tau, bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.R, bl.THETA, bl.tDot, bl.phDot, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T or bl.eCum > 1.0e-0:
