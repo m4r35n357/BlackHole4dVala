@@ -3,7 +3,7 @@
 ic=${1:-''}
 
 d=data
-p=progress
+#p=progress
 
 ./bh3d.py <$ic >$d &
 #./bh3d.rk4.py <$ic >$d &

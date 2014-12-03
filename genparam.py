@@ -22,14 +22,14 @@ class InitialConditions(object):
         self.L = 2.0
         self.Q = 0.0
 
-    def rDot (self, r):
+    def rDot2 (self, r):
 	return ((r**2 + self.a**2) * self.E - self.a * self.L)**2 - (r**2 - 2.0 * self.M * r + self.a**2) * (self.mu**2 * r**2 + (self.L - self.a * self.E)**2 + self.Q)
 
-    def thDot (self, theta):
+    def thDot2 (self, theta):
 	return self.Q - cos(theta)**2 * (self.a**2 * (self.mu**2 - self.E**2) + self.L**2 / sin(theta)**2)
 
     def qDot (self):
-	return np.array([self.rDot(self.r0), self.rDot(self.r1), self.thDot(self.th0)])
+	return np.array([self.rDot2(self.r0), self.rDot2(self.r1), self.thDot2(self.th0)])
 
     def solve (self):
         a2 = self.a**2
@@ -71,8 +71,8 @@ class InitialConditions(object):
         self.L = 0.0
         self.Q = 0.0
         a2 = self.a**2
-	while self.rDot(self.r1)**2 > 1.0e-12:
-	    self.E -= self.rDot(self.r1) / (2.0 * self.E * (self.r1**2 + a2)**2 - 2.0 * a2 * self.E * (self.r1**2 - 2.0 * self.M * self.r1 + a2))
+	while self.rDot2(self.r1)**2 > 1.0e-12:
+	    self.E -= self.rDot2(self.r1) / (2.0 * self.E * (self.r1**2 + a2)**2 - 2.0 * a2 * self.E * (self.r1**2 - 2.0 * self.M * self.r1 + a2))
 
 def main ():
     if len(argv) == 6:
@@ -109,7 +109,7 @@ def main ():
     rscale = 16.0
     thscale = 0.5 * pi
     for x in range(0, 1000):
-        print >> stderr, "{ \"r\":" + str(0.001 * x * rscale) + ", \"R\":" + str(ic.rDot(0.001 * x * rscale)) + ", \"theta\":" + str(0.001 * x * rscale) + ", \"THETA\":" + str(ic.thDot(0.5 * pi + 0.001 * x * thscale)) + " }"
+        print >> stderr, "{ \"r\":" + str(0.001 * x * rscale) + ", \"R\":" + str(ic.rDot2(0.001 * x * rscale)) + ", \"theta\":" + str(0.001 * x * rscale) + ", \"THETA\":" + str(ic.thDot2(0.5 * pi + 0.001 * x * thscale)) + " }"
 
 if __name__ == "__main__":
     main()
