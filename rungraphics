@@ -3,22 +3,21 @@
 ic=${1:-''}
 
 d=data
-p=progress
 
 ./bh3d.py <$ic >$d &
+#./bh3d.rk4.py <$ic >$d &
 PID=$!
 sleep 1
-./filegraphics.py $d $ic&
+./filegraphics.py $d $ic &
 wait $PID
+./filepotential.py potential &
 set $(wc -l $d)
 if [ $1 -gt 10000 ]
 then
-	./filedata.py $d $(($1 / 2000)) &
-	./fileprogress.py $d $(($1 / 2000)) &
-	./filelissajous.py $d $(($1 / 2000)) &
+	./datachart.py $d $(($1 / 2000)) &
+	./errorchart.py $d $(($1 / 2000)) &
 else
-	./filedata.py $d 1 &
-	./fileprogress.py $d 1 &
-	./filelissajous.py $d 1 &
+	./datachart.py $d 1 &
+	./errorchart.py $d 1 &
 fi
 

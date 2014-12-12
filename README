@@ -1,0 +1,31 @@
+Kerr Spacetime Geodesic Generator documentation (WIP)
+
+Dependencies:
+pypy
+matplotlib
+vpython
+
+
+Sample usage:
+
+Run and plot one of the initial conditions files:
+
+./rungraphics ic/CircleUnstable
+
+
+Generate initial conditions to stdout:
+
+./genparam.py 11.5 12.5 0.45 1.0 1.0
+
+(PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
+
+
+Generate, run, and plot geodesic
+
+./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
+
+
+Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
+
+./raytrace.py 1000 <data | ./raytrace [PATH-TO-KERR-IMAGE]
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ic=${1:-''}
+
+d=data
+
+../BlackHole4dPython/bh3d.py <$ic >$d &
+PID=$!
+sleep 1
+./MyOrbit.py $d $ic
+
