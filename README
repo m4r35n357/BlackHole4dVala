@@ -10,7 +10,7 @@ Sample usage:
 
 Run and plot one of the initial conditions files:
 
-./rungraphics ic/CircleUnstable
+./rungraphics ic/CircleUnStable
 
 
 Generate initial conditions to stdout:
