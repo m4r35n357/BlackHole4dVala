@@ -1,6 +1,6 @@
 #!/bin/sh
 
-raytracer=$1
+raytracer=${1:-'./kerr-image'}
 
 tmp1='/tmp/tmp1'
 tmp2='/tmp/tmp2'

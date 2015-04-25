@@ -8,26 +8,25 @@ vpython
 
 Sample usage:
 
-Run and plot one of the initial conditions files:
+1.	Run and plot one of the initial conditions files:
 
 ./rungraphics ic/CircleUnStable
 
 
-Generate initial conditions to stdout:
+2.	Generate initial conditions to stdout:
 (PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
 
 
-Generate parameters, run, and plot a geodesic
+3.	Generate parameters, run, and plot a geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
 
-Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
+4.	Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
 
-./raytrace.py 1000 <data | ./raytrace [PATH-TO-KERR-IMAGE]
-
+time { ./raytrace.py 1000 <data | ./raytrace; }
 
 
 REFERENCE DATA
