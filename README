@@ -14,13 +14,12 @@ Run and plot one of the initial conditions files:
 
 
 Generate initial conditions to stdout:
-
-./genparam.py 11.5 12.5 0.45 1.0 1.0
-
 (PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
 
+./genparam.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
 
-Generate, run, and plot geodesic
+
+Generate parameters, run, and plot a geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
@@ -30,6 +29,8 @@ Take every 1000th point of geodesic data and pass to David Madore's kerr-image r
 ./raytrace.py 1000 <data | ./raytrace [PATH-TO-KERR-IMAGE]
 
 
+
+REFERENCE DATA
 
 Particle trajectories
 
