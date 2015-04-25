@@ -13,7 +13,12 @@ def main():
 	while line:
 		p = loads(line)
 		if (n % interval == 0):
-			print >> stdout, str(p['tau']) + ' 2 ' + str(p['r']) + ' ' + str(cos(p['th'])) + ' ' + str(p['t']) + ' ' + str(p['ph']) + ' ' + str(p['rDot']) + ' ' + str(- sin(p['th']) * p['thDot']) + ' ' + str(p['tDot']) + ' ' + str(p['phDot']) + ' ' + str(-1) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(1) + ' ' + str(0) + ' ' + str(1) + ' ' + str(0) + ' ' + str(0)
+			print >> stdout, str(p['tau']) + ' 2 ' \
+				+ str(p['r']) + ' ' + str(cos(p['th'])) + ' ' + str(p['t']) + ' ' + str(p['ph']) + ' ' \
+				+ str(p['rDot']) + ' ' + str(- sin(p['th']) * p['thDot']) + ' ' + str(p['tDot']) + ' ' + str(p['phDot']) + ' ' \
+				+ str(-1) + ' ' + str(0) + ' ' + str(0) + ' ' + str(0) + ' ' \
+				+ str(0) + ' ' + str(0) + ' ' + str(0) + ' ' + str(1) + ' ' \
+				+ str(0) + ' ' + str(1) + ' ' + str(0) + ' ' + str(0)
 		line = stdin.readline()
 		n += 1
 
