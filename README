@@ -26,7 +26,14 @@ Sample usage:
 
 4.	Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
 
-time { ./raytrace.py 1000 <data | ./raytrace; }
+time { ./raytrace.py 1000 0 <data | ./raytrace; }
+
+
+5.	Make a video out of the output files
+
+avconv -y -i %04d.ppm video.mp4
+or something like:
+avconv -y -i %04d.ppm -vcodec h264 -crf 1 video.mp4
 
 
 REFERENCE DATA
