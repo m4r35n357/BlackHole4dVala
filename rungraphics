@@ -18,14 +18,12 @@ then
 	./chart.py $d $(($1 / 2000)) 'r' &
 	./chart.py $d $(($1 / 2000)) 'th' &
 	./chart.py $d $(($1 / 2000)) 'ph' &
-#	./datachart.py $d $(($1 / 2000)) &
 	./errorchart.py $d $(($1 / 2000)) &
 else
 	./chart.py $d 1 't' &
 	./chart.py $d 1 'r' &
 	./chart.py $d 1 'th' &
 	./chart.py $d 1 'ph' &
-#	./datachart.py $d #1 &
 	./errorchart.py $d 1 &
 fi
 

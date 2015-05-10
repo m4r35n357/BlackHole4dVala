@@ -1,0 +1,26 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 13.04.2 ] */
+
+/* [wxMaxima: input   start ] */
+(" ****** My Equations (Mino Time) ******")$
+kill(all)$
+
+(" Potential R: ");
+%Delta: r^2 + a^2 - 2 * M * r$
+P1: (r^2 + a^2) * E - a * L$
+P2: %mu^2 * r^2 + (L - a * E)^2 + Q$
+
+R = potentialR: P1^2 - %Delta * P2;
+'diff(R, r) = diff(potentialR, r);
+
+(" Potential THETA: ");
+Q1: a^2 * (%mu^2 - E^2) + L^2 / sin(%theta)^2$
+
+%Theta = potentialTHETA: Q - cos(%theta)^2 * Q1;
+'diff(%Theta, %theta) = diff(potentialTHETA, %theta);
+
+(" ****** END ******")$
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
