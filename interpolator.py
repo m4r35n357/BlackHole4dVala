@@ -8,39 +8,36 @@ from scipy.interpolate import interp1d
 import numpy as np
 
 def main():
-	if len(argv) < 3:
+	if len(argv) < 2:
 		raise Exception('>>> ERROR! Please supply a data file name, a plotting interval, and a coordinate to plot <<<')
-	dataFile = open(argv[1], 'r')
+	dataFile = stdin
 	line = dataFile.readline()
-	interval = int(argv[2])
-	coordinate = argv[3]
+	nData = int(argv[1])
 	tau = array('d')
-	c = array('d')
-	cDot = array('d')
+	x = array('d')
+	y = array('d')
+	z = array('d')
+	e = array('d')
 	tauMax = 0.0
 	while line:
 		p = loads(line)
 		tauValue = p['tau']
 		tauMax = tauValue if tauValue > tauMax else tauMax
 		tau.append(tauValue)
-		c.append(p[coordinate])
-		cDot.append(p[coordinate + 'Dot'])
+		x.append(p['x'])
+		y.append(p['y'])
+		z.append(p['z'])
+		e.append(p['E'])
 		line = dataFile.readline()
 	# interpolate here
-	cI = interp1d(tau, c)
-	cDotI = interp1d(tau, cDot)
-	ax1 = pyplot.figure().add_subplot(111)
-	ax1.set_xlabel('tau', color='k')
-	ax1.set_ylabel(coordinate, color='b')
-	ax2 = ax1.twinx()
-	ax2.set_ylabel(coordinate + 'Dot', color='r')
-	tauI = np.linspace(0, tauMax, num = 1000)
+	xI = interp1d(tau, x)
+	yI = interp1d(tau, y)
+	zI = interp1d(tau, z)
+	eI = interp1d(tau, e)
+	tauI = np.linspace(0, tauMax, num = nData)
 	for i in range(len(tauI)):
-		#print >> stdout, tau[i]
-		if (i % interval == 0):
-			ax1.plot(tauI[i], cI(tauI[i]), 'b.', markersize=2)
-			ax2.plot(tauI[i], cDotI(tauI[i]), 'r.', markersize=2)
-	pyplot.show()
+		print >> stdout, '{"E":%.1f, "x":%.9e, "y":%.9e, "z":%.9e}' % (eI(tauI[i]), xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))  # Log data
+
 
 if __name__ == "__main__":
 	main()
