@@ -9,10 +9,10 @@ import numpy as np
 
 def main():
 	if len(argv) < 3:
-		raise Exception('>>> ERROR! Please supply a data file name, a plotting interval, and a coordinate to plot <<<')
+		raise Exception('>>> ERROR! Please supply a data file name, the number of points to plot, and a coordinate to plot <<<')
 	dataFile = open(argv[1], 'r')
 	line = dataFile.readline()
-	interval = int(argv[2])
+	nPoints = int(argv[2])
 	coordinate = argv[3]
 	tau = array('d')
 	c = array('d')
@@ -34,12 +34,10 @@ def main():
 	ax1.set_ylabel(coordinate, color='b')
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(coordinate + 'Dot', color='r')
-	tauI = np.linspace(0, tauMax, num = 1000)
+	tauI = np.linspace(0, tauMax, num = nPoints)
 	for i in range(len(tauI)):
-		#print >> stdout, tau[i]
-		if (i % interval == 0):
-			ax1.plot(tauI[i], cI(tauI[i]), 'b.', markersize=2)
-			ax2.plot(tauI[i], cDotI(tauI[i]), 'r.', markersize=2)
+		ax1.plot(tauI[i], cI(tauI[i]), 'b.', markersize=2)
+		ax2.plot(tauI[i], cDotI(tauI[i]), 'r.', markersize=2)
 	pyplot.show()
 
 if __name__ == "__main__":
