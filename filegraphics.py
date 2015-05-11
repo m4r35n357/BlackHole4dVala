@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stderr
+from sys import argv, stdin, stderr
 from math import sqrt, sin
 from visual import scene, sphere, curve, rate, ellipsoid, ring
 from json import loads
@@ -19,10 +19,10 @@ def drag (r, theta, a, m):
 	return 2.0 * a * m * r / (R2 ** 2 - a ** 2 * DELTA * sin(theta) ** 2) 
 
 def main():
-	if len(argv) < 3:
-		raise Exception('>>> ERROR! Please supply a data file name and a parameter file name <<<')
-	dataFile = open(argv[1], 'r')
-	parameterFile = open(argv[2], 'r')
+	if len(argv) < 2:
+		raise Exception('>>> ERROR! Please supply a parameter file name <<<')
+	dataFile = stdin
+	parameterFile = open(argv[1], 'r')
 	# scene basics
 	scene.center = (0,0,0)
 	scene.width = scene.height = 1000

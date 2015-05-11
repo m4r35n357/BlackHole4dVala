@@ -81,7 +81,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 					0.44373380805019087955111365])
 	else:  # Wrong value for integrator order
 		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
-        self.coefficientsUp = range(len(self.coeff) - 1)
+        self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
     def clamp (self, potential):
@@ -121,7 +121,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.updatePotentials()
 
     def qDotUp (self, c):  # Velocity updates
-        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - (self.r - self.m) * self.P2 - self.mu2 * self.r * self.delta)
+        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu2 * self.r * self.delta)
         self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def solve (self):  # Generalized Symplectic Integrator

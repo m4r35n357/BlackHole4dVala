@@ -9,7 +9,7 @@ import numpy as np
 
 def main():
 	if len(argv) < 2:
-		raise Exception('>>> ERROR! Please supply a data file name, a plotting interval, and a coordinate to plot <<<')
+		raise Exception('>>> ERROR! Please supply a number of points to plot <<<')
 	dataFile = stdin
 	line = dataFile.readline()
 	nData = int(argv[1])
