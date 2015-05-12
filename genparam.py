@@ -34,6 +34,7 @@ class InitialConditions(object):
     def solve (self):
         a2 = self.a**2
 	while np.dot(self.qDot(), self.qDot()) > 1.0e-21:
+            #print >> stdout, np.dot(self.qDot(), self.qDot())
             p0 = self.E * (self.r0**2 + a2) - self.a * self.L
 	    p1 = self.E * (self.r1**2 + a2) - self.a * self.L
 	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + a2
@@ -48,14 +49,16 @@ class InitialConditions(object):
 	    self.Q -= correction[2]
 
     def polar (self):
+        self.E = 1.0
         self.L = 0.0
+        self.Q = 20.0
         a2 = self.a**2
 	while (self.qDot()[0]**2 + self.qDot()[2]**2) > 1.0e-21:
-            p0 = self.E * (self.r0**2 + a2)
+            #print >> stdout, self.qDot()[0]**2 + self.qDot()[2]**2
 	    delta0 = self.r0**2 - 2.0 * self.M * self.r0 + a2
-            A = 2.0 * (self.r0**2 + a2) * p0 - 2.0 * self.a**2 * self.E * delta0
+            A = 2.0 * (self.r0**2 + a2)**2 * self.E - 2.0 * a2 * self.E * delta0
             B = - delta0
-            C = 2.0 * a2 * self.E * cos(self.th0)**2
+            C = 2.0 * a2 * self.E
 	    k = np.array([[1.0, -B], [-C, A]]) / (A - B * C)
 	    self.E -= (k[0][0] * self.qDot()[0] + k[0][1] * self.qDot()[2])
 	    self.Q -= (k[1][0] * self.qDot()[0] + k[1][1] * self.qDot()[2])

@@ -39,7 +39,6 @@ def main():
 	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get data dimensions
 	line = dataFile.readline()
-#	coordinates = loads(line)
 	nData = int(argv[3])
 	tau = array('d')
 	x = array('d')
@@ -63,8 +62,6 @@ def main():
 	zI = interp1d(tau, z)
 	eI = interp1d(tau, e)
 	tauI = np.linspace(0, tauMax, num = nData)
-	#for i in range(len(tauI)):
-		#print >> stdout, '{"E":%.1f, "x":%.9e, "y":%.9e, "z":%.9e}' % (eI(tauI[i]), xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))  # Log data
 	#  set up the scene
         inner = 2.0 * sqrt(cauchy**2 + a**2)
 	ellipsoid(pos = (0.0, 0.0, 0.0), length = inner, height = inner, width = 2.0 * cauchy, color = colours[3], opacity = 0.2)  # Inner Horizon
@@ -82,10 +79,8 @@ def main():
 #	iSpin = sphere(pos = (isco(a), 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2, color = colours[2])  # Particle
 	ball.trail = curve(color = ball.color)
-#	while line:
 	for i in range(len(tauI)):
 		rate(60)
-#		coordinates = loads(line)
 		error = eI(tauI[i])
 		if error < -120.0:
 			ball.color = colours[2]
@@ -99,7 +94,6 @@ def main():
 		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
 		ball.pos = position
 		ball.trail.append(pos = position)
-#		line = dataFile.readline()
 
 if __name__ == "__main__":
 	main()

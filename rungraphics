@@ -8,34 +8,18 @@ d=data
 #./bh3d.rk4.py <$ic >$d &
 PID=$!
 sleep 1
-./filegraphics.py $d $ic 1000 &
+./filegraphics.py $d $ic 5000 &
 wait $PID
 ./filepotential.py potential &
+./interpolate.py $d 2000 't' &
+./interpolate.py $d 2000 'r' &
+./interpolate.py $d 2000 'th' &
+./interpolate.py $d 2000 'ph' &
 set $(wc -l $d)
-./interpolate.py $d 1000 't' &
-./interpolate.py $d 1000 'r' &
-./interpolate.py $d 1000 'th' &
-./interpolate.py $d 1000 'ph' &
 if [ $1 -gt 10000 ]
 then
 	./errorchart.py $d $(($1 / 2000)) &
 else
-	./errorchart.py $d 1 &
-fi
-
-exit
-if [ $1 -gt 10000 ]
-then
-	./chart.py $d $(($1 / 2000)) 't' &
-	./chart.py $d $(($1 / 2000)) 'r' &
-	./chart.py $d $(($1 / 2000)) 'th' &
-	./chart.py $d $(($1 / 2000)) 'ph' &
-	./errorchart.py $d $(($1 / 2000)) &
-else
-	./chart.py $d 1 't' &
-	./chart.py $d 1 'r' &
-	./chart.py $d 1 'th' &
-	./chart.py $d 1 'ph' &
 	./errorchart.py $d 1 &
 fi
 
