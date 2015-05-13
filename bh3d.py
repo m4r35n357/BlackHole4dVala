@@ -85,7 +85,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
     def clamp (self, potential):
-        return potential if potential >= 0.0 else 0.0
+        return potential if potential > 0.0 else 0.0
 
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)

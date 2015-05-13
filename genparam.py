@@ -3,6 +3,7 @@
 from sys import argv, stdout, stderr
 from math import fabs, sin, cos, pi, sqrt
 import numpy as np
+from scipy.optimize import minimize
 
 class InitialConditions(object):
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL, integrator):
@@ -31,6 +32,29 @@ class InitialConditions(object):
     def qDot (self):
 	return np.array([self.rDot2(self.r0), self.rDot2(self.r1), self.thDot2(self.th0)])
 
+    def clamp (self, potential):
+        #return potential if potential > 0.0 else 0.0
+	return potential
+
+    def positiveFunction(self, x):
+        E = x[0]
+        L = x[1]
+        Q = x[2]
+        return (((self.r0**2 + self.a**2) * E - self.a * L)**2 - (self.r0**2 - 2.0 * self.M * self.r0 + self.a**2) * (self.mu**2 * self.r0**2 + (L - self.a * E)**2 + Q))**2 + \
+               (((self.r1**2 + self.a**2) * E - self.a * L)**2 - (self.r1**2 - 2.0 * self.M * self.r1 + self.a**2) * (self.mu**2 * self.r1**2 + (L - self.a * E)**2 + Q))**2 + \
+               (Q - cos(self.th0)**2 * (self.a**2 * (self.mu**2 - E**2) + L**2 / sin(self.th0)**2))**2
+
+    def solve (self):
+        self.E = 0.0
+        self.L = 0.0
+        self.Q = 0.0
+        res = minimize(self.positiveFunction, np.array([self.E, self.L, self.Q]), method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
+        #print(res.x)
+        self.E = self.clamp(res.x[0])
+        self.L = self.clamp(res.x[1])
+        self.Q = self.clamp(res.x[2])
+        
+    '''
     def solve (self):
         a2 = self.a**2
 	while np.dot(self.qDot(), self.qDot()) > 1.0e-21:
@@ -47,7 +71,7 @@ class InitialConditions(object):
 	    self.E -= correction[0]
 	    self.L -= correction[1]
 	    self.Q -= correction[2]
-
+    '''
     def polar (self):
         self.E = 1.0
         self.L = 0.0
@@ -109,7 +133,7 @@ def main ():
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
     print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
     print >> stdout, "}"
-    rscale = 16.0
+    rscale = rValue + 10
     thscale = 0.5 * pi
     for x in range(0, 1000):
         print >> stderr, "{ \"r\":" + str(0.001 * x * rscale) + ", \"R\":" + str(ic.rDot2(0.001 * x * rscale)) + ", \"theta\":" + str(0.001 * x * rscale) + ", \"THETA\":" + str(ic.thDot2(0.5 * pi + 0.001 * x * thscale)) + " }"
