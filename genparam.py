@@ -14,6 +14,7 @@ class InitialConditions(object):
 	self.r0 = rMin if nonsingular else rMin - tolerance
 	self.r1 = rMax if nonsingular else rMax + tolerance
 	self.th0 = thetaMin if thetaMin > 0.01 else 0.01
+#	self.th0 = pi - thetaMin 
         self.a = a
 	self.factorL = factorL
 	self.integrator = integrator
@@ -36,23 +37,25 @@ class InitialConditions(object):
         #return potential if potential > 0.0 else 0.0
 	return potential
 
-    def positiveFunction2(self, x):
+    def constantR(self, x):
         E = x[0]
         L = x[1]
         Q = x[2]
-	P1 = (self.r0**2 + self.a**2) * E - self.a * self.L
+	P1 = (self.r0**2 + self.a**2) * E - self.a * L
 	P2 = Q + (L - self.a * E)**2 + self.mu**2 * self.r0**2
 	delta = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
-        return (((self.r0**2 + self.a**2) * E - self.a * L)**2 - delta * (self.mu**2 * self.r0**2 + (L - self.a * E)**2 + Q))**2 + \
-               (4.0 * self.r0 * E * P1 - 2.0 * P2 * (self.r0 - self.M) - 2.0 * self.mu**2 * self.r0 * delta)**2 + \
+        return (P1**2 - delta * P2)**2 + \
+               (4.0 * self.r0 * E * P1 - 2.0 * (self.r0 - self.M) * P2 - 2.0 * self.mu**2 * self.r0 * delta)**2 + \
                (Q - cos(self.th0)**2 * (self.a**2 * (self.mu**2 - E**2) + L**2 / sin(self.th0)**2))**2
 
-    def positiveFunction3(self, x):
+    def variableR(self, x):
         E = x[0]
         L = x[1]
         Q = x[2]
-        return (((self.r0**2 + self.a**2) * E - self.a * L)**2 - (self.r0**2 - 2.0 * self.M * self.r0 + self.a**2) * (self.mu**2 * self.r0**2 + (L - self.a * E)**2 + Q))**2 + \
-               (((self.r1**2 + self.a**2) * E - self.a * L)**2 - (self.r1**2 - 2.0 * self.M * self.r1 + self.a**2) * (self.mu**2 * self.r1**2 + (L - self.a * E)**2 + Q))**2 + \
+	delta0 = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
+ 	delta1 = self.r1**2 - 2.0 * self.M * self.r1 + self.a**2
+        return (((self.r0**2 + self.a**2) * E - self.a * L)**2 - delta0 * (self.mu**2 * self.r0**2 + (L - self.a * E)**2 + Q))**2 + \
+               (((self.r1**2 + self.a**2) * E - self.a * L)**2 - delta1 * (self.mu**2 * self.r1**2 + (L - self.a * E)**2 + Q))**2 + \
                (Q - cos(self.th0)**2 * (self.a**2 * (self.mu**2 - E**2) + L**2 / sin(self.th0)**2))**2
 
     def solve2 (self, function):
@@ -115,12 +118,11 @@ class InitialConditions(object):
 def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
-	ic.solve2(ic.positiveFunction3)
+	ic.solve2(ic.variableR)
         rValue = 0.5 * (ic.r0 + ic.r1)
     elif len(argv) == 5:
         ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]) * pi, float(argv[3]), float(argv[4]), 8)
-	ic.solve2(ic.positiveFunction2)
-	#ic.polar()
+	ic.solve2(ic.constantR)
         rValue = ic.r0
     elif len(argv) == 4:
         ic = InitialConditions(True, 0.0, float(argv[1]), 0.5 * pi, float(argv[2]), float(argv[3]), 8)
