@@ -33,40 +33,37 @@ class InitialConditions(object):
     def qDot (self):
 	return np.array([self.rDot2(self.r0), self.rDot2(self.r1), self.thDot2(self.th0)])
 
-    def clamp (self, potential):
-        #return potential if potential > 0.0 else 0.0
-	return potential
-
     def constantR(self, x):
         E = x[0]
         L = x[1]
         Q = x[2]
-	P1 = (self.r0**2 + self.a**2) * E - self.a * L
-	P2 = Q + (L - self.a * E)**2 + self.mu**2 * self.r0**2
+	PA = (self.r0**2 + self.a**2) * E - self.a * L
+	PB = Q + (L - self.a * E)**2 + self.mu**2 * self.r0**2
 	delta = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
-        return (P1**2 - delta * P2)**2 + \
-               (4.0 * self.r0 * E * P1 - 2.0 * (self.r0 - self.M) * P2 - 2.0 * self.mu**2 * self.r0 * delta)**2 + \
+        return (PA**2 - delta * PB)**2 + \
+               (4.0 * self.r0 * E * PA - 2.0 * (self.r0 - self.M) * PB - 2.0 * self.mu**2 * self.r0 * delta)**2 + \
                (Q - cos(self.th0)**2 * (self.a**2 * (self.mu**2 - E**2) + L**2 / sin(self.th0)**2))**2
 
     def variableR(self, x):
         E = x[0]
         L = x[1]
         Q = x[2]
+	PA0 = (self.r0**2 + self.a**2) * E - self.a * L
+	PA1 = (self.r1**2 + self.a**2) * E - self.a * L
+	PB0 = Q + (L - self.a * E)**2 + self.mu**2 * self.r0**2
+	PB1 = Q + (L - self.a * E)**2 + self.mu**2 * self.r1**2
 	delta0 = self.r0**2 - 2.0 * self.M * self.r0 + self.a**2
  	delta1 = self.r1**2 - 2.0 * self.M * self.r1 + self.a**2
-        return (((self.r0**2 + self.a**2) * E - self.a * L)**2 - delta0 * (self.mu**2 * self.r0**2 + (L - self.a * E)**2 + Q))**2 + \
-               (((self.r1**2 + self.a**2) * E - self.a * L)**2 - delta1 * (self.mu**2 * self.r1**2 + (L - self.a * E)**2 + Q))**2 + \
+        return (PA0**2 - delta0 * PB0)**2 + \
+               (PA1**2 - delta1 * PB1)**2 + \
                (Q - cos(self.th0)**2 * (self.a**2 * (self.mu**2 - E**2) + L**2 / sin(self.th0)**2))**2
 
     def solve2 (self, function):
-        self.E = 0.0
-        self.L = 0.0
-        self.Q = 0.0
-        res = minimize(function, np.array([self.E, self.L, self.Q]), method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
+        res = minimize(function, np.array([0.0, 0.0, 0.0]), method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
         #print(res.x)
-        self.E = self.clamp(res.x[0])
-        self.L = self.clamp(res.x[1])
-        self.Q = self.clamp(res.x[2])
+        self.E = res.x[0]
+        self.L = res.x[1]
+        self.Q = res.x[2]
         
     
     def solve (self):
