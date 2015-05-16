@@ -62,13 +62,6 @@ class InitialConditions(object):
         self.L = res.x[1]
         self.Q = res.x[2]
         
-    def plummet (self):
-        self.L = 0.0
-        self.Q = 0.0
-        a2 = self.a**2
-	while self.rDot2(self.r1)**2 > 1.0e-12:
-	    self.E -= self.rDot2(self.r1) / (2.0 * self.E * (self.r1**2 + a2)**2 - 2.0 * a2 * self.E * (self.r1**2 - 2.0 * self.M * self.r1 + a2))
-
 def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]) * pi, float(argv[4]), float(argv[5]), 8)
@@ -81,9 +74,9 @@ def main ():
         rValue = ic.r0
         thValue = 0.5 * pi
     elif len(argv) == 4:
-        ic = InitialConditions(True, 0.0, float(argv[1]), float(argv[2]) * pi, float(argv[3]), 1.0, 8)
-        ic.plummet()
-        rValue = ic.r1
+        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]) * pi, float(argv[3]), 0.0, 8)
+	ic.solve(ic.constantR)
+        rValue = ic.r0
         thValue = ic.th0
     else:
         print >> stderr, "Bad input data!"
@@ -102,8 +95,9 @@ def main ():
     print >> stdout, "}"
     rscale = rValue + 10
     thscale = 0.5 * pi
-    for x in range(0, 1000):
-        print >> stderr, "{ \"r\":" + str(0.001 * x * rscale) + ", \"R\":" + str(ic.rDot2(0.001 * x * rscale)) + ", \"theta\":" + str(0.001 * x * rscale) + ", \"THETA\":" + str(ic.thDot2(0.5 * pi + 0.001 * x * thscale)) + " }"
+    nPoints = 1001
+    for x in range(0, nPoints):
+        print >> stderr, "{ \"r\":" + str(x * rscale / nPoints) + ", \"R\":" + str(ic.rDot2(x * rscale / nPoints)) + ", \"theta\":" + str(x * rscale / nPoints) + ", \"THETA\":" + str(ic.thDot2(0.5 * pi + x * thscale / nPoints)) + " }"
 
 if __name__ == "__main__":
     main()
