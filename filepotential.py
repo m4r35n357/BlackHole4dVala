@@ -20,8 +20,8 @@ def main():
 	n = 0
 	while line:
 		p = loads(line)
-		ax1.plot(p['r'], p['R'], 'b.', markersize=2)
-		ax2.plot(p['theta'], p['THETA'], 'r.', markersize=2)
+		ax1.plot(p['x'], p['R'], 'b.', markersize=2)
+		ax2.plot(p['x'], p['THETA'], 'r.', markersize=2)
 		line = dataFile.readline()
 		n += 1
 	pyplot.show()
