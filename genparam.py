@@ -26,7 +26,7 @@ class InitialConditions(object):
 	self.r0 = rMin
 	self.r1 = rMax
 	self.th0 = pi * (1.0 - thetaMin) 
-        self.a = a
+        self.a = - a  # convention
         self.a2 = self.a**2
 	self.factorL = factorL
 	self.integrator = integrator
@@ -43,7 +43,7 @@ class InitialConditions(object):
         return Q + (L - self.a * E)**2 + self.mu2 * r**2
 
     def THETA (self, th, E, L, Q):
-        return Q - cos(th)**2 * (self.a2 * (self.mu2 - E**2) + L**2 / sin(th)**2)
+        return Q - cos(th)**2 * (self.a2 * (self.mu2 - E**2) + (L / sin(th))**2)
 
     def constantR (self, x):
         E = x[0]
@@ -91,10 +91,10 @@ def main ():
         print >> stderr, "Bad input data!"
         return
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
-    print >> stdout, "  \"a\" : " + str(ic.a) + ","
+    print >> stdout, "  \"a\" : " + str(- ic.a) + ","  # convention
     print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
     print >> stdout, "  \"E\" : " + str(ic.E) + ","
-    print >> stdout, "  \"Lz\" : " + str(ic.L * ic.factorL) + ","
+    print >> stdout, "  \"Lz\" : " + str(- ic.L * ic.factorL) + ","  # convention
     print >> stdout, "  \"C\" : " + str(ic.Q) + ","
     print >> stdout, "  \"r\" : " + str(rValue) + ","
     print >> stdout, "  \"theta\" : " + str(thValue) + ","
@@ -104,7 +104,7 @@ def main ():
     print >> stdout, "}"
     rscale = rValue + 5.0
     thscale = 0.5 * pi
-    nPoints = 1000
+    nPoints = 1000 + 1
     for x in range(0, nPoints):
         scaledX = 1.0 * x / nPoints
         print >> stderr, "{ \"x\":" + str(scaledX * rscale) \
