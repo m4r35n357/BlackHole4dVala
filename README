@@ -1,31 +1,48 @@
 Kerr Spacetime Geodesic Generator documentation (WIP)
 
 Dependencies:
-pypy
+pypy (optional)
 matplotlib
 vpython
 
 
 Sample usage:
 
-Run and plot one of the initial conditions files:
+1.	Run and plot one of the initial conditions files:
 
-./rungraphics ic/CircleUnstable
+./rungraphics ic/CircleUnStable
 
 
-Generate initial conditions to stdout:
-
-./genparam.py 11.5 12.5 0.45 1.0 1.0
-
+2.	Generate initial conditions to stdout:
 (PARAMETERS: min r, max r, max theta, spin, Lz multiplier)
 
+./genparam.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
 
-Generate, run, and plot geodesic
+
+3.	Generate parameters, run, and plot a geodesic
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
 
 
-Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c)
+4.	Take every 1000th point of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
 
-./raytrace.py 1000 <data | ./raytrace [PATH-TO-KERR-IMAGE]
+time { ./raytrace.py 1000 0 <data | ./raytrace; }
+
+
+5.	Make a video out of the output files
+
+avconv -y -i %04d.ppm video.mp4
+or something like:
+avconv -y -i %04d.ppm -vcodec h264 -crf 1 video.mp4
+
+
+REFERENCE DATA
+
+Particle trajectories
+
+http://staff.science.nus.edu.sg/~phylyk/downloads/reports/sp2172_report.pdf
+
+Light trajectories
+
+http://www.physics.nus.edu.sg/~phyteoe/kerr/paper.pdf
 

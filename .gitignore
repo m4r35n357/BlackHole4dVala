@@ -9,5 +9,7 @@ progress
 profdata
 test
 potential
+kerr-image
 *.ppm
+*.mp4
 
