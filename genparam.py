@@ -90,11 +90,12 @@ def main ():
     else:
         print >> stderr, "Bad input data!"
         return
+    ic.L *= ic.factorL
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(- ic.a) + ","  # convention
     print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
     print >> stdout, "  \"E\" : " + str(ic.E) + ","
-    print >> stdout, "  \"Lz\" : " + str(- ic.L * ic.factorL) + ","  # convention
+    print >> stdout, "  \"Lz\" : " + str(- ic.L) + ","  # convention
     print >> stdout, "  \"C\" : " + str(ic.Q) + ","
     print >> stdout, "  \"r\" : " + str(rValue) + ","
     print >> stdout, "  \"theta\" : " + str(thValue) + ","
