@@ -8,21 +8,33 @@
 \maketitle
 
 \abstract
-A simple method for generating geodesics for matter and light in the Kerr spacetime.
+A simple method for generating 4D geodesics for matter and light in the Kerr spacetime.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
+\subsection {Equations of motion}
+
+This is the set of equations in terms of the constants of motion; $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant):
+
 $$
-(r^2 + a^2 \cos^2\theta) \frac{d t}{d \lambda} = \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta)
-$$
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d r}{d \lambda} = \pm \sqrt R
-$$
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \lambda} = \pm \sqrt \Theta
+(r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} = \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta)
 $$
 $$
-(r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \lambda}= \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
+(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} = \pm \sqrt R
+$$
+$$
+(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} = \pm \sqrt \Theta
+$$
+$$
+(r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau}= \frac{d \phi}{d \lambda} = \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
+$$
+
+These are essentially equations (2) and (3) fom Wilkins [], fully expanded except for the potentials $R$ and $\Theta$, which , together with their differentials, are defined below.
+
+Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations mutually independent.  In terms of Mino time, the potentials are simply the squares of the $r$ and $\theta$ velocities.
+
+$$
+\lambda = \frac {\tau} {(r^2 + a^2 \cos^2\theta)}
 $$
 $$
 R = ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) ( Q+{\left( L - aE\right) }^{2}+{\mu}^{2}{r}^{2})
@@ -37,544 +49,53 @@ $$
 \frac{d \Theta}{d \theta} = 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
 $$
 
-\section{Newtonian Relativity (Galileo's ship, 1632AD)}
-
-Let us begin with this highly instructive description of inertial motion, homogeneity and isotropy of space, and relativity dating back to the Galileo Galilei in the 17th century.
-
-"Shut yourself up with some friend in the main cabin below decks on some large ship, and have with you there some flies, butterflies, and other small flying animals. Have a large bowl of water with some fish in it; hang up a bottle that empties drop by drop into a wide vessel beneath it. With the ship standing still, observe carefully how the little animals fly with equal speed to all sides of the cabin. The fish swim indifferently in all directions; the drops fall into the vessel beneath; and, in throwing something to your friend, you need throw it no more strongly in one direction than another, the distances being equal; jumping with your feet together, you pass equal spaces in every direction. When you have observed all these things carefully (though doubtless when the ship is standing still everything must happen in this way), have the ship proceed with any speed you like, so long as the motion is uniform and not fluctuating this way and that. You will discover not the least change in all the effects named, nor could you tell from any of them whether the ship was moving or standing still. In jumping, you will pass on the floor the same spaces as before, nor will you make larger jumps toward the stern than toward the prow even though the ship is moving quite rapidly, despite the fact that during the time that you are in the air the floor under you will be going in a direction opposite to your jump. In throwing something to your companion, you will need no more force to get it to him whether he is in the direction of the bow or the stern, with yourself situated opposite. The droplets will fall as before into the vessel beneath without dropping toward the stern, although while the drops are in the air the ship runs many spans. The fish in their water will swim toward the front of their bowl with no more effort than toward the back, and will go with equal ease to bait placed anywhere around the edges of the bowl. Finally the butterflies and flies will continue their flights indifferently toward every side, nor will it ever happen that they are concentrated toward the stern, as if tired out from keeping up with the course of the ship, from which they will have been separated during long intervals by keeping themselves in the air. And if smoke is made by burning some incense, it will be seen going up in the form of a little cloud, remaining still and moving no more toward one side than the other. The cause of all these correspondences of effects is the fact that the ship's motion is common to all the things contained in it, and to the air also. That is why I said you should be below decks; for if this took place above in the open air, which would not follow the course of the ship, more or less noticeable differences would be seen in some of the effects noted."
-\footnote{Dialogue Concerning the Two Chief World Systems, translated by Stillman Drake, University of California Press, 1953, pp. 186 - 187 (Second Day).}
-
-\section{The Galilean Transform}
-
-"Galileo's ship" attempts to illustrate in everyday terms the motion of bodies within a homogeneous and isotropic inertial reference frame.
-The principle of relativity combines these properties with the necessity for any other observer (for example in another ship) to be equally valid for making observations in this frame (ship).
-For example, a ship moving to the right with respect to Galilieo's ship would see all the effects described above, but moving in unison to the left.
-The mathematics that enables this conversion between frames is called a transform, and it encapsulates this relativity mathematically (by reciprocity and area preservation in the transformation).  I have labelled this transform $\Gamma(v)$, where $v$ is the relative velocity of any two frames.
+The $t$ and $\phi$ equations can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations require a little more effort.  For these the Euler approach is hampered by the need to identify turning points [].  The approach described here is to use a symplectic Stormer-Verlet integrator [] to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution.  This is possible because the potential equations are both of the form:
 
 $$
-\Gamma(v) = 
-\left(\matrix{%
-1 & -v \cr
-0 & 1
-}\right)
-$$
-so that:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-1 & -v \cr
-0 & 1
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-As well as being linear in $x$ and $t$, this transform is reciprocal:
-
-$$
-\Gamma^{-1}(v) = \Gamma(-v)
-$$
-and also area preserving:
-$$
-\det(\Gamma(v)) = 1
-$$
-but there is no linkage from space to time.  This possibility is explored next.
-
-\section{Derivation of the Lorentz Transform}
-
-What would a more general (possibly symmetrical but still linear, reciprocal and area preserving) transform look like?
-$$
-\Lambda(v) = 
-\left(\matrix{%
-A(v) & B(v) \cr
-C(v) & D(v)
-}\right)
-$$
-so that:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-A & B \cr
-C & D
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-where we now omit showing the explicit dependence on v for clarity.  So there are four functions of $v$ to find.  We can find an expression for $B$ by noting that in the moving (primed) frame $x' = 0$, so that $Ax + Bt = 0$ and therefore $B = -Ax/t = -Av$.  Now, the inverse is transform is:
-$$
-\left(\matrix{%
-x \cr
-t
-}\right)
-=
-%\left(\matrix{%
-%A(v) & B(v) \cr
-%C(v) & D(v)
-%}\right)^{-1}
-%\left(\matrix{%
-%t' \cr
-%x'
-%}\right)
-%=
-\left(\matrix{%
-D & -B \cr
--C & A
-}\right)
-%\left(\matrix{%
-%t' \cr
-%x'
-%}\right)
-%=
-%\left(\matrix{%
-%A(-v) & B(-v) \cr
-%C(-v) & D(-v)
-%}\right)
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-$$
-We can find another expression for $B$ by noting that in the rest (unprimed) frame $x = 0$, so that $Dx' - Bt' = 0$ and therefore $B = Dx'/t' = -Dv$.  This means that, additionally, $D = A$.  Substituting for $B$ and $D$, we now have only two functions of $v$ left to find:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-A & -Av \cr
-C & A
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-Note that setting $C = 0$ and $A = 1$ gives the Galilean transform above, $\Gamma(v)$.  Considering the determinant of the transform,
-$$
-\det(\Lambda(v)) = A^2 + vAC = 1
-$$
-and therefore
-$$
-C = \frac{1 - A^2}{vA}
-$$
-Substituting for $C$:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-A & -Av \cr
-\frac{1 - A^2}{vA} & A
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-so again, if $A = 1$ we still have the Galilean transform, and A is now the only unknown.  In order to proceed further we can pull A outside the matrix and $-v$ outside the expression for $C$, and rewrite the previous equation as:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-A\left(\matrix{%
-1 & -v \cr
--[\frac{A^2 - 1}{v^2A^2}]v & 1
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-=
-A\left(\matrix{%
-1 & -v \cr
--[k]v & 1
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-which remains Galilean for $A = 1$.  Equating the terms in square brackets yields:
-$$
-A = \frac{1}{\sqrt(1 - kv^2)}
-$$
-and finally substituting for A gives the general form for the Lorentz Transform:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\frac{1}{\sqrt(1 - kv^2)}\left(\matrix{%
-1 & -v \cr
--kv & 1
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-which of course is still Galilean for $k = 0$.
-If $k = 1$ then we have the symmetrical matrix:
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\frac{1}{\sqrt(1 - v^2)}\left(\matrix{%
-1 & -v \cr
--v & 1
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
-$$
-which is linear in $x$ and $t$, reciprocal, has determinant of 1, and is symmetrical.  Also notice that it is infinite for $v = 1$, effectively giving spacetime an inherent and unattainable maximum speed, but notice also that we have not so far used or even mentioned the speed of light.
-
-\section{Using The Lorentz Transform}
-
-If we now define the Lorentz gamma factor:
-$$
-\gamma = \frac{1}{\sqrt(1 - v^2)}
-$$
-then we obtain the Lorentz Transform in a more compact form.
-$$
-\Lambda(v) = 
-\left(\matrix{%
-\gamma & -v\gamma \cr
--v\gamma & \gamma
-}\right)
-$$
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-\gamma & -v\gamma \cr
--v\gamma & \gamma
-}\right)
-\left(\matrix{%
-x \cr
-t
-}\right)
+\dot x^2 - V(x) = 0
 $$
 
-Example: a ship travels three light years in five years ($v = 0.6$, $\gamma = 1.25$), how much time elapses on the ship's clock?
-$$
-\left(\matrix{%
-x' \cr
-t'
-}\right)
-=
-\left(\matrix{%
-1.25 & -0.75 \cr
--0.75 & 1.25
-}\right)
-\left(\matrix{%
-3.0 \cr
-5.0
-}\right)
-=
-\left(\matrix{%
--3.75 + 3.75 \cr
-6.25 - 2.25
-}\right)
-=
-\left(\matrix{%
-0.0 \cr
-4.0
-}\right)
-$$
-so the answer is four years, but notice we calculated the distance unneccesarily, as $x' = 0$ by definition in the ship's frame.
+This expresison is used to quantify the integration errors, whilst the two differentiated potentials above are used for velocity updates in the integrator routines.
 
-For future reference, we note the differential of $\gamma$ wrt $v$:
+\section{Finding initial conditions}
+
+The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an intersting set is hard, partly because many combinations of the constants of motion are unphysical.
+
+Here I present a straightforward way of generating bound orbits in three spatial dimensions.  It is based on solving the potential equations under various conditions using the constants of motion $E$, $L$, and $Q$ as variables.
+
+\subsection{Constant radius ("spherical")}
+
+For constant radius orbits at $r_0$, we are looking for a double root of the quartic $R$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta$ will also be zero at the maximum deviation from equatorial. 
+
 $$
-\frac{d\gamma}{dv} = \frac{v}{(1 - v^2)^{3/2}} = \gamma^3v
+R(r_0) = 0
+$$
+$$
+\frac{d R(r_0)}{d r} = 0
+$$
+$$
+\Theta(\theta_{MIN}) = 0
 $$
 
-\section{The Spacetime Interval}
+\subsection{Variable radius ("spherical shell")}
 
-Written in equation form, the Lorentz Transform in 2 dimensions is:
-$$
-x' = \gamma (x - vt)
-$$
-$$
-t' = \gamma (t - vx)
-$$
-As was hinted at earlier, the $x'$ coordinate is rarely useful in practice, unless we are studying an observer who cares about an object tracking his motion a mile away!  Let's simplify matters by assuming that we are only interested in the observer's actual location, so that $x'$ is always $0$, and $x = vt$ (top equation, remember we also used this approach in the derivation of the Lorentz Transform).  So for $t'$ we have:
-$$
-t' = \gamma t - \gamma v^2 t = \gamma t (1 - v^2) = \frac{t}{\gamma}
-$$
-$t'$ is the time in the primed reference frame.  Let's give it a symbol, $\tau$.
-Squaring it, we get:
-$$
-\tau^2 = \frac{t^2}{\gamma^2} = t^2 (1 - v^2) = t^2 - v^2t^2 = t^2 - x^2
-$$
-Notice that we are only using one set of coordinates now, and we haven't been specific about which one!  This suggests that $\tau^2$ might be invariant with respect to changes in reference frame.  It is very easy to show that this is the case by squaring and subtracting the two Lorentz Transform equations:
-$$
-t'^2 - x'^2 = \frac{(t^2 - x^2) - v^2(t^2 - x^2)}{1 - v^2} = t^2 - x^2
-$$
-Since an observer is stationary in his own frame,  $x = 0$.  So $\tau$ is just the wristwatch time in the observer's frame, known as the proper time.  Note that for light, $v = 1$ and therefore $\tau = 0$, so $t = x$ in any frame, and this is called a null spacetime interval (used to construct light cones).  Using the same example that we calculated in the Lorentz Transform above:
-$$
-\tau = \sqrt(5.0^2 - 3.0^2) = 4.0
-$$
-which is a much more straightforward calculation for this class of problem (we didn't need to compute either $v$ or $\gamma$, or the $x'$ coordinate).
+For variable radius orbits we are looking for two distinct roots of the quartic $R$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta$ condition is unchanged from the constant $R$ case.
 
-\section{Lorentz Transform in 3D (2+1) spacetime}
-
-The Lorentz Transform, as it is commonly introduced, describes what "happens" according to an observer in a given frame of reference, but it does not describe what that observer would actually see.  To describe that requires two changes: firstly we need to introduce another spatial dimension to allow a component of transverse motion, and secondly we need to constrain the "input" four vector to lie along a light cone (in other words, to be light-like).  Incidentally, the second spatial dimension serves also as a third because of the cylindrical symmetry around the direction of motion.
-
-Adding this extra spatial dimension ($y$) gives the Lorentz Transform in 2+1 spacetime for motion directed along the $x$ axis (notice the change of order of coordinates!): 
 $$
-\Lambda = 
-\left(\matrix{%
-\gamma & -v\gamma & 0 \cr
--v\gamma & \gamma & 0 \cr
-0 & 0 & 1
-}\right)
+\frac{d R(r_1)}{d r} = 0
 $$
-so that
 $$
-\left(\matrix{%
-t' \cr
-x' \cr
-y'
-}\right)
-=
-\left(\matrix{%
-\gamma & -v\gamma & 0 \cr
--v\gamma & \gamma & 0 \cr
-0 & 0 & 1
-}\right)
-\left(\matrix{%
-t \cr
-x \cr
-y
-}\right)
+\frac{d R(r_2)}{d r} = 0
 $$
-Note that the $y$ cooordinate effectively represents $z$ as well owing to the cylindrical symmetry of the arrangement.  I shall therefore refer to input and output vectors as four-vectors, even though only three are actually displayed!  For completeness, the corresponding spacetime interval in 3D is:
 $$
-\tau^2 = t^2 - x^2 - y^2
+\Theta(\theta_{MIN}) = 0
 $$
 
-\section{Light-Cone four-vectors}
+\subsection{Finding the roots}
 
-So far, all the discussion has been of moving matter within spacetime.  For visualizing relativity, we need to compute events and four-vectors corresponding to emission, transmission and absorption of light.  What this means is that the time and space coordinates are constrained by the need for the spacetime interval to be zero.
-$$
-t'^2 - x'^2 - y'^2 = t^2 - x^2 - y^2 = \tau^2 = 0
-$$
-so that, in any inertial frame whatsoever, $t^2 = x^2 + y^2$.  So the constraint means that a general light-cone four-vector for a quantity $q$ is defined as:
-$$
-Q = 
-\left(\matrix{%
-q_t \cr
-q_x \cr
-q_y
-}\right)
-=
-q\left(\matrix{%
-1 \cr
-\vec{n}
-}\right)
-=
-\left(\matrix{%
-q \cr
-q \cos \alpha \cr
-q \sin \alpha
-}\right)
-$$
-for an emission angle of $\alpha$, where $q = q_t^2 = q_x^2 + q_y^2$, $\cos \alpha = q_x/q_t$, $\sin \alpha = q_y/q_t$, and $\tan \alpha = q_y/q_x$, making $\vec{n}$ a unit three-vector in the direction of $\alpha$.  Just to spell it out, the light cone constraint also means that in any other frame:
-$$
-Q' =
-\left(\matrix{%
-q'_t \cr
-q'_x \cr
-q'_y
-}\right)
-=
-\left(\matrix{%
-q' \cr
-q' \cos \alpha' \cr
-q' \sin \alpha'
-}\right)
-$$
-with equivalent definitions of $\alpha'$.
-In the following, there will be no mention of time dilation or length contraction.  The focus is on what we would actually see (recorded on a suitably fast video camera!).
+These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function, minimizing it, and making sure it is equal to zero.  I found the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$.
 
-\section{Aberration, time lapse, distance stretch, Doppler factor}
-
-The four-vector $Q$ represents either the displacement four-vector $X$ (where $q = t = R = \sqrt(x^2 + y^2)$), or the wave four-vector $K$ (where $q = 2 \pi f / c = 2 \pi / \lambda$), so on the source's light cone:
-$$
-X =
-\left(\matrix{%
-R \cr
-R \cos \alpha \cr
-R \sin \alpha
-}\right)
-$$
-$$
-K
-=
-\left(\matrix{%
-2 \pi f / c \cr
-(2 \pi f / c) \cos \alpha \cr
-(2 \pi f / c) \sin \alpha
-}\right)
-=
-\left(\matrix{%
-2 \pi / \lambda \cr
-(2 \pi / \lambda) \cos \alpha \cr
-(2 \pi / \lambda) \sin \alpha
-}\right)
-$$
-%so the emission angle is given by the x and t components:
-%$$
-%\frac{x}{t} = \cos \alpha
-%$$
-and on the observer's light cone
-$$
-Q'=
-\left(\matrix{%
-q' \cr
-q' \cos \alpha' \cr
-q' \sin \alpha'
-}\right)
-=
-\Lambda Q
-=
-\left(\matrix{%
-\gamma & -v\gamma & 0 \cr
--v\gamma & \gamma & 0 \cr
-0 & 0 & 1
-}\right)
-\left(\matrix{%
-q \cr
-q \cos \alpha \cr
-q \sin \alpha
-}\right)
-=
-\left(\matrix{%
-\gamma q (1 - v \cos \alpha) \cr
-\gamma q (\cos \alpha - v) \cr
-q \sin \alpha
-}\right)
-$$
-so the absorption angle and from it the aberration formula are given by the ratios of the $x'$ and $t'$ components (note that unlike the next two this form is independent of $\gamma$):
-$$
-\frac{x'}{t'}
-=
-\cos \alpha'
-=
-\frac{\cos \alpha - v}{1 - v \cos \alpha}
-$$
-or the $y'$ and $t'$ components
-$$
-\frac{y'}{t'}
-=
-\sin \alpha'
-=
-\frac{\sin \alpha}{\gamma(1 - v \cos \alpha)}
-=
-\frac{\sin \alpha \sqrt(1 - v^2)}{1 - v \cos \alpha}
-$$
-or the $x'$ and $y'$ components
-$$
-\frac{y'}{x'}
-=
-\tan \alpha'
-=
-\frac{\sin \alpha}{\gamma(\cos \alpha - v)}
-=
-\frac{\sin \alpha \sqrt(1 - v^2)}{\cos \alpha - v}
-$$
-whereas the light travel delay, apparent distance stretch or Doppler factor is given by the ratio of the $t'$ and $t$ components:
-$$
-\frac{t'}{t} = \frac{R'}{R} = \frac{f'}{f} = \frac{\lambda}{\lambda'} = \gamma (1 - v \cos \alpha) = \frac{1 - v \cos \alpha}{\sqrt(1 - v^2)}
-$$
-Notice that whatever quantity is represented by $q$ cancels out of all these expressions.
-
-\section{Light Travel Delay and Moving Clocks}
-
-Starting from the general Lorentz transform in 2+1 spacetime for an observer in the primed frame moving along the $x$ axis at velocity $v$ through a "scene" at rest in the unprimed frame:
-$$
-\left(\matrix{%
-\delta t' \cr
-\delta x' \cr
-\delta y'
-}\right)
-=
-\left(\matrix{%
-\gamma & -v\gamma & 0 \cr
--v\gamma & \gamma & 0 \cr
-0 & 0 & 1
-}\right)
-\left(\matrix{%
-\delta t \cr
-\delta x \cr
-\delta y
-}\right)
-$$
-Which can be used to derive the exresssions for aberration, doppler shift etc.  The light travel delay from any point ($x, y$) in the unprimed frame to a stationary observer is given by the $t$ component, and to a moving observer is given by the $t'$ component.  If we apply the light cone constraint (light delay is just the radial distance from the observer to a point, $\delta t = \sqrt(\delta x^2 + \delta y^2)$, similarly for the primed frame) to this we have:
-$$
-\left(\matrix{%
-\delta t' \cr
-\delta t' \cos \alpha' \cr
-\delta t' \sin \alpha'
-}\right)
-=
-\left(\matrix{%
-\gamma & -v\gamma & 0 \cr
--v\gamma & \gamma & 0 \cr
-0 & 0 & 1
-}\right)
-\left(\matrix{%
-\delta t \cr
-\delta t \cos \alpha \cr
-\delta t \sin \alpha
-}\right)
-=
-\left(\matrix{%
-\gamma \delta t (1 - v \cos \alpha) \cr
-\gamma \delta t (\cos \alpha - v) \cr
-\delta t \sin \alpha
-}\right)
-$$
-so that:
-$$
-\delta t' = \gamma (1 - v \cos \alpha) \delta t
-$$
-which gives the light travel delay in terms of quantities in the unprimed frame (this is simpler).  Note that the ratio of the two time deltas is numerically identical to the doppler factor.  The time seen on the clock face by the moving observer is then given by subtracting $\delta t$ from the coordinate time in the unprimed frame:
-$$
-T = t - \gamma (1 - v \cos \alpha) \delta t
-$$
-
-\section{Other stuff}
-
-The light delay time result could be obtained by multiplying the Doppler shift K:
-$$
-K = \frac{t'}{t} = \gamma (1 - v \cos \alpha)
-$$
-by the observer's proper time, but the form I have given here is simpler in the case of accelerated motion, whereas the doppler approach would require integration.
+The generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$) in JSON format for the integrator.
 
 
 \end{document}
