@@ -57,6 +57,8 @@ $$
 
 This expresison is used to quantify the integration errors, whilst the two differentiated potentials above are used for velocity updates in the integrator routines.
 
+The simulator uses composition to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.
+
 \section{Finding initial conditions}
 
 The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an intersting set is hard, partly because many combinations of the constants of motion are unphysical.
