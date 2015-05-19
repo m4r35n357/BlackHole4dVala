@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stderr
+from sys import argv, stderr, exit
 from math import sqrt, sin
 from visual import scene, sphere, curve, rate, ellipsoid, ring
 from json import loads
@@ -32,13 +32,17 @@ def main():
 	scene.range = (20.0, 20.0, 20.0)
 	colours = [ (1.0, 1.0, 1.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0), (0.7, 0.7, 0.7), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 1.0, 1.0), (1.0, 1.0, 0.0), (0.0, 0.0, 0.0) ]
 	# get parameters
-	parameters = loads(parameterFile.read())
+        try:
+            parameters = loads(parameterFile.read())
+        except ValueError as e:
+            print('ERROR: ' + str(e))
+            exit(-1)		
 	a = parameters['a']
 	m = parameters['M']
 	horizon = m * (1.0 + sqrt(1.0 - a * a));
 	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get data dimensions
-	line = dataFile.readline()
+        line = dataFile.readline()
 	nData = int(argv[3])
 	tau = array('d')
 	x = array('d')

@@ -13,7 +13,7 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-from sys import argv, stdout, stderr
+from sys import argv, stdout, stderr, exit
 from math import fabs, sin, cos, pi, sqrt
 import numpy as np
 from scipy.optimize import minimize
@@ -66,7 +66,11 @@ class InitialConditions(object):
     def solve (self, function):
         res = minimize(function, np.array([0.0, 0.0, 0.0]), method='Nelder-Mead', \
                        options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
-        #print(res.x)
+        if not res.success or res.fun > 1.0e-6:
+            print(res.fun)
+            print(res.x)
+            print(res.message)
+            exit(-1)
         self.E = res.x[0]
         self.L = res.x[1]
         self.Q = res.x[2]
