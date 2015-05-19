@@ -1,6 +1,6 @@
 \documentclass[11pt]{article}
 %Gummi|063|=)
-\title{\textbf{Visualizing Special Relativity}}
+\title{\textbf{Simulating Kerr Geodesics}}
 \author{Ian Smith}
 \date{}
 \begin{document}
@@ -8,13 +8,13 @@
 \maketitle
 
 \abstract
-A simple method for generating 4D geodesics for matter and light in the Kerr spacetime.
+A simple numerical method is presented aimed at generating 4D geodesics for matter and light in the Kerr spacetime.  Particular attention is paid to generating a wide variety of practical sets of initial conditions for the simulator.  The source code for the suite of programs is publically available under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
 \subsection {Equations of motion}
 
-This is the set of equations in terms of the constants of motion; $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant):
+This is the set of equations describing Kerr orbits in terms of the constants of motion; $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant):
 
 $$
 (r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} = \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta)
@@ -29,7 +29,7 @@ $$
 (r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau}= \frac{d \phi}{d \lambda} = \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
 $$
 
-These are essentially equations (2) and (3) fom Wilkins [], fully expanded except for the potentials $R$ and $\Theta$, which , together with their differentials, are defined below.
+These are essentially equations (2) and (3) fom Wilkins [1], fully expanded except for the potentials $R$ and $\Theta$, which , together with their differentials, are defined below.
 
 Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations mutually independent.  In terms of Mino time, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 
@@ -49,7 +49,7 @@ $$
 \frac{d \Theta}{d \theta} = 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
 $$
 
-The $t$ and $\phi$ equations can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations require a little more effort.  For these the Euler approach is hampered by the need to identify turning points [].  The approach described here is to use a symplectic Stormer-Verlet integrator [] to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution.  This is possible because the potential equations are both of the form:
+The $t$ and $\phi$ equations can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations require a little more effort.  For these the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator [2] to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
 
 $$
 \dot x^2 - V(x) = 0
@@ -91,12 +91,45 @@ $$
 \Theta(\theta_{MIN}) = 0
 $$
 
+\subsection{Plummeting}
+
+These unbound orbits are not the focus of this article, but are easily specified by setting $L = 0$ after generating a spherical orbit as above.
+
 \subsection{Finding the roots}
 
-These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function, minimizing it, and making sure it is equal to zero.  I found the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$.
+These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function from the constraints described above, minimizing it, and making sure it is sufficiently close to zero.  By experience I found the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
 
-The generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$) in JSON format for the integrator.
+The generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$) in JSON format for input to the simulator.
 
+The output of the programs has been informally checked against a number of publically available result sets and programs [3], [4], [5] to eliminate the possibility of gross errors.
+
+\section{The programs}
+
+The sources for the programs described here are available in source form on GitHub, under a BSD licence.  These are part of a suite of very small programs which are intended to illustrate the methods in this article as tersely as possible.  There is a short README file in the root directory which gives basic instructions for running the simulations.
+
+\subsection{bh3d.py}
+
+The simulator.
+
+\subsection{genparam.py}
+
+The initial conditions generator.
+
+\subsection{Others}
+
+rungraphics, the top level shell script
+
+\section{References}
+
+1. Wilkins, D.C., "Bound Geodesics in the Kerr Metric"
+
+2. Hairer, E., Hairer, M., "GniCodes - Matlab programs for geometric numerical integration "
+
+3. Lim Yen Kheng, Seah Chu Perng, Tan Boon Sze Jackson, "Massive Particle Orbits Around Kerr Black Holes"
+
+4. Teo, E, "Spherical photon orbits around a Kerr black hole"
+
+5. GROrbits
 
 \end{document}
 
