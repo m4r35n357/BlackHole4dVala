@@ -66,11 +66,9 @@ class InitialConditions(object):
     def solve (self, function):
         res = minimize(function, np.array([0.0, 0.0, 0.0]), method='Nelder-Mead', \
                        options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
-        if not res.success or res.fun > 1.0e-6:
-            print(res.fun)
-            print(res.x)
-            print(res.message)
-            exit(-1)
+        self.fun = res.fun
+        self.message = res.message
+        self.success = res.success
         self.E = res.x[0]
         self.L = res.x[1]
         self.Q = res.x[2]
@@ -105,7 +103,10 @@ def main ():
     print >> stdout, "  \"theta\" : " + str(thValue) + ","
     print >> stdout, "  \"time\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
-    print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator)
+    print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator) + ","
+    print >> stdout, "  \"error\" : " + str(ic.fun) + ","
+    print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
+    print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
     rscale = rValue + 5.0
     thscale = 0.5 * pi
@@ -115,6 +116,8 @@ def main ():
         print >> stderr, "{ \"x\":" + str(scaledX * rscale) \
                        + ", \"R\":" + str(ic.PA(scaledX * rscale, ic.E, ic.L)**2 - ic.delta(scaledX * rscale) * ic.PB(scaledX * rscale, ic.E, ic.L, ic.Q)) \
                        + ", \"THETA\":" + str(ic.THETA(0.5 * pi + scaledX * thscale, ic.E, ic.L, ic.Q)) + " }"
+    if not ic.success or ic.fun > 1.0e-6:
+        exit(-1)
 
 if __name__ == "__main__":
     main()
