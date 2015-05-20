@@ -27,8 +27,8 @@ def main():
 		cDot.append(p[coordinate + 'Dot'])
 		line = dataFile.readline()
 	# interpolate here
-	cI = interp1d(tau, c)
-	cDotI = interp1d(tau, cDot)
+	cI = interp1d(tau, c, kind='linear')
+	cDotI = interp1d(tau, cDot, kind='linear')
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('tau', color='k')
 	ax1.set_ylabel(coordinate, color='b')

@@ -30,10 +30,10 @@ def main():
 		e.append(p['E'])
 		line = dataFile.readline()
 	# interpolate here
-	xI = interp1d(tau, x)
-	yI = interp1d(tau, y)
-	zI = interp1d(tau, z)
-	eI = interp1d(tau, e)
+	xI = interp1d(tau, x, kind='linear')
+	yI = interp1d(tau, y, kind='linear')
+	zI = interp1d(tau, z, kind='linear')
+	eI = interp1d(tau, e, kind='linear')
 	tauI = np.linspace(0, tauMax, num = nData)
 	for i in range(len(tauI)):
 		print >> stdout, '{"E":%.1f, "x":%.9e, "y":%.9e, "z":%.9e}' % (eI(tauI[i]), xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))  # Log data

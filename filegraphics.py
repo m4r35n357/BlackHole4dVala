@@ -61,10 +61,10 @@ def main():
 		e.append(p['E'])
 		line = dataFile.readline()
 	# interpolate here
-	xI = interp1d(tau, x)
-	yI = interp1d(tau, y)
-	zI = interp1d(tau, z)
-	eI = interp1d(tau, e)
+	xI = interp1d(tau, x, kind='linear')
+	yI = interp1d(tau, y, kind='linear')
+	zI = interp1d(tau, z, kind='linear')
+	eI = interp1d(tau, e, kind='linear')
 	tauI = np.linspace(0, tauMax, num = nData)
 	#  set up the scene
         inner = 2.0 * sqrt(cauchy**2 + a**2)
