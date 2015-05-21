@@ -29,12 +29,12 @@ $$
 (r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau}= \frac{d \phi}{d \lambda} = \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
 $$
 
-These are essentially equations (2) and (3) fom Wilkins [1], fully expanded except for the potentials $R$ and $\Theta$, which , together with their differentials, are defined below.
+These are essentially equations (2) and (3) fom Wilkins [1], fully expanded except for the potentials $R$ and $\Theta$ which, together with their differentials, are defined below.
 
 Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations mutually independent.  In terms of Mino time, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 
 $$
-\lambda = \frac {\tau} {(r^2 + a^2 \cos^2\theta)}
+d \lambda = \frac {d \tau} {(r^2 + a^2 \cos^2\theta)}
 $$
 $$
 R = ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) ( Q+{\left( L - aE\right) }^{2}+{\mu}^{2}{r}^{2})
@@ -84,10 +84,10 @@ $$
 For variable radius orbits we are looking for two distinct roots of the quartic $R$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta$ condition is unchanged from the constant $R$ case.
 
 $$
-\frac{d R(r_1)}{d r} = 0
+R(r_1) = 0
 $$
 $$
-\frac{d R(r_2)}{d r} = 0
+R(r_2) = 0
 $$
 $$
 \Theta(\theta_{MIN}) = 0
@@ -99,11 +99,11 @@ These unbound orbits are not the focus of this article, but are easily specified
 
 \subsection{Finding the roots}
 
-These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function from the constraints described above, minimizing it, and making sure it is sufficiently close to zero.  By experience I found the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
+These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function from the constraints described above, minimizing it, and making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
 
 The generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$) in JSON format for input to the simulator.
 
-The output of the programs has been informally checked against a number of publically available result sets and programs [3], [4], [5] to eliminate the possibility of gross errors.
+The output of the programs has been informally checked against a number of publically available result sets and programs [3], [4], [5] to guard against the possibility of gross errors.
 
 \section{The programs}
 
