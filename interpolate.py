@@ -27,8 +27,12 @@ def main():
 		cDot.append(p[coordinate + 'Dot'])
 		line = dataFile.readline()
 	# interpolate here
-	cI = interp1d(tau, c, kind='linear')
-	cDotI = interp1d(tau, cDot, kind='linear')
+        try:
+        	cI = interp1d(tau, c, kind='linear')
+		cDotI = interp1d(tau, cDot, kind='linear')
+        except ValueError as e:
+            print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
+            exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('tau', color='k')
 	ax1.set_ylabel(coordinate, color='b')
@@ -38,7 +42,11 @@ def main():
 	for i in range(len(tauI)):
 		ax1.plot(tauI[i], cI(tauI[i]), 'b.', markersize=2)
 		ax2.plot(tauI[i], cDotI(tauI[i]), 'r.', markersize=2)
-	pyplot.show()
+        try:
+            pyplot.show()
+        except AttributeError as e:
+            print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(coordinate) + ': ' + str(e))
+            exit(-3)		
 
 if __name__ == "__main__":
 	main()

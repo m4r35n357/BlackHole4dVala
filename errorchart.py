@@ -26,7 +26,11 @@ def main():
 		line = dataFile.readline()
 		n += 1
 #        pyplot.legend(['E', 'Er', 'Eth', 'EC'], loc='best')
-	pyplot.show()
+        try:
+            pyplot.show()
+        except AttributeError as e:
+            print('ATTRIBUTE ERROR: ' + str(argv[0]) + ': ' + str(e))
+            exit(-1)		
 
 if __name__ == "__main__":
 	main()

@@ -35,7 +35,7 @@ def main():
         try:
             parameters = loads(parameterFile.read())
         except ValueError as e:
-            print('ERROR: ' + str(e))
+            print('PARAMETER ERROR: ' + str(e))
             exit(-1)		
 	a = parameters['a']
 	m = parameters['M']
@@ -61,10 +61,14 @@ def main():
 		e.append(p['E'])
 		line = dataFile.readline()
 	# interpolate here
-	xI = interp1d(tau, x, kind='linear')
-	yI = interp1d(tau, y, kind='linear')
-	zI = interp1d(tau, z, kind='linear')
-	eI = interp1d(tau, e, kind='linear')
+        try:
+		xI = interp1d(tau, x, kind='linear')
+		yI = interp1d(tau, y, kind='linear')
+		zI = interp1d(tau, z, kind='linear')
+		eI = interp1d(tau, e, kind='linear')
+        except ValueError as e:
+            print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
+            exit(-2)		
 	tauI = np.linspace(0, tauMax, num = nData)
 	#  set up the scene
         inner = 2.0 * sqrt(cauchy**2 + a**2)
