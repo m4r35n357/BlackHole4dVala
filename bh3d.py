@@ -104,7 +104,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.eR = 10.0 * log10(e_r if e_r >= self.nf else self.nf)
         self.eTh = 10.0 * log10(e_th if e_th >= self.nf else self.nf)
         self.e = 10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
-        self.eCum += e_r + e_th	
+        self.eCum += e_r + e_th
 
     def update_t_phi_Dot (self):  # t and phi updates
         self.tDot = (self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2
