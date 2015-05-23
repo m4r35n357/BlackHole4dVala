@@ -3,6 +3,7 @@
 \title{\textbf{Simulating Kerr Geodesics}}
 \author{Ian Smith}
 \date{}
+\usepackage{mathtools}
 \begin{document}
 
 \maketitle
@@ -12,7 +13,7 @@ A simple numerical method is presented aimed at generating 4D geodesics for part
 
 \section{Bound Orbits in the Kerr Spacetime}
 
-The geodesic equations for the Kerr spacetime are complex second order differential equations, and are not suitable for studying horizon crossing scenarios because in these cases the $t$ variable blows up and slows the simulation to a near standstill.
+The geodesic equations for the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon crossing scenarios because in these cases the $t$ variable "blows up" and slows the simulation to a near standstill.
 
 Rather than attempting to formulate and solve these geodesic equations, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an one of the variables to solve for, these equations do not grind to a halt at the horizon.
 
@@ -21,46 +22,32 @@ The approach is so straighforward that the complete simulator script consists of
 \subsection {Equations of motion}
 
 This is the well known set of equations describing Kerr orbits in terms of $E$, $L$, and $Q$:
-
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} = \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta)
-$$
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} = \pm \sqrt R
-$$
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} = \pm \sqrt \Theta
-$$
-$$
-(r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau}= \frac{d \phi}{d \lambda} = \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
-$$
+\begin{align}
+(r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} &= \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta) \\
+(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} &= \pm \sqrt R(r) \\
+(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} &= \pm \sqrt \Theta (\theta) \\
+(r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau} = \frac{d \phi}{d \lambda} &= \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
+\end{align}
 where
-$$
+\begin{equation}
 d \lambda = \frac {d \tau} {(r^2 + a^2 \cos^2\theta)}
-$$
-These are essentially equations (2) and (3) from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined below.
+\end{equation}
+These are essentially equations (2) and (3) from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations (6)-(9) below.
 
 Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent.  In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 
+\begin{align}
+R(r) &= ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) ( Q+{\left( L - aE\right) }^{2}+{\mu}^{2}{r}^{2}) \\
+\frac{d R(r)}{d r} &= \left( 2\,r - 2\,M\right) \,\left( Q+{\left( L - a\,E\right) }^{2}+{\mu}^{2}\,{r}^{2}\right) - 2\,{\mu}^{2}r({r}^{2} - 2rM  + {a}^{2}) +4\,r\,E\,\left( \left( {r}^{2}+{a}^{2}\right) \,E - a\,L\right) \\
+\Theta (\theta) &= Q - {\mathrm{cos}\left( \theta\right) }^{2}\,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) \\
+\frac{d \Theta (\theta)}{d \theta} &= 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
+\end{align}
 
-$$
-R = ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) ( Q+{\left( L - aE\right) }^{2}+{\mu}^{2}{r}^{2})
-$$
-$$
-\frac{d R}{d r} = \left( 2\,r - 2\,M\right) \,\left( Q+{\left( L - a\,E\right) }^{2}+{\mu}^{2}\,{r}^{2}\right) - 2\,{\mu}^{2}r({r}^{2} - 2rM  + {a}^{2}) +4\,r\,E\,\left( \left( {r}^{2}+{a}^{2}\right) \,E - a\,L\right)
-$$
-$$
-\Theta=Q - {\mathrm{cos}\left( \theta\right) }^{2}\,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right)
-$$
-$$
-\frac{d \Theta}{d \theta} = 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
-$$
+The $t$ and $\phi$ equations (1) and (4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2) and (3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
 
-The $t$ and $\phi$ equations can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations require a little more effort.  For these the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
-
-$$
+\begin{equation}
 \dot x^2 - V(x) = 0
-$$
+\end{equation}
 
 This expresison is used to quantify the integration errors, whilst the two differentiated potentials above are used for velocity updates in the integrator routines.
 
@@ -70,35 +57,27 @@ The simulator uses composition to step the (even) integration order from 2 in th
 
 The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an intersting set is hard, partly because many combinations of the constants of motion are unphysical.
 
-Here I present a straightforward way of generating bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables.
+Here I present a straightforward way of generating bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials as constant parameters.
 
 \subsection{Constant radius ("spherical") orbits}
 
-For constant radius orbits at $r_0$, we are looking for a double root of the quartic $R$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta$ will also be zero at the maximum deviation from equatorial. 
+For constant radius orbits at $r_0$, we are looking for a double root of the quartic $R$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta$ will also be zero at the maximum deviation from equatorial.
 
-$$
-R(r_0, E, L, Q) = 0
-$$
-$$
-\frac{d R(r_0, E, L, Q)}{d r} = 0
-$$
-$$
-\Theta(\theta_{MIN}, E, L, Q) = 0
-$$
+\begin{align}
+R(r_0, E, L, Q) &= 0 \\
+\frac{d R(r_0, E, L, Q)}{d r} &= 0 \\
+\Theta(\theta_{MIN}, E, L, Q) &= 0
+\end{align}
 
 \subsection{Variable radius ("spherical shell") orbits}
 
-For variable radius orbits we are looking for two distinct roots of the quartic $R$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta$ condition is unchanged from the constant $R$ case.
+For variable radius orbits we are looking for two distinct roots of the quartic $R$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta$ condition is unchanged from the constant radius case.
 
-$$
-R(r_1, E, L, Q) = 0
-$$
-$$
-R(r_2, E, L, Q) = 0
-$$
-$$
-\Theta(\theta_{MIN}, E, L, Q) = 0
-$$
+\begin{align}
+R(r_1, E, L, Q) &= 0 \\
+R(r_2, E, L, Q) &= 0 \\
+\Theta(\theta_{MIN}, E, L, Q) &= 0
+\end{align}
 
 \subsection{Plummeting}
 
