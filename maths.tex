@@ -4,6 +4,7 @@
 \author{Ian Smith}
 \date{}
 \usepackage{mathtools}
+\usepackage{listings}
 \begin{document}
 
 \maketitle
@@ -24,26 +25,26 @@ The approach is so straighforward that the complete simulator script consists of
 This is the well known set of equations describing Kerr orbits in terms of $E$, $L$, and $Q$:
 \begin{align}
 (r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} &= \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta) \\
-(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} &= \pm \sqrt R(r) \\
-(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} &= \pm \sqrt \Theta (\theta) \\
+(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} &= \pm \sqrt {R(r)} \\
+(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} &= \pm \sqrt {\Theta (\theta)} \\
 (r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau} = \frac{d \phi}{d \lambda} &= \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
 \end{align}
 where
 \begin{equation}
 d \lambda = \frac {d \tau} {(r^2 + a^2 \cos^2\theta)}
 \end{equation}
-These are essentially equations (2) and (3) from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations (6)-(9) below.
+These are essentially equations 2 and 3 from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations 6-9 below.
 
 Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent.  In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 
 \begin{align}
-R(r) &= ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) ( Q+{\left( L - aE\right) }^{2}+{\mu}^{2}{r}^{2}) \\
-\frac{d R(r)}{d r} &= \left( 2\,r - 2\,M\right) \,\left( Q+{\left( L - a\,E\right) }^{2}+{\mu}^{2}\,{r}^{2}\right) - 2\,{\mu}^{2}r({r}^{2} - 2rM  + {a}^{2}) +4\,r\,E\,\left( \left( {r}^{2}+{a}^{2}\right) \,E - a\,L\right) \\
-\Theta (\theta) &= Q - {\mathrm{cos}\left( \theta\right) }^{2}\,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) \\
-\frac{d \Theta (\theta)}{d \theta} &= 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \,\left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
+R(r) &= ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) (Q + {( L - aE) }^{2}+{\mu}^{2}{r}^{2}) \\
+\frac{d R(r)}{d r} &= (2r - 2M) (Q + {( L - aEt) }^{2} + {\mu}^{2}{r}^{2}) - 2{\mu}^{2}r({r}^{2} - 2rM  + {a}^{2}) +4rE ( ( {r}^{2}+{a}^{2}) E - aL) \\
+\Theta (\theta) &= Q - {\mathrm{cos}( \theta) }^{2}( \frac{{L}^{2}}{{\mathrm{sin}( \theta) }^{2}}+{a}^{2}( {\mu}^{2} - {E}^{2}) ) \\
+\frac{d \Theta (\theta)}{d \theta} &= 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
 \end{align}
 
-The $t$ and $\phi$ equations (1) and (4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2) and (3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
+The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
 
 \begin{equation}
 \dot x^2 - V(x) = 0
@@ -51,17 +52,17 @@ The $t$ and $\phi$ equations (1) and (4) can be evolved trivially using the Eule
 
 This expresison is used to quantify the integration errors, whilst the two differentiated potentials above are used for velocity updates in the integrator routines.
 
-The simulator uses composition to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.
+The simulator uses composition \cite{hairer} to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.
 
 \section{Finding initial conditions}
 
-The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an intersting set is hard, partly because many combinations of the constants of motion are unphysical.
+The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical.
 
-Here I present a straightforward way of generating bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials as constant parameters.
+Here I present a straightforward way of generating two types of bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials as constant parameters.
 
 \subsection{Constant radius ("spherical") orbits}
 
-For constant radius orbits at $r_0$, we are looking for a double root of the quartic $R$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta$ will also be zero at the maximum deviation from equatorial.
+For constant radius orbits at $r_0$, we are looking for a double root (local maximum) of the quartic $R(r)$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta (\theta)$ will also be zero at the maximum deviation from equatorial.
 
 \begin{align}
 R(r_0, E, L, Q) &= 0 \\
@@ -71,7 +72,7 @@ R(r_0, E, L, Q) &= 0 \\
 
 \subsection{Variable radius ("spherical shell") orbits}
 
-For variable radius orbits we are looking for two distinct roots of the quartic $R$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta$ condition is unchanged from the constant radius case.
+For variable radius orbits we are looking for two distinct roots of the quartic $R(r)$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta (\theta)$ condition is unchanged from the constant radius case.
 
 \begin{align}
 R(r_1, E, L, Q) &= 0 \\
@@ -79,15 +80,33 @@ R(r_2, E, L, Q) &= 0 \\
 \Theta(\theta_{MIN}, E, L, Q) &= 0
 \end{align}
 
-\subsection{Plummeting}
+\subsection{Plummeting (an aside)}
 
-These unbound orbits are not the focus of this article, but are easily specified by setting $L = 0$ after generating a spherical orbit as above.
+These "orbits" are not the focus of this article, but are easily specified by setting $L = 0$ after generating a spherical orbit as in equations 11-13 above.
 
 \subsection{Finding the roots}
 
-These equations can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
+Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach, forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
 
-The generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$) in JSON format for input to the simulator.
+Once the optimization has terminated the generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$ as well as optimizer status) in JSON format for use as input to the simulator.  Here is an example:
+
+\begin{verbatim}
+{ "M" : 1.0,
+  "a" : -1.0,
+  "mu" : 1.0,
+  "E" : 0.965076383468,
+  "Lz" : 3.46129127476,
+  "C" : 6.34780511822,
+  "r" : 12.0,
+  "theta" : 1.57079632679,
+  "time" : 20.0,
+  "step" : 0.00001,
+  "integratorOrder" : 8,
+  "error" : 7.682937237e-24,
+  "success" : "True",
+  "message" : "Optimization terminated successfully."
+}
+\end{verbatim}
 
 The output of the simulator has been informally checked against a number of publically available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
@@ -96,19 +115,12 @@ The output of the simulator has been informally checked against a number of publ
 The sources for the programs \cite{m4r35n357} described here are publically available on GitHub, under a BSD licence.  These are part of a suite of very small scripts and programs which are intended to implement the methods in this article as concisely as possible.  There is a short README file in the root directory which gives basic instructions for running the simulations.
 
 \begin{thebibliography}{1}
-
-  \bibitem{wilkins} Wilkins, D.C., "Bound Geodesics in the Kerr Metric"
-
-  \bibitem{hairer}  Hairer, E., Hairer, M., "GniCodes - Matlab programs for geometric numerical integration "
-
-  \bibitem{kheng} Lim Yen Kheng, Seah Chu Perng, Tan Boon Sze Jackson, "Massive Particle Orbits Around Kerr Black Holes"
-
-  \bibitem{teo} Teo, E, "Spherical photon orbits around a Kerr black hole"
-  
-  \bibitem{grorbits} Tujela, S., "GRorbits, http://stuleja.org/grorbits/"
-  
-  \bibitem{m4r35n357} Smith, I. C., "4D Kerr Spacetime Geodesic calculation and display, https://github.com/m4r35n357/BlackHole4DPython.git"
-
+\bibitem{wilkins} Wilkins, D.C., "Bound Geodesics in the Kerr Metric"
+\bibitem{hairer}  Hairer, E., Hairer, M., "GniCodes - Matlab programs for geometric numerical integration "
+\bibitem{kheng} Lim Yen Kheng, Seah Chu Perng, Tan Boon Sze Jackson, "Massive Particle Orbits Around Kerr Black Holes"
+\bibitem{teo} Teo, E, "Spherical photon orbits around a Kerr black hole"
+\bibitem{grorbits} Tujela, S., "GRorbits, http://stuleja.org/grorbits/"
+\bibitem{m4r35n357} Smith, I. C., "4D Kerr Spacetime Geodesic calculation and display, https://github.com/m4r35n357/BlackHole4DPython.git"
 \end{thebibliography}
 
 \end{document}
