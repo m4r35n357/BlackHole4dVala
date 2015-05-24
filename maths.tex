@@ -24,10 +24,10 @@ The approach is so straighforward that the complete simulator script consists of
 
 This is the well known set of equations describing Kerr orbits in terms of $E$, $L$, and $Q$:
 \begin{align}
-(r^2 + a^2 \cos^2\theta) \frac{d t}{d \tau} = \frac{d t}{d \lambda} &= \frac{(r^2 + a^2) ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + a(L - aE \sin^2 \theta) \\
-(r^2 + a^2 \cos^2\theta) \frac{d r}{d \tau} = \frac{d r}{d \lambda} &= \pm \sqrt {R(r)} \\
-(r^2 + a^2 \cos^2\theta) \frac{d \theta}{d \tau} = \frac{d \theta}{d \lambda} &= \pm \sqrt {\Theta (\theta)} \\
-(r^2 + a^2 \cos^2\theta) \frac{d \phi}{d \tau} = \frac{d \phi}{d \lambda} &= \frac{a ((r^2 + a^2) E - aL)} {({r}^{2} - 2rM  + {a}^{2})} + (\frac {L} {\sin^2 \theta} -aE)
+\frac{d t}{d \lambda} &= \frac{(r^2 + a^2) \left((r^2 + a^2) E - aL \right)} {(r^2 - 2Mr  + a^2)} + a(L - aE \sin^2 \theta) \\
+\frac{d r}{d \lambda} &= \pm \sqrt {R(r)} \\
+\frac{d \theta}{d \lambda} &= \pm \sqrt {\Theta (\theta)} \\
+\frac{d \phi}{d \lambda} &= \frac{a \left((r^2 + a^2) E - aL \right)} {(r^2 - 2Mr  + a^2)} + \left(\frac {L} {\sin^2 \theta} -aE \right)
 \end{align}
 where
 \begin{equation}
@@ -38,13 +38,13 @@ These are essentially equations 2 and 3 from \cite{wilkins}, fully expanded exce
 Notice also the use of "Mino" time, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent.  In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 
 \begin{align}
-R(r) &= ((r^2 + a^2) E - aL)^2 - (r^2 - 2rM  + a^{2}) (Q + {( L - aE) }^{2}+{\mu}^{2}{r}^{2}) \\
-\frac{d R(r)}{d r} &= (2r - 2M) (Q + {( L - aEt) }^{2} + {\mu}^{2}{r}^{2}) - 2{\mu}^{2}r({r}^{2} - 2rM  + {a}^{2}) +4rE ( ( {r}^{2}+{a}^{2}) E - aL) \\
-\Theta (\theta) &= Q - {\mathrm{cos}( \theta) }^{2}( \frac{{L}^{2}}{{\mathrm{sin}( \theta) }^{2}}+{a}^{2}( {\mu}^{2} - {E}^{2}) ) \\
-\frac{d \Theta (\theta)}{d \theta} &= 2\,\mathrm{cos}\left( \theta\right) \,\mathrm{sin}\left( \theta\right) \left( \frac{{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{2}}+{a}^{2}\,\left( {\mu}^{2} - {E}^{2}\right) \right) +\frac{2\,{\mathrm{cos}\left( \theta\right) }^{3}\,{L}^{2}}{{\mathrm{sin}\left( \theta\right) }^{3}}
+R(r) &= \left((r^2 + a^2) E - aL \right)^2 - (r^2 - 2Mr  + a^2) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right) \\
+\frac{d R(r)}{d r} &= 4rE \left((r^2 + a^2)E - aL \right) - (2r - 2M) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right) - 2\mu^2r(r^2 - 2Mr  + a^2) \\
+\Theta (\theta) &= Q - {\cos^2 \theta } \left( \frac{L^2}{\sin^2 \theta } + a^2( \mu^2 - E^2) \right) \\
+\frac{d \Theta (\theta)}{d \theta} &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta }
 \end{align}
 
-The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations are both of the form:
+The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
 
 \begin{equation}
 \dot x^2 - V(x) = 0
@@ -56,13 +56,13 @@ The simulator uses composition \cite{hairer} to step the (even) integration orde
 
 \section{Finding initial conditions}
 
-The other difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical.
+Another difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical.
 
 Here I present a straightforward way of generating two types of bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials as constant parameters.
 
 \subsection{Constant radius ("spherical") orbits}
 
-For constant radius orbits at $r_0$, we are looking for a double root (local maximum) of the quartic $R(r)$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta (\theta)$ will also be zero at the maximum deviation from equatorial.
+For constant radius orbits at $r_0$, we are looking for a double root (local maximum) of the quartic $R(r)$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta (\theta)$ will also be zero at the maximum deviation from equatorial (the minimum value of $\theta$).
 
 \begin{align}
 R(r_0, E, L, Q) &= 0 \\
@@ -72,7 +72,7 @@ R(r_0, E, L, Q) &= 0 \\
 
 \subsection{Variable radius ("spherical shell") orbits}
 
-For variable radius orbits we are looking for two distinct roots of the quartic $R(r)$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta (\theta)$ condition is unchanged from the constant radius case.
+For variable radius orbits we are looking for two distinct roots of the quartic $R(r)$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta (\theta)$ condition is unchanged from the constant radius case above.
 
 \begin{align}
 R(r_1, E, L, Q) &= 0 \\
