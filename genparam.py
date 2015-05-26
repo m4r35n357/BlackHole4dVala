@@ -31,7 +31,7 @@ class InitialConditions(object):
 	self.factorL = factorL
 	self.integrator = integrator
         self.duration = 20.0
-        self.timestep = 0.01
+        self.timestep = 0.001
 
     def delta (self, r):
         return r**2 - 2.0 * self.M * r + self.a2
@@ -75,17 +75,17 @@ class InitialConditions(object):
         
 def main ():
     if len(argv) == 6:
-        ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]), 8)
+        ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]), 4)
 	ic.solve(ic.variableR)
         rValue = 0.5 * (ic.r0 + ic.r1)
         thValue = 0.5 * pi
     elif len(argv) == 5:
-        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), float(argv[4]), 8)
+        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), float(argv[4]), 4)
 	ic.solve(ic.constantR)
         rValue = ic.r0
         thValue = 0.5 * pi
     elif len(argv) == 4:
-        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), 0.0, 8)
+        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), 0.0, 4)
 	ic.solve(ic.constantR)
         rValue = ic.r0
         thValue = ic.th0

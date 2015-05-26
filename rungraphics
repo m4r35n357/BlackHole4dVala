@@ -2,7 +2,7 @@
 
 ic=${1:-''}
 
-d=data
+d='/tmp/data'
 
 ./bh3d.py <$ic >$d &
 #./bh3d.rk4.py <$ic >$d &
@@ -11,10 +11,10 @@ sleep 1
 ./filegraphics.py $d $ic 5000 &
 wait $PID
 ./filepotential.py potential &
-./interpolate.py $d 2000 't' &
-./interpolate.py $d 2000 'r' &
-./interpolate.py $d 2000 'th' &
-./interpolate.py $d 2000 'ph' &
+#./interpolate.py $d 2000 't' &
+#./interpolate.py $d 2000 'r' &
+#./interpolate.py $d 2000 'th' &
+#./interpolate.py $d 2000 'ph' &
 set $(wc -l $d)
 if [ $1 -gt 10000 ]
 then
