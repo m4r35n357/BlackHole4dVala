@@ -19,7 +19,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 class InitialConditions(object):
-    def __init__(self, particle, rMin, rMax, thetaMin, a, factorL, integrator):
+    def __init__(self, particle, rMin, rMax, thetaMin, a, factorL):
         self.M = 1.0        
 	self.mu = 1.0 if (particle == True) else 0.0
         self.mu2 = self.mu**2
@@ -29,7 +29,7 @@ class InitialConditions(object):
         self.a = - a  # convention
         self.a2 = self.a**2
 	self.factorL = factorL
-	self.integrator = integrator
+	self.integrator = 2
         self.duration = 20.0
         self.timestep = 0.001
 
@@ -75,17 +75,17 @@ class InitialConditions(object):
         
 def main ():
     if len(argv) == 6:
-        ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]), 4)
+        ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]))
 	ic.solve(ic.variableR)
         rValue = 0.5 * (ic.r0 + ic.r1)
         thValue = 0.5 * pi
     elif len(argv) == 5:
-        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), float(argv[4]), 4)
+        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), float(argv[4]))
 	ic.solve(ic.constantR)
         rValue = ic.r0
         thValue = 0.5 * pi
     elif len(argv) == 4:
-        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), 0.0, 4)
+        ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), 0.0)
 	ic.solve(ic.constantR)
         rValue = ic.r0
         thValue = ic.th0
