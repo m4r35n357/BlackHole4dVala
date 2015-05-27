@@ -13,8 +13,10 @@ def main():
 	ax1 = pyplot.figure().add_subplot(111)
 	ax1.set_xlabel('Mino Time, lambda')
 	ax1.set_ylabel('Error, dB', color='k')
+        ax1.set_ylim(-180.0, 0.0)
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('Cumulative Error', color='k')
+        ax2.set_ylim(-180.0, 0.0)
 	n = 0
 	while line:
 		p = loads(line)
