@@ -18,7 +18,7 @@ from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array
 
-class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
+class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, mass, spin, pmass, energy, momentum, carter, r0, theta0, simtime, timestep, order):
     	self.m = 1.0
     	self.a = spin
@@ -98,11 +98,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
 	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
-    def v4 (self, vT, vR, vTh, vPh):
+    def le2 (self, t, r, th, ph):  # dot product, ds2
         sigma2 = self.r**2 + self.a2 * self.cth**2
-        return sigma2 / self.delta * vR**2 + sigma2 * vTh**2 + \
-               self.sth2 / sigma2 * (self.a * vT - (self.r**2 + self.a2) * vPh)**2 - \
-               self.delta / sigma2 * (vT - self.a * self.sth2 * vPh)**2
+        return sigma2 / self.delta * r**2 + sigma2 * th**2 + \
+               self.sth2 / sigma2 * (self.a * t - (self.r**2 + self.a2) * ph)**2 - \
+               self.delta / sigma2 * (t - self.a * self.sth2 * ph)**2
 
     def errors (self):  # Error analysis
         e_r = abs(self.vR**2 - self.clamp(self.R)) / 2.0
@@ -131,7 +131,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr metric
         self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def solve (self):  # Generalized Symplectic Integrator
-        def sv (y):  # Compose higher orders from this symmetrical second-order symplectic base
+        def sv (y):  # Compose higher orders from this symle2al second-order symplectic base
 	    self.qUp(0.5 * y)
 	    self.qDotUp(y)
 	    self.qUp(0.5 * y)
@@ -155,7 +155,7 @@ def main ():  # Need to be inside a function to return . . .
         ra = sqrt(bl.r**2 + bl.a2)
 	sigma = (bl.r**2 + bl.a2 * cos(bl.th)**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, -bl.v4(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+                 % (bl.mino, bl.tau, -bl.le2(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
