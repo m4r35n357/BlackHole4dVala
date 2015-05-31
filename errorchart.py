@@ -12,13 +12,12 @@ def main():
 	interval = int(argv[2])
 	line = dataFile.readline()
 	ax1 = pyplot.figure().add_subplot(111)
+        pyplot.grid(b=True, which='major', color='k', linestyle='-')
 	ax1.set_xlabel('Mino Time, lambda')
-	ax1.set_ylabel('Radial and Latitudinal Error, dB', color='b')
+	ax1.set_ylabel('Radial and Latitudinal Errors, dB', color='k')
         ax1.set_ylim(-180.0, 0.0)
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('4-Velocity Norm Error', color='g')
-        delta = 1.0e-6
-#        ax2.set_ylim(1.0 - delta, 1.0 + delta)
         ax2.set_ylim(-180.0, 0.0)
 	n = 0
 	while line:
@@ -26,11 +25,11 @@ def main():
 		if (n % interval == 0):
 			ax1.plot(p['mino'], p['ETh'], 'r.', markersize=1)
 			ax1.plot(p['mino'], p['ER'], 'b.', markersize=1)
-			ax1.plot(p['mino'], p['E'], 'k.', markersize=2)
+#			ax2.plot(p['mino'], p['E'], 'k.', markersize=2)
 			ax2.plot(p['mino'], p['v4e'], 'g.', markersize=2)
 		line = dataFile.readline()
 		n += 1
-#        pyplot.legend(['E', 'Er', 'Eth', 'EC'], loc='best')
+#        pyplot.legend(['v4e', 'Er', 'Eth'], loc='best')
         try:
             pyplot.show()
         except AttributeError as e:

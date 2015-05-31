@@ -80,7 +80,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 					0.05246957188100069574521612,
 					0.44373380805019087955111365])
 	else:  # Wrong value for integrator order
-		raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
+            raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
@@ -102,16 +102,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.v4e = self.logError(1.0 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
-        sigma2 = self.r**2 + self.a2 * self.cth**2
-        return sigma2 / self.delta * r**2 + sigma2 * th**2 + \
-               self.sth2 / sigma2 * (self.a * t - (self.r**2 + self.a2) * ph)**2 - self.delta / sigma2 * (t - self.a * self.sth2 * ph)**2
+        return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
+               self.sth2 / self.sigma * (self.a * t - (self.r**2 + self.a2) * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
 
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
-	self.sigma = (self.r**2 + self.a2 * cos(self.th)**2)
+	self.sigma = self.r**2 + self.a2 * cos(self.th)**2
 	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
 	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
@@ -124,8 +123,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def update_t_phi (self, c):  # t and phi updates
         self.update_t_phi_Dot()
-        self.t += c * self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2)
-        self.ph += c * self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth2)
+        self.t += c * self.h * self.tDot
+        self.ph += c * self.h * self.phDot
 
     def qUp (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
