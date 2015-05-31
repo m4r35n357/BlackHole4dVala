@@ -94,11 +94,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         return 10.0 * log10(e if e >= self.nf else self.nf)
  
     def errors (self):  # Error analysis
-        e_r = self.error(self.vR, self.R)
-        e_th = self.error(self.vTh, self.THETA)
-        self.eR = self.logError(e_r)
-        self.eTh = self.logError(e_th)
-        self.e = self.logError(e_r + e_th)
+        self.eR = self.logError(self.error(self.vR, self.R))
+        self.eTh = self.logError(self.error(self.vTh, self.THETA))
         self.v4e = self.logError(1.0 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
@@ -159,8 +156,8 @@ def main ():  # Need to be inside a function to return . . .
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, bl.v4e, bl.e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.vR / bl.sigma, bl.vTh / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.9e, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
+                 % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.vR / bl.sigma, bl.vTh / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
 	    break
