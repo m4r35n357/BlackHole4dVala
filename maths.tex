@@ -110,6 +110,10 @@ Once the optimization has terminated the generation script then writes an initia
 
 The output of the simulator has been informally checked against a number of publically available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
+\subsection{. . . but are they REALLY geodesics?}
+
+Despite the high levels of accuracy which the symplectic integrator can achieve, there is no guarantee that the solutions are accurate geodesics.  To test this, we evaluate the four-velocity norm of the path by plugging the derivatives into the line element.
+
 \section{The programs}
 
 The sources for the programs \cite{m4r35n357} described here are publically available on GitHub, under a BSD licence.  These are part of a suite of very small scripts and programs which are intended to implement the methods in this article as concisely as possible.  There is a short README file in the root directory which gives basic instructions for running the simulations.

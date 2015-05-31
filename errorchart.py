@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from sys import argv
+from math import fabs, log10
 from matplotlib import pyplot
 from json import loads
 
@@ -15,9 +16,10 @@ def main():
 	ax1.set_ylabel('Radial and Latitudinal Error, dB', color='b')
         ax1.set_ylim(-180.0, 0.0)
 	ax2 = ax1.twinx()
-	ax2.set_ylabel('4-velocity', color='g')
+	ax2.set_ylabel('4-Velocity Norm Error', color='g')
         delta = 1.0e-6
-        ax2.set_ylim(1.0 - delta, 1.0 + delta)
+#        ax2.set_ylim(1.0 - delta, 1.0 + delta)
+        ax2.set_ylim(-180.0, 0.0)
 	n = 0
 	while line:
 		p = loads(line)
@@ -25,7 +27,7 @@ def main():
 			ax1.plot(p['mino'], p['ETh'], 'r.', markersize=1)
 			ax1.plot(p['mino'], p['ER'], 'b.', markersize=1)
 			ax1.plot(p['mino'], p['E'], 'k.', markersize=2)
-			ax2.plot(p['mino'], p['v4'], 'g.', markersize=2)
+			ax2.plot(p['mino'], 10.0 * log10(fabs(p['v4'] - 1) if fabs(p['v4'] - 1) >= 1.0e-18 else 1.0e-18), 'g.', markersize=2)
 		line = dataFile.readline()
 		n += 1
 #        pyplot.legend(['E', 'Er', 'Eth', 'EC'], loc='best')
