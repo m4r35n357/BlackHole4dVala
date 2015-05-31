@@ -87,6 +87,24 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def clamp (self, potential):
         return potential if potential > 0.0 else 0.0
 
+    def error (self, v, p):
+        return abs(v**2 - self.clamp(p)) / 2.0
+
+    def logError (self, e):
+        return 10.0 * log10(e if e >= self.nf else self.nf)
+ 
+    def errors (self):  # Error analysis
+        e_r = self.error(self.vR, self.R)
+        e_th = self.error(self.vTh, self.THETA)
+        self.eR = self.logError(e_r)
+        self.eTh = self.logError(e_th)
+        self.e = self.logError(e_r + e_th)
+
+    def le2 (self, t, r, th, ph):  # dot product, ds2
+        sigma2 = self.r**2 + self.a2 * self.cth**2
+        return sigma2 / self.delta * r**2 + sigma2 * th**2 + \
+               self.sth2 / sigma2 * (self.a * t - (self.r**2 + self.a2) * ph)**2 - self.delta / sigma2 * (t - self.a * self.sth2 * ph)**2
+
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)
         self.cth = cos(self.th)
@@ -98,20 +116,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
-    def le2 (self, t, r, th, ph):  # dot product, ds2
-        sigma2 = self.r**2 + self.a2 * self.cth**2
-        return sigma2 / self.delta * r**2 + sigma2 * th**2 + \
-               self.sth2 / sigma2 * (self.a * t - (self.r**2 + self.a2) * ph)**2 - \
-               self.delta / sigma2 * (t - self.a * self.sth2 * ph)**2
-
-    def errors (self):  # Error analysis
-        e_r = abs(self.vR**2 - self.clamp(self.R)) / 2.0
-        e_th = abs(self.vTh**2 - self.clamp(self.THETA)) / 2.0
-        self.eR = 10.0 * log10(e_r if e_r >= self.nf else self.nf)
-        self.eTh = 10.0 * log10(e_th if e_th >= self.nf else self.nf)
-        self.e = 10.0 * log10(e_r + e_th if e_r + e_th >= self.nf else self.nf)
-        self.eCum += e_r + e_th
-
     def update_t_phi_Dot (self):  # t and phi updates
         self.tDot = (self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2
         self.phDot = self.a * self.P1 / self.delta - self.aE + self.L / self.sth2
@@ -154,8 +158,8 @@ def main ():  # Need to be inside a function to return . . .
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
 	sigma = (bl.r**2 + bl.a2 * cos(bl.th)**2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "EC":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, -bl.le2(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, 10.0 * log10(bl.eCum if bl.eCum >= bl.nf else bl.nf), bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
+                 % (bl.mino, bl.tau, -bl.le2(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
