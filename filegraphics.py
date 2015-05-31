@@ -58,7 +58,7 @@ def main():
 		x.append(p['x'])
 		y.append(p['y'])
 		z.append(p['z'])
-		e.append(p['E'])
+		e.append(p['v4e'])
 		line = dataFile.readline()
 	# interpolate here
         try:

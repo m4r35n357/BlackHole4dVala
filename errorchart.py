@@ -27,7 +27,7 @@ def main():
 			ax1.plot(p['mino'], p['ETh'], 'r.', markersize=1)
 			ax1.plot(p['mino'], p['ER'], 'b.', markersize=1)
 			ax1.plot(p['mino'], p['E'], 'k.', markersize=2)
-			ax2.plot(p['mino'], 10.0 * log10(fabs(p['v4'] - 1) if fabs(p['v4'] - 1) >= 1.0e-18 else 1.0e-18), 'g.', markersize=2)
+			ax2.plot(p['mino'], p['v4e'], 'g.', markersize=2)
 		line = dataFile.readline()
 		n += 1
 #        pyplot.legend(['E', 'Er', 'Eth', 'EC'], loc='best')

@@ -99,6 +99,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.eR = self.logError(e_r)
         self.eTh = self.logError(e_th)
         self.e = self.logError(e_r + e_th)
+        self.v4e = self.logError(1.0 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
         sigma2 = self.r**2 + self.a2 * self.cth**2
@@ -110,6 +111,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
 	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
+	self.sigma = (self.r**2 + self.a2 * cos(self.th)**2)
 	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
 	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
@@ -158,14 +160,13 @@ def main ():  # Need to be inside a function to return . . .
     while True:
         bl.errors()
         ra = sqrt(bl.r**2 + bl.a2)
-	sigma = (bl.r**2 + bl.a2 * cos(bl.th)**2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, -bl.le2(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
+                 % (bl.mino, bl.tau, bl.v4e, bl.e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.vR / bl.sigma, bl.vTh / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
 	    break
         bl.mino += bl.h
-        bl.tau += bl.h * sigma
+        bl.tau += bl.h * bl.sigma
 
 if __name__ == "__main__":
     main()
