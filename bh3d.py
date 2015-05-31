@@ -39,7 +39,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.time = simtime
     	self.h = timestep
         self.T = abs(simtime)
-        self.t = self.ph = self.mino = self.tau = self.eCum = 0.0
+        self.t = self.ph = self.mino = self.tau = 0.0
         self.nf = 1.0e-18
 	if order == 2:  # Second order
 		self.coeff = array('d', [1.0])
@@ -120,15 +120,16 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.tDot = (self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2
         self.phDot = self.a * self.P1 / self.delta - self.aE + self.L / self.sth2
 
-    def update_t_phi (self):  # t and phi updates
+    def update_t_phi (self, c):  # t and phi updates
         self.update_t_phi_Dot()
-        self.t += self.h * self.tDot
-        self.ph += self.h * self.phDot
+        self.t += c * self.h * ((self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2)
+        self.ph += c * self.h * (self.a * self.P1 / self.delta - self.aE + self.L / self.sth2)
 
     def qUp (self, c):  # r and theta updates
         self.r += c * self.h * self.vR
         self.th += c * self.h * self.vTh
         self.updatePotentials()
+        self.update_t_phi(c)
 
     def qDotUp (self, c):  # Velocity updates
         self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu2 * self.r * self.delta)
@@ -160,7 +161,6 @@ def main ():  # Need to be inside a function to return . . .
 	sigma = (bl.r**2 + bl.a2 * cos(bl.th)**2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4":%.9e, "E":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
                  % (bl.mino, bl.tau, -bl.le2(bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma), bl.e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / sigma, bl.vR / sigma, bl.vTh / sigma, bl.phDot / sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
-        bl.update_t_phi()  # Euler's method
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
 	    break

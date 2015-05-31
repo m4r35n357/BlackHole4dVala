@@ -16,7 +16,8 @@ def main():
         ax1.set_ylim(-180.0, 0.0)
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('4-velocity', color='g')
-        #ax2.set_ylim(-180.0, 0.0)
+        delta = 1.0e-6
+        ax2.set_ylim(1.0 - delta, 1.0 + delta)
 	n = 0
 	while line:
 		p = loads(line)
