@@ -1,24 +1,34 @@
 \documentclass[11pt]{article}
 %Gummi|063|=)
-\title{\textbf{Simulating Kerr Geodesics}}
-\author{Ian Smith}
-\date{}
+\usepackage{datetime}
 \usepackage{mathtools}
 \usepackage{listings}
+\usepackage{graphicx}
+\title{\textbf{Simulating Kerr Geodesics}}
+\author{Ian Smith}
+\date{June 2015}
+\graphicspath{ {images/} }
 \begin{document}
 
 \maketitle
 
 \abstract
-A simple numerical method is presented aimed at generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the problem of generating a variety of usable initial conditions for the simulator.  The source code for the suite of programs is publically available under a BSD licence.
+A simple and accurate numerical method is presented aimed at generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the problem of generating a variety of usable initial conditions for the simulator.  Sources of error are quantified and monitored as a matter of course.  The source code for the suite of programs is publically available under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
+The starting point is the Kerr line element expressed in terms of the commonly used Boyer-Lindquist coordinates.
+
+\begin{align*}
+d s^2 &= \frac{ \sin^2 \theta } {r^2 + a^2 \cos^2 \theta} (a dt - (r^2 + a^2)d \phi )^2 + \frac{ r^2 + a^2 \cos^2 \theta } {(r^2 - 2Mr  + a^2)} d r^2 \\
+&+ (r^2 + a^2 \cos^2 \theta) d \theta^2 + \frac{ (r^2 - 2Mr  + a^2) } {r^2 + a^2 \cos^2 \theta} (dt - a \sin^2 \theta d \phi )^2
+\end{align*}
+
 The geodesic equations for the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon crossing scenarios because in these cases the $t$ variable becomes "unresponsive" near the outer horizon and slows the simulation to a near standstill without ever getting there.
 
-Rather than attempting to formulate and solve these geodesic equations, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an integration variable here, these equations do not grind to a halt at the horizon.
+Rather than attempting to formulate and solve these geodesic equations directly, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an integration variable here, these equations do not grind to a halt at the horizon.
 
-The approach is so straighforward that the complete simulator script consists of about a hundred lines of Python code \cite{m4r35n357}.
+The approach is so straightforward that the complete simulator script consists of just over a hundred lines of Python code \cite{m4r35n357}.
 
 \subsection {Equations of motion}
 
@@ -88,31 +98,42 @@ These "orbits" are not the focus of this article, but are easily specified by se
 
 Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach; forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
 
+A typical invocation of tthe suite of progrms might be:
+\begin{verbatim}
+./genparam.py 3.0 12.0 0.3 1.0 1.0 >test 2>potential; ./rungraphics test
+\end{verbatim}
+which generates an orbit bound between 3 and 12 radial units and with a minimum latitude of 0.3 radians (starting from the "north pole" of course).
 Once the optimization has terminated the generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$ as well as optimizer status) in JSON format for use as input to the simulator.  Here is an example:
-
 \begin{verbatim}
 { "M" : 1.0,
-  "a" : -1.0,
+  "a" : 1.0,
   "mu" : 1.0,
-  "E" : 0.965076383468,
-  "Lz" : 3.46129127476,
-  "C" : 6.34780511822,
-  "r" : 12.0,
+  "E" : 0.937868402897,
+  "Lz" : 2.16351904692,
+  "C" : 2.51243192834,
+  "r" : 7.5,
   "theta" : 1.57079632679,
   "time" : 20.0,
-  "step" : 0.00001,
-  "integratorOrder" : 8,
-  "error" : 7.682937237e-24,
+  "step" : 0.001,
+  "integratorOrder" : 2,
+  "error" : 3.106239408e-24,
   "success" : "True",
   "message" : "Optimization terminated successfully."
 }
 \end{verbatim}
-
+The simulator takes this input, calculates the geodesic and writes its output data in JSON format (for the default timestep the output file is approximately 6.7MB).  A static image of the corresponding geodesic is shown below.  VPython allows the user to zoom and rotate the view, and watch it evolve.
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{Screenshot}
+\end{figure}
 The output of the simulator has been informally checked against a number of publically available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
 \subsection{. . . but are they REALLY geodesics?}
 
-Despite the high levels of accuracy which the symplectic integrator can achieve, there is no guarantee that the solutions are accurate geodesics.  To test this, we evaluate the four-velocity norm of the path by plugging the derivatives into the line element.
+Despite the high level of accuracy which the symplectic integrator can achieve for $r$ and $\theta$, this provides no guarantee that the complete solution is an accurate geodesic.  To verify this, we can evaluate the four-velocity norm of the path by plugging all the coordinate derivatives into the line element.  This error data is part of the JSON output of the simulation.  The figure below shows the errors in the simulation: blue is the radial error, red the latitudinal, and green the (deviation from) four-velocity norm, all plotted against a false dB scale (where 0dB = 1.0).
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{figure_1}
+\end{figure}
+This type of error plot makes it easy to see the effects on accuracy of changing the timestep and integrator order; the default values of 2nd order integration and a fairly course timestep are intended to encourage experimentation.
 
 \section{The programs}
 
