@@ -18,12 +18,12 @@ A simple and accurate numerical method is presented aimed at generating 4D geode
 \section{Bound Orbits in the Kerr Spacetime}
 
 The starting point is the Kerr line element expressed in terms of the commonly used Boyer-Lindquist coordinates.
-
-\begin{align*}
+\begin{equation}
+\begin{aligned}
 d s^2 &= \frac{ \sin^2 \theta } {r^2 + a^2 \cos^2 \theta} (a dt - (r^2 + a^2)d \phi )^2 + \frac{ r^2 + a^2 \cos^2 \theta } {(r^2 - 2Mr  + a^2)} d r^2 \\
 &+ (r^2 + a^2 \cos^2 \theta) d \theta^2 + \frac{ (r^2 - 2Mr  + a^2) } {r^2 + a^2 \cos^2 \theta} (dt - a \sin^2 \theta d \phi )^2
-\end{align*}
-
+\end{aligned}
+\end{equation}
 The geodesic equations for the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon crossing scenarios because in these cases the $t$ variable becomes "unresponsive" near the outer horizon and slows the simulation to a near standstill without ever getting there.
 
 Rather than attempting to formulate and solve these geodesic equations directly, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an integration variable here, these equations do not grind to a halt at the horizon.
@@ -46,12 +46,18 @@ d \lambda = \frac {d \tau} {(r^2 + a^2 \cos^2\theta)}
 These are essentially equations 2 and 3 from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations 6-9 below.
 
 Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent.  In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
-
 \begin{align}
-R(r) &= \left((r^2 + a^2) E - aL \right)^2 - (r^2 - 2Mr  + a^2) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right) \\
-\frac{d R(r)}{d r} &= 4rE \left((r^2 + a^2)E - aL \right) - (2r - 2M) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right) - 2\mu^2r(r^2 - 2Mr  + a^2) \\
-\Theta (\theta) &= Q - {\cos^2 \theta } \left( \frac{L^2}{\sin^2 \theta } + a^2( \mu^2 - E^2) \right) \\
-\frac{d \Theta (\theta)}{d \theta} &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta }
+   \begin{split}
+    R(r) &= \left((r^2 + a^2) E - aL \right)^2 \label{eq:2}\\
+    &- (r^2 - 2Mr  + a^2) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right)
+   \end{split}\\
+   \begin{split}
+    \frac{d R(r)}{d r} &= 4rE \left((r^2 + a^2)E - aL \right) \label{eq:2}\\
+    &- (2r - 2M) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right)\\
+    &- 2\mu^2r(r^2 - 2Mr  + a^2)
+   \end{split}\\
+  \Theta (\theta) &= Q - {\cos^2 \theta } \left( \frac{L^2}{\sin^2 \theta } + a^2( \mu^2 - E^2) \right) \label{eq:3}\\
+  \frac{d \Theta (\theta)}{d \theta} &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta } \label{eq:4}
 \end{align}
 
 The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
