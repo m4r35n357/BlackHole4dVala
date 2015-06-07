@@ -68,7 +68,7 @@ The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler 
 
 This expresison is used to quantify the integration errors, whilst the two differentiated potentials in equations 7 and 9 are used for velocity updates in the integrator routines.
 
-The simulator uses composition \cite{hairer} to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.
+The simulator uses composition \cite{hairer} to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.  The Euler equations are actually processed alongside the composed Stormer-Verlet updates, increasing the order and accuracy for $t$ and $\phi$.
 
 \section{Finding initial conditions}
 
@@ -98,13 +98,13 @@ R(r_2, E, L, Q) &= 0 \\
 
 \subsection{Plummeting (an aside)}
 
-These "orbits" are not the focus of this article, but are easily specified by setting $L = 0$ after generating a spherical orbit as in equations 11-13 above.
+These "orbits" are not the focus of this article, but are easily specified by setting $L < 1.0$ after generating a spherical orbit as in equations 11-13 above.
 
 \subsection{Finding the roots}
 
-Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach; forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from Scipy converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
+Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach; forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from the Scipy package converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
 
-A typical invocation of tthe suite of progrms might be:
+A typical invocation of the suite of programs might be:
 \begin{verbatim}
 ./genparam.py 3.0 12.0 0.3 1.0 1.0 >test 2>potential; ./rungraphics test
 \end{verbatim}
@@ -133,13 +133,15 @@ The simulator takes this input, calculates the geodesic and writes its output da
 \end{figure}
 The output of the simulator has been informally checked against a number of publically available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
+One important point to note about the simulator is that it is not set to terminate at any particular radius, only at the end of the specified simulation period.  This means that a particle can enter the black hole and emerge, without ever encountering the singularity or the "centre" of the BH.  This is not meant to imply anything physical; it is merely the nature of the mathematics of the Kerr spacetime.
+
 \subsection{. . . but are they REALLY geodesics?}
 
-Despite the high level of accuracy which the symplectic integrator can achieve for $r$ and $\theta$, this provides no guarantee that the complete solution is an accurate geodesic.  To verify this, we can evaluate the four-velocity norm of the path by plugging all the coordinate derivatives into the line element.  This error data is part of the JSON output of the simulation.  The figure below shows the errors in the simulation: blue is the radial error, red the latitudinal, and green the (deviation from) four-velocity norm, all plotted against a false dB scale (where 0dB = 1.0).
+Despite the high level of accuracy which the symplectic integrator can achieve for $r$ and $\theta$, this provides no guarantee that the complete solution is an accurate geodesic.  To verify this, we can evaluate the four-velocity norm of the path by plugging all the coordinate derivatives into the line element.  This error data is part of the JSON output of the simulation.  The figure below shows the error plot for the simulation above: blue is the radial error, red the latitudinal, and green the (deviation from) four-velocity norm, all plotted against a false dB scale (where 0dB = 1.0).
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{figure_1}
 \end{figure}
-This type of error plot makes it easy to see the effects on accuracy of changing the timestep and integrator order; the default values of 2nd order integration and a fairly course timestep are intended to encourage experimentation.
+This type of error plot makes it easy to see the effects on accuracy of changing the timestep and integrator order; the default values of 2nd order integration and a fairly course timestep are set that way to encourage experimentation.
 
 \section{The programs}
 
