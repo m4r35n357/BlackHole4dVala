@@ -13,7 +13,7 @@
 \maketitle
 
 \abstract
-A simple and accurate numerical method is presented aimed at generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the problem of generating a variety of usable initial conditions for the simulator.  Sources of error are quantified and monitored as a matter of course.  The source code for the suite of programs is publically available under a BSD licence.
+A simple and accurate numerical method is presented aimed at generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the problem of generating a variety of usable initial conditions for the simulator.  Sources of error are quantified and monitored as a matter of course.  The source code for the suite of programs is publicly available under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
@@ -24,7 +24,7 @@ d s^2 &= \frac{ \sin^2 \theta } {r^2 + a^2 \cos^2 \theta} (a dt - (r^2 + a^2)d \
 &+ (r^2 + a^2 \cos^2 \theta) d \theta^2 + \frac{ (r^2 - 2Mr  + a^2) } {r^2 + a^2 \cos^2 \theta} (dt - a \sin^2 \theta d \phi )^2
 \end{aligned}
 \end{equation}
-The geodesic equations for the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon crossing scenarios because in these cases the $t$ variable becomes "unresponsive" near the outer horizon and slows the simulation to a near standstill without ever getting there.
+The geodesic equations corresponding to the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon approaching or crossing scenarios because in these cases the $t$ variable becomes "unresponsive" near the outer horizon and slows the simulation to a near standstill without ever getting there.
 
 Rather than attempting to formulate and solve these geodesic equations directly, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an integration variable here, these equations do not grind to a halt at the horizon.
 
@@ -131,7 +131,7 @@ The simulator takes this input, calculates the geodesic and writes its output da
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{Screenshot}
 \end{figure}
-The output of the simulator has been informally checked against a number of publically available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
+The output of the simulator has been informally checked against a number of publicly available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
 One important point to note about the simulator is that it is not set to terminate at any particular radius, only at the end of the specified simulation period.  This means that a particle can enter the black hole and emerge, without ever encountering the singularity or the "centre" of the BH.  This is not meant to imply anything physical; it is merely the nature of the mathematics of the Kerr spacetime.
 
@@ -145,7 +145,7 @@ This type of error plot makes it easy to see the effects on accuracy of changing
 
 \section{The programs}
 
-The sources for the programs \cite{m4r35n357} described here are publically available on GitHub, under a BSD licence.  These are part of a suite of very small scripts and programs which are intended to implement the methods in this article as concisely as possible.  There is a short README file in the root directory which gives basic instructions for running the simulations.
+The sources for the programs \cite{m4r35n357} described here are publicly available on GitHub, under a BSD licence.  These are part of a suite of very small scripts and programs which are intended to implement the methods in this article as concisely as possible.  There is a short README file in the root directory which gives basic instructions for running the simulations.
 
 \begin{thebibliography}{1}
 \bibitem{wilkins} Wilkins, D.C., "Bound Geodesics in the Kerr Metric"
