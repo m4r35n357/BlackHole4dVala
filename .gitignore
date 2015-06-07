@@ -12,4 +12,8 @@ potential
 kerr-image
 *.ppm
 *.mp4
+*.pdf
+*.aux
+*.log
+plot.py
 
