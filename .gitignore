@@ -1,19 +1,12 @@
 # comment
 *.zip
-*.pyc
-.spyderproject
-.idea
 *~
-data
-progress
-profdata
 test
 potential
 kerr-image
-*.ppm
-*.mp4
 *.pdf
 *.aux
 *.log
 plot.py
+RaytracingOutput
 
