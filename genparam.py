@@ -14,7 +14,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from sys import argv, stdout, stderr, exit
-from math import fabs, sin, cos, pi, sqrt
+from math import fabs, sin, cos, pi, sqrt, copysign
 import numpy as np
 from scipy.optimize import minimize
 
@@ -26,12 +26,16 @@ class InitialConditions(object):
 	self.r0 = rMin
 	self.r1 = rMax
 	self.th0 = pi * (1.0 - thetaMin) 
-        self.a = - a  # convention
+        self.a = a  # convention
         self.a2 = self.a**2
 	self.factorL = factorL
 	self.integrator = 2
         self.duration = 20.0
         self.timestep = 0.001
+        if a > 0:
+            self.ic = np.array([1.0, copysign(5.0, a), 0.0])
+        else:
+            self.ic = np.array([1.0, - copysign(5.0, a), 0.0])
 
     def delta (self, r):
         return r**2 - 2.0 * self.M * r + self.a2
@@ -64,8 +68,7 @@ class InitialConditions(object):
                (self.THETA(self.th0, E, L, Q))**2
 
     def solve (self, function):
-        res = minimize(function, np.array([0.0, 0.0, 0.0]), method='Nelder-Mead', \
-                       options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
+        res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
         self.fun = res.fun
         self.message = res.message
         self.success = res.success
