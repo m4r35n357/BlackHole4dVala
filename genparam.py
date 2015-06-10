@@ -26,7 +26,7 @@ class InitialConditions(object):
 	self.r0 = rMin
 	self.r1 = rMax
 	self.th0 = pi * (1.0 - thetaMin) 
-        self.a = a  # convention
+        self.a = a
         self.a2 = self.a**2
 	self.factorL = factorL
 	self.integrator = 2
@@ -57,7 +57,7 @@ class InitialConditions(object):
                (4.0 * self.r0 * E * self.PA(self.r0, E, L) - \
                 2.0 * (self.r0 - self.M) * self.PB(self.r0, E, L, Q) - \
                 2.0 * self.mu2 * self.r0 * self.delta(self.r0))**2 + \
-               (self.THETA(self.th0, E, L, Q))**2
+                self.THETA(self.th0, E, L, Q)**2
 
     def variableR (self, x):
         E = x[0]
@@ -65,7 +65,7 @@ class InitialConditions(object):
         Q = x[2]
         return (self.PA(self.r0, E, L)**2 - self.delta(self.r0) * self.PB(self.r0, E, L, Q))**2 + \
                (self.PA(self.r1, E, L)**2 - self.delta(self.r1) * self.PB(self.r1, E, L, Q))**2 + \
-               (self.THETA(self.th0, E, L, Q))**2
+                self.THETA(self.th0, E, L, Q)**2
 
     def solve (self, function):
         res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
@@ -97,10 +97,10 @@ def main ():
         return
     ic.L *= ic.factorL
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
-    print >> stdout, "  \"a\" : " + str(- ic.a) + ","  # convention
+    print >> stdout, "  \"a\" : " + str(ic.a) + ","
     print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
     print >> stdout, "  \"E\" : " + str(ic.E) + ","
-    print >> stdout, "  \"Lz\" : " + str(- ic.L) + ","  # convention
+    print >> stdout, "  \"Lz\" : " + str(ic.L) + ","
     print >> stdout, "  \"C\" : " + str(ic.Q) + ","
     print >> stdout, "  \"r\" : " + str(rValue) + ","
     print >> stdout, "  \"theta\" : " + str(thValue) + ","
