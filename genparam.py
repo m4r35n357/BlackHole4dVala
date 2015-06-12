@@ -32,10 +32,7 @@ class InitialConditions(object):
 	self.integrator = 2
         self.duration = 20.0
         self.timestep = 0.001
-        if a > 0:
-            self.ic = np.array([1.0, copysign(5.0, a), 0.0])
-        else:
-            self.ic = np.array([1.0, - copysign(5.0, a), 0.0])
+        self.ic = np.array([1.0, copysign(5.0, a), 0.0]) if a > 0.0 else np.array([1.0, - copysign(5.0, a), 0.0])
 
     def delta (self, r):
         return r**2 - 2.0 * self.M * r + self.a2
@@ -113,7 +110,7 @@ def main ():
     print >> stdout, "}"
     rscale = rValue + 5.0
     thscale = 0.5 * pi
-    nPoints = 1000 + 1
+    nPoints = 1001
     for x in range(0, nPoints):
         scaledX = 1.0 * x / nPoints
         print >> stderr, "{ \"x\":" + str(scaledX * rscale) \
