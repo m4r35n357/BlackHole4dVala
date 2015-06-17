@@ -100,22 +100,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
         return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
-               self.sth2 / self.sigma * (self.a * t - (self.r**2 + self.a2) * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
+               self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
 
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
-	self.delta = self.r**2 - 2.0 * self.r * self.m + self.a2
+        self.ra2 = self.r**2 + self.a2
+	self.delta = self.ra2 - 2.0 * self.r * self.m
 	self.sigma = self.r**2 + self.a2 * self.cth**2
-	self.P1 = (self.r**2 + self.a2) * self.E - self.aL
+	self.P1 = self.ra2 * self.E - self.aL
 	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
 	self.R = self.P1**2 - self.delta * self.P2
 	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
     def update_t_phi_Dot (self):  # t and phi updates
-        self.tDot = (self.r**2 + self.a2) * self.P1 / self.delta + self.aL - self.a2E * self.sth2
+        self.tDot = self.ra2 * self.P1 / self.delta + self.aL - self.a2E * self.sth2
         self.phDot = self.a * self.P1 / self.delta - self.aE + self.L / self.sth2
 
     def update_t_phi (self, c):  # t and phi updates
@@ -155,7 +156,7 @@ def main ():  # Need to be inside a function to return . . .
     bl.update_t_phi_Dot()
     while True:
         bl.errors()
-        ra = sqrt(bl.r**2 + bl.a2)
+        ra = sqrt(bl.ra2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
                  % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.vR / bl.sigma, bl.vTh / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.solve()  # update r and theta with symplectic integrator
