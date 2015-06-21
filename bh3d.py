@@ -77,9 +77,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        tmp = self.E2 - 1.0
-        self.c = array('d', [tmp, 2.0, self.a2 * tmp - self.L2 - self.Q, 2.0 * ((self.a * self.E - self.L)**2 + self.Q), - self.a2 * self.Q])
-        self.a2_E2 = - self.a2 * self.c[0]
+        E2_1 = self.E2 - 1.0
+        self.c = array('d', [E2_1, 2.0, self.a2 * E2_1 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
+        self.a2xE2_1 = - self.a2 * E2_1
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
@@ -110,7 +110,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	self.sigma = self.r**2 + self.a2 * self.cth**2
 	self.P = self.ra2 * self.E - self.aL
         self.R = (((self.c[0] * self.r + self.c[1]) * self.r + self.c[2]) * self.r + self.c[3]) * self.r + self.c[4]
-	self.TH = self.a2_E2 + (self.L / self.sth)**2
+	self.TH = self.a2xE2_1 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
     def update_t_phi_Dot (self):  # t and phi updates

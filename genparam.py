@@ -37,8 +37,8 @@ class InitialConditions(object):
         self.ic = np.array([1.0, 0.0, 5.0]) if thetaMin < 0.01 else self.ic
 
     def coefficients (self, E, L, Q):
-        tmp = E**2 - 1.0
-        return array('d', [tmp, 2.0, self.a2 * tmp - L**2 - Q, 2.0 * ((self.a * E - L)**2 + Q), - self.a2 * Q])
+        E2_1 = E**2 - 1.0
+        return array('d', [E2_1, 2.0, self.a2 * E2_1 - L**2 - Q, 2.0 * ((self.a * E - L)**2 + Q), - self.a2 * Q])
 
     def R (self, r, c):
         return (((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]
