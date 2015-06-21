@@ -19,11 +19,9 @@ from json import loads
 from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
-    def __init__(self, mass, spin, pmass, energy, momentum, carter, r0, theta0, simtime, timestep, order):
-    	self.m = 1.0
+    def __init__(self, bhMass, spin, pMass, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
     	self.a = spin
     	self.a2 = self.a**2
-        self.mu2 = pmass**2
     	self.E = energy
         self.E2 = self.E**2
         self.aE = self.a * self.E
@@ -32,14 +30,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.L2 = self.L**2
         self.aL = self.a * self.L
     	self.Q = carter
-        self.c1 = self.E2 - self.mu2
-        self.c2 = 2.0 * self.mu2 * self.m
+        self.c1 = self.E2 - 1.0
+        self.c2 = 2.0
         self.c3 = self.a2 * self.c1 - self.L2 - self.Q
-        self.c4 = 2.0 * self.m * ((self.a * self.E - self.L)**2 + self.Q)
+        self.c4 = 2.0 * ((self.a * self.E - self.L)**2 + self.Q)
         self.c5 = - self.a2 * self.Q
-        self.a2mu2_E2 = - self.a2 * self.c1
+        self.a2_E2 = - self.a2 * self.c1
     	self.r = r0
-    	self.th = theta0
+    	self.th = thetaMin
     	self.time = simtime
     	self.h = timestep
         self.T = abs(simtime)
@@ -110,15 +108,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
-
         self.ra2 = self.r**2 + self.a2
-	self.delta = self.ra2 - 2.0 * self.r * self.m
+	self.delta = (self.r - 2.0) * self.r + self.a2
 	self.sigma = self.r**2 + self.a2 * self.cth**2
-
 	self.P = self.ra2 * self.E - self.aL
-
         self.R = (((self.c1 * self.r + self.c2) * self.r + self.c3) * self.r + self.c4) * self.r + self.c5
-	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
+	self.TH = self.a2_E2 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
     def update_t_phi_Dot (self):  # t and phi updates
