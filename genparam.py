@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 '''
 from sys import argv, stdout, stderr, exit
 from math import fabs, sin, cos, pi, sqrt, copysign
+from array import array
 import numpy as np
 from scipy.optimize import minimize
 
@@ -35,14 +36,15 @@ class InitialConditions(object):
         self.ic = np.array([1.0, copysign(5.0, a), 0.0]) if a > 0.0 else np.array([1.0, - copysign(5.0, a), 0.0])
         self.ic = np.array([1.0, 0.0, 5.0]) if thetaMin < 0.01 else self.ic
 
-    def delta (self, r):
-        return r**2 - 2.0 * self.M * r + self.a2
+    def coefficients (self, E, L, Q):
+        tmp = E**2 - 1.0
+        return array('d', [tmp, 2.0, self.a2 * tmp - L**2 - Q, 2.0 * ((self.a * E - L)**2 + Q), - self.a2 * Q])
 
-    def PA (self, r, E, L):
-        return (r**2 + self.a2) * E - self.a * L
+    def R (self, r, c):
+        return (((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]
 
-    def PB (self, r, E, L, Q):
-        return Q + (L - self.a * E)**2 + self.mu2 * r**2
+    def dR (self, r, c):
+        return ((4.0 * c[0] * r + 3.0 * c[1]) * r + 2.0 * c[2]) * r + c[3]
 
     def THETA (self, th, E, L, Q):
         return Q - cos(th)**2 * (self.a2 * (self.mu2 - E**2) + (L / sin(th))**2)
@@ -51,19 +53,15 @@ class InitialConditions(object):
         E = x[0]
         L = x[1]
         Q = x[2]
-        return (self.PA(self.r0, E, L)**2 - self.delta(self.r0) * self.PB(self.r0, E, L, Q))**2 + \
-               (4.0 * self.r0 * E * self.PA(self.r0, E, L) - \
-                2.0 * (self.r0 - self.M) * self.PB(self.r0, E, L, Q) - \
-                2.0 * self.mu2 * self.r0 * self.delta(self.r0))**2 + \
-                self.THETA(self.th0, E, L, Q)**2
+        c = self.coefficients(E, L, Q)
+        return self.R(self.r0, c)**2 + self.dR(self.r0, c)**2 + self.THETA(self.th0, E, L, Q)**2
 
     def variableR (self, x):
         E = x[0]
         L = x[1]
         Q = x[2]
-        return (self.PA(self.r0, E, L)**2 - self.delta(self.r0) * self.PB(self.r0, E, L, Q))**2 + \
-               (self.PA(self.r1, E, L)**2 - self.delta(self.r1) * self.PB(self.r1, E, L, Q))**2 + \
-                self.THETA(self.th0, E, L, Q)**2
+        c = self.coefficients(E, L, Q)
+        return self.R(self.r0, c)**2 + self.R(self.r1, c)**2 + self.THETA(self.th0, E, L, Q)**2
 
     def solve (self, function):
         res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
@@ -109,13 +107,14 @@ def main ():
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
+    c = ic.coefficients(ic.E, ic.L, ic.Q)
     rscale = rValue + 5.0
     thscale = 0.5 * pi
     nPoints = 1001
     for x in range(0, nPoints):
         scaledX = 1.0 * x / nPoints
         print >> stderr, "{ \"x\":" + str(scaledX * rscale) \
-                       + ", \"R\":" + str(ic.PA(scaledX * rscale, ic.E, ic.L)**2 - ic.delta(scaledX * rscale) * ic.PB(scaledX * rscale, ic.E, ic.L, ic.Q)) \
+                       + ", \"R\":" + str(ic.R(scaledX * rscale, c)) \
                        + ", \"THETA\":" + str(ic.THETA(0.5 * pi + scaledX * thscale, ic.E, ic.L, ic.Q)) + " }"
     if not ic.success or ic.fun > 1.0e-6:
         exit(-1)

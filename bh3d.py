@@ -21,28 +21,13 @@ from array import array
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
     	self.a = spin
-    	self.a2 = self.a**2
     	self.E = energy
-        self.E2 = self.E**2
-        self.aE = self.a * self.E
-        self.a2E = self.a2 * self.E
     	self.L = momentum
-        self.L2 = self.L**2
-        self.aL = self.a * self.L
     	self.Q = carter
-        self.c1 = self.E2 - 1.0
-        self.c2 = 2.0
-        self.c3 = self.a2 * self.c1 - self.L2 - self.Q
-        self.c4 = 2.0 * ((self.a * self.E - self.L)**2 + self.Q)
-        self.c5 = - self.a2 * self.Q
-        self.a2_E2 = - self.a2 * self.c1
     	self.r = r0
     	self.th = thetaMin
     	self.time = simtime
     	self.h = timestep
-        self.T = abs(simtime)
-        self.t = self.ph = self.mino = self.tau = 0.0
-        self.nf = 1.0e-18
 	if order == 2:  # Second order
 		self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
@@ -83,21 +68,36 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 					0.44373380805019087955111365])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
+        self.T = abs(self.time)
+        self.t = self.ph = self.mino = self.tau = 0.0
+        self.nf = 1.0e-18
+    	self.a2 = self.a**2
+        self.E2 = self.E**2
+        self.aE = self.a * self.E
+        self.a2E = self.a2 * self.E
+        self.L2 = self.L**2
+        self.aL = self.a * self.L
+        self.c1 = self.E2 - 1.0
+        self.c2 = 2.0
+        self.c3 = self.a2 * self.c1 - self.L2 - self.Q
+        self.c4 = 2.0 * ((self.a * self.E - self.L)**2 + self.Q)
+        self.c5 = - self.a2 * self.Q
+        self.a2_E2 = - self.a2 * self.c1
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
-    def clamp (self, potential):
-        return potential if potential > 0.0 else 0.0
+    def clamp (self, quantity):
+        return quantity if quantity > 0.0 else 0.0
 
-    def error (self, v, p):
-        return abs(v**2 - self.clamp(p)) / 2.0
+    def potentialError (self, velocity, potential):
+        return (velocity**2 - potential) / 2.0
 
     def logError (self, e):
         return 10.0 * log10(e if e >= self.nf else self.nf)
  
     def errors (self):  # Error analysis
-        self.eR = self.logError(self.error(self.vR, self.R))
-        self.eTh = self.logError(self.error(self.vTh, self.THETA))
+        self.eR = self.logError(self.potentialError(self.vR, self.R))
+        self.eTh = self.logError(self.potentialError(self.vTh, self.THETA))
         self.v4e = self.logError(1.0 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
@@ -136,7 +136,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def solve (self):  # Generalized Symplectic Integrator
-        def sv (y):  # Compose higher orders from this symle2al second-order symplectic base
+        def sv (y):  # Compose higher orders from this second-order symplectic base
 	    self.qUp(0.5 * y)
 	    self.qDotUp(y)
 	    self.qUp(0.5 * y)
