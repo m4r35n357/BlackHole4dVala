@@ -28,12 +28,16 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.E2 = self.E**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
-        self.a2mu2_E2 = self.a2 * (self.mu2 - self.E2)
     	self.L = momentum
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        self.L_aE2 = (self.L - self.aE)**2
     	self.Q = carter
+        self.c1 = self.E2 - self.mu2
+        self.c2 = 2.0 * self.mu2 * self.m
+        self.c3 = self.a2 * self.c1 - self.L2 - self.Q
+        self.c4 = 2.0 * self.m * ((self.a * self.E - self.L)**2 + self.Q)
+        self.c5 = - self.a2 * self.Q
+        self.a2mu2_E2 = - self.a2 * self.c1
     	self.r = r0
     	self.th = theta0
     	self.time = simtime
@@ -106,18 +110,20 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
+
         self.ra2 = self.r**2 + self.a2
 	self.delta = self.ra2 - 2.0 * self.r * self.m
 	self.sigma = self.r**2 + self.a2 * self.cth**2
-	self.P1 = self.ra2 * self.E - self.aL
-	self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
-	self.R = self.P1**2 - self.delta * self.P2
+
+	self.P = self.ra2 * self.E - self.aL
+
+        self.R = (((self.c1 * self.r + self.c2) * self.r + self.c3) * self.r + self.c4) * self.r + self.c5
 	self.TH = self.a2mu2_E2 + (self.L / self.sth)**2
 	self.THETA = self.Q - self.cth**2 * self.TH
 	
     def update_t_phi_Dot (self):  # t and phi updates
-        self.tDot = self.ra2 * self.P1 / self.delta + self.aL - self.a2E * self.sth2
-        self.phDot = self.a * self.P1 / self.delta - self.aE + self.L / self.sth2
+        self.tDot = self.ra2 * self.P / self.delta + self.aL - self.a2E * self.sth2
+        self.phDot = self.a * self.P / self.delta - self.aE + self.L / self.sth2
 
     def update_t_phi (self, c):  # t and phi updates
         self.update_t_phi_Dot()
@@ -131,7 +137,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.update_t_phi(c)
 
     def qDotUp (self, c):  # Velocity updates
-        self.vR += c * self.h * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - self.m) - self.mu2 * self.r * self.delta)
+        self.vR += c * self.h * (((4.0 * self.c1 * self.r + 3.0 * self.c2) * self.r + 2.0 * self.c3) * self.r + self.c4) * 0.5
         self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def solve (self):  # Generalized Symplectic Integrator
