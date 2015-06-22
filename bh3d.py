@@ -19,9 +19,9 @@ from json import loads
 from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
-    def __init__(self, bhMass, spin, pMass, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
+    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
     	self.a = spin
-        self.mu2 = pMass
+        self.mu2 = pMass2
     	self.E = energy
     	self.L = momentum
     	self.Q = carter
@@ -78,9 +78,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        E2_1 = self.E2 - self.mu2
-        self.c = array('d', [E2_1, 2.0 * self.mu2, self.a2 * E2_1 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
-        self.a2xE2_1 = - self.a2 * E2_1
+        E2_mu2 = self.E2 - self.mu2
+        self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
+        self.a2xE2_mu2 = - self.a2 * E2_mu2
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
@@ -106,13 +106,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
+        cth2 = self.cth**2
         self.ra2 = self.r**2 + self.a2
 	self.delta = (self.r - 2.0) * self.r + self.a2
-	self.sigma = self.r**2 + self.a2 * self.cth**2
+	self.sigma = self.r**2 + self.a2 * cth2
 	self.P = self.ra2 * self.E - self.aL
         self.R = (((self.c[0] * self.r + self.c[1]) * self.r + self.c[2]) * self.r + self.c[3]) * self.r + self.c[4]
-	self.TH = self.a2xE2_1 + (self.L / self.sth)**2
-	self.THETA = self.Q - self.cth**2 * self.TH
+	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
+	self.THETA = self.Q - cth2 * self.TH
 	
     def update_t_phi_Dot (self):  # t and phi updates
         self.tDot = self.ra2 * self.P / self.delta + self.aL - self.a2E * self.sth2
