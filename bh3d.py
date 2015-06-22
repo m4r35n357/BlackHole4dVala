@@ -90,13 +90,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         def potentialError (velocity, potential):
             return fabs(velocity**2 - potential) / 2.0
         def le2 (t, r, th, ph):  # dot product, ds2
-            return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
-                   self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
-        self.eR = logError(potentialError(self.vR, self.R))
-        self.eTh = logError(potentialError(self.vTh, self.THETA))
-        self.v4e = logError(self.mu2 + le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
+            return self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 + self.sigma / self.delta * r**2 + \
+                   self.sigma * th**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
+        self.eR = logError(potentialError(self.rDot, self.R))
+        self.eTh = logError(potentialError(self.thDot, self.THETA))
+        self.v4e = logError(self.mu2 + le2(self.tDot / self.sigma, self.rDot / self.sigma, self.thDot / self.sigma, self.phDot / self.sigma))
 
-    def updatePotentials (self):  # Intermediate parameters
+    def refresh (self):  # Update quantities that depend on r or theta
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
@@ -104,31 +104,31 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ra2 = self.r**2 + self.a2
 	self.delta = (self.r - 2.0) * self.r + self.a2
 	self.sigma = self.r**2 + self.a2 * cth2
-	self.P = self.ra2 * self.E - self.aL
         self.R = (((self.c[0] * self.r + self.c[1]) * self.r + self.c[2]) * self.r + self.c[3]) * self.r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
-        self.tDot = self.ra2 * self.P / self.delta + self.aL - self.a2E * self.sth2
-        self.phDot = self.a * self.P / self.delta - self.aE + self.L / self.sth2
+	P = self.ra2 * self.E - self.aL
+        self.tDot = self.ra2 * P / self.delta + self.aL - self.a2E * self.sth2
+        self.phDot = self.a * P / self.delta - self.aE + self.L / self.sth2
 	
-    def solve (self):  # Generalized Symplectic Integrator
-        def qUp (c):  # r and theta updates
-            self.r += c * self.h * self.vR
-            self.th += c * self.h * self.vTh
-            self.updatePotentials()
+    def solve (self):  # Symplectic Integrator
+        def qUp (c):  # Coordinate updates
             self.t += c * self.h * self.tDot
+            self.r += c * self.h * self.rDot
+            self.th += c * self.h * self.thDot
             self.ph += c * self.h * self.phDot
+            self.refresh()
         def qDotUp (c):  # Velocity updates
-            self.vR += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-            self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-        def sv (y):  # Compose higher orders from this second-order symplectic base
+            self.rDot += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+            self.thDot += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+        def stormerVerlet (y):  # Compose higher orders from this second-order symplectic base
 	    qUp(0.5 * y)
 	    qDotUp(y)
 	    qUp(0.5 * y)
 	for i in self.coefficientsUp:  # Composition happens in these loops
-	    sv(self.coeff[i])
+	    stormerVerlet(self.coeff[i])
 	for i in self.coefficientsDown:
-	    sv(self.coeff[i])
+	    stormerVerlet(self.coeff[i])
 
 def main ():  # Need to be inside a function to return . . .
     if len(argv) == 2:
@@ -136,14 +136,14 @@ def main ():  # Need to be inside a function to return . . .
     else:
         ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
-    bl.updatePotentials()
-    bl.vR = - sqrt(bl.R if bl.R > 0.0 else 0.0)
-    bl.vTh = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
+    bl.refresh()
+    bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
+    bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while True:
         bl.errors()
         ra = sqrt(bl.ra2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.vR / bl.sigma, bl.vTh / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+                 % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.solve()  # update r and theta with symplectic integrator
 	if abs(bl.mino) > bl.T:
 	    break

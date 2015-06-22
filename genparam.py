@@ -49,18 +49,12 @@ class InitialConditions(object):
         return Q - cos(th)**2 * (self.a2 * (self.mu2 - E**2) + (L / sin(th))**2)
 
     def constantR (self, x):
-        E = x[0]
-        L = x[1]
-        Q = x[2]
-        c = self.coefficients(E, L, Q)
-        return self.R(self.r0, c)**2 + self.dR(self.r0, c)**2 + self.THETA(self.th0, E, L, Q)**2
+        c = self.coefficients(x[0], x[1], x[2])
+        return self.R(self.r0, c)**2 + self.dR(self.r0, c)**2 + self.THETA(self.th0, x[0], x[1], x[2])**2
 
     def variableR (self, x):
-        E = x[0]
-        L = x[1]
-        Q = x[2]
-        c = self.coefficients(E, L, Q)
-        return self.R(self.r0, c)**2 + self.R(self.r1, c)**2 + self.THETA(self.th0, E, L, Q)**2
+        c = self.coefficients(x[0], x[1], x[2])
+        return self.R(self.r0, c)**2 + self.R(self.r1, c)**2 + self.THETA(self.th0, x[0], x[1], x[2])**2
 
     def solve (self, function):
         res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
