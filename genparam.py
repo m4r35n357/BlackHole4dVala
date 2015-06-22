@@ -22,8 +22,7 @@ from scipy.optimize import minimize
 class InitialConditions(object):
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL):
         self.M = 1.0        
-	self.mu = 1.0 if (particle == True) else 0.0
-        self.mu2 = self.mu**2
+        self.mu2 = 1.0 if (particle == True) else 0.0
 	self.r0 = rMin
 	self.r1 = rMax
 	self.th0 = pi * (1.0 - thetaMin) 
@@ -37,8 +36,8 @@ class InitialConditions(object):
         self.ic = np.array([1.0, 0.0, 5.0]) if thetaMin < 0.01 else self.ic
 
     def coefficients (self, E, L, Q):
-        E2_1 = E**2 - 1.0
-        return array('d', [E2_1, 2.0, self.a2 * E2_1 - L**2 - Q, 2.0 * ((self.a * E - L)**2 + Q), - self.a2 * Q])
+        E2_1 = E**2 - self.mu2
+        return array('d', [E2_1, 2.0 * self.mu2, self.a2 * E2_1 - L**2 - Q, 2.0 * ((self.a * E - L)**2 + Q), - self.a2 * Q])
 
     def R (self, r, c):
         return (((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]
@@ -94,7 +93,7 @@ def main ():
     ic.L *= ic.factorL
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
-    print >> stdout, "  \"mu\" : " + str(ic.mu) + ","
+    print >> stdout, "  \"mu\" : " + str(ic.mu2) + ","
     print >> stdout, "  \"E\" : " + str(ic.E) + ","
     print >> stdout, "  \"Lz\" : " + str(ic.L) + ","
     print >> stdout, "  \"C\" : " + str(ic.Q) + ","

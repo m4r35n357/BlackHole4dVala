@@ -21,7 +21,7 @@ from array import array
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
     	self.a = spin
-        self.mu2 = pMass**2
+        self.mu2 = pMass
     	self.E = energy
     	self.L = momentum
     	self.Q = carter

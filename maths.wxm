@@ -27,5 +27,14 @@ collectterms(y, r);
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+kill(all)$
+(" Potential THETA: ");
+Q1: a^2 * (%mu^2 - E^2) + L^2 / (1 - u^2)$
+
+%Theta = potentialTHETA: Q - u^2 * Q1;
+'diff(%Theta, u) = diff(potentialTHETA, u);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
