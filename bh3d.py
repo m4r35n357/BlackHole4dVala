@@ -100,7 +100,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth = sin(self.th)
         self.cth = cos(self.th)
         self.sth2 = self.sth**2
-        cth2 = self.cth**2
+        cth2 = 1.0 - self.sth2
         self.ra2 = self.r**2 + self.a2
 	self.delta = (self.r - 2.0) * self.r + self.a2
 	self.sigma = self.r**2 + self.a2 * cth2
@@ -113,18 +113,18 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	
     def solve (self):  # Symplectic Integrator
         def qUp (c):  # Coordinate updates
-            self.t += c * self.h * self.tDot
-            self.r += c * self.h * self.rDot
-            self.th += c * self.h * self.thDot
-            self.ph += c * self.h * self.phDot
+            self.t += c * self.tDot
+            self.r += c * self.rDot
+            self.th += c * self.thDot
+            self.ph += c * self.phDot
             self.refresh()
         def qDotUp (c):  # Velocity updates
-            self.rDot += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-            self.thDot += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+            self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+            self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
         def stormerVerlet (y):  # Compose higher orders from this second-order symplectic base
-	    qUp(0.5 * y)
-	    qDotUp(y)
-	    qUp(0.5 * y)
+	    qUp(0.5 * y * self.h)
+	    qDotUp(y * self.h)
+	    qUp(0.5 * y * self.h)
 	for i in self.coefficientsUp:  # Composition happens in these loops
 	    stormerVerlet(self.coeff[i])
 	for i in self.coefficientsDown:
