@@ -89,12 +89,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             return 10.0 * log10(e if e >= self.nf else self.nf) 
         def potentialError (velocity, potential):
             return fabs(velocity**2 - potential) / 2.0
-        def le2 (t, r, th, ph):  # dot product, ds2
-            return self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 + self.sigma / self.delta * r**2 + \
-                   self.sigma * th**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
+        def v4Error (t, r, th, ph):  # dot product, ds2
+            return fabs(self.mu2 + self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 + self.sigma / self.delta * r**2 + \
+                                   self.sigma * th**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2)
         self.eR = logError(potentialError(self.rDot, self.R))
         self.eTh = logError(potentialError(self.thDot, self.THETA))
-        self.v4e = logError(self.mu2 + le2(self.tDot / self.sigma, self.rDot / self.sigma, self.thDot / self.sigma, self.phDot / self.sigma))
+        self.v4e = logError(v4Error(self.tDot / self.sigma, self.rDot / self.sigma, self.thDot / self.sigma, self.phDot / self.sigma))
 
     def refresh (self):  # Update quantities that depend on r or theta
         self.sth = sin(self.th)
