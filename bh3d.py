@@ -84,23 +84,17 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
-    def clamp (self, quantity):
-        return quantity if quantity > 0.0 else 0.0
-
-    def potentialError (self, velocity, potential):
-        return (velocity**2 - potential) / 2.0
-
-    def logError (self, e):
-        return 10.0 * log10(e if e >= self.nf else self.nf)
- 
     def errors (self):  # Error analysis
-        self.eR = self.logError(self.potentialError(self.vR, self.R))
-        self.eTh = self.logError(self.potentialError(self.vTh, self.THETA))
-        self.v4e = self.logError(self.mu2 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
-
-    def le2 (self, t, r, th, ph):  # dot product, ds2
-        return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
-               self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
+        def logError (e):
+            return 10.0 * log10(e if e >= self.nf else self.nf) 
+        def potentialError (velocity, potential):
+            return fabs(velocity**2 - potential) / 2.0
+        def le2 (t, r, th, ph):  # dot product, ds2
+            return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
+                   self.sth2 / self.sigma * (self.a * t - self.ra2 * ph)**2 - self.delta / self.sigma * (t - self.a * self.sth2 * ph)**2
+        self.eR = logError(potentialError(self.vR, self.R))
+        self.eTh = logError(potentialError(self.vTh, self.THETA))
+        self.v4e = logError(self.mu2 + le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def updatePotentials (self):  # Intermediate parameters
         self.sth = sin(self.th)
@@ -114,31 +108,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.R = (((self.c[0] * self.r + self.c[1]) * self.r + self.c[2]) * self.r + self.c[3]) * self.r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
-	
-    def update_t_phi_Dot (self):  # t and phi updates
         self.tDot = self.ra2 * self.P / self.delta + self.aL - self.a2E * self.sth2
         self.phDot = self.a * self.P / self.delta - self.aE + self.L / self.sth2
-
-    def update_t_phi (self, c):  # t and phi updates
-        self.update_t_phi_Dot()
-        self.t += c * self.h * self.tDot
-        self.ph += c * self.h * self.phDot
-
-    def qUp (self, c):  # r and theta updates
-        self.r += c * self.h * self.vR
-        self.th += c * self.h * self.vTh
-        self.updatePotentials()
-        self.update_t_phi(c)
-
-    def qDotUp (self, c):  # Velocity updates
-        self.vR += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-        self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-
+	
     def solve (self):  # Generalized Symplectic Integrator
+        def qUp (c):  # r and theta updates
+            self.r += c * self.h * self.vR
+            self.th += c * self.h * self.vTh
+            self.updatePotentials()
+            self.t += c * self.h * self.tDot
+            self.ph += c * self.h * self.phDot
+        def qDotUp (c):  # Velocity updates
+            self.vR += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+            self.vTh += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
         def sv (y):  # Compose higher orders from this second-order symplectic base
-	    self.qUp(0.5 * y)
-	    self.qDotUp(y)
-	    self.qUp(0.5 * y)
+	    qUp(0.5 * y)
+	    qDotUp(y)
+	    qUp(0.5 * y)
 	for i in self.coefficientsUp:  # Composition happens in these loops
 	    sv(self.coeff[i])
 	for i in self.coefficientsDown:
@@ -151,9 +137,8 @@ def main ():  # Need to be inside a function to return . . .
         ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.updatePotentials()
-    bl.vR = - sqrt(bl.clamp(bl.R))
-    bl.vTh = - sqrt(bl.clamp(bl.THETA))
-    bl.update_t_phi_Dot()
+    bl.vR = - sqrt(bl.R if bl.R > 0.0 else 0.0)
+    bl.vTh = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while True:
         bl.errors()
         ra = sqrt(bl.ra2)
