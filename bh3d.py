@@ -21,6 +21,7 @@ from array import array
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
     	self.a = spin
+        self.mu2 = pMass**2
     	self.E = energy
     	self.L = momentum
     	self.Q = carter
@@ -77,8 +78,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        E2_1 = self.E2 - 1.0
-        self.c = array('d', [E2_1, 2.0, self.a2 * E2_1 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
+        E2_1 = self.E2 - self.mu2
+        self.c = array('d', [E2_1, 2.0 * self.mu2, self.a2 * E2_1 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_1 = - self.a2 * E2_1
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
@@ -95,7 +96,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def errors (self):  # Error analysis
         self.eR = self.logError(self.potentialError(self.vR, self.R))
         self.eTh = self.logError(self.potentialError(self.vTh, self.THETA))
-        self.v4e = self.logError(1.0 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
+        self.v4e = self.logError(self.mu2 + self.le2(self.tDot / self.sigma, self.vR / self.sigma, self.vTh / self.sigma, self.phDot / self.sigma))
 
     def le2 (self, t, r, th, ph):  # dot product, ds2
         return self.sigma / self.delta * r**2 + self.sigma * th**2 + \
