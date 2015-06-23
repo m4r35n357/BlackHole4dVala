@@ -2,6 +2,9 @@
 
 raytracer=${1:-'./kerr-image'}
 
+outputDir='./RaytracingOutput'
+[ ! -d $outputDir ] && mkdir $outputDir
+
 tmp1='/tmp/tmp1'
 tmp2='/tmp/tmp2'
 tmp3='/tmp/tmp3'
@@ -11,7 +14,7 @@ n=0
 
 while read line
 do
-	filename="$(printf "%04d.png" $n)"
+	filename="$outputDir/$(printf "%04d.png" $n)"
 	if [ ! -f $filename ]
 	then
 		(echo -n $line | $raytracer 0 120 >$tmp1) &
