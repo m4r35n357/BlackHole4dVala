@@ -11,12 +11,19 @@ n=0
 
 while read line
 do
-	(echo -n $line | $raytracer 0 120 >$tmp1) &
-	(echo -n $line | $raytracer 120 240 >$tmp2) &
-	(echo -n $line | $raytracer 240 360 >$tmp3) &
-	(echo -n $line | $raytracer 360 480 >$tmp4) &
-	wait
-	cat $tmpfiles >$(printf "%04d.ppm" $n)
+	filename="$(printf "%04d.png" $n)"
+	if [ ! -f $filename ]
+	then
+		(echo -n $line | $raytracer 0 120 >$tmp1) &
+		(echo -n $line | $raytracer 120 240 >$tmp2) &
+		(echo -n $line | $raytracer 240 360 >$tmp3) &
+		(echo -n $line | $raytracer 360 480 >$tmp4) &
+		wait
+		cat $tmpfiles | convert - $filename
+		echo "Written $filename"
+	else
+		echo "Skipping $filename"
+	fi
 	n=$(expr $n + 1)
 done
 
