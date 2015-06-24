@@ -9,7 +9,7 @@ import numpy as np
 
 def main():
 	if len(argv) < 2:
-		raise Exception('>>> ERROR! Please supply number of points to plot and a viewing angle <<<')
+		raise Exception('>>> ERROR! Please supply number of points to plot and a viewing angle in degrees <<<')
 	nData = int(argv[1])
 	line = stdin.readline()
 	tau = array('d')

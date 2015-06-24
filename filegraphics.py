@@ -9,12 +9,12 @@ from scipy.interpolate import interp1d
 import numpy as np
 
 def isco (a):
-		z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
-		z2 = sqrt(3.0 * a * a + z1 * z1)
-		if a >= 0.0:
-			return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
-		else:
-			return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+	z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
+	z2 = sqrt(3.0 * a * a + z1 * z1)
+	if a >= 0.0:
+		return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+	else:
+		return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
 def drag (r, theta, a, m):
 	R2 = r ** 2 * a ** 2
