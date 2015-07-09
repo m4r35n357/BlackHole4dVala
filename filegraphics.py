@@ -26,6 +26,7 @@ def main():
 		raise Exception('>>> ERROR! Please supply a data file name, a parameter file name, and the number of points to use <<<')
 	dataFile = open(argv[1], 'r')
 	parameterFile = open(argv[2], 'r')
+	nData = int(argv[3])
 	# scene basics
 	scene.center = (0,0,0)
 	scene.width = scene.height = 1000
@@ -43,7 +44,6 @@ def main():
 	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get data dimensions
         line = dataFile.readline()
-	nData = int(argv[3])
 	tau = array('d')
 	x = array('d')
 	y = array('d')
