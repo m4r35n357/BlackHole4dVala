@@ -84,7 +84,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
         self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
 
-    def errors (self):  # Error analysis
+    def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
             return 10.0 * log10(e if e >= self.nf else self.nf) 
         def potentialError (velocity, potential):
@@ -92,19 +92,19 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         def v4Error (tDot, rDot, thDot, phDot):  # dot product, ds2
             return fabs(self.mu2 + self.sth2 / self.sigma * (self.a * tDot - self.ra2 * phDot)**2 + self.sigma / self.delta * rDot**2 + \
                                    self.sigma * thDot**2 - self.delta / self.sigma * (tDot - self.a * self.sth2 * phDot)**2)
-        self.eR = logError(potentialError(self.rDot, self.R))
-        self.eTh = logError(potentialError(self.thDot, self.THETA))
-        self.v4e = logError(v4Error(self.tDot / self.sigma, self.rDot / self.sigma, self.thDot / self.sigma, self.phDot / self.sigma))
+        self.eR = logError(potentialError(rDot, R))
+        self.eTh = logError(potentialError(thDot, THETA))
+        self.v4e = logError(v4Error(tDot / self.sigma, rDot / self.sigma, thDot / self.sigma, phDot / self.sigma))
 
-    def refresh (self):  # Update quantities that depend on r or theta
-        self.sth = sin(self.th)
-        self.cth = cos(self.th)
+    def refresh (self, r, th):  # Update quantities that depend on r or theta
+        self.sth = sin(th)
+        self.cth = cos(th)
         self.sth2 = self.sth**2
         cth2 = 1.0 - self.sth2
-        self.ra2 = self.r**2 + self.a2
-	self.delta = (self.r - 2.0) * self.r + self.a2
-	self.sigma = self.r**2 + self.a2 * cth2
-        self.R = (((self.c[0] * self.r + self.c[1]) * self.r + self.c[2]) * self.r + self.c[3]) * self.r + self.c[4]
+        self.ra2 = r**2 + self.a2
+	self.delta = (r - 2.0) * r + self.a2
+	self.sigma = r**2 + self.a2 * cth2
+        self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
 	P = self.ra2 * self.E - self.aL
@@ -117,7 +117,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.r += c * self.rDot
             self.th += c * self.thDot
             self.ph += c * self.phDot
-            self.refresh()
+            self.refresh(self.r, self.th)
         def qDotUp (c):  # Velocity updates
             self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
             self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
@@ -136,11 +136,11 @@ def main ():  # Need to be inside a function to return . . .
     else:
         ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
-    bl.refresh()
+    bl.refresh(bl.r, bl.th)
     bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while True:
-        bl.errors()
+        bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
         ra = sqrt(bl.ra2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
                  % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
