@@ -21,7 +21,7 @@ Sample usage:
 
 3.	Generate parameters, run, and plot a geodesic
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test
+./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test 2000
 
 
 4.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.

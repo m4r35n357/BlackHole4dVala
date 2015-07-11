@@ -1,19 +1,26 @@
 #!/bin/sh
 
-ic=$1
-points=${2:-2000}
+initialConditions=$1
+nPoints=$2
+shift 2
+coordinates=$*
 
-d='/tmp/data'
+dataFile='/tmp/data'
 
-./bh3d.py <$ic >$d &
+# run simulator
+./bh3d.py <$initialConditions >$dataFile &
 PID=$!
+
+# plot orbit
 sleep 1
-./filegraphics.py $d $ic $points &
+./filegraphics.py $dataFile $initialConditions $nPoints &
+
+# plot potential, coordinates/velocities (optional) and errors
 wait $PID
 ./filepotential.py potential &
-#./interpolate.py $d $points 't' &
-#./interpolate.py $d $points 'r' &
-#./interpolate.py $d $points 'th' &
-#./interpolate.py $d $points 'ph' &
-./errorchart.py $d $points &
+for coordinate in $coordinates
+do
+	./interpolate.py $dataFile $nPoints $coordinate &
+done
+./errorchart.py $dataFile $nPoints &
 
