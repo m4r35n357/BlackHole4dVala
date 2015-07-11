@@ -1,25 +1,19 @@
 #!/bin/sh
 
-ic=${1:-''}
+ic=$1
+points=${2:-2000}
 
 d='/tmp/data'
 
 ./bh3d.py <$ic >$d &
-#./bh3d.rk4.py <$ic >$d &
 PID=$!
 sleep 1
-./filegraphics.py $d $ic 5000 &
+./filegraphics.py $d $ic $points &
 wait $PID
 ./filepotential.py potential &
-#./interpolate.py $d 2000 't' &
-#./interpolate.py $d 2000 'r' &
-#./interpolate.py $d 2000 'th' &
-#./interpolate.py $d 2000 'ph' &
-set $(wc -l $d)
-if [ $1 -gt 10000 ]
-then
-	./errorchart.py $d $(($1 / 2000)) &
-else
-	./errorchart.py $d 1 &
-fi
+#./interpolate.py $d $points 't' &
+#./interpolate.py $d $points 'r' &
+#./interpolate.py $d $points 'th' &
+#./interpolate.py $d $points 'ph' &
+./errorchart.py $d $points &
 
