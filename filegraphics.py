@@ -2,7 +2,7 @@
 
 from sys import argv, stderr, exit
 from math import sqrt, sin
-from visual import scene, sphere, curve, rate, ellipsoid, ring
+from visual import scene, sphere, points, rate, ellipsoid, ring
 from json import loads
 from array import array
 from scipy.interpolate import interp1d
@@ -86,7 +86,7 @@ def main():
 #	eSpin = sphere(pos = (2.0, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 #	iSpin = sphere(pos = (isco(a), 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2, color = colours[2])  # Particle
-	ball.trail = curve(color = ball.color)
+	ball.trail = points(size = 1)
 	for i in range(len(tauI)):
 		rate(60)
 		error = eI(tauI[i])
@@ -98,10 +98,9 @@ def main():
 			ball.color = colours[8]
 		else:
 			ball.color = colours[1]
-		ball.trail.color = ball.color
 		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
 		ball.pos = position
-		ball.trail.append(pos = position)
+		ball.trail.append(pos = position, color = ball.color, retain = 10000)
 
 if __name__ == "__main__":
 	main()
