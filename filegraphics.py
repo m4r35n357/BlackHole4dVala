@@ -2,7 +2,7 @@
 
 from sys import argv, stderr, exit
 from math import sqrt, sin
-from visual import scene, sphere, points, rate, ellipsoid, ring
+from visual import scene, sphere, curve, points, rate, ellipsoid, ring
 from json import loads
 from array import array
 from scipy.interpolate import interp1d
@@ -85,22 +85,22 @@ def main():
 #	hSpin = sphere(pos = (horizon, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 #	eSpin = sphere(pos = (2.0, 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
 #	iSpin = sphere(pos = (isco(a), 0.0, 0.0), radius = 0.1, color = colours[1])  # Particle
-	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2, color = colours[2])  # Particle
+	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2, color = (0.75, 0.75, 0.75))  # Particle
 	ball.trail = points(size = 1)
 	for i in range(len(tauI)):
 		rate(60)
 		error = eI(tauI[i])
 		if error < -120.0:
-			ball.color = colours[2]
+			colour = colours[2]
 		elif error < -90.0:
-			ball.color = colours[7]
+			colour = colours[7]
 		elif error < -60.0:
-			ball.color = colours[8]
+			colour = colours[8]
 		else:
-			ball.color = colours[1]
+			colour = colours[1]
 		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
 		ball.pos = position
-		ball.trail.append(pos = position, color = ball.color, retain = 10000)
+		ball.trail.append(pos = position, color = colour, retain = 10000)
 
 if __name__ == "__main__":
 	main()
