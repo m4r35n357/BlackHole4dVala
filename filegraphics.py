@@ -93,7 +93,7 @@ def main():
 		ball.color = colour
 		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
 		ball.pos = position
-		ball.trail.append(pos = position, color = colour, retain = 10000)
+		ball.trail.append(pos = position, color = colour, retain = 1000)
 
 if __name__ == "__main__":
 	main()
