@@ -140,13 +140,13 @@ def main ():  # Need to be inside a function to return . . .
     bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while True:
+	if abs(bl.mino) > bl.T:
+	    break
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
         ra = sqrt(bl.ra2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
                  % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
         bl.solve()  # update r and theta with symplectic integrator
-	if abs(bl.mino) > bl.T:
-	    break
         bl.mino += bl.h
         bl.tau += bl.h * bl.sigma
 

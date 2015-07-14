@@ -76,10 +76,15 @@ def main():
         else:
             sphere(pos=scene.center, radius = 0.05, color = colours[0])  # Singularity
 	ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = colours[6], thickness=0.01)  # ISCO
-	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2)  # Particle
-	ball.trail = curve(size = 1)  #  trail
 	# animate!
+	ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2)  # Particle
+	counter = 0
 	for i in range(len(tauI)):
+		if counter % 1000 == 0:
+			ball.visible = False
+			del ball
+			ball = sphere(pos = (xI(tauI[0]), yI(tauI[0]), zI(tauI[0])), radius = 0.2)  # Particle
+			ball.trail = curve(size = 1)  #  trail
 		rate(60)
 		error = eI(tauI[i])
 		if error < -120.0:
@@ -93,7 +98,8 @@ def main():
 		ball.color = colour
 		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
 		ball.pos = position
-		ball.trail.append(pos = position, color = colour, retain = 1000)
+		ball.trail.append(pos = position, color = colour)
+		counter += 1
 
 if __name__ == "__main__":
 	main()
