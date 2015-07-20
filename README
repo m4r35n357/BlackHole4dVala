@@ -19,20 +19,27 @@ Sample usage:
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
 
 
-3.	Generate parameters, run, and plot a geodesic
+3.	Generate parameters, run, and plot a geodesic:
 
 ./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test 2000
 
 
-4.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
+4.	Edit the inital conditions file and run again without graphs with tau as the time parameter (mino, tau or t):
+
+cat test; ./bh3d.py <test >datapipe & ./filegraphics.py datapipe test tau 5000
+
+
+5.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
 
 time { ./raytrace.py 1000 0 <data | ./raytrace; }
 
 
-5.	Make a video out of the output files
+6.	Make a video out of the output files:
 
 avconv -y -i %04d.ppm video.mp4
+
 or something like:
+
 avconv -y -i %04d.ppm -vcodec h264 -crf 1 video.mp4
 
 

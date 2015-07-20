@@ -17,11 +17,12 @@ def isco (a):
 		return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
 def main():
-	if len(argv) < 4:
-		raise Exception('>>> ERROR! Please supply a data file name, a parameter file name, and the number of points to use <<<')
+	if len(argv) < 5:
+		raise Exception('>>> ERROR! Please supply a data file name, a parameter file name, a time variable, and the number of points to use <<<')
 	dataFile = open(argv[1], 'r')
 	parameterFile = open(argv[2], 'r')
-	nData = int(argv[3])
+	timeCoordinate = str(argv[3])
+	nData = int(argv[4])
 	# get parameters
         try:
             parameters = loads(parameterFile.read())
@@ -34,32 +35,32 @@ def main():
 	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get raw data
         line = dataFile.readline()
-	tau = array('d')
+	time = array('d')
 	x = array('d')
 	y = array('d')
 	z = array('d')
 	e = array('d')
-	tauMax = 0.0
+	timeMax = 0.0
 	while line:
-		p = loads(line)
-		tauValue = p['tau']
-		tauMax = tauValue if tauValue > tauMax else tauMax
-		tau.append(tauValue)
-		x.append(p['x'])
-		y.append(p['y'])
-		z.append(p['z'])
-		e.append(p['v4e'])
+		data = loads(line)
+		timeValue = data[timeCoordinate]
+		timeMax = timeValue if timeValue > timeMax else timeMax
+		time.append(timeValue)
+		x.append(data['x'])
+		y.append(data['y'])
+		z.append(data['z'])
+		e.append(data['v4e'])
 		line = dataFile.readline()
 	# interpolate here
         try:
-		xI = interp1d(tau, x, kind='linear')
-		yI = interp1d(tau, y, kind='linear')
-		zI = interp1d(tau, z, kind='linear')
-		eI = interp1d(tau, e, kind='linear')
+		xI = interp1d(time, x, kind='linear')
+		yI = interp1d(time, y, kind='linear')
+		zI = interp1d(time, z, kind='linear')
+		eI = interp1d(time, e, kind='linear')
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
-	tauI = np.linspace(0, tauMax, num = nData)
+	timeI = np.linspace(0, timeMax, num = nData)
 	#  set up the scene
 	scene.center = (0.0, 0.0, 0.0)
 	scene.width = scene.height = 1000.0
@@ -79,13 +80,13 @@ def main():
 	# animate!
 	ball = sphere()  # Particle
 	counter = 0
-	for i in range(len(tauI)):
+	for i in range(len(timeI)):
 		if counter % 1000 == 0:
 			ball.visible = False
 			ball = sphere(radius = 0.2)  # Particle
 			ball.trail = curve(size = 1)  #  trail
 		rate(60)
-		error = eI(tauI[i])
+		error = eI(timeI[i])
 		if error < -120.0:
 			colour = colours[2]
 		elif error < -90.0:
@@ -95,7 +96,7 @@ def main():
 		else:
 			colour = colours[1]
 		ball.color = colour
-		position = (xI(tauI[i]), yI(tauI[i]), zI(tauI[i]))
+		position = (xI(timeI[i]), yI(timeI[i]), zI(timeI[i]))
 		ball.pos = position
 		ball.trail.append(pos = position, color = colour)
 		counter += 1
