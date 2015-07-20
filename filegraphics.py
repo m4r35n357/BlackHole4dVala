@@ -34,15 +34,15 @@ def main():
 	horizon = m * (1.0 + sqrt(1.0 - a * a));
 	cauchy = m * (1.0 - sqrt(1.0 - a * a));
 	# get raw data
-        line = dataFile.readline()
+	timeMax = 0.0
 	time = array('d')
 	x = array('d')
 	y = array('d')
 	z = array('d')
 	e = array('d')
-	timeMax = 0.0
-	while line:
-		data = loads(line)
+        dataLine = dataFile.readline()
+	while dataLine:  # build raw data arrays
+		data = loads(dataLine)
 		timeValue = data[timeCoordinate]
 		timeMax = timeValue if timeValue > timeMax else timeMax
 		time.append(timeValue)
@@ -50,13 +50,12 @@ def main():
 		y.append(data['y'])
 		z.append(data['z'])
 		e.append(data['v4e'])
-		line = dataFile.readline()
-	# interpolate here
-        try:
-		xI = interp1d(time, x, kind='linear')
-		yI = interp1d(time, y, kind='linear')
-		zI = interp1d(time, z, kind='linear')
-		eI = interp1d(time, e, kind='linear')
+		dataLine = dataFile.readline()
+        try:  # interpolate here
+		xI = interp1d(time, x, kind='linear', copy=False)
+		yI = interp1d(time, y, kind='linear', copy=False)
+		zI = interp1d(time, z, kind='linear', copy=False)
+		eI = interp1d(time, e, kind='linear', copy=False)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
@@ -87,17 +86,15 @@ def main():
 		rate(60)
 		error = eI(timeI[i])
 		if error < -120.0:
-			colour = color.green
+			ball.color = color.green
 		elif error < -90.0:
-			colour = color.cyan
+			ball.color = color.cyan
 		elif error < -60.0:
-			colour = color.yellow
+			ball.color = color.yellow
 		else:
-			colour = color.red
-		ball.color = colour
-		position = (xI(timeI[i]), yI(timeI[i]), zI(timeI[i]))
-		ball.pos = position
-		ball.trail.append(pos = position, color = colour)
+			ball.color = color.red
+		ball.pos = (xI(timeI[i]), yI(timeI[i]), zI(timeI[i]))
+		ball.trail.append(pos = ball.pos, color = ball.color)
 		counter += 1
 
 if __name__ == "__main__":
