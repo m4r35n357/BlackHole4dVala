@@ -131,17 +131,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	    stormerVerlet(self.coeff[i])
 
 def main ():  # Need to be inside a function to return . . .
-    if len(argv) == 2:
-        ic = loads((open(argv[1], 'r')).read())
-    else:
-        ic = loads(stdin.read())
+    ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.refresh(bl.r, bl.th)
     bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
-    while True:
-	if abs(bl.mino) > bl.T:
-	    break
+    while not abs(bl.mino) > bl.T:
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
         ra = sqrt(bl.ra2)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
