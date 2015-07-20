@@ -2,7 +2,7 @@
 
 from sys import argv, stderr, exit
 from math import sqrt, sin, fabs
-from visual import scene, sphere, curve, points, rate, ellipsoid, ring
+from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
 from json import loads
 from array import array
 from scipy.interpolate import interp1d
@@ -60,26 +60,25 @@ def main():
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
-	timeI = np.linspace(0, timeMax, num = nData)
 	#  set up the scene
 	scene.center = (0.0, 0.0, 0.0)
 	scene.width = scene.height = 1000.0
 	scene.range = (20.0, 20.0, 20.0)
-	colours = [ (1.0, 1.0, 1.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0), (0.7, 0.7, 0.7), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 1.0, 1.0), (1.0, 1.0, 0.0), (0.0, 0.0, 0.0) ]
         inner = 2.0 * sqrt(cauchy**2 + a**2)
-	ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = colours[3], opacity = 0.4)  # Inner Horizon
+	ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = color.blue, opacity = 0.4)  # Inner Horizon
         outer = 2.0 * sqrt(horizon**2 + a**2)
-	ellipsoid(pos = scene.center, length = outer, height = outer, width = 2.0 * horizon, color = colours[3], opacity = 0.3)  # Outer Horizon
+	ellipsoid(pos = scene.center, length = outer, height = outer, width = 2.0 * horizon, color = color.blue, opacity = 0.3)  # Outer Horizon
         ergo = 2.0 * sqrt(4.0 + a**2)
-	ellipsoid(pos = scene.center, length = ergo, height = ergo, width = 2.0 * horizon, color = colours[4], opacity = 0.2)  # Ergosphere
+	ellipsoid(pos = scene.center, length = ergo, height = ergo, width = 2.0 * horizon, color = color.gray(0.7), opacity = 0.2)  # Ergosphere
         if fabs(a) > 0.0:
-	    ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = colours[0], thickness=0.01)  # Singularity
+	    ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = color.white, thickness=0.01)  # Singularity
         else:
-            sphere(pos=scene.center, radius = 0.05, color = colours[0])  # Singularity
-	ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = colours[6], thickness=0.01)  # ISCO
+            sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
+	ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
 	# animate!
 	ball = sphere()  # Particle
 	counter = 0
+	timeI = np.linspace(0, timeMax, num = nData)
 	for i in range(len(timeI)):
 		if counter % 1000 == 0:
 			ball.visible = False
@@ -88,13 +87,13 @@ def main():
 		rate(60)
 		error = eI(timeI[i])
 		if error < -120.0:
-			colour = colours[2]
+			colour = color.green
 		elif error < -90.0:
-			colour = colours[7]
+			colour = color.cyan
 		elif error < -60.0:
-			colour = colours[8]
+			colour = color.yellow
 		else:
-			colour = colours[1]
+			colour = color.red
 		ball.color = colour
 		position = (xI(timeI[i]), yI(timeI[i]), zI(timeI[i]))
 		ball.pos = position
