@@ -22,7 +22,7 @@ def main():
 	dataFile = open(argv[1], 'r')
 	parameterFile = open(argv[2], 'r')
 	timeCoordinate = str(argv[3])
-	nData = int(argv[4])	
+	nData = int(argv[4])
         try:  # get parameters
             parameters = loads(parameterFile.read())
         except ValueError as e:
@@ -90,6 +90,8 @@ def main():
 			ball.color = color.cyan
 		elif error < -60.0:
 			ball.color = color.yellow
+		elif error < -30.0:
+			ball.color = color.orange
 		else:
 			ball.color = color.red
 		ball.pos = (xI(timeI[i]), yI(timeI[i]), zI(timeI[i]))
