@@ -21,7 +21,7 @@ Sample usage:
 
 3.	Generate parameters, run, and plot a geodesic:
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics test 2000
+./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics tau test 5000
 
 
 4.	Edit the inital conditions file and run again without graphs with tau as the time parameter (mino, tau or t):

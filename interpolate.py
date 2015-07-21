@@ -9,33 +9,33 @@ import numpy as np
 
 def main():
 	if len(argv) < 3:
-		raise Exception('>>> ERROR! Please supply a data file name, the number of points to plot, and a coordinate to plot <<<')
+		raise Exception('>>> ERROR! Please supply a data file name, a time variable, the number of points to plot, and a coordinate to plot <<<')
 	dataFile = open(argv[1], 'r')
-	line = dataFile.readline()
-	nPoints = int(argv[2])
-	coordinate = argv[3]
+	timeCoordinate = str(argv[2])
+	nPoints = int(argv[3])
+	coordinate = argv[4]
 	tau = array('d')
 	c = array('d')
 	cDot = array('d')
 	tauMax = 0.0
-	while line:
+	line = dataFile.readline()
+	while line:  # build raw data arrays
 		p = loads(line)
-		tauValue = p['tau']
+		tauValue = p[timeCoordinate]
 		tauMax = tauValue if tauValue > tauMax else tauMax
 		tau.append(tauValue)
 		c.append(p[coordinate])
 		cDot.append(p[coordinate + 'Dot'])
 		line = dataFile.readline()
-	# interpolate here
-        try:
-        	cI = interp1d(tau, c, kind='linear')
-		cDotI = interp1d(tau, cDot, kind='linear')
+        try:  # interpolate here
+        	cI = interp1d(tau, c, kind='linear', copy=False)
+		cDotI = interp1d(tau, cDot, kind='linear', copy=False)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
         pyplot.grid(b=True, which='major', color='k', linestyle='-')
-	ax1.set_xlabel('tau', color='k')
+	ax1.set_xlabel('Time: ' + timeCoordinate)
 	ax1.set_ylabel(coordinate, color='b')
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(coordinate + 'Dot', color='r')

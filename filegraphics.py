@@ -22,9 +22,8 @@ def main():
 	dataFile = open(argv[1], 'r')
 	parameterFile = open(argv[2], 'r')
 	timeCoordinate = str(argv[3])
-	nData = int(argv[4])
-	# get parameters
-        try:
+	nData = int(argv[4])	
+        try:  # get parameters
             parameters = loads(parameterFile.read())
         except ValueError as e:
             print('PARAMETER ERROR: ' + str(e))
