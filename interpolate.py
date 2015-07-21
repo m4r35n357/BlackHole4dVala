@@ -34,7 +34,7 @@ def main():
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
-        pyplot.grid(b=True, which='major', color='k', linestyle='-')
+        pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
 	ax1.set_xlabel('Time: ' + timeCoordinate)
 	ax1.set_ylabel(coordinate, color='b')
 	ax2 = ax1.twinx()

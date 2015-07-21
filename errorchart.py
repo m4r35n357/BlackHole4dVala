@@ -37,7 +37,7 @@ def main():
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
-        pyplot.grid(b=True, which='major', color='k', linestyle='-')
+        pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
 	ax1.set_xlabel('Time: ' + timeCoordinate)
 	ax1.set_ylabel('Radial and Latitudinal Errors, dB', color='k')
         ax1.set_ylim(-180.0, 0.0)

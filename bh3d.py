@@ -86,7 +86,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
-            return 10.0 * log10(e if e >= self.nf else self.nf) 
+            return 10.0 * log10(e if e > self.nf else self.nf) 
         def potentialError (velocity, potential):
             return fabs(velocity**2 - potential) / 2.0
         def v4Error (tDot, rDot, thDot, phDot):  # dot product, ds2
