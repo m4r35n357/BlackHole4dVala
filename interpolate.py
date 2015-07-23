@@ -35,7 +35,7 @@ def main():
             exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
         pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
-	ax1.set_xlabel('Time: ' + timeCoordinate)
+	ax1.set_xlabel('Time: ' + timeCoordinate, color='0.20')
 	ax1.set_ylabel(coordinate, color='b')
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(coordinate + 'Dot', color='r')

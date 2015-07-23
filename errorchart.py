@@ -3,6 +3,7 @@
 from sys import argv
 from math import fabs, log10
 from matplotlib import pyplot
+from matplotlib.ticker import MultipleLocator
 from json import loads
 from array import array
 from scipy.interpolate import interp1d
@@ -37,18 +38,27 @@ def main():
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
 	ax1 = pyplot.figure().add_subplot(111)
+	pyplot.minorticks_on()
+	majorLocator = MultipleLocator(30)
+	minorLocator = MultipleLocator(10)
+	#pyplot.yticks(np.arange(-180.0, 1.0, 30.0))
         pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
-	ax1.set_xlabel('Time: ' + timeCoordinate)
-	ax1.set_ylabel('Radial and Latitudinal Errors, dB', color='k')
+        pyplot.grid(b=True, which='minor', color='0.5', linestyle='--')
+	ax1.yaxis.set_major_locator(majorLocator)
+	ax1.yaxis.set_minor_locator(minorLocator)
+	ax1.set_xlabel('Time: ' + timeCoordinate, color='0.20')
+	ax1.set_ylabel('4-Velocity Norm Error', color='green')
         ax1.set_ylim(-180.0, 0.0)
 	ax2 = ax1.twinx()
-	ax2.set_ylabel('4-Velocity Norm Error', color='g')
+	ax2.yaxis.set_major_locator(majorLocator)
+	ax2.yaxis.set_minor_locator(minorLocator)
+	ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='magenta')
         ax2.set_ylim(-180.0, 0.0)
 	tauI = np.linspace(0, tauMax, num = nPoints)
 	for i in range(len(tauI)):
-		ax1.plot(tauI[i], eRI(tauI[i]), 'b.', markersize=2)
-		ax1.plot(tauI[i], eThI(tauI[i]), 'r.', markersize=2)
-		ax2.plot(tauI[i], ev4I(tauI[i]), 'g.', markersize=2)
+		ax1.plot(tauI[i], ev4I(tauI[i]), 'g.', markersize=2, zorder=10)
+		ax2.plot(tauI[i], eRI(tauI[i]), 'b.', markersize=1, zorder=9)
+		ax2.plot(tauI[i], eThI(tauI[i]), 'r.', markersize=1, zorder=8)
         try:
             pyplot.show()
         except AttributeError as e:
