@@ -71,7 +71,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             raise Exception('>>> ERROR! Integrator order must be 2, 4, 6, 8 or 10 <<<')
         self.T = abs(self.time)
         self.t = self.ph = self.mino = self.tau = 0.0
-        self.nf = 1.0e-18
+        self.nf = 1.0e-15
     	self.a2 = self.a**2
         self.E2 = self.E**2
         self.aE = self.a * self.E
