@@ -89,12 +89,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             return 10.0 * log10(e if e > self.nf else self.nf) 
         def potentialError (velocity, potential):
             return fabs(velocity**2 - potential) / 2.0
-        def v4Error (tDot, rDot, thDot, phDot):  # dot product, ds2
-            return fabs(self.mu2 + self.sth2 / self.sigma * (self.a * tDot - self.ra2 * phDot)**2 + self.sigma / self.delta * rDot**2 + \
-                                   self.sigma * thDot**2 - self.delta / self.sigma * (tDot - self.a * self.sth2 * phDot)**2)
+        def v4Error (tDot, rDot, thDot, phDot):  # norm squared, xDot means dx/dTau !!!
+            return fabs(self.mu2 + self.sth2 / self.sigma * (self.a * tDot - self.ra2 * phDot)**2 + self.sigma / self.delta * rDot**2 +  self.sigma * thDot**2 - self.delta / self.sigma * (tDot - self.a * self.sth2 * phDot)**2)
         self.eR = logError(potentialError(rDot, R))
         self.eTh = logError(potentialError(thDot, THETA))
-        self.v4e = logError(v4Error(tDot / self.sigma, rDot / self.sigma, thDot / self.sigma, phDot / self.sigma))
+        self.v4e = logError(v4Error(tDot / self.sigma, rDot / self.sigma, thDot / self.sigma, phDot / self.sigma))  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on r or theta
         self.sth = sin(th)
@@ -138,12 +137,10 @@ def main ():  # Need to be inside a function to return . . .
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while not abs(bl.mino) > bl.T:
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
-        ra = sqrt(bl.ra2)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e, "x":%.9e, "y":%.9e, "z":%.9e}' \
-                 % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma, ra * bl.sth * cos(bl.ph), ra * bl.sth * sin(bl.ph), bl.r * bl.cth)  # Log data
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         bl.solve()  # update r and theta with symplectic integrator
         bl.mino += bl.h
-        bl.tau += bl.h * bl.sigma
+        bl.tau += bl.h * bl.sigma  # dTau = sigma * dLambda !!!
 
 if __name__ == "__main__":
     main()

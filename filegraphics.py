@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from sys import argv, stderr, exit
-from math import sqrt, sin, fabs
+from math import sqrt, sin, cos, fabs
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
 from json import loads
 from array import array
@@ -45,9 +45,14 @@ def main():
 		timeValue = data[timeCoordinate]
 		timeMax = timeValue if timeValue > timeMax else timeMax
 		time.append(timeValue)
-		x.append(data['x'])
-		y.append(data['y'])
-		z.append(data['z'])
+		r = float(data['r'])
+		th = float(data['th'])
+		ph = float(data['ph'])
+		ra = sqrt(r**2 + a**2)
+		sth = sin(th)
+		x.append(ra * sth * cos(ph))
+		y.append(ra * sth * sin(ph))
+		z.append(r * cos(th))
 		e.append(data['v4e'])
 		dataLine = dataFile.readline()
         try:  # interpolate here
