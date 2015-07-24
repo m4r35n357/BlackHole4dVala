@@ -87,13 +87,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
             return 10.0 * log10(e if e > self.nf else self.nf) 
-        def potentialError (velocity, potential):
-            return fabs(velocity**2 - potential) / 2.0
+        def modH (xDot, X):
+            return 0.5 * fabs(xDot**2 - X)
         def v4Error (tDot, rDot, thDot, phDot):  # norm squared, xDot means dx/dTau !!!
-            return fabs(self.mu2 + self.sth2 / self.sigma * (self.a * tDot - self.ra2 * phDot)**2 + self.sigma / self.delta * rDot**2 +  self.sigma * thDot**2 - self.delta / self.sigma * (tDot - self.a * self.sth2 * phDot)**2)
-        self.eR = logError(potentialError(rDot, R))
-        self.eTh = logError(potentialError(thDot, THETA))
-        self.v4e = logError(v4Error(tDot / self.sigma, rDot / self.sigma, thDot / self.sigma, phDot / self.sigma))  # d/dTau = 1/sigma * d/dLambda !!!
+            return fabs(self.mu2 + self.sth2 / self.S * (self.a * tDot - self.ra2 * phDot)**2 + self.S / self.D * rDot**2 + self.S * thDot**2 - self.D / self.S * (tDot - self.a * self.sth2 * phDot)**2)
+        self.eR = logError(modH(rDot, R))
+        self.eTh = logError(modH(thDot, THETA))
+        self.v4e = logError(v4Error(tDot / self.S, rDot / self.S, thDot / self.S, phDot / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on r or theta
         self.sth = sin(th)
@@ -101,23 +101,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth2 = self.sth**2
         cth2 = 1.0 - self.sth2
         self.ra2 = r**2 + self.a2
-	self.delta = (r - 2.0) * r + self.a2
-	self.sigma = r**2 + self.a2 * cth2
+	self.D = (r - 2.0) * r + self.a2
+	self.S = r**2 + self.a2 * cth2
         self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
 	P = self.ra2 * self.E - self.aL
-        self.tDot = self.ra2 * P / self.delta + self.aL - self.a2E * self.sth2
-        self.phDot = self.a * P / self.delta - self.aE + self.L / self.sth2
+        self.tDot = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
+        self.phDot = self.a * P / self.D - self.aE + self.L / self.sth2
 	
-    def solve (self):  # Symplectic Integrator
-        def qUp (c):  # Coordinate updates
+    def solve (self):  # Symplectic Integrator, for a pseudo-Hamiltonian H = T - V = 0.0 (note that V has negative sign c.f. a "regular" Hamiltonian)
+        def qUp (c):  # Coordinate updates, x += dH/dxDot (i.e. dT/dxDot).  N.B. x = r or theta; t and phi are just along for the ride . . .
             self.t += c * self.tDot
             self.r += c * self.rDot
             self.th += c * self.thDot
             self.ph += c * self.phDot
             self.refresh(self.r, self.th)
-        def qDotUp (c):  # Velocity updates
+        def qDotUp (c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
             self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
             self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
         def stormerVerlet (y):  # Compose higher orders from this second-order symplectic base
@@ -137,10 +137,10 @@ def main ():  # Need to be inside a function to return . . .
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     while not abs(bl.mino) > bl.T:
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.sigma, bl.rDot / bl.sigma, bl.thDot / bl.sigma, bl.phDot / bl.sigma)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.S, bl.rDot / bl.S, bl.thDot / bl.S, bl.phDot / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         bl.solve()  # update r and theta with symplectic integrator
         bl.mino += bl.h
-        bl.tau += bl.h * bl.sigma  # dTau = sigma * dLambda !!!
+        bl.tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 
 if __name__ == "__main__":
     main()
