@@ -27,7 +27,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.Q = carter
     	self.r = r0
     	self.th = thetaMin
-    	self.time = simtime
     	self.h = timestep
 	if order == 2:  # Second order
 		self.coeff = array('d', [1.0])
@@ -37,16 +36,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 		self.coeff = array('d', [y, - y * cbrt2])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2 or 4 <<<')
-        self.T = abs(self.time)
-        self.t = self.ph = self.mino = self.tau = 0.0
-        self.nf = 1.0e-15
+        self.simtime = abs(simtime)
+        self.t = self.ph = 0.0
     	self.a2 = self.a**2
-        self.E2 = self.E**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        E2_mu2 = self.E2 - self.mu2
+        E2_mu2 = self.E**2 - self.mu2
         self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_mu2 = - self.a2 * E2_mu2
         self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
@@ -54,7 +51,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
-            return 10.0 * log10(e if e > self.nf else self.nf) 
+            return 10.0 * log10(e if e > 1.0e-15 else 1.0e-15) 
         def modH (xDot, X):
             return 0.5 * fabs(xDot**2 - X)
         def v4Error (tDot, rDot, thDot, phDot):  # norm squared, xDot means dx/dTau !!!
@@ -103,12 +100,13 @@ def main ():  # Need to be inside a function to return . . .
     bl.refresh(bl.r, bl.th)
     bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
     bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
-    while not abs(bl.mino) > bl.T:
+    mino = tau = 0.0
+    while not abs(mino) > bl.simtime:
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (bl.mino, bl.tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.S, bl.rDot / bl.S, bl.thDot / bl.S, bl.phDot / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.S, bl.rDot / bl.S, bl.thDot / bl.S, bl.phDot / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         bl.solve()  # update r and theta with symplectic integrator
-        bl.mino += bl.h
-        bl.tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
+        mino += bl.h
+        tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 
 if __name__ == "__main__":
     main()
