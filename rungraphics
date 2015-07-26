@@ -21,6 +21,7 @@ wait $PID
 ./filepotential.py potential &
 for coordinate in $coordinates
 do
+	./phase.py $dataFile $time $nPoints $coordinate &
 	./interpolate.py $dataFile $time $nPoints $coordinate &
 done
 ./errorchart.py $dataFile $time $nPoints &
