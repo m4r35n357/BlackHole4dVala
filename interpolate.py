@@ -43,6 +43,7 @@ def main():
 	for i in range(len(tauI)):
 		ax1.plot(tauI[i], cI(tauI[i]), 'b.', markersize=2)
 		ax2.plot(tauI[i], cDotI(tauI[i]), 'r.', markersize=2)
+		#ax1.plot(cI(tauI[i]), cDotI(tauI[i]), 'm.', markersize=2)
         try:
             pyplot.show()
         except AttributeError as e:

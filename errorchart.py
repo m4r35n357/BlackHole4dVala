@@ -46,7 +46,7 @@ def main():
 	ax1.yaxis.set_major_locator(majorLocator)
 	ax1.yaxis.set_minor_locator(minorLocator)
 	ax1.set_xlabel('Time: ' + timeCoordinate, color='0.20')
-	ax1.set_ylabel('4-Velocity Norm Error', color='green')
+	ax1.set_ylabel('4-Velocity Norm Error', color='#006000')
         ax1.set_ylim(-150.0, 0.0)
 	ax2 = ax1.twinx()
 	ax2.yaxis.set_major_locator(majorLocator)
@@ -55,9 +55,9 @@ def main():
         ax2.set_ylim(-150.0, 0.0)
 	tauI = np.linspace(0, tauMax, num = nPoints)
 	for i in range(len(tauI)):
-		ax1.plot(tauI[i], ev4I(tauI[i]), 'g.', markersize=2, zorder=10)
-		ax2.plot(tauI[i], eRI(tauI[i]), 'b.', markersize=1, zorder=9)
-		ax2.plot(tauI[i], eThI(tauI[i]), 'r.', markersize=1, zorder=8)
+		ax1.plot(tauI[i], ev4I(tauI[i]), color='#006000', marker='.', markersize=2, zorder=10)
+		ax2.plot(tauI[i], eRI(tauI[i]), color='blue', marker='.', markersize=1, zorder=9)
+		ax2.plot(tauI[i], eThI(tauI[i]), color='red', marker='.', markersize=1, zorder=8)
         try:
             pyplot.show()
         except AttributeError as e:
