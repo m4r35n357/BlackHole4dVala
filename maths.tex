@@ -63,10 +63,10 @@ Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the
 The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
 
 \begin{equation}
-\dot x^2 - V(x) = 0
+\frac {\dot x^2 - V(x)}{2} = 0
 \end{equation}
 
-This expresison is used to quantify the integration errors, whilst the two differentiated potentials in equations 7 and 9 are used for velocity updates in the integrator routines.
+This expresison can be treated in the same way as a hamiltonian (there is no mass in the "kinetic" term so the velocity is also the canonical momentum), in particular it is amenable to sympectic integration.  It is also used to quantify the integration errors for $r$ and $\theta$, whilst the two differentiated potentials in equations 7 and 9 are used for velocity/momentum updates in the integrator routines.
 
 The simulator uses composition \cite{hairer} to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.  The Euler equations are actually processed alongside the composed Stormer-Verlet updates, increasing the order and accuracy for $t$ and $\phi$.
 
