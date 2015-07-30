@@ -29,11 +29,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.th = thetaMin
     	self.h = timestep
 	if order == 2:  # Second order
-		self.coeff = array('d', [1.0])
+            self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
-		cbrt2 = 2.0**(1.0 / 3.0)
-		y = 1.0 / (2.0 - cbrt2)
-		self.coeff = array('d', [y, - y * cbrt2])
+            cbrt2 = 2.0**(1.0 / 3.0)
+            y = 1.0 / (2.0 - cbrt2)
+            self.coeff = array('d', [y, - y * cbrt2])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2 or 4 <<<')
         self.simtime = abs(simtime)
