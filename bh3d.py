@@ -31,21 +31,21 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.cbrt2one = 1.0 - self.cbrt2
         self.cbrt2two = 2.0 - self.cbrt2
-	if order == '2':  # Second order base
+	if order == '2b':  # Second order base
             self.base = self.stormerVerlet2;
             self.coeff = array('d', [1.0])
-	elif order == '4a':  # Fourth order, composed from Second order
+	elif order == '4c':  # Fourth order, composed from Second order
             self.base = self.stormerVerlet2;
             self.coeff = array('d', [1.0 / self.cbrt2two, - self.cbrt2 / self.cbrt2two, 1.0 / self.cbrt2two])
 	elif order == '4b':  # Fourth order base
             self.base = self.stormerVerlet4;
             self.coeff = array('d', [1.0])
-	elif order == '6':  # Sixth order, composed from Fourth order
+	elif order == '6c':  # Sixth order, composed from Fourth order
             self.base = self.stormerVerlet4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
 	else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be 2, 4a, 4b or 6 <<<')
+            raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
         self.simtime = abs(simtime)
         self.t = self.ph = 0.0
     	self.a2 = self.a**2
