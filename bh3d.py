@@ -28,13 +28,22 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.r = r0
     	self.th = thetaMin
     	self.h = timestep
-	if order == 2:  # Second order
+	if order == '2':  # Second order base
+            self.base = self.stormerVerlet2;
             self.coeff = array('d', [1.0])
-	elif order == 4:  # Fourth order
+	elif order == '4a':  # Fourth order, composed from Second order
+            self.base = self.stormerVerlet2;
             cbrt2 = 2.0**(1.0 / 3.0)
             self.coeff = array('d', [1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2)])
+	elif order == '4b':  # Fourth order base
+            self.base = self.stormerVerlet4;
+            self.coeff = array('d', [1.0])
+	elif order == '6':  # Sixth order, composed from Fourth order
+            self.base = self.stormerVerlet4;
+            fthrt2 = 2.0**(1.0 / 5.0)
+            self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2)])
 	else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be 2 or 4 <<<')
+            raise Exception('>>> ERROR! Integrator order must be 2, 4a, 4b or 6 <<<')
         self.simtime = abs(simtime)
         self.t = self.ph = 0.0
     	self.a2 = self.a**2
@@ -74,34 +83,37 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.tDot = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phDot = self.a * P / self.D - self.aE + self.L / self.sth2
 	
+    def qUp (self, c):  # Coordinate updates, x += dH/dxDot (i.e. dT/dxDot).  N.B. x = r or theta; t and phi are just along for the ride . . .
+        self.t += c * self.tDot
+        self.r += c * self.rDot
+        self.th += c * self.thDot
+        self.ph += c * self.phDot
+        self.refresh(self.r, self.th)
+
+    def qDotUp (self, c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
+        self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+        self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+
+    def stormerVerlet2 (self, y):  # Compose higher orders from this second-order symplectic base
+        self.qUp(0.5 * y)
+        self.qDotUp(y)
+        self.qUp(0.5 * y)
+
+    def stormerVerlet4 (self, y):  # Compose higher orders from this second-order symplectic base
+        cbrt2 = 2.0**(1.0 / 3.0)
+        self.qUp(0.5 / (2.0 - cbrt2) * y)
+        self.qDotUp(1.0 / (2.0 - cbrt2) * y)
+        self.qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y)
+        self.qDotUp(- cbrt2 / (2.0 - cbrt2) * y)
+        self.qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y)
+        self.qDotUp(1.0 / (2.0 - cbrt2) * y)
+        self.qUp(0.5 / (2.0 - cbrt2) * y)
+
     def solve (self):  # Symplectic Integrator, for a pseudo-Hamiltonian H = T - V = 0.0 (note that V has negative sign c.f. a "regular" Hamiltonian)
-        def qUp (c):  # Coordinate updates, x += dH/dxDot (i.e. dT/dxDot).  N.B. x = r or theta; t and phi are just along for the ride . . .
-            self.t += c * self.tDot
-            self.r += c * self.rDot
-            self.th += c * self.thDot
-            self.ph += c * self.phDot
-            self.refresh(self.r, self.th)
-        def qDotUp (c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
-            self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-            self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-        def stormerVerlet2 (y):  # Compose higher orders from this second-order symplectic base
-	    qUp(0.5 * y * self.h)
-	    qDotUp(y * self.h)
-	    qUp(0.5 * y * self.h)
-        def stormerVerlet4 (y):  # Compose higher orders from this second-order symplectic base
-            cbrt2 = 2.0**(1.0 / 3.0)
-	    qUp(0.5 / (2.0 - cbrt2) * y * self.h)
-	    qDotUp(1.0 / (2.0 - cbrt2) * y * self.h)
-	    qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y * self.h)
-	    qDotUp(- cbrt2 / (2.0 - cbrt2) * y * self.h)
-	    qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y * self.h)
-	    qDotUp(1.0 / (2.0 - cbrt2) * y * self.h)
-	    qUp(0.5 / (2.0 - cbrt2) * y * self.h)
-        base = stormerVerlet4;
-	for i in self.coefficientsUp:  # Composition happens in these loops
-	    base(self.coeff[i])
-	for i in self.coefficientsDown:
-	    base(self.coeff[i])
+        for i in self.coefficientsUp:  # Composition happens in these loops
+            self.base(self.coeff[i] * self.h)
+        for i in self.coefficientsDown:
+            self.base(self.coeff[i] * self.h)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())

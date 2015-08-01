@@ -95,7 +95,7 @@ def main ():
     print >> stdout, "  \"theta\" : " + repr(thValue) + ","
     print >> stdout, "  \"time\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
-    print >> stdout, "  \"integratorOrder\" : " + str(ic.integrator) + ","
+    print >> stdout, "  \"integratorOrder\" : \"" + str(ic.integrator) + "\","
     print >> stdout, "  \"error\" : " + str(ic.fun) + ","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
