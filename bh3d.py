@@ -28,20 +28,22 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.r = r0
     	self.th = thetaMin
     	self.h = timestep
+        self.cbrt2 = 2.0**(1.0 / 3.0)
+        self.cbrt2one = 1.0 - self.cbrt2
+        self.cbrt2two = 2.0 - self.cbrt2
 	if order == '2':  # Second order base
             self.base = self.stormerVerlet2;
             self.coeff = array('d', [1.0])
 	elif order == '4a':  # Fourth order, composed from Second order
             self.base = self.stormerVerlet2;
-            cbrt2 = 2.0**(1.0 / 3.0)
-            self.coeff = array('d', [1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2)])
+            self.coeff = array('d', [1.0 / self.cbrt2two, - self.cbrt2 / self.cbrt2two, 1.0 / self.cbrt2two])
 	elif order == '4b':  # Fourth order base
             self.base = self.stormerVerlet4;
             self.coeff = array('d', [1.0])
 	elif order == '6':  # Sixth order, composed from Fourth order
             self.base = self.stormerVerlet4;
             fthrt2 = 2.0**(1.0 / 5.0)
-            self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2)])
+            self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2, 4a, 4b or 6 <<<')
         self.simtime = abs(simtime)
@@ -54,8 +56,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         E2_mu2 = self.E**2 - self.mu2
         self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_mu2 = - self.a2 * E2_mu2
-        self.coefficientsUp = range(len(self.coeff) - 1)  # This is right, believe it or not!
-        self.coefficientsDown = range(len(self.coeff) - 1, -1, -1)
+        self.coefficients = range(len(self.coeff))
 
     def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
@@ -99,21 +100,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.qDotUp(y)
         self.qUp(0.5 * y)
 
-    def stormerVerlet4 (self, y):  # Compose higher orders from this second-order symplectic base
-        cbrt2 = 2.0**(1.0 / 3.0)
-        self.qUp(0.5 / (2.0 - cbrt2) * y)
-        self.qDotUp(1.0 / (2.0 - cbrt2) * y)
-        self.qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y)
-        self.qDotUp(- cbrt2 / (2.0 - cbrt2) * y)
-        self.qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y)
-        self.qDotUp(1.0 / (2.0 - cbrt2) * y)
-        self.qUp(0.5 / (2.0 - cbrt2) * y)
-
-    def solve (self):  # Symplectic Integrator, for a pseudo-Hamiltonian H = T - V = 0.0 (note that V has negative sign c.f. a "regular" Hamiltonian)
-        for i in self.coefficientsUp:  # Composition happens in these loops
-            self.base(self.coeff[i] * self.h)
-        for i in self.coefficientsDown:
-            self.base(self.coeff[i] * self.h)
+    def stormerVerlet4 (self, y):  # Compose higher orders from this fourth-order symplectic base
+        self.qUp(0.5 / self.cbrt2two * y)
+        self.qDotUp(1.0 / self.cbrt2two * y)
+        self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
+        self.qDotUp(- self.cbrt2 / self.cbrt2two * y)
+        self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
+        self.qDotUp(1.0 / self.cbrt2two * y)
+        self.qUp(0.5 / self.cbrt2two * y)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
@@ -125,7 +119,8 @@ def main ():  # Need to be inside a function to return . . .
     while not abs(mino) > bl.simtime:
         bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.S, bl.rDot / bl.S, bl.thDot / bl.S, bl.phDot / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
-        bl.solve()  # update r and theta with symplectic integrator
+        for i in bl.coefficients:  # Composition happens in this loop
+            bl.base(bl.coeff[i] * bl.h)
         mino += bl.h
         tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 
