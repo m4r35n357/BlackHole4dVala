@@ -19,7 +19,7 @@ from json import loads
 from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
-    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
+    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, simtime, timestep, order, qOdd):
     	self.a = spin
         self.mu2 = pMass2
     	self.E = energy
@@ -48,6 +48,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
         self.coefficients = range(len(self.coeff))
+        self.odd = self.qUp if qOdd == 'True' else self.pUp
+        self.even = self.pUp if qOdd == 'True' else self.qUp
         self.t = self.ph = 0.0
     	self.a2 = self.a**2
         self.aE = self.a * self.E
@@ -95,23 +97,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
         self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
-    def base2 (self, y):  # Compose higher orders from this second-order symplectic base
-        self.qUp(0.5 * y)
-        self.pUp(y)
-        self.qUp(0.5 * y)
+    def base2 (self, y, odd, even):  # Compose higher orders from this second-order symplectic base
+        odd(0.5 * y)
+        even(y)
+        odd(0.5 * y)
 
-    def base4 (self, y):  # Compose higher orders from this fourth-order symplectic base
-        self.qUp(0.5 / self.cbrt2two * y)
-        self.pUp(1.0 / self.cbrt2two * y)
-        self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.pUp(- self.cbrt2 / self.cbrt2two * y)
-        self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.pUp(1.0 / self.cbrt2two * y)
-        self.qUp(0.5 / self.cbrt2two * y)
+    def base4 (self, y, odd, even):  # Compose higher orders from this fourth-order symplectic base
+        odd(0.5 / self.cbrt2two * y)
+        even(1.0 / self.cbrt2two * y)
+        odd(0.5 * self.cbrt2one / self.cbrt2two * y)
+        even(- self.cbrt2 / self.cbrt2two * y)
+        odd(0.5 * self.cbrt2one / self.cbrt2two * y)
+        even(1.0 / self.cbrt2two * y)
+        odd(0.5 / self.cbrt2two * y)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
-    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
+    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'], ic['qIsOdd'])
     bl.refresh(bl.r, bl.th)
     bl.rP = - sqrt(bl.R if bl.R > 0.0 else 0.0)
     bl.thP = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
@@ -120,7 +122,7 @@ def main ():  # Need to be inside a function to return . . .
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.coefficients:  # Composition happens in this loop
-            bl.base(bl.coeff[i] * bl.h)
+            bl.base(bl.coeff[i] * bl.h, bl.odd, bl.even)
         mino += bl.h
         tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 
