@@ -78,6 +78,10 @@ def main():
         else:
             sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
 	ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
+#        for j in range(2, 21, 2):
+#            ring(pos=scene.center, axis=(0, 0, 1), radius = j, color = color.gray(0.3), thickness=0.01)
+#            ring(pos=scene.center, axis=(0, 1, 0), radius = j, color = color.gray(0.3), thickness=0.01)
+#            ring(pos=scene.center, axis=(1, 0, 0), radius = j, color = color.gray(0.3), thickness=0.01)
 	# animate!
 	ball = sphere()  # Particle
 	counter = 0

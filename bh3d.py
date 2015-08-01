@@ -32,8 +32,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.coeff = array('d', [1.0])
 	elif order == 4:  # Fourth order
             cbrt2 = 2.0**(1.0 / 3.0)
-            y = 1.0 / (2.0 - cbrt2)
-            self.coeff = array('d', [y, - y * cbrt2])
+            self.coeff = array('d', [1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2)])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2 or 4 <<<')
         self.simtime = abs(simtime)
@@ -85,14 +84,24 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         def qDotUp (c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
             self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
             self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-        def stormerVerlet (y):  # Compose higher orders from this second-order symplectic base
+        def stormerVerlet2 (y):  # Compose higher orders from this second-order symplectic base
 	    qUp(0.5 * y * self.h)
 	    qDotUp(y * self.h)
 	    qUp(0.5 * y * self.h)
+        def stormerVerlet4 (y):  # Compose higher orders from this second-order symplectic base
+            cbrt2 = 2.0**(1.0 / 3.0)
+	    qUp(0.5 / (2.0 - cbrt2) * y * self.h)
+	    qDotUp(1.0 / (2.0 - cbrt2) * y * self.h)
+	    qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y * self.h)
+	    qDotUp(- cbrt2 / (2.0 - cbrt2) * y * self.h)
+	    qUp(0.5 * (1.0 - cbrt2) / (2.0 - cbrt2) * y * self.h)
+	    qDotUp(1.0 / (2.0 - cbrt2) * y * self.h)
+	    qUp(0.5 / (2.0 - cbrt2) * y * self.h)
+        base = stormerVerlet4;
 	for i in self.coefficientsUp:  # Composition happens in these loops
-	    stormerVerlet(self.coeff[i])
+	    base(self.coeff[i])
 	for i in self.coefficientsDown:
-	    stormerVerlet(self.coeff[i])
+	    base(self.coeff[i])
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
