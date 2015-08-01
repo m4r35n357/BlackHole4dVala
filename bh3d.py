@@ -27,27 +27,27 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.Q = carter
     	self.r = r0
     	self.th = thetaMin
+        self.simtime = abs(simtime)
     	self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.cbrt2one = 1.0 - self.cbrt2
         self.cbrt2two = 2.0 - self.cbrt2
 	if order == '2b':  # Second order base
-            self.base = self.stormerVerlet2;
+            self.base = self.base2;
             self.coeff = array('d', [1.0])
 	elif order == '4c':  # Fourth order, composed from Second order
-            self.base = self.stormerVerlet2;
+            self.base = self.base2;
             self.coeff = array('d', [1.0 / self.cbrt2two, - self.cbrt2 / self.cbrt2two, 1.0 / self.cbrt2two])
 	elif order == '4b':  # Fourth order base
-            self.base = self.stormerVerlet4;
+            self.base = self.base4;
             self.coeff = array('d', [1.0])
 	elif order == '6c':  # Sixth order, composed from Fourth order
-            self.base = self.stormerVerlet4;
+            self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
-        self.simtime = abs(simtime)
-        self.t = self.ph = 0.0
+        self.coefficients = range(len(self.coeff))
     	self.a2 = self.a**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
@@ -56,7 +56,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         E2_mu2 = self.E**2 - self.mu2
         self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_mu2 = - self.a2 * E2_mu2
-        self.coefficients = range(len(self.coeff))
+        self.t = self.ph = 0.0
 
     def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
         def logError (e):
@@ -91,22 +91,22 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ph += c * self.phDot
         self.refresh(self.r, self.th)
 
-    def qDotUp (self, c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
+    def pUp (self, c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
         self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
         self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
-    def stormerVerlet2 (self, y):  # Compose higher orders from this second-order symplectic base
+    def base2 (self, y):  # Compose higher orders from this second-order symplectic base
         self.qUp(0.5 * y)
-        self.qDotUp(y)
+        self.pUp(y)
         self.qUp(0.5 * y)
 
-    def stormerVerlet4 (self, y):  # Compose higher orders from this fourth-order symplectic base
+    def base4 (self, y):  # Compose higher orders from this fourth-order symplectic base
         self.qUp(0.5 / self.cbrt2two * y)
-        self.qDotUp(1.0 / self.cbrt2two * y)
+        self.pUp(1.0 / self.cbrt2two * y)
         self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.qDotUp(- self.cbrt2 / self.cbrt2two * y)
+        self.pUp(- self.cbrt2 / self.cbrt2two * y)
         self.qUp(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.qDotUp(1.0 / self.cbrt2two * y)
+        self.pUp(1.0 / self.cbrt2two * y)
         self.qUp(0.5 / self.cbrt2two * y)
 
 def main ():  # Need to be inside a function to return . . .
