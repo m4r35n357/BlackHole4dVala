@@ -48,6 +48,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
         self.coefficients = range(len(self.coeff))
+        self.t = self.ph = 0.0
     	self.a2 = self.a**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
@@ -56,18 +57,17 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         E2_mu2 = self.E**2 - self.mu2
         self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_mu2 = - self.a2 * E2_mu2
-        self.t = self.ph = 0.0
 
-    def errors (self, R, THETA, tDot, rDot, thDot, phDot):  # Error analysis
+    def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
         def logError (e):
             return 10.0 * log10(e if e > 1.0e-15 else 1.0e-15) 
         def modH (xDot, X):
             return 0.5 * fabs(xDot**2 - X)
-        def v4Error (tDot, rDot, thDot, phDot):  # norm squared, xDot means dx/dTau !!!
-            return fabs(self.mu2 + self.sth2 / self.S * (self.a * tDot - self.ra2 * phDot)**2 + self.S / self.D * rDot**2 + self.S * thDot**2 - self.D / self.S * (tDot - self.a * self.sth2 * phDot)**2)
-        self.eR = logError(modH(rDot, R))
-        self.eTh = logError(modH(thDot, THETA))
-        self.v4e = logError(v4Error(tDot / self.S, rDot / self.S, thDot / self.S, phDot / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
+        def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!
+            return fabs(self.mu2 + self.sth2 / self.S * (self.a * tP - self.ra2 * phP)**2 + self.S / self.D * rP**2 + self.S * thP**2 - self.D / self.S * (tP - self.a * self.sth2 * phP)**2)
+        self.eR = logError(modH(rP, R))
+        self.eTh = logError(modH(thP, THETA))
+        self.v4e = logError(v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on r or theta
         self.sth = sin(th)
@@ -81,19 +81,19 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
 	P = self.ra2 * self.E - self.aL
-        self.tDot = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
-        self.phDot = self.a * P / self.D - self.aE + self.L / self.sth2
+        self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
+        self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
-    def qUp (self, c):  # Coordinate updates, x += dH/dxDot (i.e. dT/dxDot).  N.B. x = r or theta; t and phi are just along for the ride . . .
-        self.t += c * self.tDot
-        self.r += c * self.rDot
-        self.th += c * self.thDot
-        self.ph += c * self.phDot
+    def qUp (self, c):  # q += c * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
+        self.t += c * self.tP
+        self.r += c * self.rP
+        self.th += c * self.thP
+        self.ph += c * self.phP
         self.refresh(self.r, self.th)
 
-    def pUp (self, c):  # Velocity (momentum) updates, xDot += -dH/dx (i.e. dV/dx, minus sign cancels with the one in the pseudo-Hamiltonian)
-        self.rDot += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-        self.thDot += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+    def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
+        self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+        self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def base2 (self, y):  # Compose higher orders from this second-order symplectic base
         self.qUp(0.5 * y)
@@ -113,12 +113,12 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.refresh(bl.r, bl.th)
-    bl.rDot = - sqrt(bl.R if bl.R > 0.0 else 0.0)
-    bl.thDot = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
+    bl.rP = - sqrt(bl.R if bl.R > 0.0 else 0.0)
+    bl.thP = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
     mino = tau = 0.0
     while not abs(mino) > bl.simtime:
-        bl.errors(bl.R, bl.THETA, bl.tDot, bl.rDot, bl.thDot, bl.phDot)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tDot":%.9e, "rDot":%.9e, "thDot":%.9e, "phDot":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tDot / bl.S, bl.rDot / bl.S, bl.thDot / bl.S, bl.phDot / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+        bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.coefficients:  # Composition happens in this loop
             bl.base(bl.coeff[i] * bl.h)
         mino += bl.h
