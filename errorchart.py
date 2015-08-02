@@ -6,7 +6,7 @@ from matplotlib import pyplot
 from matplotlib.ticker import MultipleLocator
 from json import loads
 from array import array
-from scipy.interpolate import interp1d
+from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
 
 def main():
@@ -31,9 +31,9 @@ def main():
 		ev4.append(p['v4e'])
 		line = dataFile.readline()
         try:  # interpolate here
-        	eRI = interp1d(tau, eR, kind='linear', copy=False)
-		eThI = interp1d(tau, eTh, kind='linear', copy=False)
-		ev4I = interp1d(tau, ev4, kind='linear', copy=False)
+        	eRI = InterpolatedUnivariateSpline(tau, eR, k = 1)
+		eThI = InterpolatedUnivariateSpline(tau, eTh, k = 1)
+		ev4I = InterpolatedUnivariateSpline(tau, ev4, k = 1)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		

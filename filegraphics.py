@@ -5,7 +5,7 @@ from math import sqrt, sin, cos, fabs
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
 from json import loads
 from array import array
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 import numpy as np
 
 def isco (a):
@@ -56,16 +56,17 @@ def main():
 		e.append(data['v4e'])
 		dataLine = dataFile.readline()
         try:  # interpolate here
-		xI = interp1d(time, x, kind='linear', copy=False)
-		yI = interp1d(time, y, kind='linear', copy=False)
-		zI = interp1d(time, z, kind='linear', copy=False)
-		eI = interp1d(time, e, kind='linear', copy=False)
+		xI = InterpolatedUnivariateSpline(time, x, k = 1)
+		yI = InterpolatedUnivariateSpline(time, y, k = 1)
+		zI = InterpolatedUnivariateSpline(time, z, k = 1)
+		eI = InterpolatedUnivariateSpline(time, e, k = 1)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
 	#  set up the scene
 	scene.center = (0.0, 0.0, 0.0)
-	scene.width = scene.height = 1000.0
+	scene.width = 1600
+	scene.height = 1050
 	scene.range = (20.0, 20.0, 20.0)
         inner = 2.0 * sqrt(cauchy**2 + a**2)
 	ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = color.blue, opacity = 0.4)  # Inner Horizon

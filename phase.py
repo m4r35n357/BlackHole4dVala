@@ -4,7 +4,7 @@ from sys import argv, stdin, stdout
 from matplotlib import pyplot
 from json import loads
 from array import array
-from scipy.interpolate import interp1d
+from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
 
 def main():
@@ -28,8 +28,8 @@ def main():
 		cDot.append(p[coordinate + 'Dot'])
 		line = dataFile.readline()
         try:  # interpolate here
-        	cI = interp1d(tau, c, kind='linear', copy=False)
-		cDotI = interp1d(tau, cDot, kind='linear', copy=False)
+        	cI = InterpolatedUnivariateSpline(tau, c, k = 1)
+		cDotI = InterpolatedUnivariateSpline(tau, cDot, k = 1)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
