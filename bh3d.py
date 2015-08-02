@@ -97,19 +97,19 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
         self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
-    def base2 (self, y, odd, even):  # Compose higher orders from this second-order symplectic base
-        odd(0.5 * y)
-        even(y)
-        odd(0.5 * y)
+    def base2 (self, y):  # Compose higher orders from this second-order symplectic base
+        self.odd(0.5 * y)
+        self.even(y)
+        self.odd(0.5 * y)
 
-    def base4 (self, y, odd, even):  # Compose higher orders from this fourth-order symplectic base
-        odd(0.5 / self.cbrt2two * y)
-        even(1.0 / self.cbrt2two * y)
-        odd(0.5 * self.cbrt2one / self.cbrt2two * y)
-        even(- self.cbrt2 / self.cbrt2two * y)
-        odd(0.5 * self.cbrt2one / self.cbrt2two * y)
-        even(1.0 / self.cbrt2two * y)
-        odd(0.5 / self.cbrt2two * y)
+    def base4 (self, y):  # Compose higher orders from this fourth-order symplectic base
+        self.odd(0.5 / self.cbrt2two * y)
+        self.even(1.0 / self.cbrt2two * y)
+        self.odd(0.5 * self.cbrt2one / self.cbrt2two * y)
+        self.even(- self.cbrt2 / self.cbrt2two * y)
+        self.odd(0.5 * self.cbrt2one / self.cbrt2two * y)
+        self.even(1.0 / self.cbrt2two * y)
+        self.odd(0.5 / self.cbrt2two * y)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
@@ -122,7 +122,7 @@ def main ():  # Need to be inside a function to return . . .
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.coefficients:  # Composition happens in this loop
-            bl.base(bl.coeff[i] * bl.h, bl.odd, bl.even)
+            bl.base(bl.coeff[i] * bl.h)
         mino += bl.h
         tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 
