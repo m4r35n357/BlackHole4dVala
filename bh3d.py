@@ -30,14 +30,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.simtime = abs(simtime)
     	self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.cbrt2one = 1.0 - self.cbrt2
-        self.cbrt2two = 2.0 - self.cbrt2
+        self.oneMinusCbrt2 = 1.0 - self.cbrt2
+        self.twoMinusCbrt2 = 2.0 - self.cbrt2
 	if order == '2b':  # Second order base
             self.base = self.base2;
             self.coeff = array('d', [1.0])
 	elif order == '4c':  # Fourth order, composed from Second order
             self.base = self.base2;
-            self.coeff = array('d', [1.0 / self.cbrt2two, - self.cbrt2 / self.cbrt2two, 1.0 / self.cbrt2two])
+            self.coeff = array('d', [1.0 / self.twoMinusCbrt2, - self.cbrt2 / self.twoMinusCbrt2, 1.0 / self.twoMinusCbrt2])
 	elif order == '4b':  # Fourth order base
             self.base = self.base4;
             self.coeff = array('d', [1.0])
@@ -48,8 +48,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
         self.coefficients = range(len(self.coeff))
-        self.odd = self.qUp if qOdd == 'True' else self.pUp
-        self.even = self.pUp if qOdd == 'True' else self.qUp
+        self.odd = self.qUp if qOdd else self.pUp
+        self.even = self.pUp if qOdd else self.qUp
         self.t = self.ph = 0.0
     	self.a2 = self.a**2
         self.aE = self.a * self.E
@@ -103,13 +103,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.odd(0.5 * y)
 
     def base4 (self, y):  # Compose higher orders from this fourth-order symplectic base
-        self.odd(0.5 / self.cbrt2two * y)
-        self.even(1.0 / self.cbrt2two * y)
-        self.odd(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.even(- self.cbrt2 / self.cbrt2two * y)
-        self.odd(0.5 * self.cbrt2one / self.cbrt2two * y)
-        self.even(1.0 / self.cbrt2two * y)
-        self.odd(0.5 / self.cbrt2two * y)
+        self.odd(0.5 / self.twoMinusCbrt2 * y)
+        self.even(1.0 / self.twoMinusCbrt2 * y)
+        self.odd(0.5 * self.oneMinusCbrt2 / self.twoMinusCbrt2 * y)
+        self.even(- self.cbrt2 / self.twoMinusCbrt2 * y)
+        self.odd(0.5 * self.oneMinusCbrt2 / self.twoMinusCbrt2 * y)
+        self.even(1.0 / self.twoMinusCbrt2 * y)
+        self.odd(0.5 / self.twoMinusCbrt2 * y)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
