@@ -30,7 +30,6 @@ class InitialConditions(object):
         self.a2 = self.a**2
 	self.factorL = factorL
 	self.integrator = '2b'
-	self.qOdd = 'False'
         self.duration = 50.0
         self.timestep = 0.001
         self.ic = np.array([1.0, copysign(5.0, a), 0.0]) if a >= 0.0 else np.array([1.0, - copysign(5.0, a), 0.0])
@@ -97,7 +96,6 @@ def main ():
     print >> stdout, "  \"time\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
     print >> stdout, "  \"integratorOrder\" : \"" + ic.integrator + "\","
-    print >> stdout, "  \"qIsOdd\" : \"" + ic.qOdd + "\","
     print >> stdout, "  \"error\" : " + str(ic.fun) + ","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
