@@ -116,50 +116,56 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.qUp(w * self.coefficients[1])  # w * d3
         self.pUp(w * self.coefficients[0])  # w * c4
 
-    def rDot (self):
-        return (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-
-    def thDot (self):
-        return (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-
     def rk4 (self, c):
         t = self.t
         r = self.r
+        rDot = self.rP
         theta = self.th
+        thetaDot = self.thP
         phi = self.ph
 
         self.refresh(r, theta)
 	t_k1 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-	r_k1 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
-	theta_k1 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+        rDot_k1 = c * self.rP
+	r_k1 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+	thetaDot_k1 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	theta_k1 = c * self.thP
 	phi_k1 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-        print >> stderr, '{"t_k1":%.3e, "r_k1":%.3e, "theta_k1":%.3e, "phi_k1":%.3e}' % (t_k1, r_k1, theta_k1, phi_k1)
+#        print >> stderr, '{"t_k1":%.3e, "r_k1":%.3e, "theta_k1":%.3e, "phi_k1":%.3e}' % (t_k1, r_k1, theta_k1, phi_k1)
 
         self.refresh(r + r_k1 / 2.0, theta + theta_k1 / 2.0)
 	t_k2 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-	r_k2 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
-	theta_k2 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+        rDot_k2 = c * self.rP
+	r_k2 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+	thetaDot_k2 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	theta_k2 = c * self.thP
 	phi_k2 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-        print >> stderr, '{"t_k2":%.3e, "r_k2":%.3e, "theta_k2":%.3e, "phi_k2":%.3e}' % (t_k2, r_k2, theta_k2, phi_k2)
+#        print >> stderr, '{"t_k2":%.3e, "r_k2":%.3e, "theta_k2":%.3e, "phi_k2":%.3e}' % (t_k2, r_k2, theta_k2, phi_k2)
 
         self.refresh(r + r_k2 / 2.0, theta + theta_k2 / 2.0)
 	t_k3 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-	r_k3 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
-	theta_k3 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+        rDot_k3 = c * self.rP
+	r_k3 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+	thetaDot_k3 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	theta_k3 = c * self.thP
 	phi_k3 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-        print >> stderr, '{"t_k3":%.3e, "r_k3":%.3e, "theta_k3":%.3e, "phi_k3":%.3e}' % (t_k3, r_k3, theta_k3, phi_k3)
+#        print >> stderr, '{"t_k3":%.3e, "r_k3":%.3e, "theta_k3":%.3e, "phi_k3":%.3e}' % (t_k3, r_k3, theta_k3, phi_k3)
 
         self.refresh(r + r_k3, theta + theta_k3)
 	t_k4 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-	r_k4 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
-	theta_k4 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+        rDot_k4 = c * self.rP
+	r_k4 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+	thetaDot_k4 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	theta_k4 = c * self.thP
 	phi_k4 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-        print >> stderr, '{"t_k4":%.3e, "r_k4":%.3e, "theta_k4":%.3e, "phi_k4":%.3e}' % (t_k4, r_k4, theta_k4, phi_k4)
-        print >> stderr, '' % ()
+#        print >> stderr, '{"t_k4":%.3e, "r_k4":%.3e, "theta_k4":%.3e, "phi_k4":%.3e}' % (t_k4, r_k4, theta_k4, phi_k4)
+#        print >> stderr, '' % ()
 
         self.t = t + (t_k1 + 2.0 * (t_k2 + t_k3) + t_k4) / 6.0
         self.r = r + (r_k1 + 2.0 * (r_k2 + r_k3) + r_k4) / 6.0
+        self.rP = rDot + (rDot_k1 + 2.0 * (rDot_k2 + rDot_k3) + rDot_k4) / 6.0
         self.th = theta + (theta_k1 + 2.0 * (theta_k2 + theta_k3) + theta_k4) / 6.0
+        self.thP = thetaDot + (thetaDot_k1 + 2.0 * (thetaDot_k2 + thetaDot_k3) + thetaDot_k4) / 6.0
         self.ph = phi + (phi_k1 + 2.0 * (phi_k2 + phi_k3) + phi_k4) / 6.0
 
 def main ():  # Need to be inside a function to return . . .
