@@ -74,6 +74,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
+        self.r = r
+        self.th = th
         self.sth = sin(th)
         self.cth = cos(th)
         self.sth2 = self.sth**2
@@ -85,6 +87,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
 	P = self.ra2 * self.E - self.aL
+	self.P = self.ra2 * self.E - self.aL
         self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
@@ -112,6 +115,52 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.pUp(w * self.coefficients[2])  # w * c3
         self.qUp(w * self.coefficients[1])  # w * d3
         self.pUp(w * self.coefficients[0])  # w * c4
+
+    def rDot (self):
+        return (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+
+    def thDot (self):
+        return (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+
+    def rk4 (self, c):
+        t = self.t
+        r = self.r
+        theta = self.th
+        phi = self.ph
+
+        self.refresh(r, theta)
+	t_k1 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
+	r_k1 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
+	theta_k1 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+	phi_k1 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
+        print >> stderr, '{"t_k1":%.3e, "r_k1":%.3e, "theta_k1":%.3e, "phi_k1":%.3e}' % (t_k1, r_k1, theta_k1, phi_k1)
+
+        self.refresh(r + r_k1 / 2.0, theta + theta_k1 / 2.0)
+	t_k2 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
+	r_k2 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
+	theta_k2 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+	phi_k2 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
+        print >> stderr, '{"t_k2":%.3e, "r_k2":%.3e, "theta_k2":%.3e, "phi_k2":%.3e}' % (t_k2, r_k2, theta_k2, phi_k2)
+
+        self.refresh(r + r_k2 / 2.0, theta + theta_k2 / 2.0)
+	t_k3 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
+	r_k3 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
+	theta_k3 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+	phi_k3 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
+        print >> stderr, '{"t_k3":%.3e, "r_k3":%.3e, "theta_k3":%.3e, "phi_k3":%.3e}' % (t_k3, r_k3, theta_k3, phi_k3)
+
+        self.refresh(r + r_k3, theta + theta_k3)
+	t_k4 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
+	r_k4 = c * - sqrt(self.R if self.R > 0.0 else 0.0)
+	theta_k4 = c * - sqrt(self.THETA if self.THETA > 0.0 else 0.0)
+	phi_k4 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
+        print >> stderr, '{"t_k4":%.3e, "r_k4":%.3e, "theta_k4":%.3e, "phi_k4":%.3e}' % (t_k4, r_k4, theta_k4, phi_k4)
+        print >> stderr, '' % ()
+
+        self.t = t + (t_k1 + 2.0 * (t_k2 + t_k3) + t_k4) / 6.0
+        self.r = r + (r_k1 + 2.0 * (r_k2 + r_k3) + r_k4) / 6.0
+        self.th = theta + (theta_k1 + 2.0 * (theta_k2 + theta_k3) + theta_k4) / 6.0
+        self.ph = phi + (phi_k1 + 2.0 * (phi_k2 + phi_k3) + phi_k4) / 6.0
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
