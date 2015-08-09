@@ -30,24 +30,24 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.simtime = abs(simtime)
     	self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.oneMinusCbrt2 = 1.0 - self.cbrt2
-        self.twoMinusCbrt2 = 2.0 - self.cbrt2
+        self.halfOneMinusCbrt2 = 0.5 * (1.0 - self.cbrt2)
+        self.invTwoMinusCbrt2 = 1.0 / (2.0 - self.cbrt2)
 	if order == '2b':  # Second order base
             self.base = self.base2;
-            self.coeff = array('d', [1.0])
+            self.w = array('d', [1.0])
 	elif order == '4c':  # Fourth order, composed from Second order
             self.base = self.base2;
-            self.coeff = array('d', [1.0 / self.twoMinusCbrt2, - self.cbrt2 / self.twoMinusCbrt2, 1.0 / self.twoMinusCbrt2])
+            self.w = array('d', [self.invTwoMinusCbrt2, - self.cbrt2 * self.invTwoMinusCbrt2, self.invTwoMinusCbrt2])
 	elif order == '4b':  # Fourth order base
             self.base = self.base4;
-            self.coeff = array('d', [1.0])
+            self.w = array('d', [1.0])
 	elif order == '6c':  # Sixth order, composed from Fourth order
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
-            self.coeff = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
+            self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
-        self.coefficients = range(len(self.coeff))
+        self.wRange = range(len(self.w))
         self.t = self.ph = 0.0
     	self.a2 = self.a**2
         self.aE = self.a * self.E
@@ -84,30 +84,30 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
-    def qUp (self, c):  # q += c * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
-        self.t += c * self.tP
-        self.r += c * self.rP
-        self.th += c * self.thP
-        self.ph += c * self.phP
+    def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
+        self.t += d * self.tP
+        self.r += d * self.rP
+        self.th += d * self.thP
+        self.ph += d * self.phP
         self.refresh(self.r, self.th)
 
     def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
         self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
         self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
-    def base2 (self, y):  # Compose higher orders from this second-order symplectic base
-        self.pUp(0.5 * y)
-        self.qUp(y)
-        self.pUp(0.5 * y)
+    def base2 (self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
+        self.pUp(w * 0.5)  # c1 = 0.5
+        self.qUp(w)        # d1 = 1.0
+        self.pUp(w * 0.5)  # c2 = 0.5
 
-    def base4 (self, y):  # Compose higher orders from this fourth-order symplectic base
-        self.pUp(0.5 / self.twoMinusCbrt2 * y)
-        self.qUp(1.0 / self.twoMinusCbrt2 * y)
-        self.pUp(0.5 * self.oneMinusCbrt2 / self.twoMinusCbrt2 * y)
-        self.qUp(- self.cbrt2 / self.twoMinusCbrt2 * y)
-        self.pUp(0.5 * self.oneMinusCbrt2 / self.twoMinusCbrt2 * y)
-        self.qUp(1.0 / self.twoMinusCbrt2 * y)
-        self.pUp(0.5 / self.twoMinusCbrt2 * y)
+    def base4 (self, w):  # Compose higher orders from this fourth-order symplectic base (d4 = 0.0)
+        self.pUp(w * 0.5 * self.invTwoMinusCbrt2)                     # w * c1
+        self.qUp(w * self.invTwoMinusCbrt2)                           # w * d1
+        self.pUp(w * self.halfOneMinusCbrt2 * self.invTwoMinusCbrt2)  # w * c2
+        self.qUp(w * - self.cbrt2 * self.invTwoMinusCbrt2)            # w * d2
+        self.pUp(w * self.halfOneMinusCbrt2 * self.invTwoMinusCbrt2)  # w * c3
+        self.qUp(w * self.invTwoMinusCbrt2)                           # w * d3
+        self.pUp(w * 0.5 * self.invTwoMinusCbrt2)                     # w * c4
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
@@ -119,8 +119,8 @@ def main ():  # Need to be inside a function to return . . .
     while not abs(mino) > bl.simtime:
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
 	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
-        for i in bl.coefficients:  # Composition happens in this loop
-            bl.base(bl.coeff[i] * bl.h)
+        for i in bl.wRange:  # Composition happens in this loop
+            bl.base(bl.w[i] * bl.h)
         mino += bl.h
         tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 

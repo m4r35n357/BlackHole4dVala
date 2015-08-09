@@ -56,8 +56,8 @@ def main():
 	tauI = np.linspace(0, tauMax, num = nPoints)
 	for i in range(len(tauI)):
 		ax1.plot(tauI[i], ev4I(tauI[i]), color='#006000', linestyle='-', marker='.', markersize=2, zorder=10)
-		ax2.plot(tauI[i], eRI(tauI[i]), color='blue', linestyle='-', marker='.', markersize=1, zorder=9)
-		ax2.plot(tauI[i], eThI(tauI[i]), color='red', linestyle='-', marker='.', markersize=1, zorder=8)
+		ax2.plot(tauI[i], eRI(tauI[i]), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
+		ax2.plot(tauI[i], eThI(tauI[i]), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
         try:
             pyplot.show()
         except AttributeError as e:
