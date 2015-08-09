@@ -30,14 +30,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.simtime = abs(simtime)
     	self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.halfOneMinusCbrt2 = 0.5 * (1.0 - self.cbrt2)
-        self.invTwoMinusCbrt2 = 1.0 / (2.0 - self.cbrt2)
+        self.f2 = 1.0 / (2.0 - self.cbrt2)
+        self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
 	if order == '2b':  # Second order base
             self.base = self.base2;
             self.w = array('d', [1.0])
 	elif order == '4c':  # Fourth order, composed from Second order
             self.base = self.base2;
-            self.w = array('d', [self.invTwoMinusCbrt2, - self.cbrt2 * self.invTwoMinusCbrt2, self.invTwoMinusCbrt2])
+            self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
 	elif order == '4b':  # Fourth order base
             self.base = self.base4;
             self.w = array('d', [1.0])
@@ -101,13 +101,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.pUp(w * 0.5)  # c2 = 0.5
 
     def base4 (self, w):  # Compose higher orders from this fourth-order symplectic base (d4 = 0.0)
-        self.pUp(w * 0.5 * self.invTwoMinusCbrt2)                     # w * c1
-        self.qUp(w * self.invTwoMinusCbrt2)                           # w * d1
-        self.pUp(w * self.halfOneMinusCbrt2 * self.invTwoMinusCbrt2)  # w * c2
-        self.qUp(w * - self.cbrt2 * self.invTwoMinusCbrt2)            # w * d2
-        self.pUp(w * self.halfOneMinusCbrt2 * self.invTwoMinusCbrt2)  # w * c3
-        self.qUp(w * self.invTwoMinusCbrt2)                           # w * d3
-        self.pUp(w * 0.5 * self.invTwoMinusCbrt2)                     # w * c4
+        self.pUp(w * self.coefficients[0])  # w * c1
+        self.qUp(w * self.coefficients[1])  # w * d1
+        self.pUp(w * self.coefficients[2])  # w * c2
+        self.qUp(w * self.coefficients[3])  # w * d2
+        self.pUp(w * self.coefficients[2])  # w * c3
+        self.qUp(w * self.coefficients[1])  # w * d3
+        self.pUp(w * self.coefficients[0])  # w * c4
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
