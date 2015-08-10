@@ -20,6 +20,7 @@ def main():
 	eR = array('d')
 	eTh = array('d')
 	ev4 = array('d')
+	ev4c = array('d')
 	tauMax = 0.0
 	while line:  # build raw data arrays
 		p = loads(line)
@@ -29,11 +30,13 @@ def main():
 		eR.append(p['ER'])
 		eTh.append(p['ETh'])
 		ev4.append(p['v4e'])
+		ev4c.append(p['v4c'])
 		line = dataFile.readline()
         try:  # interpolate here
         	eRI = InterpolatedUnivariateSpline(tau, eR, k = 1)
 		eThI = InterpolatedUnivariateSpline(tau, eTh, k = 1)
 		ev4I = InterpolatedUnivariateSpline(tau, ev4, k = 1)
+		ev4cI = InterpolatedUnivariateSpline(tau, ev4c, k = 1)
         except ValueError as e:
             print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
             exit(-2)		
@@ -55,7 +58,8 @@ def main():
         ax2.set_ylim(-150.0, 0.0)
 	tauI = np.linspace(0, tauMax, num = nPoints)
 	for i in range(len(tauI)):
-		ax1.plot(tauI[i], ev4I(tauI[i]), color='#006000', linestyle='-', marker='.', markersize=2, zorder=10)
+		ax1.plot(tauI[i], ev4I(tauI[i]), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
+		ax1.plot(tauI[i], ev4cI(tauI[i]), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
 		ax2.plot(tauI[i], eRI(tauI[i]), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
 		ax2.plot(tauI[i], eThI(tauI[i]), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
         try:

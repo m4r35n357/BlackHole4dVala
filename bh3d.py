@@ -48,7 +48,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
         self.wRange = range(len(self.w))
-        self.t = self.ph = 0.0
+        self.t = self.ph = self.v4cum = 0.0
+        self.count = 0
     	self.a2 = self.a**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
@@ -67,7 +68,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             return fabs(self.mu2 + self.sth2 / self.S * (self.a * tP - self.ra2 * phP)**2 + self.S / self.D * rP**2 + self.S * thP**2 - self.D / self.S * (tP - self.a * self.sth2 * phP)**2)
         self.eR = logError(modH(rP, R))
         self.eTh = logError(modH(thP, THETA))
-        self.v4e = logError(v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
+        error = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
+        self.v4cum += error
+        self.v4c = logError(self.v4cum / self.count)
+        self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
         self.sth = sin(th)
@@ -117,8 +121,9 @@ def main ():  # Need to be inside a function to return . . .
     bl.thP = -sqrt(bl.THETA if bl.THETA > 0.0 else -bl.THETA)
     mino = tau = 0.0
     while not abs(mino) > bl.simtime:
+        bl.count += 1
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.wRange:  # Composition happens in this loop
             bl.base(bl.w[i] * bl.h)
         mino += bl.h
