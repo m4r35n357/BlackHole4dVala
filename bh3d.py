@@ -45,8 +45,11 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
+	elif order == 'rk4':  # Fourth order, Runge-Kutta
+            self.base = self.rk4;
+            self.w = array('d', [1.0])
 	else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b or 6c <<<')
+            raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b, 6c or rk4 <<<')
         self.wRange = range(len(self.w))
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
@@ -91,6 +94,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
+    def dRdr (self):
+        return (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+
+    def dTHETAdth (self):
+        return self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3
+
     def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
         self.t += d * self.tP
         self.r += d * self.rP
@@ -99,8 +108,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r, self.th)
 
     def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
-        self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-        self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+        self.rP += c * self.dRdr()
+        self.thP += c * self.dTHETAdth()
 
     def base2 (self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
         self.pUp(w * 0.5)  # c1 = 0.5
@@ -124,42 +133,33 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         thetaDot = self.thP
         phi = self.ph
 
-        self.refresh(r, theta)
-	t_k1 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-        rDot_k1 = c * self.rP
-	r_k1 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-	thetaDot_k1 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	t_k1 = c * self.tP
+	rDot_k1 = c * self.dRdr()
+        r_k1 = c * self.rP
+	thetaDot_k1 = c * self.dTHETAdth()
 	theta_k1 = c * self.thP
-	phi_k1 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-#        print >> stderr, '{"t_k1":%.3e, "r_k1":%.3e, "theta_k1":%.3e, "phi_k1":%.3e}' % (t_k1, r_k1, theta_k1, phi_k1)
-
+	phi_k1 = c * self.phP
         self.refresh(r + r_k1 / 2.0, theta + theta_k1 / 2.0)
-	t_k2 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-        rDot_k2 = c * self.rP
-	r_k2 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-	thetaDot_k2 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	t_k2 = c * self.tP
+	rDot_k2 = c * self.dRdr()
+        r_k2 = c * self.rP
+	thetaDot_k2 = c * self.dTHETAdth()
 	theta_k2 = c * self.thP
-	phi_k2 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-#        print >> stderr, '{"t_k2":%.3e, "r_k2":%.3e, "theta_k2":%.3e, "phi_k2":%.3e}' % (t_k2, r_k2, theta_k2, phi_k2)
-
+	phi_k2 = c * self.phP
         self.refresh(r + r_k2 / 2.0, theta + theta_k2 / 2.0)
-	t_k3 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-        rDot_k3 = c * self.rP
-	r_k3 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-	thetaDot_k3 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	t_k3 = c * self.tP
+	rDot_k3 = c * self.dRdr()
+        r_k3 = c * self.rP
+	thetaDot_k3 = c * self.dTHETAdth()
 	theta_k3 = c * self.thP
-	phi_k3 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-#        print >> stderr, '{"t_k3":%.3e, "r_k3":%.3e, "theta_k3":%.3e, "phi_k3":%.3e}' % (t_k3, r_k3, theta_k3, phi_k3)
-
+	phi_k3 = c * self.phP
         self.refresh(r + r_k3, theta + theta_k3)
-	t_k4 = c * (self.ra2 * self.P / self.D + self.aL - self.a2E * self.sth2)
-        rDot_k4 = c * self.rP
-	r_k4 = c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-	thetaDot_k4 = c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
+	t_k4 = c * self.tP
+	rDot_k4 = c * self.dRdr()
+        r_k4 = c * self.rP
+	thetaDot_k4 = c * self.dTHETAdth()
 	theta_k4 = c * self.thP
-	phi_k4 = c * (self.a * self.P / self.D - self.aE + self.L / self.sth2)
-#        print >> stderr, '{"t_k4":%.3e, "r_k4":%.3e, "theta_k4":%.3e, "phi_k4":%.3e}' % (t_k4, r_k4, theta_k4, phi_k4)
-#        print >> stderr, '' % ()
+	phi_k4 = c * self.phP
 
         self.t = t + (t_k1 + 2.0 * (t_k2 + t_k3) + t_k4) / 6.0
         self.r = r + (r_k1 + 2.0 * (r_k2 + r_k3) + r_k4) / 6.0
