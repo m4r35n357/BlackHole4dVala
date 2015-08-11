@@ -77,8 +77,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
-        self.r = r
-        self.th = th
         self.sth = sin(th)
         self.cth = cos(th)
         self.sth2 = self.sth**2
@@ -90,7 +88,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
 	P = self.ra2 * self.E - self.aL
-	self.P = self.ra2 * self.E - self.aL
         self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
@@ -126,47 +123,47 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.pUp(w * self.coefficients[0])  # w * c4
 
     def rk4 (self, c):
-        t = self.t
-        r = self.r
-        rDot = self.rP
-        theta = self.th
-        thetaDot = self.thP
-        phi = self.ph
+        def rk4update (k1, k2, k3, k4):
+            return (k1 + 2.0 * (k2 + k3) + k4) / 6.0
 
+        self.refresh(self.r, self.th)
 	t_k1 = c * self.tP
 	rDot_k1 = c * self.dRdr()
         r_k1 = c * self.rP
-	thetaDot_k1 = c * self.dTHETAdth()
-	theta_k1 = c * self.thP
+	thDot_k1 = c * self.dTHETAdth()
+	th_k1 = c * self.thP
 	phi_k1 = c * self.phP
-        self.refresh(r + r_k1 / 2.0, theta + theta_k1 / 2.0)
+
+        self.refresh(self.r + r_k1 / 2.0, self.th + th_k1 / 2.0)
 	t_k2 = c * self.tP
 	rDot_k2 = c * self.dRdr()
         r_k2 = c * self.rP
-	thetaDot_k2 = c * self.dTHETAdth()
-	theta_k2 = c * self.thP
+	thDot_k2 = c * self.dTHETAdth()
+	th_k2 = c * self.thP
 	phi_k2 = c * self.phP
-        self.refresh(r + r_k2 / 2.0, theta + theta_k2 / 2.0)
+
+        self.refresh(self.r + r_k2 / 2.0, self.th + th_k2 / 2.0)
 	t_k3 = c * self.tP
 	rDot_k3 = c * self.dRdr()
         r_k3 = c * self.rP
-	thetaDot_k3 = c * self.dTHETAdth()
-	theta_k3 = c * self.thP
+	thDot_k3 = c * self.dTHETAdth()
+	th_k3 = c * self.thP
 	phi_k3 = c * self.phP
-        self.refresh(r + r_k3, theta + theta_k3)
+
+        self.refresh(self.r + r_k3, self.th + th_k3)
 	t_k4 = c * self.tP
 	rDot_k4 = c * self.dRdr()
         r_k4 = c * self.rP
-	thetaDot_k4 = c * self.dTHETAdth()
-	theta_k4 = c * self.thP
+	thDot_k4 = c * self.dTHETAdth()
+	th_k4 = c * self.thP
 	phi_k4 = c * self.phP
 
-        self.t = t + (t_k1 + 2.0 * (t_k2 + t_k3) + t_k4) / 6.0
-        self.r = r + (r_k1 + 2.0 * (r_k2 + r_k3) + r_k4) / 6.0
-        self.rP = rDot + (rDot_k1 + 2.0 * (rDot_k2 + rDot_k3) + rDot_k4) / 6.0
-        self.th = theta + (theta_k1 + 2.0 * (theta_k2 + theta_k3) + theta_k4) / 6.0
-        self.thP = thetaDot + (thetaDot_k1 + 2.0 * (thetaDot_k2 + thetaDot_k3) + thetaDot_k4) / 6.0
-        self.ph = phi + (phi_k1 + 2.0 * (phi_k2 + phi_k3) + phi_k4) / 6.0
+        self.t += rk4update(t_k1, t_k2, t_k3, t_k4)
+        self.r += rk4update(r_k1, r_k2, r_k3, r_k4)
+        self.rP += rk4update(rDot_k1, rDot_k2, rDot_k3, rDot_k4)
+        self.th += rk4update(th_k1, th_k2, th_k3, th_k4)
+        self.thP += rk4update(thDot_k1, thDot_k2, thDot_k3, thDot_k4)
+        self.ph += rk4update(phi_k1, phi_k2, phi_k3, phi_k4)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
