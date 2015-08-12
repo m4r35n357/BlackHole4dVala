@@ -113,8 +113,8 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.refresh(bl.r, bl.th)
-    bl.rP = - sqrt(bl.R if bl.R > 0.0 else 0.0)
-    bl.thP = - sqrt(bl.THETA if bl.THETA > 0.0 else 0.0)
+    bl.rP = -sqrt(bl.R if bl.R > 0.0 else -bl.R)
+    bl.thP = -sqrt(bl.THETA if bl.THETA > 0.0 else -bl.THETA)
     mino = tau = 0.0
     while not abs(mino) > bl.simtime:
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
