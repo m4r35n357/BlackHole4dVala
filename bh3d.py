@@ -51,6 +51,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b, 6c or rk4 <<<')
         self.wRange = range(len(self.w))
+        self.signR = self.signTHETA = 1.0
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
     	self.a2 = self.a**2
@@ -91,12 +92,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
 	
-    def dRdr (self):
-        return (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-
-    def dTHETAdth (self):
-        return self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3
-
     def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
         self.t += d * self.tP
         self.r += d * self.rP
@@ -105,8 +100,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r, self.th)
 
     def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
-        self.rP += c * self.dRdr()
-        self.thP += c * self.dTHETAdth()
+        self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+        self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
     def base2 (self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
         self.pUp(w * 0.5)  # c1 = 0.5
@@ -125,52 +120,43 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def rk4 (self, c):
         def rk4update (k1, k2, k3, k4):
             return (k1 + 2.0 * (k2 + k3) + k4) / 6.0
-
-        self.refresh(self.r, self.th)
+        if self.R <= 0.0:
+            self.signR = - self.signR
+        if self.THETA <= 0.0:
+            self.signTHETA = - self.signTHETA
 	t_k1 = c * self.tP
-	rDot_k1 = c * self.dRdr()
-        r_k1 = c * self.rP
-	thDot_k1 = c * self.dTHETAdth()
-	th_k1 = c * self.thP
+        r_k1 = c * sqrt(fabs(self.R))
+	th_k1 = c * sqrt(fabs(self.THETA))
 	phi_k1 = c * self.phP
-
-        self.refresh(self.r + r_k1 / 2.0, self.th + th_k1 / 2.0)
+        self.refresh(self.r + self.signR * r_k1 / 2.0, self.th + self.signTHETA * th_k1 / 2.0)
 	t_k2 = c * self.tP
-	rDot_k2 = c * self.dRdr()
-        r_k2 = c * self.rP
-	thDot_k2 = c * self.dTHETAdth()
-	th_k2 = c * self.thP
+        r_k2 = c * sqrt(fabs(self.R))
+	th_k2 = c * sqrt(fabs(self.THETA))
 	phi_k2 = c * self.phP
-
-        self.refresh(self.r + r_k2 / 2.0, self.th + th_k2 / 2.0)
+        self.refresh(self.r + self.signR * r_k2 / 2.0, self.th + self.signTHETA * th_k2 / 2.0)
 	t_k3 = c * self.tP
-	rDot_k3 = c * self.dRdr()
-        r_k3 = c * self.rP
-	thDot_k3 = c * self.dTHETAdth()
-	th_k3 = c * self.thP
+        r_k3 = c * sqrt(fabs(self.R))
+	th_k3 = c * sqrt(fabs(self.THETA))
 	phi_k3 = c * self.phP
-
-        self.refresh(self.r + r_k3, self.th + th_k3)
+        self.refresh(self.r + self.signR * r_k3, self.th + self.signTHETA * th_k3)
 	t_k4 = c * self.tP
-	rDot_k4 = c * self.dRdr()
-        r_k4 = c * self.rP
-	thDot_k4 = c * self.dTHETAdth()
-	th_k4 = c * self.thP
+        r_k4 = c * sqrt(fabs(self.R))
+	th_k4 = c * sqrt(fabs(self.THETA))
 	phi_k4 = c * self.phP
-
         self.t += rk4update(t_k1, t_k2, t_k3, t_k4)
-        self.r += rk4update(r_k1, r_k2, r_k3, r_k4)
-        self.rP += rk4update(rDot_k1, rDot_k2, rDot_k3, rDot_k4)
-        self.th += rk4update(th_k1, th_k2, th_k3, th_k4)
-        self.thP += rk4update(thDot_k1, thDot_k2, thDot_k3, thDot_k4)
+        self.r += self.signR * rk4update(r_k1, r_k2, r_k3, r_k4)
+        self.th += self.signTHETA * rk4update(th_k1, th_k2, th_k3, th_k4)
         self.ph += rk4update(phi_k1, phi_k2, phi_k3, phi_k4)
+        self.refresh(self.r, self.th)
+        self.rP = -sqrt(fabs(self.R))
+        self.thP = -sqrt(fabs(self.THETA))
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.refresh(bl.r, bl.th)
-    bl.rP = -sqrt(bl.R if bl.R > 0.0 else -bl.R)
-    bl.thP = -sqrt(bl.THETA if bl.THETA > 0.0 else -bl.THETA)
+    bl.rP = -sqrt(fabs(bl.R))
+    bl.thP = -sqrt(fabs(bl.THETA))
     mino = tau = 0.0
     while not abs(mino) > bl.simtime:
         bl.count += 1
