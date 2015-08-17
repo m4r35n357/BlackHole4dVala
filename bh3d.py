@@ -48,10 +48,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 	elif order == 'rk4':  # Fourth order, Runge-Kutta
             self.base = self.rk4;
             self.w = array('d', [1.0])
+            self.kt = array('d', [0.0, 0.0, 0.0, 0.0])
+            self.kr = array('d', [0.0, 0.0, 0.0, 0.0])
+            self.kth = array('d', [0.0, 0.0, 0.0, 0.0])
+            self.kph = array('d', [0.0, 0.0, 0.0, 0.0])
 	else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b, 6c or rk4 <<<')
         self.wRange = range(len(self.w))
-        self.signR = self.signTHETA = 1.0
+        self.sgnR = self.sgnTHETA = 1.0
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
     	self.a2 = self.a**2
@@ -117,36 +121,29 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.qUp(w * self.coefficients[1])  # w * d3
         self.pUp(w * self.coefficients[0])  # w * c4
 
-    def rk4 (self, c):
-        def rk4update (k1, k2, k3, k4):
-            return (k1 + 2.0 * (k2 + k3) + k4) / 6.0
+    def rk4 (self, ts):
+        def k (i):
+            self.kt[i] = ts * self.tP
+            self.kr[i] = ts * sqrt(fabs(self.R))
+            self.kth[i] = ts * sqrt(fabs(self.THETA))
+            self.kph[i] = ts * self.phP
+        def rk4update (k):
+            return (k[0] + 2.0 * (k[1] + k[2]) + k[3]) / 6.0
         if self.R <= 0.0:
-            self.signR = - self.signR
+            self.sgnR = - self.sgnR
         if self.THETA <= 0.0:
-            self.signTHETA = - self.signTHETA
-	t_k1 = c * self.tP
-        r_k1 = c * sqrt(fabs(self.R))
-	th_k1 = c * sqrt(fabs(self.THETA))
-	phi_k1 = c * self.phP
-        self.refresh(self.r + self.signR * r_k1 / 2.0, self.th + self.signTHETA * th_k1 / 2.0)
-	t_k2 = c * self.tP
-        r_k2 = c * sqrt(fabs(self.R))
-	th_k2 = c * sqrt(fabs(self.THETA))
-	phi_k2 = c * self.phP
-        self.refresh(self.r + self.signR * r_k2 / 2.0, self.th + self.signTHETA * th_k2 / 2.0)
-	t_k3 = c * self.tP
-        r_k3 = c * sqrt(fabs(self.R))
-	th_k3 = c * sqrt(fabs(self.THETA))
-	phi_k3 = c * self.phP
-        self.refresh(self.r + self.signR * r_k3, self.th + self.signTHETA * th_k3)
-	t_k4 = c * self.tP
-        r_k4 = c * sqrt(fabs(self.R))
-	th_k4 = c * sqrt(fabs(self.THETA))
-	phi_k4 = c * self.phP
-        self.t += rk4update(t_k1, t_k2, t_k3, t_k4)
-        self.r += self.signR * rk4update(r_k1, r_k2, r_k3, r_k4)
-        self.th += self.signTHETA * rk4update(th_k1, th_k2, th_k3, th_k4)
-        self.ph += rk4update(phi_k1, phi_k2, phi_k3, phi_k4)
+            self.sgnTHETA = - self.sgnTHETA
+	k(0)
+        self.refresh(self.r + 0.5 * self.sgnR * self.kr[0], self.th + 0.5 * self.sgnTHETA * self.kth[0])
+	k(1)
+        self.refresh(self.r + 0.5 * self.sgnR * self.kr[1], self.th + 0.5 * self.sgnTHETA * self.kth[1])
+	k(2)
+        self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
+	k(3)
+        self.t += rk4update(self.kt)
+        self.r += self.sgnR * rk4update(self.kr)
+        self.th += self.sgnTHETA * rk4update(self.kth)
+        self.ph += rk4update(self.kph)
         self.refresh(self.r, self.th)
         self.rP = -sqrt(fabs(self.R))
         self.thP = -sqrt(fabs(self.THETA))
