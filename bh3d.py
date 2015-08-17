@@ -87,14 +87,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth2 = self.sth**2
         cth2 = 1.0 - self.sth2
         self.ra2 = r**2 + self.a2
-	self.D = (r - 2.0) * r + self.a2
+	self.D = self.ra2 - 2.0 * r
 	self.S = r**2 + self.a2 * cth2
         self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - cth2 * self.TH
-	P = self.ra2 * self.E - self.aL
-        self.tP = self.ra2 * P / self.D + self.aL - self.a2E * self.sth2
-        self.phP = self.a * P / self.D - self.aE + self.L / self.sth2
+	P_D = (self.ra2 * self.E - self.aL) / self.D
+        self.tP = self.ra2 * P_D + self.aL - self.a2E * self.sth2
+        self.phP = self.a * P_D - self.aE + self.L / self.sth2
 	
     def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
         self.t += d * self.tP
@@ -139,8 +139,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
 	k(3)
         self.t += rk4update(self.kt)
-        self.r += self.sgnR * rk4update(self.kr)
-        self.th += self.sgnTHETA * rk4update(self.kth)
+        self.r += rk4update(self.kr) * self.sgnR
+        self.th += rk4update(self.kth) * self.sgnTHETA
         self.ph += rk4update(self.kph)
         self.refresh(self.r, self.th)
         self.rP = sqrt(fabs(self.R))
@@ -150,8 +150,8 @@ def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
     bl.refresh(bl.r, bl.th)
-    bl.rP = -sqrt(fabs(bl.R))
-    bl.thP = -sqrt(fabs(bl.THETA))
+    bl.rP = sqrt(fabs(bl.R))
+    bl.thP = sqrt(fabs(bl.THETA))
     mino = tau = 0.0
     while not abs(mino) > bl.simtime:
         bl.count += 1
