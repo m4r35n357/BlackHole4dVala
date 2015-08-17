@@ -32,16 +32,16 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.f2 = 1.0 / (2.0 - self.cbrt2)
         self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
-	if order == '2b':  # Second order base
+	if order == 'sb2':  # Second order base
             self.base = self.base2;
             self.w = array('d', [1.0])
-	elif order == '4c':  # Fourth order, composed from Second order
+	elif order == 'sc4':  # Fourth order, composed from Second order
             self.base = self.base2;
             self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
-	elif order == '4b':  # Fourth order base
+	elif order == 'sb4':  # Fourth order base
             self.base = self.base4;
             self.w = array('d', [1.0])
-	elif order == '6c':  # Sixth order, composed from Fourth order
+	elif order == 'sc6':  # Sixth order, composed from Fourth order
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
@@ -53,7 +53,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.kth = array('d', [0.0, 0.0, 0.0, 0.0])
             self.kph = array('d', [0.0, 0.0, 0.0, 0.0])
 	else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be 2b, 4c, 4b, 6c or rk4 <<<')
+            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, sc6 or rk4 <<<')
         self.wRange = range(len(self.w))
         self.sgnR = self.sgnTHETA = 1.0
         self.t = self.ph = self.v4cum = 0.0
