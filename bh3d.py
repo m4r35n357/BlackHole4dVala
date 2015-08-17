@@ -128,15 +128,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.kth[i] = ts * sqrt(fabs(self.THETA))
             self.kph[i] = ts * self.phP
         def rk4update (k):
-            return (k[0] + 2.0 * (k[1] + k[2]) + k[3]) / 6.0
-        if self.R <= 0.0:
-            self.sgnR = - self.sgnR
-        if self.THETA <= 0.0:
-            self.sgnTHETA = - self.sgnTHETA
+            return (k[0] + 3.0 * (k[1] + k[2]) + k[3]) / 8.0
+        self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
+        self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
 	k(0)
-        self.refresh(self.r + 0.5 * self.sgnR * self.kr[0], self.th + 0.5 * self.sgnTHETA * self.kth[0])
+        self.refresh(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0], self.th + 1.0 / 3.0 * self.sgnTHETA * self.kth[0])
 	k(1)
-        self.refresh(self.r + 0.5 * self.sgnR * self.kr[1], self.th + 0.5 * self.sgnTHETA * self.kth[1])
+        self.refresh(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1], self.th + 2.0 / 3.0 * self.sgnTHETA * self.kth[1])
 	k(2)
         self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
 	k(3)
@@ -145,8 +143,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.th += self.sgnTHETA * rk4update(self.kth)
         self.ph += rk4update(self.kph)
         self.refresh(self.r, self.th)
-        self.rP = -sqrt(fabs(self.R))
-        self.thP = -sqrt(fabs(self.THETA))
+        self.rP = sqrt(fabs(self.R))
+        self.thP = sqrt(fabs(self.THETA))
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
