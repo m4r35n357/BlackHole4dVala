@@ -69,14 +69,28 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
         def logError (e):
-            return 10.0 * log10(e if e > 1.0e-15 else 1.0e-15) 
+            return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18) 
         def modH (xDot, X):
             return 0.5 * fabs(xDot**2 - X)
         def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!
             return fabs(self.mu2 + self.sth2 / self.S * (self.a * tP - self.ra2 * phP)**2 + self.S / self.D * rP**2 + self.S * thP**2 - self.D / self.S * (tP - self.a * self.sth2 * phP)**2)
+        def eError (tP, phP):
+            return self.E + (self.a2 * self.sth2 - self.D) / self.S * tP - 2.0 * self.r * self.a * self.sth2 / self.S * phP
+        def lError (tP, phP):
+            return self.L - self.sth2 / self.S * (self.ra2**2 - self.D * self.a2 * self.sth2) * phP + 2.0 * self.r * self.a * self.sth2 / self.S * tP
+        def qError (thP):
+            return self.Q - (self.S * thP)**2 - self.cth2 * self.TH
         self.eR = logError(modH(rP, R))
         self.eTh = logError(modH(thP, THETA))
-        error = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
+        ev = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
+        ee = eError(tP / self.S, phP / self.S)
+        el = lError(tP / self.S, phP / self.S)
+        eq = qError(thP / self.S)
+        self.errorV = logError(ev)
+        self.errorE = logError(ee)
+        self.errorL = logError(el)
+        self.errorQ = logError(eq)
+        error = fabs(ev) + fabs(ee) + fabs(el) + fabs(eq)
         self.v4cum += error
         self.v4c = logError(self.v4cum / self.count)
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
@@ -85,13 +99,13 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth = sin(th)
         self.cth = cos(th)
         self.sth2 = self.sth**2
-        cth2 = 1.0 - self.sth2
+        self.cth2 = 1.0 - self.sth2
         self.ra2 = r**2 + self.a2
 	self.D = self.ra2 - 2.0 * r
-	self.S = r**2 + self.a2 * cth2
+	self.S = r**2 + self.a2 * self.cth2
         self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
-	self.THETA = self.Q - cth2 * self.TH
+	self.THETA = self.Q - self.cth2 * self.TH
 	P_D = (self.ra2 * self.E - self.aL) / self.D
         self.tP = self.ra2 * P_D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P_D - self.aE + self.L / self.sth2
@@ -121,7 +135,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.qUp(w * self.coefficients[1])  # w * d3
         self.pUp(w * self.coefficients[0])  # w * c4
 
-    def rk4 (self, ts):
+    def rk4 (self, ts):  # 3/8ths rule
         def k (i):
             self.kt[i] = ts * self.tP
             self.kr[i] = ts * sqrt(fabs(self.R))
@@ -156,7 +170,7 @@ def main ():  # Need to be inside a function to return . . .
     while not abs(mino) > bl.simtime:
         bl.count += 1
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e,"EV":%.9e,  "EE":%.9e, "EL":%.9e, "EQ":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S, bl.errorV, bl.errorE, bl.errorL, bl.errorQ)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.wRange:  # Composition happens in this loop
             bl.base(bl.w[i] * bl.h)
         mino += bl.h
