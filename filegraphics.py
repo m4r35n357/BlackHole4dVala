@@ -53,7 +53,7 @@ def main():
 		x.append(ra * sth * cos(ph))
 		y.append(ra * sth * sin(ph))
 		z.append(r * cos(th))
-		e.append(data['v4c'])
+		e.append(data['v4e'])
 		dataLine = dataFile.readline()
         try:  # interpolate here
 		xI = InterpolatedUnivariateSpline(time, x, k = 1)
