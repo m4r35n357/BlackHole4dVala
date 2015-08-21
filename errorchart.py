@@ -56,7 +56,7 @@ def main():
 	ax2.yaxis.set_minor_locator(minorLocator)
 	ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
         ax2.set_ylim(-150.0, 0.0)
-	tauI = np.linspace(0, tauMax, num = nPoints)
+	tauI = np.linspace(tau[0], tauMax, num = nPoints)
 	for i in range(len(tauI)):
 		ax1.plot(tauI[i], ev4I(tauI[i]), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
 		ax1.plot(tauI[i], ev4cI(tauI[i]), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)

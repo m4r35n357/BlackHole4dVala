@@ -19,7 +19,7 @@ from json import loads
 from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
-    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, simtime, timestep, order):
+    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
     	self.a = spin
         self.mu2 = pMass2
     	self.E = energy
@@ -27,7 +27,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     	self.Q = carter
     	self.r = r0
     	self.th = thetaMin
-        self.simtime = abs(simtime)
+        self.starttime = abs(starttime)
+        self.duration = abs(duration)
+        self.endtime = self.starttime + self.duration
     	self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.f2 = 1.0 / (2.0 - self.cbrt2)
@@ -158,15 +160,16 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
-    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['time'], ic['step'], ic['integratorOrder'])
+    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['integrator'])
     bl.refresh(bl.r, bl.th)
     bl.rP = sqrt(fabs(bl.R))
     bl.thP = sqrt(fabs(bl.THETA))
     mino = tau = 0.0
-    while not abs(mino) > bl.simtime:
+    while not abs(mino) > bl.endtime:
         bl.count += 1
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
-	print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+        if abs(mino) > bl.starttime:
+	    print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.wRange:  # Composition happens in this loop
             bl.base(bl.w[i] * bl.h)
         mino += bl.h

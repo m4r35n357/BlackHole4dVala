@@ -9,15 +9,12 @@ coordinates=$*
 dataFile='/tmp/data'
 
 # run simulator
-./bh3d.py <$initialConditions >$dataFile &
-PID=$!
+./bh3d.py <$initialConditions >$dataFile
 
 # plot orbit
-sleep 1
 ./filegraphics.py $dataFile $initialConditions $time $nPoints &
 
 # plot potential, coordinates/velocities (optional) and errors
-wait $PID
 ./filepotential.py potential &
 for coordinate in $coordinates
 do

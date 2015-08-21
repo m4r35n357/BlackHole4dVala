@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stderr, exit
+from sys import argv, stderr, exit, stdout
 from math import sqrt, sin, cos, fabs
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
 from json import loads
@@ -65,8 +65,8 @@ def main():
             exit(-2)		
 	#  set up the scene
 	scene.center = (0.0, 0.0, 0.0)
-	scene.width = 1600
-	scene.height = 1050
+	scene.width = 1024
+	scene.height = 1024
 	scene.range = (20.0, 20.0, 20.0)
         inner = 2.0 * sqrt(cauchy**2 + a**2)
 	ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = color.blue, opacity = 0.4)  # Inner Horizon
@@ -86,7 +86,7 @@ def main():
 	# animate!
 	ball = sphere()  # Particle
 	counter = 0
-	timeI = np.linspace(0, timeMax, num = nData)
+	timeI = np.linspace(time[0], timeMax, num = nData)
 	for i in range(len(timeI)):
 		if counter % 1000 == 0:
 			ball.visible = False
