@@ -76,19 +76,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             return 0.5 * fabs(xDot**2 - X)
         def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!
             return fabs(self.mu2 + self.sth2 / self.S * (self.a * tP - self.ra2 * phP)**2 + self.S / self.D * rP**2 + self.S * thP**2 - self.D / self.S * (tP - self.a * self.sth2 * phP)**2)
-        def eError (tP, phP):
-            return self.E + (self.a2 * self.sth2 - self.D) / self.S * tP - 2.0 * self.r * self.a * self.sth2 / self.S * phP
-        def lError (tP, phP):
-            return self.L - self.sth2 / self.S * (self.ra2**2 - self.D * self.a2 * self.sth2) * phP + 2.0 * self.r * self.a * self.sth2 / self.S * tP
-        def qError (thP):
-            return self.Q - (self.S * thP)**2 - self.cth2 * self.TH
         self.eR = logError(modH(rP, R))
         self.eTh = logError(modH(thP, THETA))
-        ev = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
-        ee = eError(tP / self.S, phP / self.S)
-        el = lError(tP / self.S, phP / self.S)
-        eq = qError(thP / self.S)
-        error = fabs(ev) + fabs(ee) + fabs(el) + fabs(eq)
+        error = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
         self.v4cum += error
         self.v4c = logError(self.v4cum / self.count)
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
