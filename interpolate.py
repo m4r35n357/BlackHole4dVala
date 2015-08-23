@@ -25,7 +25,7 @@ def main():
 		tauMax = tauValue if tauValue > tauMax else tauMax
 		tau.append(tauValue)
 		c.append(p[coordinate])
-		cDot.append(p[coordinate + 'Dot'])
+		cDot.append(p[coordinate + 'P'])
 		line = dataFile.readline()
         try:  # interpolate here
         	cI = InterpolatedUnivariateSpline(tau, c, k = 1)
