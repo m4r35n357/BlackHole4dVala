@@ -47,17 +47,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
-	elif order == 'rk4':  # Fourth order, Runge-Kutta
-            self.base = self.rk4;
-            self.w = array('d', [1.0])
-            self.kt = array('d', [0.0, 0.0, 0.0, 0.0])
-            self.kr = array('d', [0.0, 0.0, 0.0, 0.0])
-            self.kth = array('d', [0.0, 0.0, 0.0, 0.0])
-            self.kph = array('d', [0.0, 0.0, 0.0, 0.0])
 	else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, sc6 or rk4 <<<')
+            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
         self.wRange = range(len(self.w))
-        self.sgnR = self.sgnTHETA = 1.0
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
     	self.a2 = self.a**2
@@ -84,13 +76,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
+        r2 = r * r
         self.sth = sin(th)
         self.cth = cos(th)
         self.sth2 = self.sth**2
         self.cth2 = 1.0 - self.sth2
-        self.ra2 = r**2 + self.a2
+        self.ra2 = r2 + self.a2
 	self.D = self.ra2 - 2.0 * r
-	self.S = r**2 + self.a2 * self.cth2
+	self.S = r2 + self.a2 * self.cth2
         self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
 	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
 	self.THETA = self.Q - self.cth2 * self.TH
@@ -122,31 +115,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.pUp(w * self.coefficients[2])  # w * c3
         self.qUp(w * self.coefficients[1])  # w * d3
         self.pUp(w * self.coefficients[0])  # w * c4
-
-    def rk4 (self, ts):  # 3/8ths rule
-        def k (i):
-            self.kt[i] = ts * self.tP
-            self.kr[i] = ts * sqrt(fabs(self.R))
-            self.kth[i] = ts * sqrt(fabs(self.THETA))
-            self.kph[i] = ts * self.phP
-        def rk4update (k):
-            return (k[0] + 3.0 * (k[1] + k[2]) + k[3]) / 8.0
-        self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
-        self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
-	k(0)
-        self.refresh(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0], self.th + 1.0 / 3.0 * self.sgnTHETA * self.kth[0])
-	k(1)
-        self.refresh(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1], self.th + 2.0 / 3.0 * self.sgnTHETA * self.kth[1])
-	k(2)
-        self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
-	k(3)
-        self.t += rk4update(self.kt)
-        self.r += rk4update(self.kr) * self.sgnR
-        self.th += rk4update(self.kth) * self.sgnTHETA
-        self.ph += rk4update(self.kph)
-        self.refresh(self.r, self.th)
-        self.rP = sqrt(fabs(self.R))
-        self.thP = sqrt(fabs(self.THETA))
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
