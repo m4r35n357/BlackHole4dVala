@@ -79,7 +79,8 @@ namespace BH.BL {
             stdout.printf ("Unable to parse the string: %s\n", e.message);
             return -1;
         }
-        Geodesic g = new Geodesic(obj.get_member("M").get_double(), obj.get_member("a"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M"), obj.get_member("M").get_string());
+        Geodesic g = new Geodesic(obj.get_member("M").get_double(), obj.get_member("a").get_double(), obj.get_member("mu").get_double(), obj.get_member("E").get_double(), obj.get_member("Lz").get_double(), obj.get_member("C").get_double(), obj.get_member("r").get_double(), obj.get_member("theta").get_double(), obj.get_member("start").get_double(), obj.get_member("duration").get_double(), obj.get_member("step").get_double(), obj.get_member("integrator").get_string());
+        stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}", g.spin, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         return 0; 
     }
 }
