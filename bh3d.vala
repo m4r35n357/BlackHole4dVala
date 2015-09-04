@@ -30,6 +30,44 @@ namespace BH.BL {
         return input.str;
     }
 
+    public interface Integrator : GLib.Object {
+        public abstract void integrate (double w);
+    }
+
+    public class Base2 : GLib.Object, Integrator {
+
+        private Geodesic g;
+
+        public Base2 (Geodesic g) {
+            this.g = g;
+        }
+
+        public void integrate (double w) {
+		    g.pUp(w * 0.5);
+		    g.qUp(w);
+		    g.pUp(w * 0.5);
+        }
+    }
+
+    public class Base4 : GLib.Object, Integrator {
+
+        private Geodesic g;
+
+        public Base4 (Geodesic g) {
+            this.g = g;
+        }
+
+        public void integrate (double w) {
+		    g.pUp(w * g.coefficients[0]);
+		    g.qUp(w * g.coefficients[1]);
+		    g.pUp(w * g.coefficients[2]);
+		    g.qUp(w * g.coefficients[3]);
+		    g.pUp(w * g.coefficients[2]);
+		    g.qUp(w * g.coefficients[1]);
+		    g.pUp(w * g.coefficients[0]);
+        }
+    }
+
     public class Geodesic : GLib.Object {
 
         public double M;
@@ -79,12 +117,7 @@ namespace BH.BL {
 		public double v4c;
 		public double v4e;
 
-        public enum Base {
-		    BASE2,
-		    BASE4
-		}
-
-        public Base b;
+        public Integrator integrator;
 
         public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string order) {
             this.M = bhMass;
@@ -104,19 +137,19 @@ namespace BH.BL {
             this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
             switch (order) {
                 case "sb2":
-                    this.b = Base.BASE2;
+                    this.integrator = new Base2(this);
                     this.w = { 1.0 };
                     break;
                 case "sc4":
-                    this.b = Base.BASE2;
+                    this.integrator = new Base2(this);
                     this.w = { coefficients[1], coefficients[3], coefficients[1] };
                     break;
                 case "sb4":
-                    this.b = Base.BASE4;
+                    this.integrator = new Base4(this);
                     this.w = { 1.0 };
                     break;
                 case "sc6":
-                    this.b = Base.BASE4;
+                    this.integrator = new Base4(this);
                     var fthrt2 = pow(2.0, (1.0 / 5.0));
                     this.w = { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) };
                     break;
@@ -178,13 +211,13 @@ namespace BH.BL {
 		    phP = a * P_D - aE + L / sth2;
         }
 
-        private void pUp (double c) {
+        public void pUp (double c) {
 		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;
             double cot = cth / sth;
 		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);
         }
 
-        private void qUp (double d) {
+        public void qUp (double d) {
 		    t += d * tP;
 		    r += d * rP;
 		    th += d * thP;
@@ -192,60 +225,36 @@ namespace BH.BL {
 		    refresh(r, th);
         }
 
-        public void base2 (double w) {
-		    pUp(w * 0.5);
-		    qUp(w);
-		    pUp(w * 0.5);
-        }
-
-        public void base4 (double w) {
-		    pUp(w * coefficients[0]);
-		    qUp(w * coefficients[1]);
-		    pUp(w * coefficients[2]);
-		    qUp(w * coefficients[3]);
-		    pUp(w * coefficients[2]);
-		    qUp(w * coefficients[1]);
-		    pUp(w * coefficients[0]);
-        }
-    }
-
-    static int main (string[] args) {
-        unowned Json.Object obj;
-        Json.Parser parser = new Json.Parser ();
-        try {
-            parser.load_from_data(read_stdin());
-            obj = parser.get_root().get_object ();
-        } catch (Error e) {
-            stdout.printf ("Unable to parse the data file: %s\n", e.message);
-            return -1;
-        }
-        Geodesic g = new Geodesic(obj.get_member("M").get_double(), obj.get_member("a").get_double(), obj.get_member("mu").get_double(), obj.get_member("E").get_double(), obj.get_member("Lz").get_double(), obj.get_member("C").get_double(), obj.get_member("r").get_double(), obj.get_member("theta").get_double(), obj.get_member("start").get_double(), obj.get_member("duration").get_double(), obj.get_member("step").get_double(), obj.get_member("integrator").get_string());
-		g.refresh(g.r, g.th);
-		g.rP = sqrt(fabs(g.R));
-		g.thP = sqrt(fabs(g.THETA));
-		double mino = 0.0;
-		double tau = 0.0;
-    	while (! (fabs(mino) > g.endtime)) {
-		    g.count += 1;
-		    g.errors(g.R, g.THETA, g.tP, g.rP, g.thP, g.phP);
-		    if (fabs(mino) > g.starttime) {
-			    stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, g.v4e, g.v4c, g.eR, g.eTh, g.t, g.r, g.th, g.ph, g.tP / g.S, g.rP / g.S, g.thP / g.S, g.phP / g.S);
-            }
-		    for (int i = 0; i < g.wRange; i++) {
-		        switch (g.b) {
-		            case Geodesic.Base.BASE2:
-		                g.base2(g.w[i] * g.h);
-		                break;
-		            case Geodesic.Base.BASE4:
-		                g.base4(g.w[i] * g.h);
-		                break;
+		static int main (string[] args) {
+		    unowned Json.Object obj;
+		    Json.Parser parser = new Json.Parser ();
+		    try {
+		        parser.load_from_data(read_stdin());
+		        obj = parser.get_root().get_object ();
+		    } catch (Error e) {
+		        stdout.printf ("Unable to parse the data file: %s\n", e.message);
+		        return -1;
+		    }
+		    Geodesic g = new Geodesic(obj.get_member("M").get_double(), obj.get_member("a").get_double(), obj.get_member("mu").get_double(), obj.get_member("E").get_double(), obj.get_member("Lz").get_double(), obj.get_member("C").get_double(), obj.get_member("r").get_double(), obj.get_member("theta").get_double(), obj.get_member("start").get_double(), obj.get_member("duration").get_double(), obj.get_member("step").get_double(), obj.get_member("integrator").get_string());
+			g.refresh(g.r, g.th);
+			g.rP = sqrt(fabs(g.R));
+			g.thP = sqrt(fabs(g.THETA));
+			double mino = 0.0;
+			double tau = 0.0;
+			while (! (fabs(mino) > g.endtime)) {
+				g.count += 1;
+				g.errors(g.R, g.THETA, g.tP, g.rP, g.thP, g.phP);
+				if (fabs(mino) > g.starttime) {
+					stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, g.v4e, g.v4c, g.eR, g.eTh, g.t, g.r, g.th, g.ph, g.tP / g.S, g.rP / g.S, g.thP / g.S, g.phP / g.S);
 		        }
-		        g.base2(g.w[i] * g.h);
-            }
-		    mino += g.h;
-		    tau += g.h * g.S;
-        }
-        return 0; 
-    }
+				for (int i = 0; i < g.wRange; i++) {
+		            g.integrator.integrate(g.w[i] * g.h);
+		        }
+				mino += g.h;
+				tau += g.h * g.S;
+		    }
+        	return 0; 
+    	}
+	}
 }
 
