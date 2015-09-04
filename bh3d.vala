@@ -32,39 +32,66 @@ namespace BH.BL {
 
     public interface Integrator : GLib.Object {
         public abstract void integrate (double w);
+        public abstract void compose ();
     }
 
     public class Base2 : GLib.Object, Integrator {
 
+        private double[] coefficients;
+        public double[] w;
+        public int wRange;
         private Geodesic g;
 
-        public Base2 (Geodesic g) {
+        public Base2 (Geodesic g, double[] w) {
+            this.coefficients = { 0.5, 1.0 };
+            this.w = w;
+            this.wRange = w.length;
             this.g = g;
         }
 
         public void integrate (double w) {
-		    g.pUp(w * 0.5);
-		    g.qUp(w);
-		    g.pUp(w * 0.5);
+		    g.pUp(w * coefficients[0]);
+		    g.qUp(w * coefficients[1]);
+		    g.pUp(w * coefficients[0]);
+        }
+
+        public void compose () {
+			for (int i = 0; i < wRange; i++) {
+	            integrate(w[i] * g.h);
+	        }
         }
     }
 
     public class Base4 : GLib.Object, Integrator {
 
+        private double[] coefficients;
+        public double[] w;
+        public int wRange;
         private Geodesic g;
 
-        public Base4 (Geodesic g) {
+        public Base4 (Geodesic g, double[] w) {
+            double cbrt2 = pow(2.0, (1.0 / 3.0));
+            double f2 = 1.0 / (2.0 - cbrt2);
+            this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
+            this.w = w;
+            this.wRange = w.length;
             this.g = g;
         }
 
         public void integrate (double w) {
-		    g.pUp(w * g.coefficients[0]);
-		    g.qUp(w * g.coefficients[1]);
-		    g.pUp(w * g.coefficients[2]);
-		    g.qUp(w * g.coefficients[3]);
-		    g.pUp(w * g.coefficients[2]);
-		    g.qUp(w * g.coefficients[1]);
-		    g.pUp(w * g.coefficients[0]);
+		    g.pUp(w * coefficients[0]);
+		    g.qUp(w * coefficients[1]);
+		    g.pUp(w * coefficients[2]);
+		    g.qUp(w * coefficients[3]);
+		    g.pUp(w * coefficients[2]);
+		    g.qUp(w * coefficients[1]);
+		    g.pUp(w * coefficients[0]);
+        }
+
+        public void compose () {
+			for (int i = 0; i < wRange; i++) {
+	            integrate(w[i] * g.h);
+	        }
         }
     }
 
@@ -81,12 +108,7 @@ namespace BH.BL {
         public double starttime;
         public double endtime;
         public double h;
-        public string order;
-        public double cbrt2;
         public double f2;
-        public double[] coefficients;
-        public double[] w;
-        public int wRange;
         public double t;
         public double ph;
         public double eCum;
@@ -116,7 +138,6 @@ namespace BH.BL {
 		public double v4Cum;
 		public double v4c;
 		public double v4e;
-
         public Integrator integrator;
 
         public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string order) {
@@ -131,33 +152,25 @@ namespace BH.BL {
             this.starttime = starttime;
             this.endtime = starttime + fabs(duration);
             this.h = timestep;
-            this.order = order;
-            this.cbrt2 = pow(2.0, (1.0 / 3.0));
-            this.f2 = 1.0 / (2.0 - cbrt2);
-            this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
             switch (order) {
                 case "sb2":
-                    this.integrator = new Base2(this);
-                    this.w = { 1.0 };
+                    this.integrator = new Base2(this, { 1.0 });
                     break;
                 case "sc4":
-                    this.integrator = new Base2(this);
-                    this.w = { coefficients[1], coefficients[3], coefficients[1] };
+				    var cbrt2 = pow(2.0, (1.0 / 3.0));
+                    this.integrator = new Base2(this, { 1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2) });
                     break;
                 case "sb4":
-                    this.integrator = new Base4(this);
-                    this.w = { 1.0 };
+                    this.integrator = new Base4(this, { 1.0 });
                     break;
                 case "sc6":
-                    this.integrator = new Base4(this);
                     var fthrt2 = pow(2.0, (1.0 / 5.0));
-                    this.w = { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) };
+                    this.integrator = new Base4(this, { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) });
                     break;
                 default:
 				    stderr.printf ("Unknown integrator type: %s\n", order);
                     break;
             }
-            this.wRange = w.length;
             this.t = 0.0;
             this.ph = 0.0;
             this.eCum = 0.0;
@@ -196,13 +209,14 @@ namespace BH.BL {
 		}
 
 		public void refresh (double r, double th) {
+            double r2 = r * r;
 		    sth = sin(th);
 		    cth = cos(th);
 		    sth2 = sth * sth;
 		    double cth2 = 1.0 - sth2;
-		    ra2 = r * r + a2;
+		    ra2 = r2 + a2;
 			D = ra2 - 2.0 * r;
-			S = r * r + a2 * cth2;
+			S = r2 + a2 * cth2;
 		    R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];
 			TH = a2xE2_mu2 + L2 / sth2;
 			THETA = Q - cth2 * TH;
@@ -247,9 +261,7 @@ namespace BH.BL {
 				if (fabs(mino) > g.starttime) {
 					stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, g.v4e, g.v4c, g.eR, g.eTh, g.t, g.r, g.th, g.ph, g.tP / g.S, g.rP / g.S, g.thP / g.S, g.phP / g.S);
 		        }
-				for (int i = 0; i < g.wRange; i++) {
-		            g.integrator.integrate(g.w[i] * g.h);
-		        }
+                g.integrator.compose();
 				mino += g.h;
 				tau += g.h * g.S;
 		    }
