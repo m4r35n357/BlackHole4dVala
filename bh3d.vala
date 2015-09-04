@@ -30,55 +30,52 @@ namespace BH.BL {
         return input.str;
     }
 
-    public interface Integrator : GLib.Object {
-        public abstract void integrate (double w);
-        public abstract void compose ();
-    }
+    public abstract class Integrator : GLib.Object {
 
-    public class Base2 : GLib.Object, Integrator {
+        public double[] coefficients;
+        private double[] weights;
+        private int wRange;
+        public Geodesic g;
 
-        private double[] coefficients;
-        public double[] w;
-        public int wRange;
-        private Geodesic g;
-
-        public Base2 (Geodesic g, double[] w) {
-            this.coefficients = { 0.5, 1.0 };
-            this.w = w;
+        public Integrator (Geodesic g, double[] w) {
+            this.weights = w;
             this.wRange = w.length;
             this.g = g;
         }
 
-        public void integrate (double w) {
-		    g.pUp(w * coefficients[0]);
-		    g.qUp(w * coefficients[1]);
-		    g.pUp(w * coefficients[0]);
-        }
+        public abstract void integrate (double w);
 
         public void compose () {
 			for (int i = 0; i < wRange; i++) {
-	            integrate(w[i] * g.h);
+	            integrate(weights[i] * g.h);
 	        }
         }
     }
 
-    public class Base4 : GLib.Object, Integrator {
+    public class Base2 : Integrator {
 
-        private double[] coefficients;
-        public double[] w;
-        public int wRange;
-        private Geodesic g;
+        public Base2 (Geodesic g, double[] w) {
+            base(g, w);
+            this.coefficients = { 0.5, 1.0 };
+        }
+
+        public override void integrate (double w) {
+		    g.pUp(w * coefficients[0]);
+		    g.qUp(w * coefficients[1]);
+		    g.pUp(w * coefficients[0]);
+        }
+    }
+
+    public class Base4 : Integrator {
 
         public Base4 (Geodesic g, double[] w) {
+            base(g, w);
             double cbrt2 = pow(2.0, (1.0 / 3.0));
             double f2 = 1.0 / (2.0 - cbrt2);
             this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
-            this.w = w;
-            this.wRange = w.length;
-            this.g = g;
         }
 
-        public void integrate (double w) {
+        public override void integrate (double w) {
 		    g.pUp(w * coefficients[0]);
 		    g.qUp(w * coefficients[1]);
 		    g.pUp(w * coefficients[2]);
@@ -86,12 +83,6 @@ namespace BH.BL {
 		    g.pUp(w * coefficients[2]);
 		    g.qUp(w * coefficients[1]);
 		    g.pUp(w * coefficients[0]);
-        }
-
-        public void compose () {
-			for (int i = 0; i < wRange; i++) {
-	            integrate(w[i] * g.h);
-	        }
         }
     }
 
@@ -171,10 +162,6 @@ namespace BH.BL {
 				    stderr.printf ("Unknown integrator type: %s\n", order);
                     break;
             }
-            this.t = 0.0;
-            this.ph = 0.0;
-            this.eCum = 0.0;
-		    this.count = 0;
 			this.a2 = a * a;
 		    this.aE = a * E;
 		    this.a2E = a2 * E;
