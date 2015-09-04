@@ -79,6 +79,13 @@ namespace BH.BL {
 		public double v4c;
 		public double v4e;
 
+        public enum Base {
+		    BASE2,
+		    BASE4
+		}
+
+        public Base b;
+
         public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string order) {
             this.M = bhMass;
             this.a = spin;
@@ -97,17 +104,21 @@ namespace BH.BL {
             this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
             switch (order) {
                 case "sb2":
-                    w = { 1.0 };
+                    this.b = Base.BASE2;
+                    this.w = { 1.0 };
                     break;
                 case "sc4":
-                    w = { coefficients[1], coefficients[3], coefficients[1] };
+                    this.b = Base.BASE2;
+                    this.w = { coefficients[1], coefficients[3], coefficients[1] };
                     break;
                 case "sb4":
-                    w = { 1.0 };
+                    this.b = Base.BASE4;
+                    this.w = { 1.0 };
                     break;
                 case "sc6":
+                    this.b = Base.BASE4;
                     var fthrt2 = pow(2.0, (1.0 / 5.0));
-                    w = { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) };
+                    this.w = { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) };
                     break;
                 default:
 				    stderr.printf ("Unknown integrator type: %s\n", order);
@@ -221,6 +232,14 @@ namespace BH.BL {
 			    stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, g.v4e, g.v4c, g.eR, g.eTh, g.t, g.r, g.th, g.ph, g.tP / g.S, g.rP / g.S, g.thP / g.S, g.phP / g.S);
             }
 		    for (int i = 0; i < g.wRange; i++) {
+		        switch (g.b) {
+		            case Geodesic.Base.BASE2:
+		                g.base2(g.w[i] * g.h);
+		                break;
+		            case Geodesic.Base.BASE4:
+		                g.base4(g.w[i] * g.h);
+		                break;
+		        }
 		        g.base2(g.w[i] * g.h);
             }
 		    mino += g.h;
