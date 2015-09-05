@@ -14,97 +14,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 using GLib.Math;
-using Json;
 
 namespace Kerr {
 
-    private static string read_stdin() {
-        var input = new StringBuilder();
-        var buffer = new char[1024];
-        while (!stdin.eof()) {
-            var read_chunk = stdin.gets(buffer);
-            if (read_chunk != null) {
-                input.append(read_chunk);
-            }
-        }
-        return input.str;
-    }
-
-    public static Json.Object getJson () {
-	    unowned Json.Object obj;
-	    Json.Parser parser = new Json.Parser();
-	    try {
-	        parser.load_from_data(read_stdin());
-	        obj = parser.get_root().get_object();
-	    } catch (Error e) {
-	        stderr.printf("Unable to parse the data file: %s\n", e.message);
-	        return new Json.Object();
-	    }
-        return obj;
-    }
-
-    public interface ISymplectic : GLib.Object {
-        public abstract double h { get; set; }
-        public abstract void pUp (double c);
-        public abstract void qUp (double d);
-    }
-
-    public abstract class Integrator : GLib.Object {
-
-        private double[] weights;
-        private int wRange;
-        public ISymplectic model;
-        public double[] coefficients;
-
-        public Integrator (ISymplectic model, double[] w) {
-            this.weights = w;
-            this.wRange = w.length;
-            this.model = model;
-        }
-
-        public abstract void integrate (double w);
-
-        public void compose () {
-			for (int i = 0; i < wRange; i++) {
-	            integrate(weights[i] * model.h);
-	        }
-        }
-    }
-
-    public class Base2 : Integrator {
-
-        public Base2 (ISymplectic model, double[] w) {
-            base(model, w);
-            this.coefficients = { 0.5, 1.0 };
-        }
-
-        public override void integrate (double w) {
-		    model.pUp(w * coefficients[0]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[0]);
-        }
-    }
-
-    public class Base4 : Integrator {
-
-        public Base4 (ISymplectic model, double[] w) {
-            base(model, w);
-            var cbrt2 = pow(2.0, (1.0 / 3.0));
-            this.coefficients = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
-        }
-
-        public override void integrate (double w) {
-		    model.pUp(w * coefficients[0]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[2]);
-		    model.qUp(w * coefficients[3]);
-		    model.pUp(w * coefficients[2]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[0]);
-        }
-    }
-
-    public class Geodesic : GLib.Object, ISymplectic {
+    public class Geodesic : GLib.Object, IModel {
 
         public double a;
         public double mu2;
@@ -147,7 +60,7 @@ namespace Kerr {
 		public double v4e;
         public Integrator integrator;
 
-        public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string order) {
+        public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string type) {
             this.a = spin;
             this.mu2 = pMass2;
             this.E = energy;
@@ -158,25 +71,7 @@ namespace Kerr {
             this.starttime = starttime;
             this.endtime = starttime + fabs(duration);
             this.h = timestep;
-            switch (order) {
-                case "sb2":
-                    this.integrator = new Base2(this, { 1.0 });
-                    break;
-                case "sc4":
-				    var cbrt2 = pow(2.0, (1.0 / 3.0));
-                    this.integrator = new Base2(this, { 1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2) });
-                    break;
-                case "sb4":
-                    this.integrator = new Base4(this, { 1.0 });
-                    break;
-                case "sc6":
-                    var fthrt2 = pow(2.0, (1.0 / 5.0));
-                    this.integrator = new Base4(this, { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) });
-                    break;
-                default:
-				    stderr.printf ("Unknown integrator type: %s\n", order);
-                    break;
-            }
+            this.integrator = Integrator.getIntegrator(this, type);
 			this.a2 = a * a;
 		    this.aE = a * E;
 		    this.a2E = a2 * E;
