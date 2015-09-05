@@ -19,46 +19,45 @@ namespace Kerr {
 
     public class Geodesic : GLib.Object, IModel {
 
-        public double a;
-        public double mu2;
-        public double E;
-        public double L;
-        public double Q;
-        public double r;
-        public double th;
+        private double a;
+        private double mu2;
+        private double E;
+        private double L;
+        private double Q;
+        private double r;
+        private double th;
         public double starttime;
         public double endtime;
         public double h { get; set; }
-        public double t;
-        public double ph;
-        public double eCum;
-        public int count;
-        public double a2;
-        public double aE;
-        public double a2E;
-        public double L2;
-        public double aL;
-        public double a2xE2_mu2;
-        public double[] cr;
-        public double tP;
-        public double rP;
-        public double thP;
-        public double phP;
-        public double sth;
-        public double cth;
-        public double sth2;
-        public double ra2;
-		public double D;
+        private double t;
+        private double ph;
+        private int count;
+        private double a2;
+        private double aE;
+        private double a2E;
+        private double L2;
+        private double aL;
+        private double a2xE2_mu2;
+        private double[] cr;
+        private double tP;
+        private double rP;
+        private double thP;
+        private double phP;
+        private double sth;
+        private double cth;
+        private double sth2;
+        private double ra2;
+		private double D;
 		public double S;
-		public double R;
-		public double TH;
-		public double THETA;
-		public double eR;
-		public double eTh;
-		public double v4Cum;
-		public double v4c;
-		public double v4e;
-        public ISymplectic integrator;
+		private double R;
+		private double TH;
+		private double THETA;
+		private double eR;
+		private double eTh;
+		private double v4Cum;
+		private double v4c;
+		private double v4e;
+        private ISymplectic integrator;
 
         public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
                          double starttime, double duration, double timestep, string type) {
@@ -110,7 +109,7 @@ namespace Kerr {
 			count++;
 		}
 
-		public void refresh () {
+		private void refresh () {
             var r2 = r * r;
 		    sth = sin(th);
 		    cth = cos(th);
@@ -141,6 +140,10 @@ namespace Kerr {
 		    refresh();
         }
 
+        public void evolve () {
+            integrator.compose();
+        }
+
         public static Geodesic icJson () {
             var ic = getJson();
 		    return new Geodesic(ic.get_double_member("M"),
@@ -163,21 +166,22 @@ namespace Kerr {
             stdout.printf("{\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
         }
 
-		static int main (string[] args) {
-		    Geodesic g = icJson();
-			var mino = 0.0;
-			var tau = 0.0;
-			while (! (fabs(mino) > fabs(g.endtime))) {
-				g.errors();
-				if (fabs(mino) > fabs(g.starttime)) {
-					g.output(mino, tau);
-		        }
-                g.integrator.compose();
-				mino += g.h;
-				tau += g.h * g.S;
-		    }
-        	return 0; 
-    	}
+	}
+
+	static int main (string[] args) {
+	    Geodesic g = Geodesic.icJson();
+		var mino = 0.0;
+		var tau = 0.0;
+		while (! (fabs(mino) > fabs(g.endtime))) {
+			g.errors();
+			if (fabs(mino) > fabs(g.starttime)) {
+				g.output(mino, tau);
+	        }
+            g.evolve();
+			mino += g.h;
+			tau += g.h * g.S;
+	    }
+    	return 0; 
 	}
 }
 

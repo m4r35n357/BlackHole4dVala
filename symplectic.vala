@@ -24,6 +24,7 @@ namespace Kerr {
         public abstract double h { get; set; }
         public abstract void pUp (double c);
         public abstract void qUp (double d);
+        public abstract void evolve ();
     }
 
 	/**
@@ -43,13 +44,13 @@ namespace Kerr {
         public IModel model;
         public double[] baseCoeff;
 
-        public Integrator (IModel model, double[] compWeight) {
+        protected Integrator (IModel model, double[] compWeight) {
             this.compWeight = compWeight;
             this.wRange = compWeight.length;
             this.model = model;
         }
 
-		public static Integrator getIntegrator (IModel model, string order) {
+		public static ISymplectic getIntegrator (IModel model, string order) {
             Integrator integrator = null;
 		    switch (order) {
 		        case "sb2":  // second order, basic
@@ -84,7 +85,7 @@ namespace Kerr {
 	 */
     public class Base2 : Integrator {
 
-        public Base2 (IModel model, double[] weight) {
+        protected Base2 (IModel model, double[] weight) {
             base(model, weight);
             this.baseCoeff = { 0.5, 1.0 };
         }
@@ -101,7 +102,7 @@ namespace Kerr {
 	 */
     public class Base4 : Integrator {
 
-        public Base4 (IModel model, double[] weight) {
+        protected Base4 (IModel model, double[] weight) {
             base(model, weight);
             var cbrt2 = pow(2.0, (1.0 / 3.0));
             this.baseCoeff = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
