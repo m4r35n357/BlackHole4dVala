@@ -80,6 +80,9 @@ namespace Kerr {
 		    var E2_mu2 = E * E - mu2;
 		    this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
 		    this.a2xE2_mu2 = - a2 * E2_mu2;
+			refresh();
+			this.rP = sqrt(fabs(R));
+			this.thP = sqrt(fabs(THETA));
         }
 
 		private double logError (double e) {
@@ -103,6 +106,7 @@ namespace Kerr {
 		    v4e = logError(error);
 		    v4Cum += error;
 		    v4c = logError(v4Cum / count);
+			count++;
 		}
 
 		public void refresh () {
@@ -136,19 +140,23 @@ namespace Kerr {
 		    refresh();
         }
 
-		static int main (string[] args) {
+        public static Geodesic icJson () {
             var ic = getJson();
-		    Geodesic g = new Geodesic(ic.get_member("M").get_double(), ic.get_member("a").get_double(), ic.get_member("mu").get_double(), ic.get_member("E").get_double(), ic.get_member("Lz").get_double(), ic.get_member("C").get_double(), ic.get_member("r").get_double(), ic.get_member("theta").get_double(), ic.get_member("start").get_double(), ic.get_member("duration").get_double(), ic.get_member("step").get_double(), ic.get_member("integrator").get_string());
-			g.refresh();
-			g.rP = sqrt(fabs(g.R));
-			g.thP = sqrt(fabs(g.THETA));
+		    return new Geodesic(ic.get_member("M").get_double(), ic.get_member("a").get_double(), ic.get_member("mu").get_double(), ic.get_member("E").get_double(), ic.get_member("Lz").get_double(), ic.get_member("C").get_double(), ic.get_member("r").get_double(), ic.get_member("theta").get_double(), ic.get_member("start").get_double(), ic.get_member("duration").get_double(), ic.get_member("step").get_double(), ic.get_member("integrator").get_string());
+        }
+
+        public void output (double mino, double tau) {
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, v4e, v4c, eR, eTh, t, r, th, ph, tP / S, rP / S, thP / S, phP / S);
+        }
+
+		static int main (string[] args) {
+		    Geodesic g = icJson();
 			var mino = 0.0;
 			var tau = 0.0;
 			while (! (fabs(mino) > g.endtime)) {
-				g.count += 1;
 				g.errors();
 				if (fabs(mino) > g.starttime) {
-					stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, g.v4e, g.v4c, g.eR, g.eTh, g.t, g.r, g.th, g.ph, g.tP / g.S, g.rP / g.S, g.thP / g.S, g.phP / g.S);
+					g.output(mino, tau);
 		        }
                 g.integrator.compose();
 				mino += g.h;

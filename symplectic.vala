@@ -18,7 +18,7 @@ using GLib.Math;
 namespace Kerr {
 
 	/**
-	 * Interface for the physical model
+	 * Interface for the (external) physical model
 	 */
     public interface IModel : GLib.Object {
         public abstract double h { get; set; }
@@ -38,14 +38,14 @@ namespace Kerr {
 	 */
     public abstract class Integrator : GLib.Object, ISymplectic {
 
-        private double[] weights;
+        private double[] compWeight;
         private int wRange;
         public IModel model;
-        public double[] coefficients;
+        public double[] baseCoeff;
 
-        public Integrator (IModel model, double[] w) {
-            this.weights = w;
-            this.wRange = w.length;
+        public Integrator (IModel model, double[] compWeight) {
+            this.compWeight = compWeight;
+            this.wRange = compWeight.length;
             this.model = model;
         }
 
@@ -74,7 +74,7 @@ namespace Kerr {
 
         public void compose () {
 			for (int i = 0; i < wRange; i++) {
-	            integrate(weights[i] * model.h);
+	            integrate(compWeight[i] * model.h);
 	        }
         }
     }
@@ -84,15 +84,15 @@ namespace Kerr {
 	 */
     public class Base2 : Integrator {
 
-        public Base2 (IModel model, double[] w) {
-            base(model, w);
-            this.coefficients = { 0.5, 1.0 };
+        public Base2 (IModel model, double[] weight) {
+            base(model, weight);
+            this.baseCoeff = { 0.5, 1.0 };
         }
 
         public override void integrate (double w) {
-		    model.pUp(w * coefficients[0]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[0]);
+		    model.pUp(w * baseCoeff[0]);
+		    model.qUp(w * baseCoeff[1]);
+		    model.pUp(w * baseCoeff[0]);
         }
     }
 
@@ -101,20 +101,20 @@ namespace Kerr {
 	 */
     public class Base4 : Integrator {
 
-        public Base4 (IModel model, double[] w) {
-            base(model, w);
+        public Base4 (IModel model, double[] weight) {
+            base(model, weight);
             var cbrt2 = pow(2.0, (1.0 / 3.0));
-            this.coefficients = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
+            this.baseCoeff = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
         public override void integrate (double w) {
-		    model.pUp(w * coefficients[0]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[2]);
-		    model.qUp(w * coefficients[3]);
-		    model.pUp(w * coefficients[2]);
-		    model.qUp(w * coefficients[1]);
-		    model.pUp(w * coefficients[0]);
+		    model.pUp(w * baseCoeff[0]);
+		    model.qUp(w * baseCoeff[1]);
+		    model.pUp(w * baseCoeff[2]);
+		    model.qUp(w * baseCoeff[3]);
+		    model.pUp(w * baseCoeff[2]);
+		    model.qUp(w * baseCoeff[1]);
+		    model.pUp(w * baseCoeff[0]);
         }
     }
 }
