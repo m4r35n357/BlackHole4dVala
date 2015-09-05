@@ -43,64 +43,69 @@ namespace Kerr {
         return obj;
     }
 
+    public interface ISymplectic : GLib.Object {
+        public abstract double h { get; set; }
+        public abstract void pUp (double c);
+        public abstract void qUp (double d);
+    }
+
     public abstract class Integrator : GLib.Object {
 
-        public double[] coefficients;
         private double[] weights;
         private int wRange;
-        public Geodesic g;
+        public ISymplectic model;
+        public double[] coefficients;
 
-        public Integrator (Geodesic g, double[] w) {
+        public Integrator (ISymplectic model, double[] w) {
             this.weights = w;
             this.wRange = w.length;
-            this.g = g;
+            this.model = model;
         }
 
         public abstract void integrate (double w);
 
         public void compose () {
 			for (int i = 0; i < wRange; i++) {
-	            integrate(weights[i] * g.h);
+	            integrate(weights[i] * model.h);
 	        }
         }
     }
 
     public class Base2 : Integrator {
 
-        public Base2 (Geodesic g, double[] w) {
-            base(g, w);
+        public Base2 (ISymplectic model, double[] w) {
+            base(model, w);
             this.coefficients = { 0.5, 1.0 };
         }
 
         public override void integrate (double w) {
-		    g.pUp(w * coefficients[0]);
-		    g.qUp(w * coefficients[1]);
-		    g.pUp(w * coefficients[0]);
+		    model.pUp(w * coefficients[0]);
+		    model.qUp(w * coefficients[1]);
+		    model.pUp(w * coefficients[0]);
         }
     }
 
     public class Base4 : Integrator {
 
-        public Base4 (Geodesic g, double[] w) {
-            base(g, w);
+        public Base4 (ISymplectic model, double[] w) {
+            base(model, w);
             var cbrt2 = pow(2.0, (1.0 / 3.0));
             this.coefficients = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
         public override void integrate (double w) {
-		    g.pUp(w * coefficients[0]);
-		    g.qUp(w * coefficients[1]);
-		    g.pUp(w * coefficients[2]);
-		    g.qUp(w * coefficients[3]);
-		    g.pUp(w * coefficients[2]);
-		    g.qUp(w * coefficients[1]);
-		    g.pUp(w * coefficients[0]);
+		    model.pUp(w * coefficients[0]);
+		    model.qUp(w * coefficients[1]);
+		    model.pUp(w * coefficients[2]);
+		    model.qUp(w * coefficients[3]);
+		    model.pUp(w * coefficients[2]);
+		    model.qUp(w * coefficients[1]);
+		    model.pUp(w * coefficients[0]);
         }
     }
 
-    public class Geodesic : GLib.Object {
+    public class Geodesic : GLib.Object, ISymplectic {
 
-        public double M;
         public double a;
         public double mu2;
         public double E;
@@ -110,8 +115,7 @@ namespace Kerr {
         public double th;
         public double starttime;
         public double endtime;
-        public double h;
-        public double f2;
+        public double h { get; set; }
         public double t;
         public double ph;
         public double eCum;
@@ -144,7 +148,6 @@ namespace Kerr {
         public Integrator integrator;
 
         public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string order) {
-            this.M = bhMass;
             this.a = spin;
             this.mu2 = pMass2;
             this.E = energy;
