@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 using Json;
 
-namespace BH.BL {
+namespace Kerr {
 
     public string read_stdin () {
         var input = new StringBuilder ();
