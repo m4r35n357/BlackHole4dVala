@@ -58,9 +58,10 @@ namespace Kerr {
 		public double v4Cum;
 		public double v4c;
 		public double v4e;
-        public Integrator integrator;
+        public ISymplectic integrator;
 
-        public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, double starttime, double duration, double timestep, string type) {
+        public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
+                         double starttime, double duration, double timestep, string type) {
             this.a = spin;
             this.mu2 = pMass2;
             this.E = energy;
@@ -142,20 +143,33 @@ namespace Kerr {
 
         public static Geodesic icJson () {
             var ic = getJson();
-		    return new Geodesic(ic.get_double_member("M"), ic.get_double_member("a"), ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"), ic.get_double_member("r"), ic.get_double_member("theta"), ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_string_member("integrator"));
+		    return new Geodesic(ic.get_double_member("M"),
+                                ic.get_double_member("a"),
+                                ic.get_double_member("mu"),
+                                ic.get_double_member("E"),
+                                ic.get_double_member("Lz"),
+                                ic.get_double_member("C"),
+                                ic.get_double_member("r"),
+                                ic.get_double_member("theta"),
+                                ic.get_double_member("start"),
+                                ic.get_double_member("duration"),
+                                ic.get_double_member("step"),
+                                ic.get_string_member("integrator"));
         }
 
         public void output (double mino, double tau) {
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, v4e, v4c, eR, eTh, t, r, th, ph, tP / S, rP / S, thP / S, phP / S);
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f ", mino, tau, v4e, v4c, eR, eTh);
+            stdout.printf("{\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
+            stdout.printf("{\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
         }
 
 		static int main (string[] args) {
 		    Geodesic g = icJson();
 			var mino = 0.0;
 			var tau = 0.0;
-			while (! (fabs(mino) > g.endtime)) {
+			while (! (fabs(mino) > fabs(g.endtime))) {
 				g.errors();
-				if (fabs(mino) > g.starttime) {
+				if (fabs(mino) > fabs(g.starttime)) {
 					g.output(mino, tau);
 		        }
                 g.integrator.compose();

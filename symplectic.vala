@@ -70,7 +70,7 @@ namespace Kerr {
             return integrator;
 		}
 
-        public abstract void integrate (double w);
+        protected abstract void integrate (double w);
 
         public void compose () {
 			for (int i = 0; i < wRange; i++) {
@@ -89,7 +89,7 @@ namespace Kerr {
             this.baseCoeff = { 0.5, 1.0 };
         }
 
-        public override void integrate (double w) {
+        protected override void integrate (double w) {
 		    model.pUp(w * baseCoeff[0]);
 		    model.qUp(w * baseCoeff[1]);
 		    model.pUp(w * baseCoeff[0]);
@@ -107,7 +107,7 @@ namespace Kerr {
             this.baseCoeff = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
-        public override void integrate (double w) {
+        protected override void integrate (double w) {
 		    model.pUp(w * baseCoeff[0]);
 		    model.qUp(w * baseCoeff[1]);
 		    model.pUp(w * baseCoeff[2]);
