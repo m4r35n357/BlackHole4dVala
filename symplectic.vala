@@ -21,9 +21,24 @@ namespace Kerr {
 	 * Interface for the (external) physical model
 	 */
     public interface IModel : GLib.Object {
+		/**
+		 * Model time step size
+		 */
         public abstract double h { get; set; }
+        
+		/**
+		 * Momentum updates
+		 */
         public abstract void pUp (double c);
+        
+		/**
+		 * Coordinate updates
+		 */
         public abstract void qUp (double d);
+        
+		/**
+		 * Should wrap and call ISymplectic.compose()
+		 */
         public abstract void evolve ();
     }
 
@@ -31,11 +46,14 @@ namespace Kerr {
 	 * Interface for the symplectic integrators
 	 */
     public interface ISymplectic : GLib.Object {
+		/**
+		 * Should be called by IModel.evolve()
+		 */
         public abstract void compose ();
     }
 
 	/**
-	 * Base class containing a factory method
+	 * Integrator superclass with an ISymplectic factory method
 	 */
     public abstract class Integrator : GLib.Object, ISymplectic {
 
