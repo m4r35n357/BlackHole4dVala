@@ -71,8 +71,7 @@ namespace BH.BL {
         public Base4 (Geodesic g, double[] w) {
             base(g, w);
             double cbrt2 = pow(2.0, (1.0 / 3.0));
-            double f2 = 1.0 / (2.0 - cbrt2);
-            this.coefficients = { 0.5 * f2, f2, 0.5 * (1.0 - cbrt2) * f2, - cbrt2 * f2 };
+            this.coefficients = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
         public override void integrate (double w) {
