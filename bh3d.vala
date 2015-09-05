@@ -18,7 +18,7 @@ using Json;
 
 namespace Kerr {
 
-    public string read_stdin () {
+    private static string read_stdin () {
         var input = new StringBuilder ();
         var buffer = new char[1024];
         while (!stdin.eof ()) {
@@ -28,6 +28,19 @@ namespace Kerr {
             }
         }
         return input.str;
+    }
+
+    public static Json.Object getJson () {
+	    unowned Json.Object obj;
+	    Json.Parser parser = new Json.Parser ();
+	    try {
+	        parser.load_from_data(read_stdin());
+	        obj = parser.get_root().get_object ();
+	    } catch (Error e) {
+	        stderr.printf ("Unable to parse the data file: %s\n", e.message);
+	        return new Json.Object();
+	    }
+        return obj;
     }
 
     public abstract class Integrator : GLib.Object {
@@ -226,16 +239,8 @@ namespace Kerr {
         }
 
 		static int main (string[] args) {
-		    unowned Json.Object obj;
-		    Json.Parser parser = new Json.Parser ();
-		    try {
-		        parser.load_from_data(read_stdin());
-		        obj = parser.get_root().get_object ();
-		    } catch (Error e) {
-		        stdout.printf ("Unable to parse the data file: %s\n", e.message);
-		        return -1;
-		    }
-		    Geodesic g = new Geodesic(obj.get_member("M").get_double(), obj.get_member("a").get_double(), obj.get_member("mu").get_double(), obj.get_member("E").get_double(), obj.get_member("Lz").get_double(), obj.get_member("C").get_double(), obj.get_member("r").get_double(), obj.get_member("theta").get_double(), obj.get_member("start").get_double(), obj.get_member("duration").get_double(), obj.get_member("step").get_double(), obj.get_member("integrator").get_string());
+            var ic = getJson();
+		    Geodesic g = new Geodesic(ic.get_member("M").get_double(), ic.get_member("a").get_double(), ic.get_member("mu").get_double(), ic.get_member("E").get_double(), ic.get_member("Lz").get_double(), ic.get_member("C").get_double(), ic.get_member("r").get_double(), ic.get_member("theta").get_double(), ic.get_member("start").get_double(), ic.get_member("duration").get_double(), ic.get_member("step").get_double(), ic.get_member("integrator").get_string());
 			g.refresh(g.r, g.th);
 			g.rP = sqrt(fabs(g.R));
 			g.thP = sqrt(fabs(g.THETA));
