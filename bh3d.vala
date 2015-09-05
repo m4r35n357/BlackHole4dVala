@@ -142,7 +142,7 @@ namespace Kerr {
 
         public static Geodesic icJson () {
             var ic = getJson();
-		    return new Geodesic(ic.get_member("M").get_double(), ic.get_member("a").get_double(), ic.get_member("mu").get_double(), ic.get_member("E").get_double(), ic.get_member("Lz").get_double(), ic.get_member("C").get_double(), ic.get_member("r").get_double(), ic.get_member("theta").get_double(), ic.get_member("start").get_double(), ic.get_member("duration").get_double(), ic.get_member("step").get_double(), ic.get_member("integrator").get_string());
+		    return new Geodesic(ic.get_double_member("M"), ic.get_double_member("a"), ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"), ic.get_double_member("r"), ic.get_double_member("theta"), ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_string_member("integrator"));
         }
 
         public void output (double mino, double tau) {
