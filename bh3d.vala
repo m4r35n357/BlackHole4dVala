@@ -93,7 +93,7 @@ namespace Kerr {
 		    return 0.5 * fabs(xDot * xDot - X);
 		}
 
-		private double v4Error () {
+		private double v4Error (double tP, double rP, double thP, double phP) {
 		    var tmp1 = a * tP - ra2 * phP;
 		    var tmp2 = tP - a * sth2 * phP;
 		    return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rP * rP + S * thP * thP - D / S * tmp2 * tmp2);
@@ -102,7 +102,7 @@ namespace Kerr {
 		public void errors () {
 		    eR = logError(modH(rP, R));
 		    eTh = logError(modH(thP, THETA));
-		    var error = v4Error();
+		    var error = v4Error(tP / S, rP / S, thP / S, phP / S);
 		    v4e = logError(error);
 		    v4Cum += error;
 		    v4c = logError(v4Cum / count);
@@ -160,9 +160,9 @@ namespace Kerr {
         }
 
         public void output (double mino, double tau) {
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f ", mino, tau, v4e, v4c, eR, eTh);
-            stdout.printf("{\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("{\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, tau, v4e, v4c, eR, eTh);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
         }
 	}
 
