@@ -10,4 +10,12 @@ kerr-image
 *.log
 plot.py
 RaytracingOutput
+*.c
+.valencia
+__pycache__/
+bh3d
+build/
+nbody3d
+test.vala
+tmp/
 
