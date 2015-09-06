@@ -59,8 +59,8 @@ namespace Kerr {
 
         private double[] compWeight;
         private int wRange;
-        public IModel model;
-        public double[] baseCoeff;
+        protected IModel model;
+        protected double[] baseCoeff;
 
         protected Integrator (IModel model, double[] compWeight) {
             this.compWeight = compWeight;
