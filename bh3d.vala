@@ -59,7 +59,7 @@ namespace Kerr {
 		private double v4e;
         private ISymplectic integrator;
 
-        public Geodesic (double bhMass, double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
+        public Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
                          double starttime, double duration, double timestep, string type) {
             this.a = spin;
             this.mu2 = pMass2;
@@ -146,8 +146,7 @@ namespace Kerr {
 
         public static Geodesic icJson () {
             var ic = getJson();
-		    return new Geodesic(ic.get_double_member("M"),
-                                ic.get_double_member("a"),
+		    return new Geodesic(ic.get_double_member("a"),
                                 ic.get_double_member("mu"),
                                 ic.get_double_member("E"),
                                 ic.get_double_member("Lz"),
@@ -165,7 +164,6 @@ namespace Kerr {
             stdout.printf("{\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
             stdout.printf("{\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
         }
-
 	}
 
 	static int main (string[] args) {
