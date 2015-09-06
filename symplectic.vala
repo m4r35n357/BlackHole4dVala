@@ -69,7 +69,7 @@ namespace Kerr {
         }
 
 		public static ISymplectic getIntegrator (IModel model, string order) {
-            Integrator integrator = null;
+            ISymplectic integrator = null;
 		    switch (order) {
 		        case "sb2":  // second order, basic
 		            integrator = new Base2(model, { 1.0 });
@@ -109,9 +109,9 @@ namespace Kerr {
         }
 
         protected override void integrate (double w) {
-		    model.pUp(w * baseCoeff[0]);
-		    model.qUp(w * baseCoeff[1]);
-		    model.pUp(w * baseCoeff[0]);
+		    model.pUp(baseCoeff[0] * w);
+		    model.qUp(baseCoeff[1] * w);
+		    model.pUp(baseCoeff[0] * w);
         }
     }
 
@@ -127,13 +127,13 @@ namespace Kerr {
         }
 
         protected override void integrate (double w) {
-		    model.pUp(w * baseCoeff[0]);
-		    model.qUp(w * baseCoeff[1]);
-		    model.pUp(w * baseCoeff[2]);
-		    model.qUp(w * baseCoeff[3]);
-		    model.pUp(w * baseCoeff[2]);
-		    model.qUp(w * baseCoeff[1]);
-		    model.pUp(w * baseCoeff[0]);
+		    model.pUp(baseCoeff[0] * w);
+		    model.qUp(baseCoeff[1] * w);
+		    model.pUp(baseCoeff[2] * w);
+		    model.qUp(baseCoeff[3] * w);
+		    model.pUp(baseCoeff[2] * w);
+		    model.qUp(baseCoeff[1] * w);
+		    model.pUp(baseCoeff[0] * w);
         }
     }
 }
