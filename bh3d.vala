@@ -69,7 +69,7 @@ namespace Kerr {
             this.r = r0;
             this.th = thetaMin;
             this.starttime = starttime;
-            this.endtime = starttime + fabs(duration);
+            this.endtime = starttime + duration;
             this.h = timestep;
             this.integrator = Integrator.getIntegrator(this, type);
 			this.a2 = a * a;
@@ -170,9 +170,9 @@ namespace Kerr {
 	    Geodesic g = Geodesic.icJson();
 		var mino = 0.0;
 		var tau = 0.0;
-		while (! (fabs(mino) > fabs(g.endtime))) {
+		while (! (mino > g.endtime)) {
 			g.errors();
-			if (fabs(mino) > fabs(g.starttime)) {
+			if (mino > g.starttime) {
 				g.output(mino, tau);
 	        }
             g.evolve();

@@ -18,7 +18,7 @@ using GLib.Math;
 namespace Kerr {
 
 	/**
-	 * Interface for the (external) physical model
+	 * Interface for the physical model (client)
 	 */
     public interface IModel : GLib.Object {
 		/**
@@ -43,7 +43,7 @@ namespace Kerr {
     }
 
 	/**
-	 * Interface for the symplectic integrators
+	 * Interface for the integrators
 	 */
     public interface ISymplectic : GLib.Object {
 		/**
