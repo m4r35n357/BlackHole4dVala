@@ -53,7 +53,7 @@ namespace Kerr {
     }
 
 	/**
-	 * Integrator superclass with an ISymplectic factory method
+	 * Integrator superclass
 	 */
     public abstract class Integrator : GLib.Object, ISymplectic {
 
@@ -68,9 +68,12 @@ namespace Kerr {
             this.model = model;
         }
 
-		public static ISymplectic getIntegrator (IModel model, string order) {
+		/**
+		 * Static factory
+		 */
+		public static ISymplectic getIntegrator (IModel model, string type) {
             ISymplectic integrator = null;
-		    switch (order) {
+		    switch (type) {
 		        case "sb2":  // second order, basic
 		            integrator = new Base2(model, { 1.0 });
 		            break;
@@ -89,8 +92,14 @@ namespace Kerr {
             return integrator;
 		}
 
-        protected abstract void integrate (double w);
+		/**
+		 * Perform one integration step with the current compositional weight
+		 */
+        protected abstract void integrate (double compWeight);
 
+		/**
+		 * Perform a composition of weighted integration steps
+		 */
         public void compose () {
 			for (int i = 0; i < wRange; i++) {
 	            integrate(compWeight[i] * model.h);
@@ -103,15 +112,15 @@ namespace Kerr {
 	 */
     public class Base2 : Integrator {
 
-        protected Base2 (IModel model, double[] weight) {
-            base(model, weight);
+        protected Base2 (IModel model, double[] compWeight) {
+            base(model, compWeight);
             this.baseCoeff = { 0.5, 1.0 };
         }
 
-        protected override void integrate (double w) {
-		    model.pUp(baseCoeff[0] * w);
-		    model.qUp(baseCoeff[1] * w);
-		    model.pUp(baseCoeff[0] * w);
+        protected override void integrate (double compWeight) {
+		    model.pUp(baseCoeff[0] * compWeight);
+		    model.qUp(baseCoeff[1] * compWeight);
+		    model.pUp(baseCoeff[0] * compWeight);
         }
     }
 
@@ -120,20 +129,20 @@ namespace Kerr {
 	 */
     public class Base4 : Integrator {
 
-        protected Base4 (IModel model, double[] weight) {
-            base(model, weight);
+        protected Base4 (IModel model, double[] compWeight) {
+            base(model, compWeight);
             var cbrt2 = pow(2.0, (1.0 / 3.0));
             this.baseCoeff = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
-        protected override void integrate (double w) {
-		    model.pUp(baseCoeff[0] * w);
-		    model.qUp(baseCoeff[1] * w);
-		    model.pUp(baseCoeff[2] * w);
-		    model.qUp(baseCoeff[3] * w);
-		    model.pUp(baseCoeff[2] * w);
-		    model.qUp(baseCoeff[1] * w);
-		    model.pUp(baseCoeff[0] * w);
+        protected override void integrate (double compWeight) {
+		    model.pUp(baseCoeff[0] * compWeight);
+		    model.qUp(baseCoeff[1] * compWeight);
+		    model.pUp(baseCoeff[2] * compWeight);
+		    model.qUp(baseCoeff[3] * compWeight);
+		    model.pUp(baseCoeff[2] * compWeight);
+		    model.qUp(baseCoeff[1] * compWeight);
+		    model.pUp(baseCoeff[0] * compWeight);
         }
     }
 }
