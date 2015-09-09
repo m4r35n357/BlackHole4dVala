@@ -93,10 +93,10 @@ namespace Kerr {
 		    return 0.5 * fabs(xDot * xDot - X);
 		}
 
-		private double v4Error (double tP, double rP, double thP, double phP) {
-		    var tmp1 = a * tP - ra2 * phP;
-		    var tmp2 = tP - a * sth2 * phP;
-		    return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rP * rP + S * thP * thP - D / S * tmp2 * tmp2);
+		private double v4Error (double tDot, double rDot, double thDot, double phDot) {
+		    var tmp1 = a * tDot - ra2 * phDot;
+		    var tmp2 = tDot - a * sth2 * phDot;
+		    return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
 		}
 
 		public void errors () {
@@ -144,6 +144,20 @@ namespace Kerr {
             integrator.compose();
         }
 
+        public void solve () {
+			var mino = 0.0;
+			var tau = 0.0;
+			while (! (mino > endtime)) {
+				errors();
+				if (mino > starttime) {
+					output(mino, tau);
+			    }
+		        evolve();
+				mino += h;
+				tau += h * S;
+			}
+        }
+
         public static Geodesic icJson () {
             var ic = getJson();
 		    return new Geodesic(ic.get_double_member("a"),
@@ -168,17 +182,7 @@ namespace Kerr {
 
 	static int main (string[] args) {
 	    Geodesic g = Geodesic.icJson();
-		var mino = 0.0;
-		var tau = 0.0;
-		while (! (mino > g.endtime)) {
-			g.errors();
-			if (mino > g.starttime) {
-				g.output(mino, tau);
-	        }
-            g.evolve();
-			mino += g.h;
-			tau += g.h * g.S;
-	    }
+        g.solve();
     	return 0; 
 	}
 }
