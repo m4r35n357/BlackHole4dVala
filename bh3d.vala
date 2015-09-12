@@ -31,7 +31,7 @@ namespace Kerr {
         public double h { get; set; }
         private double t;
         private double ph;
-        private int count;
+        private int count = 1;
         private double a2;
         private double aE;
         private double a2E;
@@ -158,7 +158,7 @@ namespace Kerr {
 			}
         }
 
-        public static Geodesic icJson () {
+        public static Geodesic fromJson () {
             var ic = getJson();
 		    return new Geodesic(ic.get_double_member("a"),
                                 ic.get_double_member("mu"),
@@ -181,8 +181,7 @@ namespace Kerr {
 	}
 
 	static int main (string[] args) {
-	    Geodesic g = Geodesic.icJson();
-        g.solve();
+	    Geodesic.fromJson().solve();
     	return 0; 
 	}
 }

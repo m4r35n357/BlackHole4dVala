@@ -20,7 +20,7 @@ namespace Kerr {
 	/**
 	 * Read JSON data from stdin
 	 */
-    private static string read_stdin() {
+    private static string fromStdin () {
         var input = new StringBuilder();
         var buffer = new char[1024];
         while (!stdin.eof()) {
@@ -39,7 +39,7 @@ namespace Kerr {
 	    unowned Json.Object obj;
 	    Json.Parser parser = new Json.Parser();
 	    try {
-	        parser.load_from_data(read_stdin());
+	        parser.load_from_data(fromStdin());
 	        obj = parser.get_root().get_object();
 	    } catch (Error e) {
 	        stderr.printf("Unable to parse the data file: %s\n", e.message);
