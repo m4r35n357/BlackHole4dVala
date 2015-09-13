@@ -33,13 +33,12 @@ namespace Kerr {
 		private double R;
 		private double H0;
 		private double eR;
-		private double eTh;
         private ISymplectic integrator;
 
         public Orbit (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
-            this.L = momentum;
+            this.L = momentum * sqrt(r0);
             this.r = r0;
             this.th = thetaMin;
             this.starttime = starttime;
@@ -66,7 +65,7 @@ namespace Kerr {
 
 		private void refresh () {
             R = - 1.0 / r + L2 / (2.0 * r * r);
-		    phP = L / (r * r);
+//		    phP = L / (r * r);
 //            stderr.printf("{\"L\":%.9e}\n", L);
 //            stderr.printf("{\"r\":%.9e}\n", r);
 //            stderr.printf("{\"phP\":%.9e}\n", phP);
@@ -115,7 +114,7 @@ namespace Kerr {
 
         public void output (double mino, double tau) {
             //stderr.printf("{\"phP\":%.9e}\n", phP);
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, H(rP, R), 0.0, eR, eTh);
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, 0.0, eR, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 0.0, rP, 0.0, phP);
         }
