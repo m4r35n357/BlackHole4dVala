@@ -11,6 +11,9 @@ kerr-image
 plot.py
 RaytracingOutput
 *.c
+*.o
+*.i
+*.s
 .valencia
 bh3d
 nbody3d
