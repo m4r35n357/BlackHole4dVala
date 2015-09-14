@@ -23,14 +23,15 @@ namespace Kerr {
         private double L;
         private double r;
         private double th;
+        private double ph;
+        private double rDot;
+        private double phDot;
         public double starttime;
         public double endtime;
         public double h { get; set; }
-        private double ph;
         private double L2;
         private double rP;
-        private double phP;
-		private double R;
+        //private double phP;
 		private double H0;
 		private double eR;
         private ISymplectic integrator;
@@ -48,7 +49,6 @@ namespace Kerr {
 		    this.L2 = L * L;
 			refresh();
             this.H0 = H();
-			//this.rP = - sqrt(fabs(E - 1.0 - R));
         }
 
 		private double logError (double e) {
@@ -64,16 +64,18 @@ namespace Kerr {
 		}
 
 		private void refresh () {
-		    //phP = L / (r * r);
         }
 
         public void pUp (double c) {
-		    rP += c * (L2 / (r * r * r) - 1.0 / (r * r));
+            double rPDot = L2 / (r * r * r) - 1.0 / (r * r);
+		    rP += c * rPDot;
         }
 
         public void qUp (double d) {
-		    r += d * rP;
-		    ph += d * L / (r * r);
+            rDot = rP;
+		    r += d * rDot;
+		    phDot = L / (r * r);
+		    ph += d * phDot;
 		    refresh();
         }
 
@@ -112,7 +114,7 @@ namespace Kerr {
             //stderr.printf("{\"phP\":%.9e}\n", phP);
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, H(), eR, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 0.0, rP, 0.0, phP);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 0.0, rDot, 0.0, phDot);
         }
 	}
 
