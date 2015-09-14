@@ -47,7 +47,7 @@ namespace Kerr {
             this.integrator = Integrator.getIntegrator(this, type);
 		    this.L2 = L * L;
 			refresh();
-            this.H0 = H(rP, R);
+            this.H0 = H();
 			//this.rP = - sqrt(fabs(E - 1.0 - R));
         }
 
@@ -55,20 +55,16 @@ namespace Kerr {
 		    return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
 		}
 
-		private double H (double xDot, double X) {
-		    return 0.5 * (xDot * xDot + X);
+		private double H () {
+		    return 0.5 * rP * rP + 0.5 * L2 / (r * r) - 1.0 / r;
 		}
 
 		public void errors () {
-		    eR = logError(H(rP, R));
+		    eR = logError(H());
 		}
 
 		private void refresh () {
-            R = - 1.0 / r + L2 / (2.0 * r * r);
-//		    phP = L / (r * r);
-//            stderr.printf("{\"L\":%.9e}\n", L);
-//            stderr.printf("{\"r\":%.9e}\n", r);
-//            stderr.printf("{\"phP\":%.9e}\n", phP);
+		    //phP = L / (r * r);
         }
 
         public void pUp (double c) {
@@ -114,7 +110,7 @@ namespace Kerr {
 
         public void output (double mino, double tau) {
             //stderr.printf("{\"phP\":%.9e}\n", phP);
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, 0.0, eR, -180.0);
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, H(), eR, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 0.0, rP, 0.0, phP);
         }
