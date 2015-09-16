@@ -39,7 +39,7 @@ namespace Kerr {
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
             this.L = sqrt(r0);
-		    this.L2 = L * L;
+		    this.L2 = r0;
             this.r = r0;
             this.th = thetaMin;
             this.starttime = starttime;
@@ -50,7 +50,7 @@ namespace Kerr {
             this.L = momentum * L;
 		    this.L2 = L * L;
             var V0 = - 1.0 / r + L2 / (2.0 * r * r);
-            //this.rP =  sqrt(2.0 * (energyBar - V0));
+            //this.rP = - sqrt(2.0 * (energyBar - V0));
             this.H0 = H();
         }
 
