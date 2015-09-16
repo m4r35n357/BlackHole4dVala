@@ -38,19 +38,14 @@ namespace Kerr {
         public Orbit (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
-            this.L = sqrt(r0);
-		    this.L2 = r0;
+            this.L = momentum * sqrt(r0);
+		    this.L2 = L * L;
             this.r = r0;
             this.th = thetaMin;
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
             this.integrator = Integrator.getIntegrator(this, type);
-            var energyBar = - 1.0 / r + L2 / (2.0 * r * r);
-            this.L = momentum * L;
-		    this.L2 = L * L;
-            var V0 = - 1.0 / r + L2 / (2.0 * r * r);
-            //this.rP = - sqrt(2.0 * (energyBar - V0));
             this.H0 = H();
         }
 
@@ -110,7 +105,6 @@ namespace Kerr {
         }
 
         public void output (double mino, double tau) {
-            //stderr.printf("{\"phP\":%.9e}\n", phP);
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, H() - H0, eR, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
