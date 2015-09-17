@@ -145,9 +145,9 @@ namespace Kerr {
         public void solve () {
 			var mino = 0.0;
 			var tau = 0.0;
-			while (! (mino > endtime)) {
+			while (mino <= endtime) {
 				errors();
-				if (mino > starttime) {
+				if (mino >= starttime) {
 					output(mino, tau);
 			    }
 		        evolve();
