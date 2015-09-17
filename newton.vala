@@ -62,8 +62,7 @@ namespace Kerr {
 		}
 
         public void pUp (double c) {
-            double rPDot = - L2 / (r * r * r) + 1.0 / (r * r);
-		    rP -= c * rPDot;
+		    rP -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         public void qUp (double d) {

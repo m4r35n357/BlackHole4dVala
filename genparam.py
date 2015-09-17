@@ -69,19 +69,13 @@ class InitialConditions(object):
 def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]))
-	ic.solve(ic.variableR)
-        rValue = 0.5 * (ic.r0 + ic.r1)
-        thValue = 0.5 * pi
+        ic.solve(ic.variableR)
     elif len(argv) == 5:
         ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), float(argv[4]))
-	ic.solve(ic.constantR)
-        rValue = ic.r0
-        thValue = 0.5 * pi
+        ic.solve(ic.constantR)
     elif len(argv) == 4:
         ic = InitialConditions(True, float(argv[1]), 0.0, float(argv[2]), float(argv[3]), 0.0)
-	ic.solve(ic.constantR)
-        rValue = ic.r0
-        thValue = ic.th0
+        ic.solve(ic.constantR)
     else:
         print >> stderr, "Bad input data!"
         return
@@ -92,8 +86,8 @@ def main ():
     print >> stdout, "  \"E\" : " + repr(ic.E) + ","
     print >> stdout, "  \"Lz\" : " + repr(ic.L) + ","
     print >> stdout, "  \"C\" : " + repr(ic.Q) + ","
-    print >> stdout, "  \"r\" : " + repr(rValue) + ","
-    print >> stdout, "  \"theta\" : " + repr(thValue) + ","
+    print >> stdout, "  \"r\" : " + repr(ic.r0) + ","
+    print >> stdout, "  \"theta\" : " + repr(ic.th0) + ","
     print >> stdout, "  \"start\" : " + str(ic.starttime) + ","
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
@@ -103,7 +97,7 @@ def main ():
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
     c = ic.coefficients(ic.E, ic.L, ic.Q)
-    rscale = rValue + 5.0
+    rscale = ic.r0 + 5.0
     thscale = 0.5 * pi
     nPoints = 1001
     for x in range(0, nPoints):

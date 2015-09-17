@@ -81,8 +81,6 @@ namespace Kerr {
 		    this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
 		    this.a2xE2_mu2 = - a2 * E2_mu2;
 			refresh();
-			this.rP = sqrt(fabs(R));
-			this.thP = sqrt(fabs(THETA));
         }
 
 		private double logError (double e) {
