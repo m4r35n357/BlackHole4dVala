@@ -79,15 +79,15 @@ def main ():
     else:
         print >> stderr, "Bad input data!"
         return
-    ic.L *= ic.factorL
+    # Initial conditions file
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
     print >> stdout, "  \"mu\" : " + str(ic.mu2) + ","
     print >> stdout, "  \"E\" : " + repr(ic.E) + ","
-    print >> stdout, "  \"Lz\" : " + repr(ic.L) + ","
+    print >> stdout, "  \"Lz\" : " + repr(ic.factorL * ic.L) + ","
     print >> stdout, "  \"C\" : " + repr(ic.Q) + ","
     print >> stdout, "  \"r\" : " + repr(ic.r0) + ","
-    print >> stdout, "  \"theta\" : " + repr(ic.th0) + ","
+    print >> stdout, "  \"theta\" : " + repr(0.5 * pi) + ","
     print >> stdout, "  \"start\" : " + str(ic.starttime) + ","
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
@@ -96,15 +96,16 @@ def main ():
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
+    # Potential plot data
     c = ic.coefficients(ic.E, ic.L, ic.Q)
-    rscale = ic.r0 if (ic.r0 > ic.r1) else ic.r1 + 1.0
-    thscale = 0.5 * pi
+    rMax = ic.r0 if (ic.r0 > ic.r1) else ic.r1
     nPoints = 1001
-    for x in range(0, nPoints):
-        scaledX = 1.0 * x / nPoints
-        print >> stderr, "{ \"x\":" + str(scaledX * rscale) \
-                       + ", \"R\":" + str(ic.R(scaledX * rscale, c)) \
-                       + ", \"THETA\":" + str(ic.THETA(0.5 * pi + scaledX * thscale, ic.E, ic.L, ic.Q)) + " }"
+    for x in range(1, nPoints - 1):
+        xValue = 1.0 * x / nPoints
+        print >> stderr, "{ \"x\":" + str(xValue * rMax) \
+                       + ", \"R\":" + str(ic.R(xValue * rMax, c)) \
+                       + ", \"THETA\":" + str(ic.THETA(xValue * pi, ic.E, ic.L, ic.Q)) + " }"
+    # Return value
     if not ic.success or ic.fun > 1.0e-6:
         exit(-1)
 
@@ -112,5 +113,4 @@ if __name__ == "__main__":
     main()
 else:
     print >> stderr, __name__ + " module loaded"
-
 
