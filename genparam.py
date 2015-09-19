@@ -97,7 +97,7 @@ def main ():
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
     c = ic.coefficients(ic.E, ic.L, ic.Q)
-    rscale = ic.r0 + 5.0
+    rscale = ic.r0 if (ic.r0 > ic.r1) else ic.r1 + 1.0
     thscale = 0.5 * pi
     nPoints = 1001
     for x in range(0, nPoints):
