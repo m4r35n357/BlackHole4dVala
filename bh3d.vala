@@ -28,10 +28,10 @@ namespace Kerr {
         private double r;
         private double th;
         private double ph;
-        private double tP;
+        private double tDot;
         private double rP;
         private double thP;
-        private double phP;
+        private double phDot;
         public double starttime;
         public double endtime;
         public double h { get; set; }
@@ -102,7 +102,7 @@ namespace Kerr {
 		public void errors () {
 		    eR = logError(modH(rP, R));
 		    eTh = logError(modH(thP, THETA));
-		    var error = v4Error(tP / S, rP / S, thP / S, phP / S);
+		    var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
 		    v4e = logError(error);
 		    v4Cum += error;
 		    v4c = logError(v4Cum / count);
@@ -122,8 +122,8 @@ namespace Kerr {
 			TH = a2xE2_mu2 + L2 / sth2;
 			THETA = Q - cth2 * TH;
 			var P_D = (ra2 * E - aL) / D;
-		    tP = ra2 * P_D + aL - a2E * sth2;
-		    phP = a * P_D - aE + L / sth2;
+		    tDot = ra2 * P_D + aL - a2E * sth2;
+		    phDot = a * P_D - aE + L / sth2;
         }
 
         public void pUp (double c) {
@@ -133,10 +133,10 @@ namespace Kerr {
         }
 
         public void qUp (double d) {
-		    t += d * tP;
+		    t += d * tDot;
 		    r += d * rP;
 		    th += d * thP;
-		    ph += d * phP;
+		    ph += d * phDot;
 		    refresh();
         }
 
@@ -176,7 +176,7 @@ namespace Kerr {
         public void output (double mino, double tau) {
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, tau, v4e, v4c, eR, eTh);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tP / S, rP / S, thP / S, phP / S);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);
         }
 	}
 

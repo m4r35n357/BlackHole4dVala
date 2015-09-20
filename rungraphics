@@ -10,8 +10,8 @@ dataFile='/tmp/data'
 
 # run simulator
 #./newton <$initialConditions >$dataFile 2>errors
-./bh3d <$initialConditions >$dataFile 2>errors
-#./bh3d.py <$initialConditions >$dataFile 2>errors
+#./bh3d <$initialConditions >$dataFile 2>errors
+./bh3d.py <$initialConditions >$dataFile 2>errors
 
 # plot orbit
 ./filegraphics.py $dataFile $initialConditions $time $nPoints &

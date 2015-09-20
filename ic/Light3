@@ -6,7 +6,8 @@
   "C" : 27.0,
   "r" : 3.0,
   "theta" : 1.570796327,
-  "time" : 10.0,
+  "start" : 0.0,
+  "duration" : 10.0,
   "step" : 0.001,
-  "integratorOrder" : "6c"
+  "integrator" : "sb2"
 }
