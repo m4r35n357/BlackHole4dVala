@@ -24,13 +24,17 @@ namespace Kerr {
         private double E;
         private double L;
         private double Q;
+        private double t;
         private double r;
         private double th;
+        private double ph;
+        private double tP;
+        private double rP;
+        private double thP;
+        private double phP;
         public double starttime;
         public double endtime;
         public double h { get; set; }
-        private double t;
-        private double ph;
         private int count = 1;
         private double a2;
         private double aE;
@@ -39,10 +43,6 @@ namespace Kerr {
         private double aL;
         private double a2xE2_mu2;
         private double[] cr;
-        private double tP;
-        private double rP;
-        private double thP;
-        private double phP;
         private double sth;
         private double cth;
         private double sth2;
