@@ -79,6 +79,8 @@ def main ():
     else:
         print >> stderr, "Bad input data!"
         return
+    if not ic.success or ic.fun > 1.0e-6:
+        exit(-1)
     # Initial conditions file
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
@@ -105,9 +107,6 @@ def main ():
         print >> stderr, "{ \"x\":" + str(xValue * rMax) \
                        + ", \"R\":" + str(ic.R(xValue * rMax, c)) \
                        + ", \"THETA\":" + str(ic.THETA(xValue * pi, ic.E, ic.L, ic.Q)) + " }"
-    # Return value
-    if not ic.success or ic.fun > 1.0e-6:
-        exit(-1)
 
 if __name__ == "__main__":
     main()
