@@ -32,8 +32,8 @@ namespace Kerr {
         private double rP;
         private double thP;
         private double phDot;
-        public double starttime;
-        public double endtime;
+        private double starttime;
+        private double endtime;
         public double h { get; set; }
         private int count = 1;
         private double a2;
@@ -42,13 +42,15 @@ namespace Kerr {
         private double L2;
         private double aL;
         private double a2xE2_mu2;
-        private double[] cr;
+        private double L_aE2;
         private double sth;
         private double cth;
         private double sth2;
         private double ra2;
 		private double D;
-		public double S;
+		private double S;
+		private double P1;
+		private double P2;
 		private double R;
 		private double TH;
 		private double THETA;
@@ -78,8 +80,8 @@ namespace Kerr {
 		    this.L2 = L * L;
 		    this.aL = a * L;
 		    var E2_mu2 = E * E - mu2;
-		    this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
 		    this.a2xE2_mu2 = - a2 * E2_mu2;
+            this.L_aE2 = (L - a * E) * (L - a * E);
 			refresh();
 			this.rP = sqrt(fabs(R));
 			this.thP = sqrt(fabs(THETA));
@@ -118,21 +120,23 @@ namespace Kerr {
 		    ra2 = r2 + a2;
 			D = ra2 - 2.0 * r;
 			S = r2 + a2 * cth2;
-		    R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];
+			P1 = ra2 * E - aL;  // MTW eq.33.33b, ignoring charge term
+			P2 = mu2 * r2 + L_aE2 + Q;
+			R = P1 * P1 - D * P2;  // MTW eq.33.33c
 			TH = a2xE2_mu2 + L2 / sth2;
 			THETA = Q - cth2 * TH;
 			var P_D = (ra2 * E - aL) / D;
-		    tDot = ra2 * P_D + aL - a2E * sth2;
-		    phDot = a * P_D - aE + L / sth2;
+		    tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
+		    phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
         }
 
-        public void pUp (double c) {
-		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;
+        public void pUp (double c) {  // dxP/dTau = - dH/dx
+		    rP += c * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
             var cot = cth / sth;
-		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);
+		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
-        public void qUp (double d) {
+        public void qUp (double d) {  // dx/dTau = dH/dxDot
 		    t += d * tDot;
 		    r += d * rP;
 		    th += d * thP;
@@ -160,16 +164,10 @@ namespace Kerr {
 
         public static Geodesic fromJson () {
             var ic = getJson();
-		    return new Geodesic(ic.get_double_member("a"),
-                                ic.get_double_member("mu"),
-                                ic.get_double_member("E"),
-                                ic.get_double_member("Lz"),
-                                ic.get_double_member("C"),
-                                ic.get_double_member("r"),
-                                ic.get_double_member("theta"),
-                                ic.get_double_member("start"),
-                                ic.get_double_member("duration"),
-                                ic.get_double_member("step"),
+		    return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
+                                ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
+                                ic.get_double_member("r"), ic.get_double_member("theta"),
+                                ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
                                 ic.get_string_member("integrator"));
         }
 
