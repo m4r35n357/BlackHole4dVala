@@ -17,19 +17,19 @@ from sys import argv, stdout, stderr, exit
 from math import fabs, sin, cos, pi, sqrt, copysign
 from array import array
 import numpy as np
-from scipy.optimize import minimize, root
+from scipy.optimize import root
 
 class InitialConditions(object):
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL):
         self.M = 1.0        
         self.mu2 = 1.0 if (particle == True) else 0.0
-	self.r0 = rMin
-	self.r1 = rMax
-	self.th0 = pi * (1.0 - thetaMin) 
+        self.r0 = rMin
+        self.r1 = rMax
+        self.th0 = pi * (1.0 - thetaMin) 
         self.a = a
         self.a2 = self.a**2
-	self.factorL = factorL
-	self.integrator = 'sb2'
+        self.factorL = factorL
+        self.integrator = 'sb2'
         self.starttime = 0.0
         self.duration = 50.0
         self.timestep = 0.001
@@ -59,7 +59,6 @@ class InitialConditions(object):
 
     def solve (self, function):
         res = root(function, self.ic, jac = False, method='hybr')
-        #res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
         self.fun = res.fun
         self.message = res.message
         self.success = res.success
