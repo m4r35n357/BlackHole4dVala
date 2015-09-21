@@ -42,15 +42,13 @@ namespace Kerr {
         private double L2;
         private double aL;
         private double a2xE2_mu2;
-        private double L_aE2;
+        private double[] cr;
         private double sth;
         private double cth;
         private double sth2;
         private double ra2;
 		private double D;
 		private double S;
-		private double P1;
-		private double P2;
 		private double R;
 		private double TH;
 		private double THETA;
@@ -80,8 +78,8 @@ namespace Kerr {
 		    this.L2 = L * L;
 		    this.aL = a * L;
 		    var E2_mu2 = E * E - mu2;
+            this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
 		    this.a2xE2_mu2 = - a2 * E2_mu2;
-            this.L_aE2 = (L - a * E) * (L - a * E);
 			refresh();
 			this.rP = sqrt(fabs(R));
 			this.thP = sqrt(fabs(THETA));
@@ -120,9 +118,7 @@ namespace Kerr {
 		    ra2 = r2 + a2;
 			D = ra2 - 2.0 * r;
 			S = r2 + a2 * cth2;
-			P1 = ra2 * E - aL;  // MTW eq.33.33b, ignoring charge term
-			P2 = mu2 * r2 + L_aE2 + Q;
-			R = P1 * P1 - D * P2;  // MTW eq.33.33c
+			R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];
 			TH = a2xE2_mu2 + L2 / sth2;
 			THETA = Q - cth2 * TH;
 			var P_D = (ra2 * E - aL) / D;
@@ -131,12 +127,12 @@ namespace Kerr {
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-		    rP += c * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
+		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // see Wilkins
             var cot = cth / sth;
 		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
-        public void qUp (double d) {  // dx/dTau = dH/dxDot
+        public void qUp (double d) {  // dx/dTau = dH/dxP
 		    t += d * tDot;
 		    r += d * rP;
 		    th += d * thP;
