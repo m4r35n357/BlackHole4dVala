@@ -17,7 +17,7 @@ from sys import argv, stdout, stderr, exit
 from math import fabs, sin, cos, pi, sqrt, copysign
 from array import array
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import minimize, root
 
 class InitialConditions(object):
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL):
@@ -51,14 +51,15 @@ class InitialConditions(object):
 
     def constantR (self, x):
         c = self.coefficients(x[0], x[1], x[2])
-        return self.R(self.r0, c)**2 + self.dR(self.r0, c)**2 + self.THETA(self.th0, x[0], x[1], x[2])**2
+        return [self.R(self.r0, c), self.dR(self.r0, c), self.THETA(self.th0, x[0], x[1], x[2])]
 
     def variableR (self, x):
         c = self.coefficients(x[0], x[1], x[2])
-        return self.R(self.r0, c)**2 + self.R(self.r1, c)**2 + self.THETA(self.th0, x[0], x[1], x[2])**2
+        return [self.R(self.r0, c), self.R(self.r1, c), self.THETA(self.th0, x[0], x[1], x[2])]
 
     def solve (self, function):
-        res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
+        res = root(function, self.ic, jac = False, method='hybr')
+        #res = minimize(function, self.ic, method='Nelder-Mead', options={'xtol': 1e-12, 'ftol': 1e-12, 'maxiter': 1.0e6, 'maxfev': 1.0e6, 'disp': False})
         self.fun = res.fun
         self.message = res.message
         self.success = res.success
@@ -79,8 +80,6 @@ def main ():
     else:
         print >> stderr, "Bad input data!"
         return
-    if not ic.success or ic.fun > 1.0e-6:
-        exit(-1)
     # Initial conditions file
     print >> stdout, "{ \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
@@ -94,7 +93,7 @@ def main ():
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
     print >> stdout, "  \"integrator\" : \"" + ic.integrator + "\","
-    print >> stdout, "  \"error\" : " + str(ic.fun) + ","
+    print >> stdout, "  \"error\" : \"" + str(ic.fun) + "\","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
     print >> stdout, "  \"message\" : \"" + str(ic.message) + "\""
     print >> stdout, "}"
@@ -107,6 +106,8 @@ def main ():
         print >> stderr, "{ \"x\":" + str(xValue * rMax) \
                        + ", \"R\":" + str(ic.R(xValue * rMax, c)) \
                        + ", \"THETA\":" + str(ic.THETA(xValue * pi, ic.E, ic.L, ic.Q)) + " }"
+    if not ic.success or ic.fun.any() > 1.0e-6:
+        exit(-1)
 
 if __name__ == "__main__":
     main()
