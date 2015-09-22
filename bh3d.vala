@@ -118,7 +118,7 @@ namespace Kerr {
 		    ra2 = r2 + a2;
 			D = ra2 - 2.0 * r;
 			S = r2 + a2 * cth2;
-			R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];
+			R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];  // see Wilkins
 			TH = a2xE2_mu2 + L2 / sth2;
 			THETA = Q - cth2 * TH;
 			var P_D = (ra2 * E - aL) / D;
@@ -127,7 +127,7 @@ namespace Kerr {
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // see Wilkins
+		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
             var cot = cth / sth;
 		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
