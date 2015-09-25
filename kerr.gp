@@ -31,10 +31,10 @@ set timefmt x2 "%d/%m/%y,%H:%M"
 set x2data 
 set boxwidth
 set style fill  empty border
-set style rectangle back fc lt -3 fillstyle   solid 1.00 border lt -1
+set style rectangle back fc  lt -3 fillstyle   solid 1.00 border lt -1
 set style circle radius graph 0.02, first 0, 0 
 set style ellipse size graph 0.05, 0.03, first 0 angle 0 units xy
-set dummy x,y
+set dummy u,v
 set format x "% g"
 set format y "% g"
 set format x2 "% g"
@@ -54,6 +54,8 @@ unset label
 unset arrow
 set style increment default
 unset style line
+set style line 3  linetype 3 linecolor rgb "grey50"  linewidth 1.000 pointtype 3 pointsize default pointinterval 0
+set style line 4  linetype 4 linecolor rgb "grey70"  linewidth 1.000 pointtype 4 pointsize default pointinterval 0
 unset style arrow
 set style histogram clustered gap 2 title  offset character 0, 0, 0
 unset logscale
@@ -62,20 +64,20 @@ set pointsize 1
 set pointintervalbox 1
 set encoding default
 unset polar
-unset parametric
+set parametric
 unset decimalsign
-set view 60, 7, 1, 1
+set view 24, 213, 1, 1
 set samples 100, 100
-set isosamples 200, 200
+set isosamples 100, 100
 set surface
-set contour
+set contour base
 set clabel '%8.3g'
 set mapping cartesian
 set datafile separator whitespace
-unset hidden3d
+set hidden3d back offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
 set cntrparam order 4
 set cntrparam linear
-set cntrparam levels auto 5
+set cntrparam levels incremental -20,2,34
 set cntrparam points 5
 set size ratio 0 1,1
 set origin 0,0
@@ -112,23 +114,23 @@ set timestamp ""
 set timestamp  offset character 0, 0, 0 font "" norotate
 set rrange [ * : * ] noreverse nowriteback
 set trange [ * : * ] noreverse nowriteback
-set urange [ * : * ] noreverse nowriteback
-set vrange [ * : * ] noreverse nowriteback
+set urange [ 0.00000 : 5.00000 ] noreverse nowriteback
+set vrange [ 0.00000 : 6.28319 ] noreverse nowriteback
 set xlabel "" 
 set xlabel  offset character 0, 0, 0 font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  offset character 0, 0, 0 font "" textcolor lt -1 norotate
-set xrange [ * : * ] noreverse nowriteback
+set xrange [ -5.00000 : 5.00000 ] noreverse nowriteback
 set x2range [ * : * ] noreverse nowriteback
 set ylabel "" 
 set ylabel  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
 set y2label "" 
 set y2label  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
-set yrange [ * : * ] noreverse nowriteback
+set yrange [ -5.00000 : 5.00000 ] noreverse nowriteback
 set y2range [ * : * ] noreverse nowriteback
 set zlabel "" 
 set zlabel  offset character 0, 0, 0 font "" textcolor lt -1 norotate
-set zrange [ * : * ] noreverse nowriteback
+set zrange [ -12.0000 : 12.0000 ] noreverse nowriteback
 set cblabel "" 
 set cblabel  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
 set cbrange [ * : * ] noreverse nowriteback
@@ -139,10 +141,10 @@ set rmargin  -1
 set tmargin  -1
 set locale "en_GB.UTF-8"
 set pm3d explicit at s
-set pm3d scansautomatic
+set pm3d depthorder
 set pm3d interpolate 1,1 flush begin noftriangles nohidden3d corners2color mean
 set palette positive nops_allcF maxcolors 0 gamma 1.5 color model RGB 
-set palette rgbformulae 7, 5, 15
+set palette defined ( 0 1 0 0, 0.5 0.498 0.498 0.498, 1 0 0 1 )
 set colorbox default
 set colorbox vertical origin screen 0.9, 0.2, 0 size screen 0.05, 0.6, 0 front bdefault
 set style boxplot candles range  1.50 outliers pt 7 separation 1 labels auto unsorted
@@ -150,9 +152,15 @@ set loadpath
 set fontpath 
 set psdir
 set fit noerrorvariables
+f(u,v) = 48.0 * (a**2 * cos(v)**2 - u**2) * (a**4 * cos(v)**4 - 18.0 * u**2 * a**2 * cos(v)**2 + u**4) / (a**2 * cos(v)**2 + u**2)**6
+g(u,v) = (a**2 * cos(v)**2 + u**2)**6
+clamp(u,v) = (f(u,v) > 10.0) ? 10.0 : (f(u,v) > -10.0 ? f(u,v) : -10.0)
 GNUTERM = "wxt"
+a = 0.7
+GPFUN_f = "f(u,v) = 48.0 * (a**2 * cos(v)**2 - u**2) * (a**4 * cos(v)**4 - 14.0 * u**2 * a**2 * cos(v)**2 + u**4) / (a**2 * cos(v)**2 + u**2)**6"
+GPFUN_g = "g(u,v) = (a**2 * cos(v)**2 + u**2)**6"
+GPFUN_clamp = "clamp(u,v) = (f(u,v) > 10.0) ? 10.0 : (f(u,v) > -10.0 ? f(u,v) : -10.0)"
 r = 10
 th = 3.14159265358979
-a = 0.7
-splot [0.0:6.0][0.0:pi][-100.0:100.0] - 48.0 * (a**2 * cos(y)**2 - x**2)**2  * (a**4 * cos(y)**4 - 18.0 * x**2 * a**2 * cos(y)**2 + x**4) / (a**2 * cos(y)**2 + x**2)**6 w pm3d
+splot u*cos(v),u*sin(v),clamp(u,v) title "Kretschmann Scalar" ls 3 palette, (1.0 + sqrt(1.0 - a * a))*cos(v),(1.0 + sqrt(1.0 - a * a))*sin(v),0.0 title "Horizon"
 #    EOF
