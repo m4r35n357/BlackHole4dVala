@@ -66,18 +66,18 @@ set encoding default
 unset polar
 set parametric
 unset decimalsign
-set view 24, 213, 1, 1
+set view 65, 330, 1, 1
 set samples 100, 100
 set isosamples 100, 100
 set surface
-set contour base
+set contour both
 set clabel '%8.3g'
 set mapping cartesian
 set datafile separator whitespace
 set hidden3d back offset 1 trianglepattern 3 undefined 1 altdiagonal bentover
 set cntrparam order 4
 set cntrparam linear
-set cntrparam levels incremental -20,2,34
+set cntrparam levels incremental -1000,100,1200
 set cntrparam points 5
 set size ratio 0 1,1
 set origin 0,0
@@ -130,7 +130,7 @@ set yrange [ -5.00000 : 5.00000 ] noreverse nowriteback
 set y2range [ * : * ] noreverse nowriteback
 set zlabel "" 
 set zlabel  offset character 0, 0, 0 font "" textcolor lt -1 norotate
-set zrange [ -12.0000 : 12.0000 ] noreverse nowriteback
+set zrange [ -1000.00 : 1000.00 ] noreverse nowriteback
 set cblabel "" 
 set cblabel  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
 set cbrange [ * : * ] noreverse nowriteback
@@ -144,7 +144,8 @@ set pm3d explicit at s
 set pm3d depthorder
 set pm3d interpolate 1,1 flush begin noftriangles nohidden3d corners2color mean
 set palette positive nops_allcF maxcolors 0 gamma 1.5 color model RGB 
-set palette defined ( 0 1 0 0, 0.5 0.498 0.498 0.498, 1 0 0 1 )
+set palette defined ( 0 1 0 0, 0.499 1 0.6471 0, 0.5 0.302 0.302 0.302,\
+     0.501 0 1 0, 1 0 0 1 )
 set colorbox default
 set colorbox vertical origin screen 0.9, 0.2, 0 size screen 0.05, 0.6, 0 front bdefault
 set style boxplot candles range  1.50 outliers pt 7 separation 1 labels auto unsorted
@@ -154,12 +155,12 @@ set psdir
 set fit noerrorvariables
 f(u,v) = 48.0 * (a**2 * cos(v)**2 - u**2) * (a**4 * cos(v)**4 - 18.0 * u**2 * a**2 * cos(v)**2 + u**4) / (a**2 * cos(v)**2 + u**2)**6
 g(u,v) = (a**2 * cos(v)**2 + u**2)**6
-clamp(u,v) = (f(u,v) > 10.0) ? 10.0 : (f(u,v) > -10.0 ? f(u,v) : -10.0)
+clamp(u,v) = (f(u,v) > 1000.0) ? 1000.0 : (f(u,v) > -1000.0 ? f(u,v) : -1000.0)
 GNUTERM = "wxt"
-a = 0.7
+a = 1.0
 GPFUN_f = "f(u,v) = 48.0 * (a**2 * cos(v)**2 - u**2) * (a**4 * cos(v)**4 - 14.0 * u**2 * a**2 * cos(v)**2 + u**4) / (a**2 * cos(v)**2 + u**2)**6"
 GPFUN_g = "g(u,v) = (a**2 * cos(v)**2 + u**2)**6"
-GPFUN_clamp = "clamp(u,v) = (f(u,v) > 10.0) ? 10.0 : (f(u,v) > -10.0 ? f(u,v) : -10.0)"
+GPFUN_clamp = "clamp(u,v) = (f(u,v) > 1000.0) ? 1000.0 : (f(u,v) > -1000.0 ? f(u,v) : -1000.0)"
 r = 10
 th = 3.14159265358979
 splot u*cos(v),u*sin(v),clamp(u,v) title "Kretschmann Scalar" ls 3 palette, (1.0 + sqrt(1.0 - a * a))*cos(v),(1.0 + sqrt(1.0 - a * a))*sin(v),0.0 title "Horizon"
