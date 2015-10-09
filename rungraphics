@@ -9,12 +9,18 @@ coordinates=$*
 dataFile='/tmp/data'
 
 # run simulator
-#./newton <$initialConditions >$dataFile 2>errors
-./bh3d <$initialConditions >$dataFile 2>errors
-#./bh3d.py <$initialConditions >$dataFile 2>errors
+if [ -f ./bh3d ]
+then
+    ./bh3d <$initialConditions >$dataFile 2>errors
+else
+    ./bh3d.py <$initialConditions >$dataFile 2>errors
+fi
 
 # plot orbit
-./filegraphics.py $dataFile $initialConditions $time $nPoints &
+case $(uname -m) in
+    armv7l) ./filegraphics-pi.py $dataFile $initialConditions &;;
+    x86_64) ./filegraphics.py $dataFile $initialConditions $time $nPoints &;;
+esac
 
 # plot potential, coordinates/velocities (optional) and errors
 ./filepotential.py potential &
