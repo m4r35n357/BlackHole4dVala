@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 from numpy import sqrt, sin, cos, radians, pi, add, subtract, array
-import demo
 import pi3d
 from sys import argv, stdout, stderr
 from json import loads
