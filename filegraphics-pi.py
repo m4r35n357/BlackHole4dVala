@@ -18,14 +18,14 @@ class Planet(pi3d.Sphere):
     self.trace_shape = None
     self.set_material(colour)
     
-  def position_and_draw(self):
+  def position_and_draw(self, trace_material=(0.5,0.5,0.5)):
     self.position(self.pos[0], self.pos[1], self.pos[2])
     self.draw()
     if self.track_shader != None:
       self.t_len += 1
       self.t_v.append(tuple(self.pos))
       if (self.t_len % 10) == 0:
-        self.trace_shape = pi3d.Points(vertices=self.t_v, material=(1.0,0.0,0.0), point_size=1)
+        self.trace_shape = pi3d.Points(vertices=self.t_v, material=trace_material, point_size=1)
         self.trace_shape.set_shader(self.track_shader)
         if (self.t_len > 2400):
           self.t_v = self.t_v[-2400:]
@@ -73,7 +73,19 @@ while DISPLAY.loop_running():
   ph = float(params['ph'])
   rasth = sqrt(r**2 + a2) * sin(th)
   earth.pos = [rasth * cos(ph), rasth * sin(ph), r * cos(th)]
-  earth.position_and_draw()
+  error = params['v4e']
+  if error < -120.0:
+    colour = (0.0,1.0,0.0)
+  elif error < -90.0:
+    colour = (0.0,0.5,0.5)
+  elif error < -60.0:
+    colour = (1.0,1.0,0.0)
+  elif error < -30.0:
+    colour = (0.5,0.5,0.0)
+  else:
+    colour = (1.0,0.0,0.0)
+  earth.set_material(colour)
+  earth.position_and_draw(trace_material=colour)
   k = mykeys.read()
   if k >-1:
     rottilt = True
