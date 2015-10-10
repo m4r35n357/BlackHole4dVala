@@ -6,28 +6,33 @@ nPoints=$3
 shift 3
 coordinates=$*
 
+simVala='./bh3d'
+simPython='./bh3d.py'
 dataFile='/tmp/data'
 
 # run simulator
-if [ -f ./bh3d ]
+echo -n "Simulating "
+if [ -f $simVala ]
 then
-    ./bh3d <$initialConditions >$dataFile 2>errors
+    echo -n "with $simVala . . . "
+    $simVala <$initialConditions 1>$dataFile 2>errors
 else
-    ./bh3d.py <$initialConditions >$dataFile 2>errors
+    echo -n "with $simPython . . . "
+    $simPython <$initialConditions 1>$dataFile 2>errors
 fi
-
-# plot potential, coordinates/velocities (optional) and errors
-./filepotential.py potential &
-for coordinate in $coordinates
-do
-	./phase.py $dataFile $time $nPoints $coordinate &
-	./interpolate.py $dataFile $time $nPoints $coordinate &
-done
-./errorchart.py $dataFile $time $nPoints &
+echo "Done!"
 
 # plot orbit
 case $(uname -m) in
     armv7l) ./filegraphics-pi.py $dataFile $initialConditions;;
-    x86_64) ./filegraphics.py $dataFile $initialConditions $time $nPoints &;;
+    x86_64) ./filegraphics.py $dataFile $initialConditions $time $nPoints &
+            # plot potential, coordinates/velocities (optional) and errors
+            ./filepotential.py potential &
+            for coordinate in $coordinates
+            do
+            	./phase.py $dataFile $time $nPoints $coordinate &
+            	./interpolate.py $dataFile $time $nPoints $coordinate &
+            done
+            ./errorchart.py $dataFile $time $nPoints &;;
 esac
 
