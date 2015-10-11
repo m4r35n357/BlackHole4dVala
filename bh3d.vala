@@ -34,7 +34,7 @@ namespace Kerr {
         private double phDot;
         private double starttime;
         private double endtime;
-        public double h { get; set; }
+        private double h;
         private int count = 1;
         private double a2;
         private double aE;
@@ -47,19 +47,19 @@ namespace Kerr {
         private double cth;
         private double sth2;
         private double ra2;
-		private double D;
-		private double S;
-		private double R;
-		private double TH;
-		private double THETA;
-		private double eR;
-		private double eTh;
-		private double v4Cum;
-		private double v4c;
-		private double v4e;
+        private double D;
+        private double S;
+        private double R;
+        private double TH;
+        private double THETA;
+        private double eR;
+        private double eTh;
+        private double v4Cum;
+        private double v4c;
+        private double v4e;
         private ISymplectic integrator;
 
-        public Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
+        public Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             this.a = spin;
             this.mu2 = pMass2;
@@ -72,72 +72,76 @@ namespace Kerr {
             this.endtime = starttime + duration;
             this.h = timestep;
             this.integrator = Integrator.getIntegrator(this, type);
-			this.a2 = a * a;
-		    this.aE = a * E;
-		    this.a2E = a2 * E;
-		    this.L2 = L * L;
-		    this.aL = a * L;
-		    var E2_mu2 = E * E - mu2;
+            this.a2 = a * a;
+            this.aE = a * E;
+            this.a2E = a2 * E;
+            this.L2 = L * L;
+            this.aL = a * L;
+            var E2_mu2 = E * E - mu2;
             this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
-		    this.a2xE2_mu2 = - a2 * E2_mu2;
-			refresh();
-			this.rP = sqrt(fabs(R));
-			this.thP = sqrt(fabs(THETA));
+            this.a2xE2_mu2 = - a2 * E2_mu2;
+            refresh();
+            this.rP = sqrt(fabs(R));
+            this.thP = sqrt(fabs(THETA));
         }
 
-		private double logError (double e) {
-		    return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-		}
+        public double getH () {
+            return h;
+        }
 
-		private double modH (double xDot, double X) {
-		    return 0.5 * fabs(xDot * xDot - X);
-		}
+        private double logError (double e) {
+            return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
+        }
 
-		private double v4Error (double tDot, double rDot, double thDot, double phDot) {
-		    var tmp1 = a * tDot - ra2 * phDot;
-		    var tmp2 = tDot - a * sth2 * phDot;
-		    return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
-		}
+        private double modH (double xDot, double X) {
+            return 0.5 * fabs(xDot * xDot - X);
+        }
 
-		public void errors () {
-		    eR = logError(modH(rP, R));
-		    eTh = logError(modH(thP, THETA));
-		    var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
-		    v4e = logError(error);
-		    v4Cum += error;
-		    v4c = logError(v4Cum / count);
-			count++;
-		}
+        private double v4Error (double tDot, double rDot, double thDot, double phDot) {
+            var tmp1 = a * tDot - ra2 * phDot;
+            var tmp2 = tDot - a * sth2 * phDot;
+            return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
+        }
 
-		private void refresh () {
+        public void errors () {
+            eR = logError(modH(rP, R));
+            eTh = logError(modH(thP, THETA));
+            var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
+            v4e = logError(error);
+            v4Cum += error;
+            v4c = logError(v4Cum / count);
+            count++;
+        }
+
+        private void refresh () {
             var r2 = r * r;
-		    sth = sin(th);
-		    cth = cos(th);
-		    sth2 = sth * sth;
-		    var cth2 = 1.0 - sth2;
-		    ra2 = r2 + a2;
-			D = ra2 - 2.0 * r;
-			S = r2 + a2 * cth2;
-			R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];  // see Wilkins
-			TH = a2xE2_mu2 + L2 / sth2;
-			THETA = Q - cth2 * TH;
-			var P_D = (ra2 * E - aL) / D;
-		    tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
-		    phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
+            sth = sin(th);
+            cth = cos(th);
+            sth2 = sth * sth;
+            var cth2 = 1.0 - sth2;
+            ra2 = r2 + a2;
+            D = ra2 - 2.0 * r;
+            S = r2 + a2 * cth2;
+            R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];  // see Wilkins
+            TH = a2xE2_mu2 + L2 / sth2;
+            THETA = Q - cth2 * TH;
+            var P_D = (ra2 * E - aL) / D;
+            tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
+            phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-		    rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
+            rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
             var cot = cth / sth;
-		    thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
+            thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
-		    t += d * tDot;
-		    r += d * rP;
-		    th += d * thP;
-		    ph += d * phDot;
-		    refresh();
+            t += d * tDot;
+            r += d * rP;
+            th += d * thP;
+            ph += d * phDot;
+            refresh();
         }
 
         public void evolve () {
@@ -145,22 +149,22 @@ namespace Kerr {
         }
 
         public void solve () {
-			var mino = 0.0;
-			var tau = 0.0;
-			while (mino <= endtime) {
-				errors();
-				if (mino >= starttime) {
-					output(mino, tau);
-			    }
-		        evolve();
-				mino += h;
-				tau += h * S;
-			}
+            var mino = 0.0;
+            var tau = 0.0;
+            while ((mino <=endtime) && (r >= h)) {
+                errors();
+                if (mino >= starttime) {
+                    output(mino, tau);
+                }
+                evolve();
+                mino += h;
+                tau += h * S;
+            }
         }
 
         public static Geodesic fromJson () {
             var ic = getJson();
-		    return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
+            return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
                                 ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
                                 ic.get_double_member("r"), ic.get_double_member("theta"),
                                 ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
@@ -172,11 +176,11 @@ namespace Kerr {
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);
         }
-	}
+    }
 
-	static int main (string[] args) {
-	    Geodesic.fromJson().solve();
-    	return 0; 
-	}
+    static int main (string[] args) {
+        Geodesic.fromJson().solve();
+        return 0;
+    }
 }
 

@@ -17,44 +17,44 @@ using GLib.Math;
 
 namespace Kerr {
 
-	/**
-	 * Interface for the physical model (client)
-	 */
+    /**
+     * Interface for the physical model (client)
+     */
     public interface IModel : GLib.Object {
-		/**
-		 * Model time step size
-		 */
-        public abstract double h { get; set; }
-        
-		/**
-		 * Momentum updates
-		 */
+        /**
+         * Model time step size
+         */
+        public abstract double getH ();
+
+        /**
+         * Momentum updates
+         */
         public abstract void pUp (double c);
-        
-		/**
-		 * Coordinate updates
-		 */
+
+        /**
+         * Coordinate updates
+         */
         public abstract void qUp (double d);
-        
-		/**
-		 * Should wrap and call ISymplectic.compose()
-		 */
+
+        /**
+         * Should wrap and call ISymplectic.compose()
+         */
         public abstract void evolve ();
     }
 
-	/**
-	 * Interface for the integrators
-	 */
+    /**
+     * Interface for the integrators
+     */
     public interface ISymplectic : GLib.Object {
-		/**
-		 * Should be called by IModel.evolve()
-		 */
+        /**
+         * Should be called by IModel.evolve()
+         */
         public abstract void compose ();
     }
 
-	/**
-	 * Integrator superclass
-	 */
+    /**
+     * Integrator superclass
+     */
     public abstract class Integrator : GLib.Object, ISymplectic {
 
         private double[] compWeight;
@@ -68,48 +68,48 @@ namespace Kerr {
             this.model = model;
         }
 
-		/**
-		 * Static factory
-		 */
-		public static ISymplectic getIntegrator (IModel model, string type) {
+        /**
+         * Static factory
+         */
+        public static ISymplectic getIntegrator (IModel model, string type) {
             ISymplectic integrator = null;
-		    switch (type) {
-		        case "sb2":  // second order, basic
-		            integrator = new Base2(model, { 1.0 });
-		            break;
-		        case "sc4":  // fourth order, composed
-					var cbrt2 = pow(2.0, (1.0 / 3.0));
-		            integrator = new Base2(model, { 1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2) });
-		            break;
-		        case "sb4":  // fourth order, basic
-		            integrator = new Base4(model, { 1.0 });
-		            break;
-		        case "sc6":  // sixth order, composed
-		            var fthrt2 = pow(2.0, (1.0 / 5.0));
-		            integrator = new Base4(model, { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) });
-		            break;
-		    }
+            switch (type) {
+                case "sb2":  // second order, basic
+                    integrator = new Base2(model, { 1.0 });
+                    break;
+                case "sc4":  // fourth order, composed
+                    var cbrt2 = pow(2.0, (1.0 / 3.0));
+                    integrator = new Base2(model, { 1.0 / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2) });
+                    break;
+                case "sb4":  // fourth order, basic
+                    integrator = new Base4(model, { 1.0 });
+                    break;
+                case "sc6":  // sixth order, composed
+                    var fthrt2 = pow(2.0, (1.0 / 5.0));
+                    integrator = new Base4(model, { 1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2) });
+                    break;
+            }
             return integrator;
-		}
+        }
 
-		/**
-		 * Perform one integration step with the current compositional weight
-		 */
+        /**
+         * Perform one integration step with the current compositional weight
+         */
         protected abstract void integrate (double compWeight);
 
-		/**
-		 * Perform a composition of weighted integration steps
-		 */
+        /**
+         * Perform a composition of weighted integration steps
+         */
         public void compose () {
-			for (int i = 0; i < wRange; i++) {
-	            integrate(compWeight[i] * model.h);
-	        }
+            for (int i = 0; i < wRange; i++) {
+                integrate(compWeight[i] * model.getH());
+            }
         }
     }
 
-	/**
-	 * Second-order symplectic integrator base
-	 */
+    /**
+     * Second-order symplectic integrator base
+     */
     public class Base2 : Integrator {
 
         protected Base2 (IModel model, double[] compWeight) {
@@ -118,15 +118,15 @@ namespace Kerr {
         }
 
         protected override void integrate (double compWeight) {
-		    model.pUp(baseCoeff[0] * compWeight);
-		    model.qUp(baseCoeff[1] * compWeight);
-		    model.pUp(baseCoeff[0] * compWeight);
+            model.pUp(baseCoeff[0] * compWeight);
+            model.qUp(baseCoeff[1] * compWeight);
+            model.pUp(baseCoeff[0] * compWeight);
         }
     }
 
-	/**
-	 * Fourth-order symplectic integrator base
-	 */
+    /**
+     * Fourth-order symplectic integrator base
+     */
     public class Base4 : Integrator {
 
         protected Base4 (IModel model, double[] compWeight) {
@@ -136,13 +136,13 @@ namespace Kerr {
         }
 
         protected override void integrate (double compWeight) {
-		    model.pUp(baseCoeff[0] * compWeight);
-		    model.qUp(baseCoeff[1] * compWeight);
-		    model.pUp(baseCoeff[2] * compWeight);
-		    model.qUp(baseCoeff[3] * compWeight);
-		    model.pUp(baseCoeff[2] * compWeight);
-		    model.qUp(baseCoeff[1] * compWeight);
-		    model.pUp(baseCoeff[0] * compWeight);
+            model.pUp(baseCoeff[0] * compWeight);
+            model.qUp(baseCoeff[1] * compWeight);
+            model.pUp(baseCoeff[2] * compWeight);
+            model.qUp(baseCoeff[3] * compWeight);
+            model.pUp(baseCoeff[2] * compWeight);
+            model.qUp(baseCoeff[1] * compWeight);
+            model.pUp(baseCoeff[0] * compWeight);
         }
     }
 }
