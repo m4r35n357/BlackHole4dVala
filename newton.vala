@@ -28,7 +28,7 @@ namespace Kerr {
         private double phDot;
         public double starttime;
         public double endtime;
-        public double h { get; set; }
+        private double h;
         private double L2;
         private double rP;
 		private double H0;
@@ -47,6 +47,10 @@ namespace Kerr {
             this.h = timestep;
             this.integrator = Integrator.getIntegrator(this, type);
             this.H0 = H();
+        }
+
+        public double getH () {
+            return h;
         }
 
 		private double logError (double e) {
