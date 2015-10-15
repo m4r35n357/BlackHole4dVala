@@ -19,6 +19,7 @@ namespace Kerr {
 
     public class Orbit : GLib.Object, IModel {
 
+        private double E0;
         private double E;
         private double L;
         private double r;
@@ -26,26 +27,30 @@ namespace Kerr {
         private double ph;
         private double rDot;
         private double phDot;
-        public double starttime;
-        public double endtime;
+        private double starttime;
+        private double endtime;
         private double h;
         private double L2;
         private double rP;
-		private double H0;
-		private double eR;
+        private double H0;
+        private double eR;
         private ISymplectic integrator;
 
-        public Orbit (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
+        private Orbit (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
-            this.L = momentum * sqrt(r0);
-		    this.L2 = L * L;
+            this.L = sqrt(r0);
+            this.L2 = L * L;
             this.r = r0;
             this.th = thetaMin;
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
             this.integrator = Integrator.getIntegrator(this, type);
+            this.E0 = V(r);
+            this.L = lFac * L;
+            this.L2 = L * L;
+            this.rP = - sqrt(2.0 * fabs(E0 - V(r)));
             this.H0 = H();
         }
 
@@ -53,27 +58,31 @@ namespace Kerr {
             return h;
         }
 
-		private double logError (double e) {
-		    return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-		}
+        private double V (double r) {
+			return 0.5 * L2 / (r * r) - 1.0 / r;
+        }
+        
+        private double logError (double e) {
+            return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
+        }
 
-		private double H () {
-		    return 0.5 * rP * rP + 0.5 * L2 / (r * r) - 1.0 / r;
-		}
+        private double H () {
+            return 0.5 * rP * rP + V(r);
+        }
 
-		public void errors () {
-		    eR = logError(fabs(H() - H0));
-		}
+        public void errors () {
+            eR = logError(fabs(H() - H0));
+        }
 
         public void pUp (double c) {
-		    rP -= c * (1.0 / (r * r) - L2 / (r * r * r));
+            rP -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         public void qUp (double d) {
             rDot = rP;
-		    r += d * rDot;
-		    phDot = L / (r * r);
-		    ph += d * phDot;
+            r += d * rDot;
+            phDot = L / (r * r);
+            ph += d * phDot;
         }
 
         public void evolve () {
@@ -81,20 +90,20 @@ namespace Kerr {
         }
 
         public void solve () {
-			var mino = 0.0;
-			while (! (mino > endtime)) {
-				errors();
-				if (mino > starttime) {
-					output(mino, 0.0);
-			    }
-		        evolve();
-				mino += h;
-			}
+            var mino = 0.0;
+            while (! (mino > endtime)) {
+                errors();
+                if (mino > starttime) {
+                    output(mino, 0.0);
+                }
+                evolve();
+                mino += h;
+            }
         }
 
         public static Orbit fromJson () {
             var ic = getJson();
-		    return new Orbit(ic.get_double_member("a"),
+            return new Orbit(ic.get_double_member("a"),
                                 ic.get_double_member("mu"),
                                 ic.get_double_member("E"),
                                 ic.get_double_member("Lz"),
@@ -112,11 +121,11 @@ namespace Kerr {
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }
-	}
+    }
 
-	static int main (string[] args) {
-	    Orbit.fromJson().solve();
-    	return 0; 
-	}
+    static int main (string[] args) {
+        Orbit.fromJson().solve();
+        return 0; 
+    }
 }
 

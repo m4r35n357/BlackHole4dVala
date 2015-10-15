@@ -59,7 +59,7 @@ namespace Kerr {
         private double v4e;
         private ISymplectic integrator;
 
-        public Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
+        private Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             this.a = spin;
             this.mu2 = pMass2;
@@ -148,6 +148,9 @@ namespace Kerr {
             integrator.compose();
         }
 
+        /**
+         * Sole user method
+         */
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
@@ -162,6 +165,9 @@ namespace Kerr {
             }
         }
 
+        /**
+         * Static factory
+         */
         public static Geodesic fromJson () {
             var ic = getJson();
             return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
