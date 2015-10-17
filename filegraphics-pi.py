@@ -7,16 +7,25 @@ from sys import argv, stdout, stderr
 from json import loads
 from pprint import pprint
 
+def isco (a):
+	z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
+	z2 = sqrt(3.0 * a * a + z1 * z1)
+	if a >= 0.0:
+		return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+	else:
+		return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+
 class Planet(pi3d.Sphere):
-  def __init__(self, shader, colour, radius, pos=[0.0, 0.0, 0.0], track_shader=None):
-    super(Planet, self).__init__(radius=radius, x=pos[0], y=pos[1], z=pos[2])
-    super(Planet, self).set_draw_details(shader, [])
+  def __init__(self, shader, colour, radius, pos=[0.0, 0.0, 0.0], track_shader=None, scale=1.0, grid=12, opacity=1.0):
+    super(Planet, self).__init__(radius=radius, slices=grid, sides=grid, sx=scale, sy=scale, sz=1.0, x=pos[0], y=pos[1], z=pos[2])
+    self.set_draw_details(shader, [])
     self.pos = array(pos)
     self.track_shader = track_shader
     self.t_v = []
     self.t_len = 0
     self.trace_shape = None
     self.set_material(colour)
+    self.set_alpha(opacity)
     
   def position_and_draw(self, trace_material=(0.5,0.5,0.5)):
     self.position(self.pos[0], self.pos[1], self.pos[2])
@@ -42,6 +51,7 @@ a = parameters['a']
 a2 = a**2
 m = parameters['M']
 horizon = m * (1.0 + sqrt(1.0 - a2))
+cauchy = m * (1.0 - sqrt(1.0 - a2))
 # Setup display and initialise pi3d ------
 DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=0)
 DISPLAY.set_background(0,0,0,1)    	# r,g,b,alpha
@@ -55,7 +65,10 @@ camRad = 30.0
 shader = pi3d.Shader("mat_light")
 tracksh = pi3d.Shader("mat_flat")
 # Planets --------------------------------
-sun = Planet(shader, (0.0,0.0,1.0), horizon, pos=[0.0, 0.0, 0.0])
+bulge = sqrt(1.0 + a2)
+ergo = Planet(shader, (1.0,1.0,0.0), horizon, pos=[0.0, 0.0, 0.0], scale=sqrt(2.0 + a2), grid=24, opacity=0.1)
+outer = Planet(shader, (0.0,1.0,1.0), horizon, pos=[0.0, 0.0, 0.0], scale=bulge, grid=24, opacity=0.3)
+inner = Planet(shader, (0.0,0.0,1.0), cauchy, pos=[0.0, 0.0, 0.0], scale=bulge, grid=24)
 earth = Planet(shader, (0.0,1.0,0.0), 0.125, track_shader=tracksh)
 # Fetch key presses ----------------------
 mykeys = pi3d.Keyboard()
@@ -67,7 +80,9 @@ while DISPLAY.loop_running():
     CAMERA.rotate(-tilt, rot, 0)
     CAMERA.position((camRad * sin(radians(rot)) * cos(radians(tilt)), camRad * sin(radians(tilt)), -camRad * cos(radians(rot)) * cos(radians(tilt))))
     rottilt = False
-  sun.position_and_draw()
+  inner.position_and_draw()
+  outer.position_and_draw()
+  ergo.position_and_draw()
   r = float(params['r'])
   th = float(params['th'])
   ph = float(params['ph'])
@@ -86,6 +101,7 @@ while DISPLAY.loop_running():
     colour = (1.0,0.0,0.0)
   earth.set_material(colour)
   earth.position_and_draw(trace_material=colour)
+#  Cylinder(radius=isco(a), height=0.1).draw()
   k = mykeys.read()
   if k >-1:
     rottilt = True
