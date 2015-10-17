@@ -34,8 +34,9 @@ namespace Kerr {
         private double phDot;
         private double starttime;
         private double endtime;
+        private double interval;
         private double h;
-        private int count = 1;
+        private int count;
         private double a2;
         private double aE;
         private double a2E;
@@ -60,7 +61,7 @@ namespace Kerr {
         private ISymplectic integrator;
 
         private Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep, string type) {
+                         double starttime, double duration, double timestep, double interval, string type) {
             this.a = spin;
             this.mu2 = pMass2;
             this.E = energy;
@@ -71,6 +72,7 @@ namespace Kerr {
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
+            this.interval = interval;
             this.integrator = Integrator.getIntegrator(this, type);
             this.a2 = a * a;
             this.aE = a * E;
@@ -109,8 +111,7 @@ namespace Kerr {
             var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
             v4e = logError(error);
             v4Cum += error;
-            v4c = logError(v4Cum / count);
-            count++;
+            v4c = logError(v4Cum / (count + 1));
         }
 
         private void refresh () {
@@ -156,12 +157,13 @@ namespace Kerr {
             var tau = 0.0;
             while ((mino <=endtime) && (r >= h)) {
                 errors();
-                if (mino >= starttime) {
+                if ((mino >= starttime) && (count % interval == 0)) {
                     output(mino, tau);
                 }
                 evolve();
                 mino += h;
                 tau += h * S;
+                count++;
             }
         }
 
@@ -173,7 +175,7 @@ namespace Kerr {
             return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
                                 ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
                                 ic.get_double_member("r"), ic.get_double_member("theta"),
-                                ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
+                                ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_int_member("interval"),
                                 ic.get_string_member("integrator"));
         }
 

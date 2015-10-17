@@ -91,6 +91,7 @@ def main ():
     print >> stdout, "  \"start\" : " + str(ic.starttime) + ","
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
+    print >> stdout, "  \"interval\" : 1,"
     print >> stdout, "  \"integrator\" : \"" + ic.integrator + "\","
     print >> stdout, "  \"error\" : " + str(ic.fun) + ","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
