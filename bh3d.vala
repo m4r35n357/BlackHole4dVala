@@ -17,12 +17,17 @@ using GLib.Math;
 namespace Kerr {
 
     public class Geodesic : GLib.Object, IModel {
-        // Constants
+        // Constants from IC file
         private double a;
         private double mu2;
         private double E;
         private double L;
         private double Q;
+        private double starttime;
+        private double endtime;
+        private double interval;
+        private ISymplectic integrator;
+        // Derived Constants
         private double a2;
         private double aE;
         private double a2E;
@@ -30,10 +35,6 @@ namespace Kerr {
         private double aL;
         private double a2xE2_mu2;
         private double[] cr;
-        private double starttime;
-        private double endtime;
-        private double interval;
-        private ISymplectic integrator;
         // Variables
         private double h;
         private int count;
@@ -75,14 +76,14 @@ namespace Kerr {
             this.L2 = L * L;
             this.aL = a * L;
             var E2_mu2 = E * E - mu2;
-            this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
             this.a2xE2_mu2 = - a2 * E2_mu2;
+            this.cr = { E2_mu2, 2.0 * mu2, - a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
             this.interval = interval;
             this.integrator = Integrator.getIntegrator(this, type);
-            // Boyer-Lindquist Coordinates
+            // Coordinates
             this.r = r0;
             this.th = thetaMin;
             refresh();
