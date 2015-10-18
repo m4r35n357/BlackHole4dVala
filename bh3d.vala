@@ -12,31 +12,17 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 using GLib.Math;
 
 namespace Kerr {
 
     public class Geodesic : GLib.Object, IModel {
-
+        // Constants
         private double a;
         private double mu2;
         private double E;
         private double L;
         private double Q;
-        private double t;
-        private double r;
-        private double th;
-        private double ph;
-        private double tDot;
-        private double rP;
-        private double thP;
-        private double phDot;
-        private double starttime;
-        private double endtime;
-        private double interval;
-        private double h;
-        private int count;
         private double a2;
         private double aE;
         private double a2E;
@@ -44,6 +30,13 @@ namespace Kerr {
         private double aL;
         private double a2xE2_mu2;
         private double[] cr;
+        private double starttime;
+        private double endtime;
+        private double interval;
+        private ISymplectic integrator;
+        // Variables
+        private double h;
+        private int count;
         private double sth;
         private double cth;
         private double sth2;
@@ -58,22 +51,24 @@ namespace Kerr {
         private double v4Cum;
         private double v4c;
         private double v4e;
-        private ISymplectic integrator;
-
+        // Boyer-Lindquist Coordinates
+        private double t;
+        private double r;
+        private double th;
+        private double ph;
+        private double tDot;
+        private double rP;
+        private double thP;
+        private double phDot;
+        // private constructor; use the static factory
         private Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, double interval, string type) {
+            // Constants
             this.a = spin;
             this.mu2 = pMass2;
             this.E = energy;
             this.L = momentum;
             this.Q = carter;
-            this.r = r0;
-            this.th = thetaMin;
-            this.starttime = starttime;
-            this.endtime = starttime + duration;
-            this.h = timestep;
-            this.interval = interval;
-            this.integrator = Integrator.getIntegrator(this, type);
             this.a2 = a * a;
             this.aE = a * E;
             this.a2E = a2 * E;
@@ -82,6 +77,14 @@ namespace Kerr {
             var E2_mu2 = E * E - mu2;
             this.cr = { E2_mu2, 2.0 * mu2, a2 * E2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
             this.a2xE2_mu2 = - a2 * E2_mu2;
+            this.starttime = starttime;
+            this.endtime = starttime + duration;
+            this.h = timestep;
+            this.interval = interval;
+            this.integrator = Integrator.getIntegrator(this, type);
+            // Boyer-Lindquist Coordinates
+            this.r = r0;
+            this.th = thetaMin;
             refresh();
             this.rP = sqrt(fabs(R));
             this.thP = sqrt(fabs(THETA));
@@ -105,7 +108,7 @@ namespace Kerr {
             return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
         }
 
-        public void errors () {
+        private void errors () {
             eR = logError(modH(rP, R));
             eTh = logError(modH(thP, THETA));
             var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
