@@ -4,12 +4,6 @@ from sys import argv, stdin, stdout
 from math import fabs
 from json import loads
 
-def nearest (time, target, olderTime, newerTime, older, newer):
-    if fabs(newerTime - target) <= fabs(olderTime - target):
-        return newer
-    else:
-        return older
-
 def main():
     if len(argv) > 3:
         raise Exception('>>> Please supply a time variable name (string) and a precision (float) <<<')
@@ -26,10 +20,13 @@ def main():
         latestTime = float(latestJson[timeVariable])
         target = counter * precision
         if (latestTime - target) > 0.0:
-            print >> stdout, (previousTime)
-            print >> stdout, (target)
-            print >> stdout, (latestTime)
-            print >> stdout, (nearest(timeVariable, target, previousTime, latestTime, previous, latest))
+#            print >> stdout, (previousTime)
+#            print >> stdout, (target)
+#            print >> stdout, (latestTime)
+            if fabs(latestTime - target) <= fabs(previousTime - target):
+                print latest,  # trailing comma suppresses newline
+            else:
+                print previous,
             counter += 1
         previous = latest
         previousJson = latestJson
