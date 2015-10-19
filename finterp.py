@@ -4,10 +4,6 @@ from sys import argv, stdin, stdout
 from math import fabs
 from json import loads
 
-def signChange (time, target, olderTime, newerTime):
-    return (newerTime - target) > 0.0
-#    return (newerTime - target) * (olderTime - target) < 0.0
-
 def nearest (time, target, olderTime, newerTime, older, newer):
     if fabs(newerTime - target) <= fabs(olderTime - target):
         return newer
@@ -29,7 +25,7 @@ def main():
         latestJson = loads(latest)
         latestTime = float(latestJson[timeVariable])
         target = counter * precision
-        if signChange(timeVariable, target, previousTime, latestTime):
+        if (latestTime - target) > 0.0:
             print >> stdout, (previousTime)
             print >> stdout, (target)
             print >> stdout, (latestTime)
