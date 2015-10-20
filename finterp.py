@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stdin, stdout
+from sys import argv, stdin
 from math import fabs
 from json import loads
 
@@ -20,14 +20,11 @@ def main():
         latestTime = float(latestJson[timeVariable])
         target = counter * precision
         if (latestTime - target) > 0.0:
-#            print >> stdout, (previousTime)
-#            print >> stdout, (target)
-#            print >> stdout, (latestTime)
+            counter += 1
             if fabs(latestTime - target) <= fabs(previousTime - target):
                 print latest,  # trailing comma suppresses newline
             else:
                 print previous,
-            counter += 1
         previous = latest
         previousJson = latestJson
         previousTime = latestTime
