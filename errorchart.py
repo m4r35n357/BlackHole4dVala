@@ -34,14 +34,10 @@ def main():
     while line:  # build raw data arrays
         p = loads(line)
         timeValue = p[timeCoordinate]
-        eR = float(p['ER'])
-        eTh = float(p['ETh'])
-        ev4 = float(p['v4e'])
-        ev4c = float(p['v4c'])
-        ax1.plot(timeValue, ev4, color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
-        ax1.plot(timeValue, ev4c, color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-        ax2.plot(timeValue, eR, color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
-        ax2.plot(timeValue, eTh, color='red', linestyle='-', marker=',', markersize=1, zorder=8)
+        ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
+        ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
+        ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
+        ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
         line = dataFile.readline()
     try:
         pyplot.show()

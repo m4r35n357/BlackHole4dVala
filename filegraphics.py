@@ -47,30 +47,22 @@ def main():
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
     ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
-#        for j in range(2, 21, 2):
-#            ring(pos=scene.center, axis=(0, 0, 1), radius = j, color = color.gray(0.3), thickness=0.01)
-#            ring(pos=scene.center, axis=(0, 1, 0), radius = j, color = color.gray(0.3), thickness=0.01)
-#            ring(pos=scene.center, axis=(1, 0, 0), radius = j, color = color.gray(0.3), thickness=0.01)
+#    for j in range(2, 13, 2):
+#        ring(pos=scene.center, axis=(0, 0, 1), radius = j, color = color.gray(0.3), thickness=0.01)
+#        ring(pos=scene.center, axis=(0, 1, 0), radius = j, color = color.gray(0.3), thickness=0.01)
+#        ring(pos=scene.center, axis=(1, 0, 0), radius = j, color = color.gray(0.3), thickness=0.01)
     # animate!
     ball = sphere()  # Particle
     counter = 0
     dataLine = dataFile.readline()
     while dataLine:  # build raw data arrays
-        data = loads(dataLine)
-        r = float(data['r'])
-        th = float(data['th'])
-        ph = float(data['ph'])
-        ra = sqrt(r**2 + a**2)
-        sth = sin(th)
-        x = ra * sth * cos(ph)
-        y = ra * sth * sin(ph)
-        z = r * cos(th)
-        e = float(data['v4e'])
+        rate(60)
         if counter % 1000 == 0:
             ball.visible = False
             ball = sphere(radius = 0.2)  # Particle
             ball.trail = curve(size = 1)  #  trail
-        rate(60)
+        data = loads(dataLine)
+        e = float(data['v4e'])
         if e < -120.0:
             ball.color = color.green
         elif e < -90.0:
@@ -81,7 +73,12 @@ def main():
             ball.color = color.orange
         else:
             ball.color = color.red
-        ball.pos = (x, y, z)
+        r = float(data['r'])
+        th = float(data['th'])
+        ph = float(data['ph'])
+        ra = sqrt(r**2 + a**2)
+        sth = sin(th)
+        ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
         counter += 1
         dataLine = dataFile.readline()
