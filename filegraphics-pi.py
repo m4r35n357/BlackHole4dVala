@@ -8,12 +8,12 @@ from json import loads
 from pprint import pprint
 
 def isco (a):
-	z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
-	z2 = sqrt(3.0 * a * a + z1 * z1)
-	if a >= 0.0:
-		return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
-	else:
-		return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+    z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
+    z2 = sqrt(3.0 * a * a + z1 * z1)
+    if a >= 0.0:
+        return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+    else:
+        return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
 class Planet(pi3d.Sphere):
   def __init__(self, shader, colour, radius, pos=[0.0, 0.0, 0.0], track_shader=None, scale=1.0, grid=12, opacity=1.0):
@@ -26,7 +26,7 @@ class Planet(pi3d.Sphere):
     self.trace_shape = None
     self.set_material(colour)
     self.set_alpha(opacity)
-    
+
   def position_and_draw(self, trace_material=(0.5,0.5,0.5)):
     self.position(self.pos[0], self.pos[1], self.pos[2])
     self.draw()
@@ -34,7 +34,7 @@ class Planet(pi3d.Sphere):
       self.t_len += 1
       self.t_v.append(tuple(self.pos))
       if (self.t_len % 10) == 0:
-        self.trace_shape = pi3d.Points(vertices=self.t_v, material=trace_material, point_size=1)
+        self.trace_shape = pi3d.Points(vertices=self.t_v, material=trace_material, point_size=2)
         self.trace_shape.set_shader(self.track_shader)
         if (self.t_len > 2400):
           self.t_v = self.t_v[-2400:]
@@ -53,8 +53,8 @@ m = parameters['M']
 horizon = m * (1.0 + sqrt(1.0 - a2))
 cauchy = m * (1.0 - sqrt(1.0 - a2))
 # Setup display and initialise pi3d ------
-DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=0)
-DISPLAY.set_background(0,0,0,1)    	# r,g,b,alpha
+DISPLAY = pi3d.Display.create(x=420, y=50, frames_per_second=25)
+DISPLAY.set_background(0,0,0,1)     # r,g,b,alpha
 # Camera ---------------------------------
 CAMERA = pi3d.Camera()
 rot = 0
@@ -106,7 +106,7 @@ while DISPLAY.loop_running():
   if k >-1:
     rottilt = True
     if k==112:
-      pi3d.screenshot("orbit.jpg")
+      pi3d.screenshot("./orbit.jpg")
     elif k==119:  #key W rotate camera up
       tilt += 2.0
     elif k==115:  #kry S down
