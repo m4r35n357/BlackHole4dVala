@@ -47,7 +47,7 @@ def main():
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
     ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
-    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.magenta)
+    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
 #    for j in range(2, 13, 2):
 #        ring(pos=scene.center, axis=(0, 0, 1), radius = j, color = color.gray(0.3), thickness=0.01)
 #        ring(pos=scene.center, axis=(0, 1, 0), radius = j, color = color.gray(0.3), thickness=0.01)

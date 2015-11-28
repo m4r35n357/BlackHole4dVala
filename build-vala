@@ -2,8 +2,8 @@
 
 opt="${1:-0}"
 
-vcc='/usr/bin/valac'
-#vcc='/opt/vala/bin/valac'
+#vcc='/usr/bin/valac'
+vcc='/opt/vala/bin/valac'
 
 $vcc -X -O$opt -X -lm --pkg json-glib-1.0 bh3d.vala symplectic.vala utils.vala
 $vcc -X -O$opt -X -lm --pkg json-glib-1.0 newton.vala symplectic.vala utils.vala
