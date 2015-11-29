@@ -29,6 +29,7 @@ namespace Kerr {
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
+        private double horizon;
         private double aE;
         private double a2E;
         private double L2;
@@ -71,6 +72,7 @@ namespace Kerr {
             this.L = momentum;
             this.Q = carter;
             this.a2 = a * a;
+            this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.a2E = a2 * E;
             this.L2 = L * L;
@@ -159,7 +161,7 @@ namespace Kerr {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
-            while ((mino <=endtime) && (r >= h)) {
+            while ((mino <=endtime) && (r >= horizon)) {
                 errors();
                 if ((mino >= starttime) && (count % interval == 0)) {
                     output(mino, tau);
