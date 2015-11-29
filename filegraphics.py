@@ -29,12 +29,11 @@ def main():
         exit(-1)
     a = parameters['a']
     m = parameters['M']
-    horizon = m * (1.0 + sqrt(1.0 - a * a));
-    cauchy = m * (1.0 - sqrt(1.0 - a * a));
+    horizon = m * (1.0 + sqrt(1.0 - a * a))
+    cauchy = m * (1.0 - sqrt(1.0 - a * a))
     #  set up the scene
     scene.center = (0.0, 0.0, 0.0)
-    scene.width = 1024
-    scene.height = 1024
+    scene.width = scene.height = 1024
     scene.range = (20.0, 20.0, 20.0)
     inner = 2.0 * sqrt(cauchy**2 + a**2)
     ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = color.blue, opacity = 0.4)  # Inner Horizon
@@ -48,10 +47,6 @@ def main():
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
     ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
-#    for j in range(2, 13, 2):
-#        ring(pos=scene.center, axis=(0, 0, 1), radius = j, color = color.gray(0.3), thickness=0.01)
-#        ring(pos=scene.center, axis=(0, 1, 0), radius = j, color = color.gray(0.3), thickness=0.01)
-#        ring(pos=scene.center, axis=(1, 0, 0), radius = j, color = color.gray(0.3), thickness=0.01)
     # animate!
     ball = sphere()  # Particle
     counter = 0
