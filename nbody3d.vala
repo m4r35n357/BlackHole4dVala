@@ -38,7 +38,7 @@ namespace Kerr {
             this.mass = mass;
         }
 
-        public void output (double mino, double tau) {
+        public void output () {
             stdout.printf("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}\n", qX, qY, qZ, pX, pY, pZ, mass);
         }
     }
@@ -140,6 +140,14 @@ namespace Kerr {
             integrator.compose();
         }
 
+        public void particlesJson () {
+            stdout.printf("[");
+            foreach (var particle in bodies) {
+                particle.output();
+            }
+            stdout.printf("]");
+        }
+
         /**
          * Sole user method
          */
@@ -147,9 +155,9 @@ namespace Kerr {
             double h0 = getH();
             double hMin = h0;
             double hMax = h0;
-            stdout.println(particlesJson());
-            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}%n", 0.0, h0, h0, h0, h0, -999.9);
+            particlesJson();
             long n = 1;
+            output(n, 0.0, h0, h0, h0, h0, -999.9);
             while (n <= iterations) {
                 evolve();
                 double hNow = getH();
@@ -161,8 +169,8 @@ namespace Kerr {
                     hMax = hNow;
                 }
                 double dbValue = 10.0 * Math.log10(dH);
-                stdout.println(particlesJson());
-                stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}%n", n * timeStep, hNow, h0, hMin, hMax, dbValue);
+                particlesJson();
+                output(n, timeStep, hNow, h0, hMin, hMax, dbValue);
                 if (dbValue > errorLimit) {
                     return;
                 }
@@ -177,14 +185,10 @@ namespace Kerr {
                 bodies.add(new Particle(ic.get_double_member("qX"), ic.get_double_member("qY"), ic.get_double_member("qZ"), ic.get_double_member("pX"), ic.get_double_member("pY"), ic.get_double_member("pZ"), ic.get_double_member("mass")));
             }
             return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("simulationTime"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_string_member("integrator"));
-
-            //return new System({ 0.0 }, 0.0, 0.0, 0.0, 0.0, "");
         }
 
-        public void output (double mino, double tau) {
-    /*
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, v4e, v4c, eR, eTh, t, r, th, ph, tP / S, rP / S, thP / S, phP / S);
-    */
+        public void output (long n, double timeStep, double hNow, double h0, double hMin, double hMax, double dbValue) {
+            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", n * timeStep, hNow, h0, hMin, hMax, dbValue);
         }
 
     }
