@@ -36,7 +36,7 @@ namespace Kerr {
         private double eR;
         private ISymplectic integrator;
 
-        private Orbit (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin, 
+        private Orbit (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
             this.L = sqrt(r0);
@@ -59,9 +59,9 @@ namespace Kerr {
         }
 
         private double V (double r) {
-			return 0.5 * L2 / (r * r) - 1.0 / r;
+            return 0.5 * L2 / (r * r) - 1.0 / r;
         }
-        
+
         private double logError (double e) {
             return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
         }
@@ -89,6 +89,9 @@ namespace Kerr {
             integrator.compose();
         }
 
+        /**
+         * Sole user method
+         */
         public void solve () {
             var mino = 0.0;
             while (! (mino > endtime)) {
@@ -101,6 +104,9 @@ namespace Kerr {
             }
         }
 
+        /**
+         * Static factory
+         */
         public static Orbit fromJson () {
             var ic = getJson();
             return new Orbit(ic.get_double_member("a"),
@@ -125,7 +131,7 @@ namespace Kerr {
 
     static int main (string[] args) {
         Orbit.fromJson().solve();
-        return 0; 
+        return 0;
     }
 }
 

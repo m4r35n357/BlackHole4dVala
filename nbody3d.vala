@@ -46,10 +46,10 @@ namespace Kerr {
 
         private Particle[] bodies;
         private int np;
-        private double iterations;
         private double g;
-        private double errorLimit;
         private double h;
+        private double errorLimit;
+        private double simulationTime;
         private ISymplectic integrator;
 
         public Simulation (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
@@ -58,7 +58,7 @@ namespace Kerr {
             this.g = g;
             this.h = timeStep;
             this.errorLimit = errorLimit;
-            this.iterations = simulationTime / timeStep;
+            this.simulationTime = simulationTime;
             this.integrator = Integrator.getIntegrator(this, type);
         }
 
@@ -73,7 +73,7 @@ namespace Kerr {
          * @return the Euclidean distance between points A and B
          */
         double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
-            return Math.sqrt(Math.pow(xB - xA, 2) + Math.pow(yB - yA, 2) + Math.pow(zB - zA, 2));
+            return sqrt(pow(xB - xA, 2) + pow(yB - yA, 2) + pow(zB - zA, 2));
         }
 
         public double getH () {
@@ -123,7 +123,7 @@ namespace Kerr {
                 for (var j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
-                        var tmp = - c * g * a.mass * b.mass * h / Math.pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                        var tmp = - c * g * a.mass * b.mass * h / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
                         var dPx = (b.qX - a.qX) * tmp;
                         var dPy = (b.qY - a.qY) * tmp;
                         var dPz = (b.qZ - a.qZ) * tmp;
@@ -149,9 +149,9 @@ namespace Kerr {
             var h0 = hamiltonian();
             var hMin = h0;
             var hMax = h0;
-            var n = 0;
-            output(n, 0.0, h0, h0, h0, h0, -999.9);
-            while (n <= iterations) {
+            double t = 0.0;
+            output(t, h0, h0, h0, h0, -180.0);
+            while (true) {
                 evolve();
                 var hNow = hamiltonian();
                 var tmp = fabs(hNow - h0);
@@ -161,15 +161,18 @@ namespace Kerr {
                 } else if (hNow > hMax) {
                     hMax = hNow;
                 }
-                var dbValue = 10.0 * Math.log10(dH);
-                output(n, h, hNow, h0, hMin, hMax, dbValue);
-                if (dbValue > errorLimit) {
+                var dbValue = 10.0 * log10(fabs(dH / h0) + 1.0e-18);
+                output(t, hNow, h0, hMin, hMax, dbValue);
+                if (fabs(t) > simulationTime || dbValue > errorLimit) {
                     return;
                 }
-                n += 1;
+                t += h;
             }
         }
 
+        /**
+         * Static factory
+         */
         public static Simulation fromJson () {
             Particle[] bodies = {};
             var ic = getJson();
@@ -180,13 +183,13 @@ namespace Kerr {
             return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }
 
-        public void output (long n, double timeStep, double hNow, double h0, double hMin, double hMax, double dbValue) {
+        public void output (double time, double hNow, double h0, double hMin, double hMax, double dbValue) {
             stdout.printf("[");
             foreach (var particle in bodies) {
                 particle.output();
             }
             stdout.printf("]\n");
-            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", n * h, hNow, h0, hMin, hMax, dbValue);
+            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, hMin, hMax, dbValue);
         }
 
     }
