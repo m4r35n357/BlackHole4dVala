@@ -39,7 +39,7 @@ namespace Kerr {
         }
 
         public void output () {
-            stdout.printf("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}\n", qX, qY, qZ, pX, pY, pZ, mass);
+            stdout.printf("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}", qX, qY, qZ, pX, pY, pZ, mass);
         }
     }
 
@@ -49,17 +49,16 @@ namespace Kerr {
         private int np;
         public double iterations;
         public double g;
-        public double timeStep;
         public double errorLimit;
-        public double h { get; set; }
+        public double h;
         public ISymplectic integrator;
-        public double T;
 
         public Simulation (ArrayList<Particle> bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
             this.np = bodies.size;
             this.g = g;
             this.h = timeStep;
+            this.errorLimit = errorLimit;
             this.iterations = simulationTime / timeStep;
             this.integrator = Integrator.getIntegrator(this, type);
         }
@@ -104,7 +103,7 @@ namespace Kerr {
         public void qUp (double c) {
             for (int i = 0; i < np; i++) {
                 var a = bodies[i];
-                double tmp = c * timeStep / a.mass;
+                double tmp = c * h / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
@@ -121,7 +120,7 @@ namespace Kerr {
                 for (int j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
-                        double tmp = - c * g * a.mass * b.mass * timeStep / Math.pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                        double tmp = - c * g * a.mass * b.mass * h / Math.pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
                         double dPx = (b.qX - a.qX) * tmp;
                         double dPy = (b.qY - a.qY) * tmp;
                         double dPz = (b.qZ - a.qZ) * tmp;
@@ -140,14 +139,6 @@ namespace Kerr {
             integrator.compose();
         }
 
-        public void particlesJson () {
-            stdout.printf("[");
-            foreach (var particle in bodies) {
-                particle.output();
-            }
-            stdout.printf("]");
-        }
-
         /**
          * Sole user method
          */
@@ -155,7 +146,6 @@ namespace Kerr {
             double h0 = getH();
             double hMin = h0;
             double hMax = h0;
-            particlesJson();
             long n = 1;
             output(n, 0.0, h0, h0, h0, h0, -999.9);
             while (n <= iterations) {
@@ -169,8 +159,7 @@ namespace Kerr {
                     hMax = hNow;
                 }
                 double dbValue = 10.0 * Math.log10(dH);
-                particlesJson();
-                output(n, timeStep, hNow, h0, hMin, hMax, dbValue);
+                output(n, h, hNow, h0, hMin, hMax, dbValue);
                 if (dbValue > errorLimit) {
                     return;
                 }
@@ -181,14 +170,20 @@ namespace Kerr {
         public static Simulation fromJson () {
             var bodies = new ArrayList<Particle> ();
             var ic = getJson();
-            foreach (var body in ic.get_array_member("bodies").get_elements()) {
-                bodies.add(new Particle(ic.get_double_member("qX"), ic.get_double_member("qY"), ic.get_double_member("qZ"), ic.get_double_member("pX"), ic.get_double_member("pY"), ic.get_double_member("pZ"), ic.get_double_member("mass")));
+            foreach (var node in ic.get_array_member("bodies").get_elements()) {
+                var body = node.get_object();
+                bodies.add(new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), body.get_double_member("vX"), body.get_double_member("vY"), body.get_double_member("vZ"), body.get_double_member("mass")));
             }
-            return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("simulationTime"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_string_member("integrator"));
+            return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }
 
         public void output (long n, double timeStep, double hNow, double h0, double hMin, double hMax, double dbValue) {
-            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", n * timeStep, hNow, h0, hMin, hMax, dbValue);
+            stdout.printf("[");
+            foreach (var particle in bodies) {
+                particle.output();
+            }
+            stdout.printf("]\n");
+            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", n * h, hNow, h0, hMin, hMax, dbValue);
         }
 
     }
