@@ -45,13 +45,13 @@ namespace Kerr {
 
     public class Simulation : GLib.Object, IModel {
 
-        public ArrayList<Particle> bodies;
+        private ArrayList<Particle> bodies;
         private int np;
-        public double iterations;
-        public double g;
-        public double errorLimit;
-        public double h;
-        public ISymplectic integrator;
+        private double iterations;
+        private double g;
+        private double errorLimit;
+        private double h;
+        private ISymplectic integrator;
 
         public Simulation (ArrayList<Particle> bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
@@ -77,16 +77,20 @@ namespace Kerr {
             return Math.sqrt(Math.pow(xB - xA, 2) + Math.pow(yB - yA, 2) + Math.pow(zB - zA, 2));
         }
 
-        /**
+        public double getH () {
+            return h;
+        }
+
+       /**
          * Total (kinetic + potential) energy of the system
          * @return the total energy
          */
-        public double getH () {
-            double energy = 0.0;
-            for (int i = 0; i < np; i++) {
+        public double hamiltonian () {
+            var energy = 0.0;
+            for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 energy += (0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ)) / a.mass;
-                for (int j = 0; j < np; j++) {
+                for (var j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
                         energy -= (g * a.mass * b.mass) / (distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ));
@@ -101,9 +105,9 @@ namespace Kerr {
          * @param c composition coefficient
          */
         public void qUp (double c) {
-            for (int i = 0; i < np; i++) {
+            for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                double tmp = c * h / a.mass;
+                var tmp = c * h / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
@@ -115,15 +119,15 @@ namespace Kerr {
          * @param c composition coefficient
          */
         public void pUp (double c) {
-            for (int i = 0; i < np; i++) {
+            for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                for (int j = 0; j < np; j++) {
+                for (var j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
-                        double tmp = - c * g * a.mass * b.mass * h / Math.pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
-                        double dPx = (b.qX - a.qX) * tmp;
-                        double dPy = (b.qY - a.qY) * tmp;
-                        double dPz = (b.qZ - a.qZ) * tmp;
+                        var tmp = - c * g * a.mass * b.mass * h / Math.pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                        var dPx = (b.qX - a.qX) * tmp;
+                        var dPy = (b.qY - a.qY) * tmp;
+                        var dPz = (b.qZ - a.qZ) * tmp;
                         a.pX -= dPx;
                         a.pY -= dPy;
                         a.pZ -= dPz;
@@ -143,22 +147,22 @@ namespace Kerr {
          * Sole user method
          */
         public void solve (string[] args) {
-            double h0 = getH();
-            double hMin = h0;
-            double hMax = h0;
-            long n = 1;
+            var h0 = hamiltonian();
+            var hMin = h0;
+            var hMax = h0;
+            var n = 1;
             output(n, 0.0, h0, h0, h0, h0, -999.9);
             while (n <= iterations) {
                 evolve();
-                double hNow = getH();
-                double tmp = fabs(hNow - h0);
-                double dH = tmp > 0.0 ? tmp : 1.0e-18;
+                var hNow = hamiltonian();
+                var tmp = fabs(hNow - h0);
+                var dH = tmp > 0.0 ? tmp : 1.0e-18;
                 if (hNow < hMin) {
                     hMin = hNow;
                 } else if (hNow > hMax) {
                     hMax = hNow;
                 }
-                double dbValue = 10.0 * Math.log10(dH);
+                var dbValue = 10.0 * Math.log10(dH);
                 output(n, h, hNow, h0, hMin, hMax, dbValue);
                 if (dbValue > errorLimit) {
                     return;
@@ -168,7 +172,7 @@ namespace Kerr {
         }
 
         public static Simulation fromJson () {
-            var bodies = new ArrayList<Particle> ();
+            var bodies = new ArrayList<Particle>();
             var ic = getJson();
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
                 var body = node.get_object();
