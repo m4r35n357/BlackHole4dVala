@@ -14,7 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 using GLib.Math;
-using Gee;
 
 namespace Kerr {
 
@@ -45,7 +44,7 @@ namespace Kerr {
 
     public class Simulation : GLib.Object, IModel {
 
-        private ArrayList<Particle> bodies;
+        private Particle[] bodies;
         private int np;
         private double iterations;
         private double g;
@@ -53,9 +52,9 @@ namespace Kerr {
         private double h;
         private ISymplectic integrator;
 
-        public Simulation (ArrayList<Particle> bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
+        public Simulation (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
-            this.np = bodies.size;
+            this.np = bodies.length;
             this.g = g;
             this.h = timeStep;
             this.errorLimit = errorLimit;
@@ -150,7 +149,7 @@ namespace Kerr {
             var h0 = hamiltonian();
             var hMin = h0;
             var hMax = h0;
-            var n = 1;
+            var n = 0;
             output(n, 0.0, h0, h0, h0, h0, -999.9);
             while (n <= iterations) {
                 evolve();
@@ -172,11 +171,11 @@ namespace Kerr {
         }
 
         public static Simulation fromJson () {
-            var bodies = new ArrayList<Particle>();
+            Particle[] bodies = {};
             var ic = getJson();
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
                 var body = node.get_object();
-                bodies.add(new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), body.get_double_member("vX"), body.get_double_member("vY"), body.get_double_member("vZ"), body.get_double_member("mass")));
+                bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), body.     get_double_member("vX"), body.get_double_member("vY"), body.get_double_member("vZ"), body.get_double_member("mass"));
             }
             return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }

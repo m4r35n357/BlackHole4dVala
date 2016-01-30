@@ -5,6 +5,8 @@ opt="${1:-0}"
 #vcc='/usr/bin/valac'
 vcc='/opt/vala/bin/valac'
 
-$vcc -X -O$opt -X -lm --pkg json-glib-1.0 bh3d.vala symplectic.vala utils.vala
-$vcc -X -O$opt -X -lm --pkg json-glib-1.0 newton.vala symplectic.vala utils.vala
-$vcc -X -O$opt -X -lm --pkg json-glib-1.0 --pkg gee-0.8 nbody3d.vala symplectic.vala utils.vala 
+for program in bh3d newton nbody3d
+do
+	$vcc -X -O$opt -X -lm --pkg json-glib-1.0 ${program}.vala symplectic.vala utils.vala
+done
+
