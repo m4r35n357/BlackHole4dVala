@@ -88,11 +88,11 @@ namespace Kerr {
             var energy = 0.0;
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                energy += (0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ)) / a.mass;
+                energy += 0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ) / a.mass;
                 for (var j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
-                        energy -= (g * a.mass * b.mass) / (distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ));
+                        energy -= g * a.mass * b.mass / distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
                     }
                 }
             }
@@ -123,7 +123,7 @@ namespace Kerr {
                 for (var j = 0; j < np; j++) {
                     if (i > j) {
                         var b = bodies[j];
-                        var tmp = - c * g * a.mass * b.mass * h / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                        var tmp = - c * h * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
                         var dPx = (b.qX - a.qX) * tmp;
                         var dPy = (b.qY - a.qY) * tmp;
                         var dPz = (b.qZ - a.qZ) * tmp;
@@ -178,7 +178,8 @@ namespace Kerr {
             var ic = getJson();
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
                 var body = node.get_object();
-                bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), body.     get_double_member("vX"), body.get_double_member("vY"), body.get_double_member("vZ"), body.get_double_member("mass"));
+                var mass = body.get_double_member("mass");
+                bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), mass * body.get_double_member("vX"), mass * body.get_double_member("vY"), mass * body.get_double_member("vZ"), mass);
             }
             return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }
