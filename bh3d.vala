@@ -93,10 +93,6 @@ namespace Kerr {
             this.thP = sqrt(fabs(THETA));
         }
 
-        public double getH () {
-            return h;
-        }
-
         private double logError (double e) {
             return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
         }
@@ -138,21 +134,17 @@ namespace Kerr {
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
+            rP += c * h * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
             var cot = cth / sth;
-            thP += c * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
+            thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
-            t += d * tDot;
-            r += d * rP;
-            th += d * thP;
-            ph += d * phDot;
+            t += d * h * tDot;
+            r += d * h * rP;
+            th += d * h * thP;
+            ph += d * h * phDot;
             refresh();
-        }
-
-        public void evolve () {
-            integrator.compose();
         }
 
         /**
@@ -161,12 +153,12 @@ namespace Kerr {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
-            while ((mino <=endtime) && (r >= horizon)) {
+            while ((mino <= endtime) && (r >= horizon)) {
                 errors();
                 if ((mino >= starttime) && (count % interval == 0)) {
                     output(mino, tau);
                 }
-                evolve();
+                integrator.compose();
                 mino += h;
                 tau += h * S;
                 count++;

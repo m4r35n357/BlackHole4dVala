@@ -54,10 +54,6 @@ namespace Kerr {
             this.H0 = H();
         }
 
-        public double getH () {
-            return h;
-        }
-
         private double V (double r) {
             return 0.5 * L2 / (r * r) - 1.0 / r;
         }
@@ -75,32 +71,28 @@ namespace Kerr {
         }
 
         public void pUp (double c) {
-            rP -= c * (1.0 / (r * r) - L2 / (r * r * r));
+            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         public void qUp (double d) {
             rDot = rP;
-            r += d * rDot;
+            r += d * h * rDot;
             phDot = L / (r * r);
-            ph += d * phDot;
-        }
-
-        public void evolve () {
-            integrator.compose();
+            ph += d * h * phDot;
         }
 
         /**
          * Sole user method
          */
         public void solve () {
-            var mino = 0.0;
-            while (! (mino > endtime)) {
+            var t = 0.0;
+            while (! (t > endtime)) {
                 errors();
-                if (mino > starttime) {
-                    output(mino, 0.0);
+                if (t > starttime) {
+                    output(t);
                 }
-                evolve();
-                mino += h;
+                integrator.compose();
+                t += h;
             }
         }
 
@@ -122,9 +114,9 @@ namespace Kerr {
                                 ic.get_string_member("integrator"));
         }
 
-        public void output (double mino, double tau) {
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, mino, eR, H() - H0, eR, -180.0);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", mino, r, th, ph);
+        public void output (double time) {
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", time, time, eR, H() - H0, eR, -180.0);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", time, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }
     }

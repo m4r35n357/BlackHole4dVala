@@ -14,8 +14,12 @@ RaytracingOutput
 *.o
 *.i
 *.s
+*.pyc
 .valencia
+data
+progress
 bh3d
+newton
 nbody3d
 test.vala
 tmp/

@@ -22,11 +22,6 @@ namespace Kerr {
      */
     public interface IModel : GLib.Object {
         /**
-         * Model time step size
-         */
-        public abstract double getH ();
-
-        /**
          * Momentum updates
          */
         public abstract void pUp (double c);
@@ -35,11 +30,6 @@ namespace Kerr {
          * Coordinate updates
          */
         public abstract void qUp (double d);
-
-        /**
-         * Should wrap and call ISymplectic.compose()
-         */
-        public abstract void evolve ();
     }
 
     /**
@@ -102,7 +92,7 @@ namespace Kerr {
          */
         public void compose () {
             for (int i = 0; i < wRange; i++) {
-                integrate(compWeight[i] * model.getH());
+                integrate(compWeight[i]);
             }
         }
     }

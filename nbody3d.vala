@@ -76,10 +76,6 @@ namespace Kerr {
             return sqrt(pow(xB - xA, 2) + pow(yB - yA, 2) + pow(zB - zA, 2));
         }
 
-        public double getH () {
-            return ts;
-        }
-
        /**
          * Total (kinetic + potential) energy of the system
          * @return the total energy
@@ -104,7 +100,7 @@ namespace Kerr {
         public void qUp (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                var tmp = c / a.mass;
+                var tmp = c * ts / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
@@ -120,7 +116,7 @@ namespace Kerr {
                 var a = bodies[i];
                 for (var j = i + 1; j < np; j++) {
                     var b = bodies[j];
-                    var tmp = - c * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                    var tmp = - c * ts * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
                     var dPx = (b.qX - a.qX) * tmp;
                     var dPy = (b.qY - a.qY) * tmp;
                     var dPz = (b.qZ - a.qZ) * tmp;
@@ -134,10 +130,6 @@ namespace Kerr {
             }
         }
 
-        public void evolve () {
-            integrator.compose();
-        }
-
         /**
          * Sole user method
          */
@@ -148,7 +140,7 @@ namespace Kerr {
             double t = 0.0;
             output(t, h0, h0, h0, h0, -180.0);
             while (true) {
-                evolve();
+                integrator.compose();
                 var hNow = hamiltonian();
                 var tmp = fabs(hNow - h0);
                 var dH = tmp > 0.0 ? tmp : 1.0e-18;
