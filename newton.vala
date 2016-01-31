@@ -70,15 +70,15 @@ namespace Kerr {
             eR = logError(fabs(H() - H0));
         }
 
-        public void pUp (double c) {
-            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
-        }
-
         public void qUp (double d) {
             rDot = rP;
             r += d * h * rDot;
             phDot = L / (r * r);
             ph += d * h * phDot;
+        }
+
+        public void pUp (double c) {
+            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**

@@ -22,14 +22,14 @@ namespace Kerr {
      */
     public interface IModel : GLib.Object {
         /**
-         * Momentum updates
-         */
-        public abstract void pUp (double c);
-
-        /**
          * Coordinate updates
          */
         public abstract void qUp (double d);
+
+        /**
+         * Momentum updates
+         */
+        public abstract void pUp (double c);
     }
 
     /**

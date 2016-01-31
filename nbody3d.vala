@@ -97,10 +97,10 @@ namespace Kerr {
          * Position update implements dH/dp, which in this case is a function of p only
          * @param c composition coefficient
          */
-        public void qUp (double c) {
+        public void qUp (double d) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                var tmp = c * ts / a.mass;
+                var tmp = d * ts / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;

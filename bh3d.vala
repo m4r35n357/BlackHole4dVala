@@ -133,18 +133,18 @@ namespace Kerr {
             phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
         }
 
-        public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * h * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
-            var cot = cth / sth;
-            thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
-        }
-
         public void qUp (double d) {  // dx/dTau = dH/dxP
             t += d * h * tDot;
             r += d * h * rP;
             th += d * h * thP;
             ph += d * h * phDot;
             refresh();
+        }
+
+        public void pUp (double c) {  // dxP/dTau = - dH/dx
+            rP += c * h * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
+            var cot = cth / sth;
+            thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
         /**
