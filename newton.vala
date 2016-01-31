@@ -54,6 +54,24 @@ namespace Kerr {
             this.H0 = H();
         }
 
+        /**
+         * Static factory
+         */
+        public static Orbit fromJson () {
+            var ic = getJson();
+            return new Orbit(ic.get_double_member("a"),
+                                ic.get_double_member("mu"),
+                                ic.get_double_member("E"),
+                                ic.get_double_member("Lz"),
+                                ic.get_double_member("C"),
+                                ic.get_double_member("r"),
+                                ic.get_double_member("theta"),
+                                ic.get_double_member("start"),
+                                ic.get_double_member("duration"),
+                                ic.get_double_member("step"),
+                                ic.get_string_member("integrator"));
+        }
+
         private double V (double r) {
             return 0.5 * L2 / (r * r) - 1.0 / r;
         }
@@ -94,24 +112,6 @@ namespace Kerr {
                 integrator.compose();
                 t += h;
             }
-        }
-
-        /**
-         * Static factory
-         */
-        public static Orbit fromJson () {
-            var ic = getJson();
-            return new Orbit(ic.get_double_member("a"),
-                                ic.get_double_member("mu"),
-                                ic.get_double_member("E"),
-                                ic.get_double_member("Lz"),
-                                ic.get_double_member("C"),
-                                ic.get_double_member("r"),
-                                ic.get_double_member("theta"),
-                                ic.get_double_member("start"),
-                                ic.get_double_member("duration"),
-                                ic.get_double_member("step"),
-                                ic.get_string_member("integrator"));
         }
 
         public void output (double time) {

@@ -52,7 +52,7 @@ namespace Kerr {
         private double simulationTime;
         private ISymplectic integrator;
 
-        public Simulation (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
+        private Simulation (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
@@ -63,14 +63,44 @@ namespace Kerr {
         }
 
         /**
-         * Separation between points A and B
-         * @param xA x coordinate of point A
-         * @param yA y coordinate of point A
-         * @param zA z coordinate of point A
-         * @param xB x coordinate of point B
-         * @param yB y coordinate of point B
-         * @param zB z coordinate of point B
-         * @return the Euclidean distance between points A and B
+         * Static factory
+         */
+        public static Simulation fromJson () {
+            Particle[] bodies = {};
+            var ic = getJson();
+            foreach (var node in ic.get_array_member("bodies").get_elements()) {
+                var body = node.get_object();
+                if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
+                    bodies += new Particle(body.get_double_member("qX"),
+                                           body.get_double_member("qY"),
+                                           body.get_double_member("qZ"),
+                                           body.get_double_member("pX"),
+                                           body.get_double_member("pY"),
+                                           body.get_double_member("pZ"),
+                                           body.get_double_member("mass"));
+                } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
+                    var mass = body.get_double_member("mass");
+                    bodies += new Particle(body.get_double_member("qX"),
+                                           body.get_double_member("qY"),
+                                           body.get_double_member("qZ"),
+                                           body.get_double_member("vX") * mass,
+                                           body.get_double_member("vY") * mass,
+                                           body.get_double_member("vZ") * mass,
+                                           mass);
+                } else {
+                    stderr.printf("Mixed use of momenta and velocity\n");
+                }
+            }
+            return new Simulation(bodies,
+                                  ic.get_double_member("g"),
+                                  ic.get_double_member("timeStep"),
+                                  ic.get_double_member("errorLimit"),
+                                  ic.get_double_member("simulationTime"),
+                                  ic.get_string_member("integratorOrder"));
+        }
+
+        /**
+         * Euclidean distance between points A and B
          */
         double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
             return sqrt(pow(xB - xA, 2) + pow(yB - yA, 2) + pow(zB - zA, 2));
@@ -78,7 +108,6 @@ namespace Kerr {
 
        /**
          * Total (kinetic + potential) energy of the system
-         * @return the total energy
          */
         public double hamiltonian () {
             var energy = 0.0;
@@ -95,7 +124,6 @@ namespace Kerr {
 
         /**
          * Position update implements dH/dp, which in this case is a function of p only
-         * @param c composition coefficient
          */
         public void qUp (double d) {
             for (var i = 0; i < np; i++) {
@@ -109,7 +137,6 @@ namespace Kerr {
 
         /**
          * Momentum update implements -dH/dq, which in this case is a function of q only
-         * @param c composition coefficient
          */
         public void pUp (double c) {
             for (var i = 0; i < np; i++) {
@@ -156,28 +183,6 @@ namespace Kerr {
                 }
                 t += ts;
             }
-        }
-
-        /**
-         * Static factory
-         */
-        public static Simulation fromJson () {
-            Particle[] bodies = {};
-            var ic = getJson();
-            foreach (var node in ic.get_array_member("bodies").get_elements()) {
-                var body = node.get_object();
-                if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                        body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"), body.get_double_member("mass"));
-                } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                    var mass = body.get_double_member("mass");
-                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                        mass * body.get_double_member("vX"), mass * body.get_double_member("vY"), mass * body.get_double_member("vZ"), mass);
-                } else {
-                    stderr.printf("Mixed use of momenta and velocity\n");
-                }
-            }
-            return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }
 
         public void output (double time, double hNow, double h0, double hMin, double hMax, double dbValue) {

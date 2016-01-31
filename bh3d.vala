@@ -62,6 +62,7 @@ namespace Kerr {
         private double rP;
         private double thP;
         private double phDot;
+
         // private constructor; use the static factory
         private Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, double interval, string type) {
@@ -91,6 +92,25 @@ namespace Kerr {
             refresh();
             this.rP = sqrt(fabs(R));
             this.thP = sqrt(fabs(THETA));
+        }
+
+        /**
+         * Static factory
+         */
+        public static Geodesic fromJson () {
+            var ic = getJson();
+            return new Geodesic(ic.get_double_member("a"),
+                                ic.get_double_member("mu"),
+                                ic.get_double_member("E"),
+                                ic.get_double_member("Lz"),
+                                ic.get_double_member("C"),
+                                ic.get_double_member("r"),
+                                ic.get_double_member("theta"),
+                                ic.get_double_member("start"),
+                                ic.get_double_member("duration"),
+                                ic.get_double_member("step"),
+                                ic.get_int_member("interval"),
+                                ic.get_string_member("integrator"));
         }
 
         private double logError (double e) {
@@ -163,18 +183,6 @@ namespace Kerr {
                 tau += h * S;
                 count++;
             }
-        }
-
-        /**
-         * Static factory
-         */
-        public static Geodesic fromJson () {
-            var ic = getJson();
-            return new Geodesic(ic.get_double_member("a"), ic.get_double_member("mu"),
-                                ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
-                                ic.get_double_member("r"), ic.get_double_member("theta"),
-                                ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_int_member("interval"),
-                                ic.get_string_member("integrator"));
         }
 
         public void output (double mino, double tau) {
