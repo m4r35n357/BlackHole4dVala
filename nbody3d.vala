@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 using GLib.Math;
 
-namespace Kerr {
+namespace Simulations {
 
     public class Particle : GLib.Object {
 
@@ -42,7 +42,7 @@ namespace Kerr {
         }
     }
 
-    public class Simulation : GLib.Object, IModel {
+    public class NBody : GLib.Object, IModel {
 
         private Particle[] bodies;
         private int np;
@@ -52,7 +52,7 @@ namespace Kerr {
         private double simulationTime;
         private ISymplectic integrator;
 
-        private Simulation (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
+        private NBody (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
@@ -65,7 +65,7 @@ namespace Kerr {
         /**
          * Static factory
          */
-        public static Simulation fromJson () {
+        public static NBody fromJson () {
             Particle[] bodies = {};
             var ic = getJson();
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
@@ -91,12 +91,12 @@ namespace Kerr {
                     stderr.printf("Mixed use of momenta and velocity\n");
                 }
             }
-            return new Simulation(bodies,
-                                  ic.get_double_member("g"),
-                                  ic.get_double_member("timeStep"),
-                                  ic.get_double_member("errorLimit"),
-                                  ic.get_double_member("simulationTime"),
-                                  ic.get_string_member("integratorOrder"));
+            return new NBody(bodies,
+                              ic.get_double_member("g"),
+                              ic.get_double_member("timeStep"),
+                              ic.get_double_member("errorLimit"),
+                              ic.get_double_member("simulationTime"),
+                              ic.get_string_member("integratorOrder"));
         }
 
         /**
@@ -197,7 +197,7 @@ namespace Kerr {
     }
 
     static int main (string[] args) {
-        Simulation.fromJson().solve(args);
+        NBody.fromJson().solve(args);
         return 0;
     }
 }

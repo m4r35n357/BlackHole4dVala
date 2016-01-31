@@ -15,11 +15,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 using Json;
 
-namespace Kerr {
+namespace Simulations {
 
-	/**
-	 * Read JSON data from stdin
-	 */
+    /**
+     * Read JSON data from stdin
+     */
     private static string fromStdin () {
         var input = new StringBuilder();
         var buffer = new char[1024];
@@ -32,19 +32,19 @@ namespace Kerr {
         return input.str;
     }
 
-	/**
-	 * Parse JSON initial conditions data
-	 */
+    /**
+     * Parse JSON initial conditions data
+     */
     public static Json.Object getJson () {
-	    unowned Json.Object obj;
-	    Json.Parser parser = new Json.Parser();
-	    try {
-	        parser.load_from_data(fromStdin());
-	        obj = parser.get_root().get_object();
-	    } catch (Error e) {
-	        stderr.printf("Unable to parse the data file: %s\n", e.message);
-	        return new Json.Object();
-	    }
+        unowned Json.Object obj;
+        Json.Parser parser = new Json.Parser();
+        try {
+            parser.load_from_data(fromStdin());
+            obj = parser.get_root().get_object();
+        } catch (Error e) {
+            stderr.printf("Unable to parse the data file: %s\n", e.message);
+            return new Json.Object();
+        }
         return obj;
     }
 }

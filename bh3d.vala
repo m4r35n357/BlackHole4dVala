@@ -14,9 +14,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 using GLib.Math;
 
-namespace Kerr {
+namespace Simulations {
 
-    public class Geodesic : GLib.Object, IModel {
+    public class KerrGeodesic : GLib.Object, IModel {
         // Constants from IC file
         private double a;
         private double mu2;
@@ -64,7 +64,7 @@ namespace Kerr {
         private double phDot;
 
         // private constructor; use the static factory
-        private Geodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
+        private KerrGeodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, double interval, string type) {
             // Constants
             this.a = spin;
@@ -97,9 +97,9 @@ namespace Kerr {
         /**
          * Static factory
          */
-        public static Geodesic fromJson () {
+        public static KerrGeodesic fromJson () {
             var ic = getJson();
-            return new Geodesic(ic.get_double_member("a"),
+            return new KerrGeodesic(ic.get_double_member("a"),
                                 ic.get_double_member("mu"),
                                 ic.get_double_member("E"),
                                 ic.get_double_member("Lz"),
@@ -193,7 +193,7 @@ namespace Kerr {
     }
 
     static int main (string[] args) {
-        Geodesic.fromJson().solve();
+        KerrGeodesic.fromJson().solve();
         return 0;
     }
 }

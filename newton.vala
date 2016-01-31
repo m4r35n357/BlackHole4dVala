@@ -15,9 +15,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 using GLib.Math;
 
-namespace Kerr {
+namespace Simulations {
 
-    public class Orbit : GLib.Object, IModel {
+    public class Newton : GLib.Object, IModel {
 
         private double E0;
         private double E;
@@ -36,7 +36,7 @@ namespace Kerr {
         private double eR;
         private ISymplectic integrator;
 
-        private Orbit (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
+        private Newton (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;
             this.L = sqrt(r0);
@@ -57,9 +57,9 @@ namespace Kerr {
         /**
          * Static factory
          */
-        public static Orbit fromJson () {
+        public static Newton fromJson () {
             var ic = getJson();
-            return new Orbit(ic.get_double_member("a"),
+            return new Newton(ic.get_double_member("a"),
                                 ic.get_double_member("mu"),
                                 ic.get_double_member("E"),
                                 ic.get_double_member("Lz"),
@@ -122,7 +122,7 @@ namespace Kerr {
     }
 
     static int main (string[] args) {
-        Orbit.fromJson().solve();
+        Newton.fromJson().solve();
         return 0;
     }
 }
