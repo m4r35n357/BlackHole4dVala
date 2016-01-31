@@ -166,8 +166,16 @@ namespace Kerr {
             var ic = getJson();
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
                 var body = node.get_object();
-                var mass = body.get_double_member("mass");
-                bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"), mass * body.get_double_member("vX"), mass * body.get_double_member("vY"), mass * body.get_double_member("vZ"), mass);
+                if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
+                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                        body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"), body.get_double_member("mass"));
+                } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
+                    var mass = body.get_double_member("mass");
+                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                        mass * body.get_double_member("vX"), mass * body.get_double_member("vY"), mass * body.get_double_member("vZ"), mass);
+                } else {
+                    stderr.printf("Mixed use of momenta and velocity\n");
+                }
             }
             return new Simulation(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"), ic.get_double_member("simulationTime"), ic.get_string_member("integratorOrder"));
         }
@@ -179,8 +187,6 @@ namespace Kerr {
             }
             stdout.printf("[".concat(string.joinv(",", data), "]\n"));
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, hMin, hMax, dbValue);
-            string enemies = string.join (", ", "Dalek", "Cyberman", "Weeping Angel");
-            enemies = null;
         }
 
     }
