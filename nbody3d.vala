@@ -37,8 +37,8 @@ namespace Kerr {
             this.mass = mass;
         }
 
-        public void output () {
-            stdout.printf("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}", qX, qY, qZ, pX, pY, pZ, mass);
+        public string toString () {
+            return("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}".printf(qX, qY, qZ, pX, pY, pZ, mass));
         }
     }
 
@@ -47,7 +47,7 @@ namespace Kerr {
         private Particle[] bodies;
         private int np;
         private double g;
-        private double h;
+        private double ts;
         private double errorLimit;
         private double simulationTime;
         private ISymplectic integrator;
@@ -56,7 +56,7 @@ namespace Kerr {
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
-            this.h = timeStep;
+            this.ts = timeStep;
             this.errorLimit = errorLimit;
             this.simulationTime = simulationTime;
             this.integrator = Integrator.getIntegrator(this, type);
@@ -77,7 +77,7 @@ namespace Kerr {
         }
 
         public double getH () {
-            return h;
+            return ts;
         }
 
        /**
@@ -89,11 +89,9 @@ namespace Kerr {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 energy += 0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ) / a.mass;
-                for (var j = 0; j < np; j++) {
-                    if (i > j) {
-                        var b = bodies[j];
-                        energy -= g * a.mass * b.mass / distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
-                    }
+                for (var j = i + 1; j < np; j++) {
+                    var b = bodies[j];
+                    energy -= g * a.mass * b.mass / distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
                 }
             }
             return energy;
@@ -106,7 +104,7 @@ namespace Kerr {
         public void qUp (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                var tmp = c * h / a.mass;
+                var tmp = c / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
@@ -120,20 +118,18 @@ namespace Kerr {
         public void pUp (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                for (var j = 0; j < np; j++) {
-                    if (i > j) {
-                        var b = bodies[j];
-                        var tmp = - c * h * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
-                        var dPx = (b.qX - a.qX) * tmp;
-                        var dPy = (b.qY - a.qY) * tmp;
-                        var dPz = (b.qZ - a.qZ) * tmp;
-                        a.pX -= dPx;
-                        a.pY -= dPy;
-                        a.pZ -= dPz;
-                        b.pX += dPx;
-                        b.pY += dPy;
-                        b.pZ += dPz;
-                    }
+                for (var j = i + 1; j < np; j++) {
+                    var b = bodies[j];
+                    var tmp = - c * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                    var dPx = (b.qX - a.qX) * tmp;
+                    var dPy = (b.qY - a.qY) * tmp;
+                    var dPz = (b.qZ - a.qZ) * tmp;
+                    a.pX -= dPx;
+                    a.pY -= dPy;
+                    a.pZ -= dPz;
+                    b.pX += dPx;
+                    b.pY += dPy;
+                    b.pZ += dPz;
                 }
             }
         }
@@ -166,7 +162,7 @@ namespace Kerr {
                 if (fabs(t) > simulationTime || dbValue > errorLimit) {
                     return;
                 }
-                t += h;
+                t += ts;
             }
         }
 
@@ -185,12 +181,14 @@ namespace Kerr {
         }
 
         public void output (double time, double hNow, double h0, double hMin, double hMax, double dbValue) {
-            stdout.printf("[");
+            string[] data = {};
             foreach (var particle in bodies) {
-                particle.output();
+                data += particle.toString();
             }
-            stdout.printf("]\n");
+            stdout.printf("[".concat(string.joinv(",", data), "]\n"));
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, hMin, hMax, dbValue);
+            string enemies = string.join (", ", "Dalek", "Cyberman", "Weeping Angel");
+            enemies = null;
         }
 
     }
