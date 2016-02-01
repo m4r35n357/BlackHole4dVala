@@ -6,6 +6,7 @@ potential
 errors
 kerr-image
 *.pdf
+*.dvi
 *.aux
 *.log
 plot.py
