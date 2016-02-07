@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv, stderr, exit, stdout
+from sys import argv, stderr, exit, stdin
 from math import sqrt, sin, cos, fabs
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
 from json import loads
@@ -17,18 +17,10 @@ def isco (a):
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
 def main():
-    if len(argv) < 4:
-        raise Exception('>>> ERROR! Please supply a data file name, a parameter file name, and a time variable <<<')
-    dataFile = open(argv[1], 'r')
-    parameterFile = open(argv[2], 'r')
-    timeCoordinate = str(argv[3])
-    try:  # get parameters
-        parameters = loads(parameterFile.read())
-    except ValueError as e:
-        print('PARAMETER ERROR: ' + str(e))
-        exit(-1)
-    a = parameters['a']
-    m = parameters['M']
+    if len(argv) < 3:
+        raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0] and spin [0.0 - 1.0] <<<')
+    m = float(argv[1])
+    a = float(argv[2])
     horizon = m * (1.0 + sqrt(1.0 - a * a))
     cauchy = m * (1.0 - sqrt(1.0 - a * a))
     #  set up the scene
@@ -50,7 +42,7 @@ def main():
     # animate!
     ball = sphere()  # Particle
     counter = 0
-    dataLine = dataFile.readline()
+    dataLine = stdin.readline()
     while dataLine:  # build raw data arrays
         rate(60)
         if counter % 1000 == 0:
@@ -77,7 +69,7 @@ def main():
         ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
         counter += 1
-        dataLine = dataFile.readline()
+        dataLine = stdin.readline()
 
 if __name__ == "__main__":
     main()

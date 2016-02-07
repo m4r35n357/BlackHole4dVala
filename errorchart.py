@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv
+from sys import argv, stdin
 from math import fabs, log10
 from matplotlib import pyplot
 from matplotlib.ticker import MultipleLocator
@@ -11,9 +11,9 @@ import numpy as np
 
 def main():
     if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply a data file name, a time variable, and the number of points to plot <<<')
-    dataFile = open(argv[1], 'r')
-    timeCoordinate = str(argv[2])
+        raise Exception('>>> ERROR! Please supply a time variable name and a plotting interval <<<')
+    timeCoordinate = str(argv[1])
+    interval = int(argv[2])
     ax1 = pyplot.figure().add_subplot(111)
     pyplot.minorticks_on()
     majorLocator = MultipleLocator(30)
@@ -30,15 +30,18 @@ def main():
     ax2.yaxis.set_minor_locator(minorLocator)
     ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
     ax2.set_ylim(-150.0, 0.0)
-    line = dataFile.readline()
+    count = 0
+    line = stdin.readline()
     while line:  # build raw data arrays
         p = loads(line)
-        timeValue = p[timeCoordinate]
-        ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
-        ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-        ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
-        ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
-        line = dataFile.readline()
+        if (count % interval == 0):
+            timeValue = p[timeCoordinate]
+            ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
+            ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
+            ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
+            ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
+        line = stdin.readline()
+        count += 1
     try:
         pyplot.show()
     except AttributeError as e:

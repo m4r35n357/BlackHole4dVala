@@ -1,8 +1,8 @@
 #!/bin/sh
-
-initialConditions=$1
+set -x
+ic=$1
 time=$2
-nPoints=$3
+timeStep=$3
 shift 3
 coordinates=$*
 
@@ -10,29 +10,33 @@ simVala='./bh3d'
 simPython='./bh3d.py'
 dataFile='/tmp/data'
 
-# run simulator
+# Pretty-print the parameter file
+jq . $ic
+
+# Run the simulator
 echo -n "Simulating "
 if [ -f $simVala ]
 then
     echo -n "with $simVala . . . "
-    $simVala <$initialConditions 1>$dataFile 2>errors
+    $simVala <$ic 2>errors | ./finterp.py $timeStep >$datafile
 else
     echo -n "with $simPython . . . "
-    $simPython <$initialConditions 1>$dataFile 2>errors
+    $simPython <$ic 2>errors | ./finterp.py $timeStep >$datafile
 fi
 echo "Done!"
 
-# plot orbit
+# Plot the orbit
 case $(uname -m) in
-    armv7l) ./filegraphics-pi.py $dataFile $initialConditions;;
-    x86_64) ./filegraphics.py $dataFile $initialConditions $time $nPoints &
-            # plot potential, coordinates/velocities (optional) and errors
+    armv7l) ./filegraphics-pi.py $dataFile $ic;;
+    x86_64) ./filegraphics.py $(jq .M $ic) $(jq .a $ic) &
+            # Plot potential, coordinates/velocities (optional) and errors
             ./filepotential.py potential &
             for coordinate in $coordinates
             do
             	./phase.py $dataFile $time $nPoints $coordinate &
             	./interpolate.py $dataFile $time $nPoints $coordinate &
             done
-            ./errorchart.py $dataFile $time $nPoints &;;
+	filesize=$(wc -l $datafile)
+            ./errorchart.py <$dataFile $(expr $filesize / 1000) &;;
 esac
 
