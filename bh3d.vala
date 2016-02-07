@@ -25,7 +25,6 @@ namespace Simulations {
         private double Q;
         private double starttime;
         private double endtime;
-        private double interval;
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
@@ -38,7 +37,6 @@ namespace Simulations {
         private double[] cr;
         // Variables
         private double h;
-        private int count;
         private double sth;
         private double cth;
         private double sth2;
@@ -65,7 +63,7 @@ namespace Simulations {
 
         // private constructor; use the static factory
         private KerrGeodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep, double interval, string type) {
+                         double starttime, double duration, double timestep, string type) {
             // Constants
             this.a = spin;
             this.mu2 = pMass2;
@@ -80,11 +78,10 @@ namespace Simulations {
             this.aL = a * L;
             var E2_mu2 = E * E - mu2;
             this.a2xE2_mu2 = - a2 * E2_mu2;
-            this.cr = { E2_mu2, 2.0 * mu2, - a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
+            this.cr = { E2_mu2, 2.0 * mu2, - a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };  // see Wilkins
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
-            this.interval = interval;
             this.integrator = Integrator.getIntegrator(this, type);
             // Coordinates
             this.r = r0;
@@ -109,7 +106,6 @@ namespace Simulations {
                                 ic.get_double_member("start"),
                                 ic.get_double_member("duration"),
                                 ic.get_double_member("step"),
-                                ic.get_int_member("interval"),
                                 ic.get_string_member("integrator"));
         }
 
@@ -127,7 +123,7 @@ namespace Simulations {
             return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
         }
 
-        private void errors () {
+        private void errors (int count) {
             eR = logError(modH(rP, R));
             eTh = logError(modH(thP, THETA));
             var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
@@ -136,7 +132,7 @@ namespace Simulations {
             v4c = logError(v4Cum / (count + 1));
         }
 
-        private void refresh () {
+        private void refresh () {  // update intermediate variables
             var r2 = r * r;
             sth = sin(th);
             cth = cos(th);
@@ -147,7 +143,7 @@ namespace Simulations {
             S = r2 + a2 * cth2;
             R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];  // see Wilkins
             TH = a2xE2_mu2 + L2 / sth2;
-            THETA = Q - cth2 * TH;
+            THETA = Q - cth2 * TH;  // see Wilkins
             var P_D = (ra2 * E - aL) / D;
             tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
             phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
@@ -173,9 +169,10 @@ namespace Simulations {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
+            var count = 0;
             while ((mino <= endtime) && (r >= horizon)) {
-                errors();
-                if ((mino >= starttime) && (count % interval == 0)) {
+                errors(count);
+                if (mino >= starttime) {
                     output(mino, tau);
                 }
                 integrator.compose();
@@ -186,9 +183,12 @@ namespace Simulations {
         }
 
         public void output (double mino, double tau) {
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", mino, tau, v4e, v4c, eR, eTh);
+            stdout.printf("{");
+            stdout.printf("\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);
+            stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, eR, eTh);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e", tDot / S, rP / S, thP / S, phDot / S);
+            stdout.printf("}\n");
         }
     }
 

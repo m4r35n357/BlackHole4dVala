@@ -21,11 +21,11 @@ from scipy.optimize import minimize
 
 class InitialConditions(object):
     def __init__(self, particle, rMin, rMax, thetaMin, a, factorL):
-        self.M = 1.0        
+        self.M = 1.0
         self.mu2 = 1.0 if (particle == True) else 0.0
         self.r0 = rMin
         self.r1 = rMax
-        self.th0 = pi * (1.0 - thetaMin) 
+        self.th0 = pi * (1.0 - thetaMin)
         self.a = a
         self.a2 = self.a**2
         self.factorL = factorL
@@ -65,7 +65,7 @@ class InitialConditions(object):
         self.E = res.x[0]
         self.L = res.x[1]
         self.Q = res.x[2]
-        
+
 def main ():
     if len(argv) == 6:
         ic = InitialConditions(True, float(argv[1]), float(argv[2]), float(argv[3]), float(argv[4]), float(argv[5]))
@@ -91,7 +91,6 @@ def main ():
     print >> stdout, "  \"start\" : " + str(ic.starttime) + ","
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
-    print >> stdout, "  \"interval\" : 1,"
     print >> stdout, "  \"integrator\" : \"" + ic.integrator + "\","
     print >> stdout, "  \"error\" : " + str(ic.fun) + ","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","
