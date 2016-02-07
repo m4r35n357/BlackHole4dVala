@@ -1,0 +1,36 @@
+#!/bin/sh
+
+timeCoord=${1:-'mino'}
+timeStep=${2:-0.01}
+
+# Generate the parameter file
+ic='test'
+if ! [ -f $ic ]
+then
+	./genparam.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>potential
+fi
+
+# Pretty-print the parameter file
+jq . $ic
+
+# Run the simulator
+simVala='./bh3d'
+simPython='./bh3d.py'
+datafile='/tmp/data'
+echo -n "Simulating "
+if [ -f $simVala ]
+then
+    echo -n "with $simVala . . . "
+    $simVala <$ic 2>errors >$datafile
+else
+    echo -n "with $simPython . . . "
+    $simPython <$ic 2>errors >$datafile
+fi
+echo "Done!"
+
+# Plot 3D graphics
+./finterp.py $timeCoord $timeStep <$datafile | ./filegraphics.py `jq .M $ic` `jq .a $ic` &
+
+# Plot errors
+./errorchart.py $timeCoord $(echo `jq .duration $ic` / `jq .step $ic` / 5000 | bc) <$datafile &
+
