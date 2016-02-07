@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-from sys import argv
+from sys import argv, stdin
 from matplotlib import pyplot
 from json import loads
 
 def main():
-	if len(argv) < 2:
-		raise Exception('>>> ERROR! Please supply a potential file name <<<')
-	dataFile = open(argv[1], 'r')
-	line = dataFile.readline()
+	line = stdin.readline()
 	ax1 = pyplot.figure().add_subplot(111)
         pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
 	ax1.set_xlabel('r, theta', color='0.20')
@@ -22,7 +19,7 @@ def main():
 		p = loads(line)
 		ax1.plot(p['x'], p['R'], 'b.', markersize=2)
 		ax2.plot(p['x'], p['THETA'], 'r.', markersize=2)
-		line = dataFile.readline()
+		line = stdin.readline()
 		n += 1
         try:
             pyplot.show()
