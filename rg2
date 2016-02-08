@@ -30,7 +30,7 @@ fi
 echo "Done!"
 
 # Plot errors
-./errorchart.py $timeCoord $(echo `jq .duration $ic` / `jq .step $ic` / 5000 | bc) <$datafile &
+./errorchart.py $timeCoord $(echo `jq .duration $ic` / `jq .step $ic` / 2000 | bc) <$datafile &
 
 # Plot potentials
 ./filepotential.py <$pot &
