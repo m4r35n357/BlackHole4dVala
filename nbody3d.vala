@@ -162,22 +162,15 @@ namespace Simulations {
          */
         public void solve (string[] args) {
             var h0 = hamiltonian();
-            var hMin = h0;
-            var hMax = h0;
             double t = 0.0;
-            output(t, h0, h0, h0, h0, -180.0);
+            output(t, h0, h0, -180.0);
             while (true) {
                 integrator.compose();
                 var hNow = hamiltonian();
                 var tmp = fabs(hNow - h0);
                 var dH = tmp > 0.0 ? tmp : 1.0e-18;
-                if (hNow < hMin) {
-                    hMin = hNow;
-                } else if (hNow > hMax) {
-                    hMax = hNow;
-                }
                 var dbValue = 10.0 * log10(fabs(dH / h0) + 1.0e-18);
-                output(t, hNow, h0, hMin, hMax, dbValue);
+                output(t, hNow, h0, dbValue);
                 if (fabs(t) > simulationTime || dbValue > errorLimit) {
                     return;
                 }
@@ -185,13 +178,13 @@ namespace Simulations {
             }
         }
 
-        public void output (double time, double hNow, double h0, double hMin, double hMax, double dbValue) {
+        public void output (double time, double hNow, double h0, double dbValue) {
             string[] data = {};
             foreach (var particle in bodies) {
                 data += particle.toString();
             }
             stdout.printf("[".concat(string.joinv(",", data), "]\n"));
-            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"H-\":%.9e, \"H+\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, hMin, hMax, dbValue);
+            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);
         }
 
     }
