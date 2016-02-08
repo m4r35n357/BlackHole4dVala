@@ -102,8 +102,8 @@ def main ():
     nPoints = 1001
     for x in range(1, nPoints - 1):
         xValue = 1.0 * x / nPoints
-        print >> stderr, "{ \"x\":" + str(xValue * rMax) \
-                       + ", \"R\":" + str(ic.R(xValue * rMax, c)) \
+        print >> stderr, "{ \"x\":" + str(xValue * rMax * 1.1) \
+                       + ", \"R\":" + str(ic.R(xValue * rMax * 1.1, c)) \
                        + ", \"THETA\":" + str(ic.THETA(xValue * pi, ic.E, ic.L, ic.Q)) + " }"
     if not ic.success or ic.fun > 1.0e-6:
         exit(-1)
