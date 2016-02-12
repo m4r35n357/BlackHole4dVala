@@ -52,6 +52,9 @@ namespace Simulations {
         private double simulationTime;
         private ISymplectic integrator;
 
+        /**
+         * Private constructor, use the static factory
+         */
         private NBody (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
             this.bodies = bodies;
             this.np = bodies.length;

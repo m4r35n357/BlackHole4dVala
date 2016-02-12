@@ -36,6 +36,9 @@ namespace Simulations {
         private double eR;
         private ISymplectic integrator;
 
+        /**
+         * Private constructor, use the static factory
+         */
         private Newton (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             this.E = energy;

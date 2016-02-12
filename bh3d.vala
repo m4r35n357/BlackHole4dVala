@@ -61,7 +61,9 @@ namespace Simulations {
         private double thP;
         private double phDot;
 
-        // private constructor; use the static factory
+        /**
+         * Private constructor, use the static factory
+         */
         private KerrGeodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep, string type) {
             // Constants
@@ -97,16 +99,16 @@ namespace Simulations {
         public static KerrGeodesic fromJson () {
             var ic = getJson();
             return new KerrGeodesic(ic.get_double_member("a"),
-                                ic.get_double_member("mu"),
-                                ic.get_double_member("E"),
-                                ic.get_double_member("Lz"),
-                                ic.get_double_member("C"),
-                                ic.get_double_member("r"),
-                                ic.get_double_member("theta"),
-                                ic.get_double_member("start"),
-                                ic.get_double_member("duration"),
-                                ic.get_double_member("step"),
-                                ic.get_string_member("integrator"));
+                                    ic.get_double_member("mu"),
+                                    ic.get_double_member("E"),
+                                    ic.get_double_member("Lz"),
+                                    ic.get_double_member("C"),
+                                    ic.get_double_member("r"),
+                                    ic.get_double_member("theta"),
+                                    ic.get_double_member("start"),
+                                    ic.get_double_member("duration"),
+                                    ic.get_double_member("step"),
+                                    ic.get_string_member("integrator"));
         }
 
         private double logError (double e) {
@@ -184,10 +186,10 @@ namespace Simulations {
 
         public void output (double mino, double tau) {
             stdout.printf("{");
-            stdout.printf("\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);
-            stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, eR, eTh);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e", tDot / S, rP / S, thP / S, phDot / S);
+            stdout.printf("\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                      // time variables
+            stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, eR, eTh);                    // errors
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);                              // coordinates
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
             stdout.printf("}\n");
         }
     }
