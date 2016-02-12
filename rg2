@@ -36,5 +36,5 @@ echo "Done!"
 ./filepotential.py <$pot &
 
 # Plot 3D graphics
-./finterp.py $timeCoord $timeStep <$datafile | ./filegraphics.py $(jq .M $ic) $(jq .a $ic) &
+./finterp.py $timeCoord $timeStep <$datafile | ./plotBH.py $(jq .M $ic) $(jq .a $ic) &
 
