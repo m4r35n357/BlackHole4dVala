@@ -1,0 +1,14 @@
+#!/bin/sh
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 >test 2>potential
+jq . test
+./bh3d.py <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+./bh3d <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+
+./nbody3d.py <ic/SolarSystem 2>progress | ./plotNBody.py
+./nbody3d <ic/SolarSystem 2>progress | ./plotNBody.py
+
+./genparam.py 12.0 0.5 1.0 1.0 >test 2>potential
+jq . test
+./newton <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+

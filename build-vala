@@ -2,11 +2,30 @@
 
 opt="${1:-0}"
 
-#vcc='/usr/bin/valac'
-vcc='/opt/vala/bin/valac'
+#valac='/usr/bin/valac'
+valac='/opt/vala/bin/valac'
 
-for program in bh3d newton nbody3d
+outfile='utils'
+executables='bh3d nbody3d newton'
+
+# cleanup
+rm -f $outfile $executables
+
+# compile vala files
+valafiles="${outfile}.vala symplectic.vala"
+for executable in $executables
 do
-	$vcc -X -O$opt -X -lm --pkg json-glib-1.0 ${program}.vala symplectic.vala utils.vala
+	valafiles="$valafiles ${executable}.vala"
 done
+$valac -v -X -lm --pkg json-glib-1.0 $valafiles
+
+# hard link executables
+for executable in $executables
+do
+	ln $outfile $executable
+done
+rm -f $outfile
+
+# admire our work
+ls -lAh $executables
 
