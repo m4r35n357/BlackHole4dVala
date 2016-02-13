@@ -20,39 +20,39 @@ from array import array
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
-    	self.a = spin
+        self.a = spin
         self.mu2 = pMass2
-    	self.E = energy
-    	self.L = momentum
-    	self.Q = carter
-    	self.r = r0
-    	self.th = thetaMin
+        self.E = energy
+        self.L = momentum
+        self.Q = carter
+        self.r = r0
+        self.th = thetaMin
         self.starttime = abs(starttime)
         self.duration = abs(duration)
         self.endtime = self.starttime + self.duration
-    	self.h = timestep
+        self.h = timestep
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.f2 = 1.0 / (2.0 - self.cbrt2)
         self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
-    	if order == 'sb2':  # Second order base
+        if order == 'sb2':  # Second order base
             self.base = self.base2;
             self.w = array('d', [1.0])
-    	elif order == 'sc4':  # Fourth order, composed from Second order
+        elif order == 'sc4':  # Fourth order, composed from Second order
             self.base = self.base2;
             self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
-    	elif order == 'sb4':  # Fourth order base
+        elif order == 'sb4':  # Fourth order base
             self.base = self.base4;
             self.w = array('d', [1.0])
-    	elif order == 'sc6':  # Sixth order, composed from Fourth order
+        elif order == 'sc6':  # Sixth order, composed from Fourth order
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
             self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
-    	else:  # Wrong value for integrator order
+        else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
         self.wRange = range(len(self.w))
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
-    	self.a2 = self.a**2
+        self.a2 = self.a**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
@@ -63,7 +63,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
     def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
         def logError (e):
-            return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18) 
+            return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
         def modH (xDot, X):
             return 0.5 * fabs(xDot**2 - X)
         def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!
@@ -82,15 +82,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.sth2 = self.sth**2
         self.cth2 = 1.0 - self.sth2
         self.ra2 = r2 + self.a2
-    	self.D = self.ra2 - 2.0 * r
-    	self.S = r2 + self.a2 * self.cth2
+        self.D = self.ra2 - 2.0 * r
+        self.S = r2 + self.a2 * self.cth2
         self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
-    	self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
-    	self.THETA = self.Q - self.cth2 * self.TH
-    	P_D = (self.ra2 * self.E - self.aL) / self.D
+        self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
+        self.THETA = self.Q - self.cth2 * self.TH
+        P_D = (self.ra2 * self.E - self.aL) / self.D
         self.tP = self.ra2 * P_D + self.aL - self.a2E * self.sth2
         self.phP = self.a * P_D - self.aE + self.L / self.sth2
-	
+
     def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
         self.t += d * self.tP
         self.r += d * self.rP
@@ -127,7 +127,7 @@ def main ():  # Need to be inside a function to return . . .
         bl.count += 1
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
         if abs(mino) > bl.starttime:
-	    print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+        print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
         for i in bl.wRange:  # Composition happens in this loop
             bl.base(bl.w[i] * bl.h)
         mino += bl.h
