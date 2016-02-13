@@ -22,14 +22,19 @@ namespace Simulations {
      */
     public interface IModel : GLib.Object {
         /**
-         * Coordinate updates
+         * Coordinate updates, called by ISymplectic.compose()
          */
         public abstract void qUp (double d);
 
         /**
-         * Momentum updates
+         * Momentum updates, called by ISymplectic.compose()
          */
         public abstract void pUp (double c);
+
+        /**
+         * Sole method called by main(), calls ISymplectic.compose() method on the integrator as needed
+         */
+        public abstract void solve ();
     }
 
     /**
@@ -37,7 +42,7 @@ namespace Simulations {
      */
     public interface ISymplectic : GLib.Object {
         /**
-         * Should be called by IModel.evolve()
+         * Should be called by IModel.solve() as needed
          */
         public abstract void compose ();
     }

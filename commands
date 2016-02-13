@@ -9,5 +9,5 @@
 
 ./genparam.py 12.0 0.5 1.0 1.0 >test 2>potential; jq . test; ./newton <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
 
-rm -f utils bh3d nbody3d newton; /opt/vala/bin/valac -X -lm --pkg json-glib-1.0 utils.vala bh3d.vala newton.vala nbody3d.vala symplectic.vala; ln utils nbody3d; ln utils newton; ln utils bh3d; rm -f utils; ls -lAh bh3d newton nbody3d; strings bh3d|grep simulations.*construct
+rm -f utils bh3d nbody3d newton; /opt/vala/bin/valac -v -X -lm --pkg json-glib-1.0 utils.vala bh3d.vala newton.vala nbody3d.vala symplectic.vala; strings utils|grep Simulations; ln utils nbody3d; ln utils newton; ln utils bh3d; rm -f utils; ls -lAh bh3d newton nbody3d
 

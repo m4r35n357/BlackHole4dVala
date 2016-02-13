@@ -47,5 +47,24 @@ namespace Simulations {
         }
         return obj;
     }
+
+    static int main (string[] args) {
+        var arg0 = args[0].split("/");
+        switch (arg0[arg0.length - 1]) {  // basename
+            case "bh3d":
+                KerrGeodesic.fromJson().solve();
+                break;
+            case "newton":
+                Newton.fromJson().solve();
+                break;
+            case "nbody3d":
+                NBody.fromJson().solve();
+                break;
+            default:
+                stdout.printf("Please specify an executable by name!");
+                break;
+        }
+        return 0;
+    }
 }
 

@@ -193,10 +193,5 @@ namespace Simulations {
             stdout.printf("}\n");
         }
     }
-
-    static int main (string[] args) {
-        KerrGeodesic.fromJson().solve();
-        return 0;
-    }
 }
 
