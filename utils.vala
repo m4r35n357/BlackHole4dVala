@@ -60,8 +60,21 @@ namespace Simulations {
             case "nbody3d":
                 NBody.fromJson().solve();
                 break;
-            default:
-                stdout.printf("Please specify an executable by name!");
+            default:  // for debugging "utils" binary
+                switch (args[1]) {  // command line argument
+                    case "bh3d":
+                        KerrGeodesic.fromJson().solve();
+                        break;
+                    case "newton":
+                        Newton.fromJson().solve();
+                        break;
+                    case "nbody3d":
+                        NBody.fromJson().solve();
+                        break;
+                    default:
+                        stdout.printf("Please specify an executable by name or by program argument");
+                        break;
+                }
                 break;
         }
         return 0;
