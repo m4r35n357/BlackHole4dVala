@@ -163,7 +163,7 @@ namespace Simulations {
         /**
          * Sole user method
          */
-        public void solve (string[] args) {
+        public void solve () {
             var h0 = hamiltonian();
             double t = 0.0;
             output(t, h0, h0, -180.0);
@@ -189,11 +189,5 @@ namespace Simulations {
             stdout.printf("[".concat(string.joinv(",", data), "]\n"));
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);
         }
-
-    }
-
-    static int main (string[] args) {
-        NBody.fromJson().solve(args);
-        return 0;
     }
 }
