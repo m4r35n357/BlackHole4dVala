@@ -34,11 +34,11 @@ def main():
         ax2.plot(p['x'], p['THETA'], 'r.', markersize=2)
         line = stdin.readline()
         n += 1
-        try:
-            pyplot.show()
-        except AttributeError as e:
-            print('ATTRIBUTE ERROR: ' + str(argv[0]) + ': ' + str(e))
-            exit(-1)
+    try:
+        pyplot.show()
+    except AttributeError as e:
+        print('ATTRIBUTE ERROR: ' + str(argv[0]) + ': ' + str(e))
+        exit(-1)
 
 if __name__ == "__main__":
     main()
