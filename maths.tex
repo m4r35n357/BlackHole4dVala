@@ -4,7 +4,7 @@
 \usepackage{mathtools}
 \usepackage{listings}
 \usepackage{graphicx}
-\title{\textbf{Simulating Kerr Geodesics}}
+\title{\textbf{Simulating Geodesics in the Kerr Spacetime}}
 \author{Ian Smith}
 \date{June 2015}
 \graphicspath{ {images/} }
@@ -13,11 +13,11 @@
 \maketitle
 
 \abstract
-A simple and accurate numerical method is presented aimed at generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the problem of generating a variety of usable initial conditions for the simulator.  Sources of error are quantified and monitored as a matter of course.  The source code for the suite of programs is publicly available under a BSD licence.
+A simple and accurate numerical procedure is presented, aimed at efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the method of generating a wide variety of useful initial conditions for the simulator.  The core is written both in Python and Vala, whilst graphical output and processing, including error plots, is provided by Python modules.  The source code for the suite of programs is published on GitHub under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
-The starting point is the Kerr line element expressed in terms of the commonly used Boyer-Lindquist coordinates.
+The starting point for the procedure is the Kerr line element, expressed in terms of the widely used Boyer-Lindquist coordinates.
 \begin{equation}
 \begin{aligned}
 d s^2 &= \frac{ \sin^2 \theta } {r^2 + a^2 \cos^2 \theta} (a dt - (r^2 + a^2)d \phi )^2 + \frac{ r^2 + a^2 \cos^2 \theta } {(r^2 - 2Mr  + a^2)} d r^2 \\
@@ -52,29 +52,31 @@ Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the
     &- (r^2 - 2Mr  + a^2) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right)
    \end{split}\\
    \begin{split}
-    \frac{d R(r)}{d r} &= 4rE \left((r^2 + a^2)E - aL \right) \label{eq:2}\\
+    \frac{d R}{d r} (r) &= 4rE \left((r^2 + a^2)E - aL \right) \label{eq:2}\\
     &- 2\mu^2r(r^2 - 2Mr  + a^2)\\
     &- (2r - 2M) \left(Q + ( L - aE)^2 + \mu^2 r^2 \right)
    \end{split}\\
   \Theta (\theta) &= Q - {\cos^2 \theta } \left( \frac{L^2}{\sin^2 \theta } + a^2( \mu^2 - E^2) \right) \label{eq:3}\\
-  \frac{d \Theta (\theta)}{d \theta} &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta } \label{eq:4}
+  \frac{d \Theta}{d \theta} (\theta) &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta } \label{eq:4}
 \end{align}
 
-The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the Euler approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  The approach described here is to use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the $R$ and $\Theta$ equations, which turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
+The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the "brute force" integration approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.
+
+The alternative approach described here is to square $R$ and $\Theta$ equations, and use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the resulting equations, which are each treated as a "hamiltonian" system of first order differential equations.  This turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
 
 \begin{equation}
 \frac {\dot x^2 - V(x)}{2} = 0
 \end{equation}
 
-This expresison can be treated in the same way as a hamiltonian (there is no mass in the "kinetic" term so the velocity is also the canonical momentum), in particular it is amenable to sympectic integration.  It is also used to quantify the integration errors for $r$ and $\theta$, whilst the two differentiated potentials in equations 7 and 9 are used for velocity/momentum updates in the integrator routines.
+This expresison can be treated in the same way as a hamiltonian (there is no mass in the "kinetic" term so the velocity is also the canonical momentum), in particular it is amenable to symplectic integration \cite{hairer}.  It is also used to quantify the integration errors for $r$ and $\theta$, whilst the two differentiated potentials in equations 7 and 9 are used for velocity/momentum updates in the integrator routines.
 
-The simulator uses composition \cite{hairer} to step the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.  The Euler equations are actually processed alongside the composed Stormer-Verlet updates, increasing the order and accuracy for $t$ and $\phi$.
+The simulator uses composition \cite{hairer} to enable changing the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.  Rather than using Euler, the $t$ and $\phi$ equations are actually processed alongside the composed Stormer-Verlet updates, increasing the order and accuracy for $t$ and $\phi$ (according to the four-velocity norm error).
 
 \section{Finding initial conditions}
 
-Another difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical.
+Another difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical, and extreme sensitivity to some parameters (particularly $E$).
 
-Here I present a straightforward way of generating two types of bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials as constant parameters.
+Here I present a straightforward way of generating two types of bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials (with respect to these variables) as constraint parameters.
 
 \subsection{Constant radius ("spherical") orbits}
 
@@ -82,7 +84,7 @@ For constant radius orbits at $r_0$, we are looking for a double root (local max
 
 \begin{align}
 R(r_0, E, L, Q) &= 0 \\
-\frac{d R(r_0, E, L, Q)}{d r} &= 0 \\
+\frac{d R}{d r} (r_0, E, L, Q) &= 0 \\
 \Theta(\theta_{MIN}, E, L, Q) &= 0
 \end{align}
 
@@ -98,7 +100,7 @@ R(r_2, E, L, Q) &= 0 \\
 
 \subsection{Plummeting (an aside)}
 
-These "orbits" are not the focus of this article, but are easily specified by setting $L < 1.0$ after generating a spherical orbit as in equations 11-13 above.
+These "orbits" are not the focus of this article, but it is possible to experiment by setting $L < 1.0$ after generating a spherical orbit as in equations 11-13 above.
 
 \subsection{Finding the roots}
 
