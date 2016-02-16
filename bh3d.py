@@ -17,7 +17,7 @@ from sys import argv, stdin, stdout, stderr
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array
-from symplectic import Integrator
+from symplectic import Integrator, logError
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
@@ -45,8 +45,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2xE2_mu2 = - self.a2 * E2_mu2
 
     def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
-        def logError (e):
-            return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
         def modH (xDot, X):
             return 0.5 * fabs(xDot**2 - X)
         def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!

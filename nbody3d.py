@@ -17,7 +17,7 @@ from sys import stdin, stdout, stderr
 from math import fabs, log10, sqrt
 from json import loads
 from array import array
-from symplectic import Integrator
+from symplectic import Integrator, logError
 
 class Particle(object):
 
@@ -82,6 +82,7 @@ class NBody(object):
                     b.pX += dPx
                     b.pY += dPy
                     b.pZ += dPz
+
     def print_out (self, time, hNow, h0, dbValue):
         data = []
         for i in self.pRange:
@@ -105,17 +106,14 @@ def icJson ():
 def main ():  # Need to be inside a function to return . . .
     s = icJson()  # Create a symplectic integrator object from JSON input
     h0 = s.h()  # Set up error reporting
-    s.print_out(0.0, h0, h0, -180.0)
     t = 0.0
     while True:
-        s.integrator.compose()
         hNow = s.h()
-        tmp = fabs(hNow - h0)  # Protect logarithm against negative arguments
-        dH = tmp if tmp > 0.0 else 1.0e-18  # Protect logarithm against small arguments
-        dbValue = 10.0 * log10(fabs(dH / h0) + 1.0e-18)
+        dbValue = logError(fabs(hNow / h0 - 1.0))
         s.print_out(t, hNow, h0, dbValue)
         if fabs(t) > s.T or dbValue > s.eMax:
             return
+        s.integrator.compose()
         t += s.ts
 
 if __name__ == "__main__":
