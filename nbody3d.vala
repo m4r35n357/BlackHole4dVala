@@ -111,7 +111,7 @@ namespace Simulations {
        /**
          * Total (kinetic + potential) energy of the system
          */
-        public double hamiltonian () {
+        public double h () {
             var energy = 0.0;
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
@@ -163,19 +163,16 @@ namespace Simulations {
          * Sole user method
          */
         public void solve () {
-            var h0 = hamiltonian();
-            double t = 0.0;
-            output(t, h0, h0, -180.0);
+            var h0 = h();
+            var t = 0.0;
             while (true) {
-                integrator.compose();
-                var hNow = hamiltonian();
-                var tmp = fabs(hNow - h0);
-                var dH = tmp > 0.0 ? tmp : 1.0e-18;
-                var dbValue = 10.0 * log10(fabs(dH / h0) + 1.0e-18);
+                var hNow = h();
+                var dbValue = logError(fabs(hNow / h0 - 1.0));
                 output(t, hNow, h0, dbValue);
                 if (fabs(t) > simulationTime || dbValue > errorLimit) {
                     return;
                 }
+                integrator.compose();
                 t += ts;
             }
         }

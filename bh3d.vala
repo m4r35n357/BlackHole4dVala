@@ -111,10 +111,6 @@ namespace Simulations {
                                     ic.get_string_member("integrator"));
         }
 
-        private double logError (double e) {
-            return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-        }
-
         private double modH (double xDot, double X) {
             return 0.5 * fabs(xDot * xDot - X);
         }

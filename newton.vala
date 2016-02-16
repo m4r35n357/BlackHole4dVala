@@ -78,10 +78,6 @@ namespace Simulations {
             return 0.5 * L2 / (r * r) - 1.0 / r;
         }
 
-        private double logError (double e) {
-            return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-        }
-
         private double H () {
             return 0.5 * rP * rP + V(r);
         }

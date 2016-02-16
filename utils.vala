@@ -13,6 +13,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 using Json;
+using GLib.Math;
 
 namespace Simulations {
 
@@ -47,34 +48,31 @@ namespace Simulations {
     }
 
     /**
-     * Read JSON data from stdin
+     * Parse JSON initial conditions data from stdin
      */
-    private static string fromStdin () {
+    private static Json.Object getJson () {
         var input = new StringBuilder();
         var buffer = new char[1024];
         while (!stdin.eof()) {
-            var read_chunk = stdin.gets(buffer);
-            if (read_chunk != null) {
-                input.append(read_chunk);
+            var chunk = stdin.gets(buffer);
+            if (chunk != null) {
+                input.append(chunk);
             }
         }
-        return input.str;
-    }
-
-    /**
-     * Parse JSON initial conditions data
-     */
-    public static Json.Object getJson () {
         unowned Json.Object obj;
-        Json.Parser parser = new Json.Parser();
+        var p = new Parser();
         try {
-            parser.load_from_data(fromStdin());
-            obj = parser.get_root().get_object();
+            p.load_from_data(input.str);
+            obj = p.get_root().get_object();
         } catch (Error e) {
             stderr.printf("Unable to parse the data file: %s\n", e.message);
             return new Json.Object();
         }
         return obj;
+    }
+
+    private static double logError (double e) {
+        return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
     }
 
     public static int main (string[] args) {
