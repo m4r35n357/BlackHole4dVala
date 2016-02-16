@@ -17,6 +17,7 @@ from sys import argv, stdin, stdout, stderr
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 from array import array
+from symplectic import Integrator
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
@@ -31,25 +32,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.duration = abs(duration)
         self.endtime = self.starttime + self.duration
         self.h = timestep
-        self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.f2 = 1.0 / (2.0 - self.cbrt2)
-        self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
-        if order == 'sb2':  # Second order base
-            self.base = self.base2;
-            self.w = array('d', [1.0])
-        elif order == 'sc4':  # Fourth order, composed from Second order
-            self.base = self.base2;
-            self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
-        elif order == 'sb4':  # Fourth order base
-            self.base = self.base4;
-            self.w = array('d', [1.0])
-        elif order == 'sc6':  # Sixth order, composed from Fourth order
-            self.base = self.base4;
-            fthrt2 = 2.0**(1.0 / 5.0)
-            self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
-        else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
-        self.wRange = range(len(self.w))
+        self.integrator = Integrator(self, order)
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
         self.a2 = self.a**2
@@ -92,29 +75,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.phP = self.a * P_D - self.aE + self.L / self.sth2
 
     def qUp (self, d):  # q += d * dq/dTau, where dq/dTau = dH/dp (i.e. dT/dp).  N.B. here q = r or theta; t and phi are just along for the ride . . .
-        self.t += d * self.tP
-        self.r += d * self.rP
-        self.th += d * self.thP
-        self.ph += d * self.phP
+        self.t += d * self.h * self.tP
+        self.r += d * self.h * self.rP
+        self.th += d * self.h * self.thP
+        self.ph += d * self.h * self.phP
         self.refresh(self.r, self.th)
 
     def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
-        self.rP += c * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
-        self.thP += c * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
-
-    def base2 (self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
-        self.pUp(w * 0.5)  # c1 = 0.5
-        self.qUp(w)        # d1 = 1.0
-        self.pUp(w * 0.5)  # c2 = 0.5
-
-    def base4 (self, w):  # Compose higher orders from this fourth-order symplectic base (d4 = 0.0)
-        self.pUp(w * self.coefficients[0])  # w * c1
-        self.qUp(w * self.coefficients[1])  # w * d1
-        self.pUp(w * self.coefficients[2])  # w * c2
-        self.qUp(w * self.coefficients[3])  # w * d2
-        self.pUp(w * self.coefficients[2])  # w * c3
-        self.qUp(w * self.coefficients[1])  # w * d3
-        self.pUp(w * self.coefficients[0])  # w * c4
+        self.rP += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+        self.thP += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
@@ -128,8 +97,7 @@ def main ():  # Need to be inside a function to return . . .
         bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
         if abs(mino) > bl.starttime:
             print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, bl.eR, bl.eTh, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
-        for i in bl.wRange:  # Composition happens in this loop
-            bl.base(bl.w[i] * bl.h)
+        bl.integrator.compose()
         mino += bl.h
         tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
 

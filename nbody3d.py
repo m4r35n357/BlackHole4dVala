@@ -17,6 +17,7 @@ from sys import stdin, stdout, stderr
 from math import fabs, log10, sqrt
 from json import loads
 from array import array
+from symplectic import Integrator
 
 class Particle(object):
 
@@ -32,7 +33,7 @@ class Particle(object):
     def __str__(self):
         return "{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}" % (self.qX, self.qY, self.qZ, self.pX, self.pY, self.pZ, self.mass)
 
-class Symplectic(object):
+class NBody(object):
     def __init__(self, g, runTime, timeStep, errorLimit, bodies, order):
         self.bodies = bodies
         self.pRange = range(len(bodies))
@@ -40,25 +41,7 @@ class Symplectic(object):
         self.ts = timeStep
         self.eMax = errorLimit
         self.T = runTime
-        self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.f2 = 1.0 / (2.0 - self.cbrt2)
-        self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
-        if order == 'sb2':  # Second order base
-            self.base = self.base2;
-            self.w = array('d', [1.0])
-        elif order == 'sc4':  # Fourth order, composed from Second order
-            self.base = self.base2;
-            self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
-        elif order == 'sb4':  # Fourth order base
-            self.base = self.base4;
-            self.w = array('d', [1.0])
-        elif order == 'sc6':  # Sixth order, composed from Fourth order
-            self.base = self.base4;
-            fthrt2 = 2.0**(1.0 / 5.0)
-            self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
-        else:  # Wrong value for integrator order
-            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
-        self.wRange = range(len(self.w))
+        self.integrator = Integrator(self, order)
 
     @staticmethod
     def dist (xA, yA, zA, xB, yB, zB):  # Euclidean distance between point A and point B
@@ -78,7 +61,7 @@ class Symplectic(object):
     def qUp (self, d):  # Update Positions
         for i in self.pRange:
             a = self.bodies[i]
-            tmp = d / a.mass
+            tmp = d * self.ts / a.mass
             a.qX += a.pX * tmp
             a.qY += a.pY * tmp
             a.qZ += a.pZ * tmp
@@ -89,7 +72,7 @@ class Symplectic(object):
             for j in self.pRange:
                 if i > j:
                     b = self.bodies[j]
-                    tmp = - c * self.g * a.mass * b.mass / self.dist(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ)**3
+                    tmp = - c * self.ts * self.g * a.mass * b.mass / self.dist(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ)**3
                     dPx = tmp * (b.qX - a.qX)
                     dPy = tmp * (b.qY - a.qY)
                     dPz = tmp * (b.qZ - a.qZ)
@@ -99,21 +82,6 @@ class Symplectic(object):
                     b.pX += dPx
                     b.pY += dPy
                     b.pZ += dPz
-
-    def base2 (self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
-        self.pUp(w * 0.5)  # c1 = 0.5
-        self.qUp(w)        # d1 = 1.0
-        self.pUp(w * 0.5)  # c2 = 0.5
-
-    def base4 (self, w):  # Compose higher orders from this fourth-order symplectic base (d4 = 0.0)
-        self.pUp(w * self.coefficients[0])  # w * c1
-        self.qUp(w * self.coefficients[1])  # w * d1
-        self.pUp(w * self.coefficients[2])  # w * c2
-        self.qUp(w * self.coefficients[3])  # w * d2
-        self.pUp(w * self.coefficients[2])  # w * c3
-        self.qUp(w * self.coefficients[1])  # w * d3
-        self.pUp(w * self.coefficients[0])  # w * c4
-
     def print_out (self, time, hNow, h0, dbValue):
         data = []
         for i in self.pRange:
@@ -132,7 +100,7 @@ def icJson ():
             bodies.append(Particle(a['qX'], a['qY'], a['qZ'], mass * a['vX'], mass * a['vY'], mass * a['vZ'], mass))
         else:
             raise Exception('>>> ERROR! Specify either momenta or velocites consistently <<<')
-    return Symplectic(ic['g'], ic['simulationTime'], ic['timeStep'], ic['errorLimit'], bodies, ic['integratorOrder'])
+    return NBody(ic['g'], ic['simulationTime'], ic['timeStep'], ic['errorLimit'], bodies, ic['integratorOrder'])
 
 def main ():  # Need to be inside a function to return . . .
     s = icJson()  # Create a symplectic integrator object from JSON input
@@ -140,8 +108,7 @@ def main ():  # Need to be inside a function to return . . .
     s.print_out(0.0, h0, h0, -180.0)
     t = 0.0
     while True:
-        for i in s.wRange:  # Composition happens in this loop
-            s.base(s.w[i] * s.ts)
+        s.integrator.compose()
         hNow = s.h()
         tmp = fabs(hNow - h0)  # Protect logarithm against negative arguments
         dH = tmp if tmp > 0.0 else 1.0e-18  # Protect logarithm against small arguments
@@ -155,3 +122,4 @@ if __name__ == "__main__":
     main()
 else:
     print >> stderr, __name__ + " module loaded"
+
