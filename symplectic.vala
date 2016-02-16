@@ -17,7 +17,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Integrator superclass
+     * Integrator superclass, controls composition but leaves integration details to subclass
      */
     public abstract class Integrator : GLib.Object, ISymplectic {
 
@@ -26,6 +26,9 @@ namespace Simulations {
         protected IModel model;
         protected double[] baseCoeff;
 
+        /**
+         * Protected constructor, use the static factory
+         */
         protected Integrator (IModel model, double[] compWeight) {
             this.compWeight = compWeight;
             this.wRange = compWeight.length;
@@ -57,7 +60,7 @@ namespace Simulations {
         }
 
         /**
-         * Perform one integration step with the current compositional weight
+         * Subclasses should perform one integration step with the current compositional weight
          */
         protected abstract void integrate (double compWeight);
 
@@ -72,15 +75,21 @@ namespace Simulations {
     }
 
     /**
-     * Second-order symplectic integrator base
+     * Second-order symplectic integrator subclass
      */
     public class Base2 : Integrator {
 
+        /**
+         * Protected constructor, use the static factory in superclass
+         */
         protected Base2 (IModel model, double[] compWeight) {
             base(model, compWeight);
             this.baseCoeff = { 0.5, 1.0 };
         }
 
+        /**
+         * Weighted 2nd order integration step
+         */
         protected override void integrate (double compWeight) {
             model.pUp(baseCoeff[0] * compWeight);
             model.qUp(baseCoeff[1] * compWeight);
@@ -89,16 +98,22 @@ namespace Simulations {
     }
 
     /**
-     * Fourth-order symplectic integrator base
+     * Fourth-order symplectic integrator subclass
      */
     public class Base4 : Integrator {
 
+        /**
+         * Protected constructor, use the static factory in superclass
+         */
         protected Base4 (IModel model, double[] compWeight) {
             base(model, compWeight);
             var cbrt2 = pow(2.0, (1.0 / 3.0));
             this.baseCoeff = { 0.5 / (2.0 - cbrt2), 1.0 / (2.0 - cbrt2), 0.5 * (1.0 - cbrt2) / (2.0 - cbrt2), - cbrt2 / (2.0 - cbrt2) };
         }
 
+        /**
+         * Weighted 4th order integration step
+         */
         protected override void integrate (double compWeight) {
             model.pUp(baseCoeff[0] * compWeight);
             model.qUp(baseCoeff[1] * compWeight);

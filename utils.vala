@@ -42,7 +42,7 @@ namespace Simulations {
      */
     public interface ISymplectic : GLib.Object {
         /**
-         * Should be called by IModel.solve() as needed
+         * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
          */
         public abstract void compose ();
     }
@@ -71,10 +71,16 @@ namespace Simulations {
         return obj;
     }
 
+    /**
+     * Used by all models
+     */
     private static double logError (double e) {
         return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
     }
 
+    /**
+     * Entry point
+     */
     public static int main (string[] args) {
         var arg0 = args[0].split("/");
         switch (arg0[arg0.length - 1]) {  // basename
