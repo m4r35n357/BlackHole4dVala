@@ -1,10 +1,13 @@
 #!/bin/sh
 
+C='\033[0;36m'
+NC='\033[0m' # No Color
+
 ./genparam.py 3.0 12.0 0.15 1.0 1.0 >test 2>potential
 jq . test
 for app in ./bh3d.py ./bh3d
 do
-	echo $app
+	echo ${C}$app${NC}
 	$app <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
 done
 
@@ -12,18 +15,18 @@ done
 jq . test
 for app in ./bh3d.py ./bh3d
 do
-	echo $app
+	echo ${C}$app${NC}
 	$app <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
 done
 
 for app in ./nbody3d.py ./nbody3d
 do
-	echo $app
+	echo ${C}$app${NC}
 	$app <ic/SolarSystem 2>progress | ./plotNBody.py
 done
 
 ./genparam.py 12.0 0.5 1.0 1.0 >test 2>potential
 jq . test
-echo "./newton"
+echo ${C}"./newton"${NC}
 ./newton <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
 

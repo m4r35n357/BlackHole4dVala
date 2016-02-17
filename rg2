@@ -15,10 +15,12 @@ fi
 jq . $ic
 
 # Run the simulator
+C='\033[0;36m'
+NC='\033[0m' # No Color
 simVala='./bh3d'
 simPython='./bh3d.py'
 datafile='/tmp/data'
-echo -n "Simulating "
+echo -n ${C}"Simulating "
 if [ -f $simVala ]
 then
     echo -n "with $simVala . . . "
@@ -27,7 +29,7 @@ else
     echo -n "with $simPython . . . "
     $simPython <$ic 2>errors >$datafile
 fi
-echo "Done!"
+echo "Done!"${NC}
 
 # Plot errors
 ./errorchart.py $timeCoord $(echo $(jq .duration $ic) / $(jq .step $ic) / 2000 | bc) <$datafile &
