@@ -1,9 +1,12 @@
 Kerr Spacetime Geodesic Generator documentation (WIP)
 
-Dependencies:
+DEPENDENCIES:
+
 pypy (optional)
 matplotlib
 vpython
+jq
+bc
 
 
 Sample usage:
@@ -21,12 +24,14 @@ Sample usage:
 
 3.	Generate parameters, run, and plot a geodesic:
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 >test 2>potential; ./rungraphics tau test 5000
+./genparam.py 11.5 12.5 0.45 1.0 1.0 2>potential | ./bh3d | ./plotBH.py `jq .M test` `jq .a test`
 
 
-4.	Edit the inital conditions file and run again without graphs with tau as the time parameter (mino, tau or t):
+4.	Edit the inital conditions file and run again with tau and t as the time parameter:
 
-cat test; ./bh3d.py <test >datapipe & ./filegraphics.py datapipe test tau 5000
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M test` `jq .a test`
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M test` `jq .a test`
 
 
 5.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You weill need to build the (included) source first, instructions are at the top of kerr-image.c.
@@ -41,6 +46,19 @@ avconv -y -i %04d.ppm video.mp4
 or something like:
 
 avconv -y -i %04d.ppm -vcodec h264 -crf 1 video.mp4
+
+
+7.	Two test commands . . .
+
+./run-tests
+./rg2
+
+
+8.	Two pipelines . . .
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./raytrace.py 1000 0 | ./raytrace
 
 
 REFERENCE DATA
