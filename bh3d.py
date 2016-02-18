@@ -43,6 +43,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         E2_mu2 = self.E**2 - self.mu2
         self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
         self.a2xE2_mu2 = - self.a2 * E2_mu2
+        self.refresh(self.r, self.th)
+        self.rP = sqrt(fabs(self.R))
+        self.thP = sqrt(fabs(self.THETA))
 
     def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
         def modH (xDot, X):
@@ -86,9 +89,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['integrator'])
-    bl.refresh(bl.r, bl.th)
-    bl.rP = sqrt(fabs(bl.R))
-    bl.thP = sqrt(fabs(bl.THETA))
     mino = tau = 0.0
     while not abs(mino) > bl.endtime:
         bl.count += 1
