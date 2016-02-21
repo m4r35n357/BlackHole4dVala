@@ -7,6 +7,8 @@ matplotlib
 vpython
 jq
 bc
+imagemagick
+ffmpeg
 
 
 Sample usage:
@@ -41,11 +43,8 @@ time { ./raytrace.py 1000 0 <data | ./raytrace; }
 
 6.	Make a video out of the output files:
 
-avconv -y -i %04d.ppm video.mp4
-
-or something like:
-
-avconv -y -i %04d.ppm -vcodec h264 -crf 1 video.mp4
+ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
+mplayer raytrace.mp4 -fps 10
 
 
 7.	Two test commands . . .
