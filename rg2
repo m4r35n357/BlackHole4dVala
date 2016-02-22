@@ -1,7 +1,8 @@
 #!/bin/sh
 
-timeCoord=${1:-'mino'}
-timeStep=${2:-0.01}
+program=${1:-'./bh3d.rk4.py'}
+timeCoord=${2:-'mino'}
+timeStep=${3:-0.01}
 
 # Generate the parameter file
 ic='test'
@@ -17,18 +18,9 @@ jq . $ic
 # Run the simulator
 C='\033[0;36m'
 NC='\033[0m' # No Color
-simVala='./bh3d'
-simPython='./bh3d.py'
 datafile='/tmp/data'
-echo -n ${C}"Simulating "
-if [ -f $simVala ]
-then
-    echo -n "with $simVala . . . "
-    $simVala <$ic 2>errors >$datafile
-else
-    echo -n "with $simPython . . . "
-    $simPython <$ic 2>errors >$datafile
-fi
+echo -n ${C}"Simulating with $program . . . "
+$program <$ic 2>errors >$datafile
 echo "Done!"${NC}
 
 # Plot errors
