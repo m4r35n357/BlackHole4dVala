@@ -168,7 +168,7 @@ namespace Simulations {
             var mino = 0.0;
             var tau = 0.0;
             var count = 0;
-            while ((mino <= endtime) && (r >= horizon)) {
+            while (mino <= endtime) {
                 errors(count);
                 if (mino >= starttime) {
                     output(mino, tau);
