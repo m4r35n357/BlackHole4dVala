@@ -9,5 +9,5 @@
   "start" : 0.0,
   "duration" : 10.0,
   "step" : 0.001,
-  "integrator" : "sc6"
+  "integrator" : "sb4"
 }
