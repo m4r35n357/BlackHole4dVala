@@ -28,7 +28,6 @@ namespace Simulations {
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
-        private double horizon;
         private double aE;
         private double a2E;
         private double L2;
@@ -73,7 +72,6 @@ namespace Simulations {
             this.L = momentum;
             this.Q = carter;
             this.a2 = a * a;
-            this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.a2E = a2 * E;
             this.L2 = L * L;
