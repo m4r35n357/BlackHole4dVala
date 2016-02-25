@@ -44,8 +44,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.L2 = self.L**2
         self.aL = self.a * self.L
         self.L_aE2 = (self.L - self.aE)**2
-        E2_mu2 = self.E**2 - self.mu2
-        self.a2xE2_mu2 = - self.a2 * E2_mu2
+        self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
         self.refresh(self.r, self.th)
 
     def errors (self, R, TH, tP, rP, thP, phP):  # Error analysis
