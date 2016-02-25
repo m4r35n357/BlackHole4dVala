@@ -16,7 +16,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from sys import argv, stdin, stdout, stderr
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
-from array import array
 from symplectic import logError
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
@@ -32,10 +31,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.duration = abs(duration)
         self.endtime = self.starttime + self.duration
         self.h = timestep
-        self.kt = array('d', [0.0, 0.0, 0.0, 0.0])
-        self.kr = array('d', [0.0, 0.0, 0.0, 0.0])
-        self.kth = array('d', [0.0, 0.0, 0.0, 0.0])
-        self.kph = array('d', [0.0, 0.0, 0.0, 0.0])
+        self.kt = [0.0, 0.0, 0.0, 0.0]
+        self.kr = [0.0, 0.0, 0.0, 0.0]
+        self.kth = [0.0, 0.0, 0.0, 0.0]
+        self.kph = [0.0, 0.0, 0.0, 0.0]
         self.sgnR = self.sgnTH = 1.0
         self.t = self.ph = self.v4cum = 0.0
         self.count = 0
