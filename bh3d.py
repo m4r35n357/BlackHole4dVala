@@ -40,9 +40,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2E = self.a2 * self.E
         self.L2 = self.L**2
         self.aL = self.a * self.L
-        E2_mu2 = self.E**2 - self.mu2
-        self.c = array('d', [E2_mu2, 2.0 * self.mu2, self.a2 * E2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q])
-        self.a2xE2_mu2 = - self.a2 * E2_mu2
+        self.L_aE2 = (self.L - self.aE)**2
+        self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
         self.refresh(self.r, self.th)
         self.rP = sqrt(fabs(self.R))
         self.thP = sqrt(fabs(self.THETA))
@@ -68,7 +67,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ra2 = r2 + self.a2
         self.D = self.ra2 - 2.0 * r
         self.S = r2 + self.a2 * self.cth2
-        self.R = (((self.c[0] * r + self.c[1]) * r + self.c[2]) * r + self.c[3]) * r + self.c[4]
+        self.P1 = self.ra2 * self.E - self.aL
+        self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
+        self.R = self.P1**2 - self.D * self.P2
         self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
         self.THETA = self.Q - self.cth2 * self.TH
         P_D = (self.ra2 * self.E - self.aL) / self.D
@@ -83,7 +84,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r, self.th)
 
     def pUp (self, c):  # p += c * dp/dTau, where dp/dTau = -dH/dq (i.e. dV/dq, minus sign cancels with the one in the pseudo-Hamiltonian)
-        self.rP += c * self.h * (((4.0 * self.c[0] * self.r + 3.0 * self.c[1]) * self.r + 2.0 * self.c[2]) * self.r + self.c[3]) * 0.5
+        self.rP += c * self.h * (2.0 * self.r * self.E * self.P1 - self.P2 * (self.r - 1.0) - self.mu2 * self.r * self.D)
         self.thP += c * self.h * (self.cth * self.sth * self.TH + self.L2 * (self.cth / self.sth)**3)
 
 def main ():  # Need to be inside a function to return . . .

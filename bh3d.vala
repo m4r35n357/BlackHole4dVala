@@ -32,8 +32,8 @@ namespace Simulations {
         private double a2E;
         private double L2;
         private double aL;
+        private double L_aE2;
         private double a2xE2_mu2;
-        private double[] cr;
         // Variables
         private double h;
         private double sth;
@@ -42,6 +42,8 @@ namespace Simulations {
         private double ra2;
         private double D;
         private double S;
+        private double P1;
+        private double P2;
         private double R;
         private double TH;
         private double THETA;
@@ -76,9 +78,8 @@ namespace Simulations {
             this.a2E = a2 * E;
             this.L2 = L * L;
             this.aL = a * L;
-            var E2_mu2 = E * E - mu2;
-            this.a2xE2_mu2 = - a2 * E2_mu2;
-            this.cr = { E2_mu2, 2.0 * mu2, - a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };  // see Wilkins
+            this.L_aE2 = (L - a * E) * (L - a * E);
+            this.a2xE2_mu2 = - a2 * (E * E - mu2);
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
@@ -137,7 +138,9 @@ namespace Simulations {
             ra2 = r2 + a2;
             D = ra2 - 2.0 * r;
             S = r2 + a2 * cth2;
-            R = (((cr[0] * r + cr[1]) * r + cr[2]) * r + cr[3]) * r + cr[4];  // see Wilkins
+            P1 = ra2 * E - aL;  // MTW eq.33.33b, ignoring charge term
+            P2 = mu2 * r2 + L_aE2 + Q;
+            R = P1 * P1 - D * P2;  // MTW eq.33.33c
             TH = a2xE2_mu2 + L2 / sth2;
             THETA = Q - cth2 * TH;  // see Wilkins
             var P_D = (ra2 * E - aL) / D;
@@ -154,7 +157,7 @@ namespace Simulations {
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * h * (((4.0 * cr[0] * r + 3.0 * cr[1]) * r + 2.0 * cr[2]) * r + cr[3]) * 0.5;  // dR/dr
+            rP += c * h * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
             var cot = cth / sth;
             thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }

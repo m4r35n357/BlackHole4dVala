@@ -19,6 +19,13 @@ do
 	$app <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
 done
 
+jq . ic/Light1
+for app in ./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d
+do
+	echo ${C}$app${NC}
+	$app <ic/Light1 | ./plotBH.py `jq .M test` `jq .a test`
+done
+
 for app in ./nbody3d.py ./nbody3d
 do
 	echo ${C}$app${NC}
