@@ -2,8 +2,6 @@
 *.zip
 *~
 test
-potential
-errors
 kerr-image
 *.pdf
 *.dvi
@@ -18,7 +16,6 @@ RaytracingOutput
 *.s
 *.pyc
 .valencia
-data
 progress
 bh3d
 bh3d.rk4

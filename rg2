@@ -6,7 +6,7 @@ timeStep=${3:-0.01}
 
 # Generate the parameter file
 ic='test'
-pot='potential'
+pot='/tmp/potential'
 if ! [ -f $ic ]
 then
 	./genparam.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
@@ -19,8 +19,9 @@ jq . $ic
 C='\033[0;36m'
 NC='\033[0m' # No Color
 datafile='/tmp/data'
+errorfile='/tmp/errors'
 echo -n ${C}"Simulating with $program . . . "
-$program <$ic 2>errors >$datafile
+$program <$ic 2>$errorfile >$datafile
 echo "Done!"${NC}
 
 # Plot errors
