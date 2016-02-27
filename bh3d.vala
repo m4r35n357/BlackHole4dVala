@@ -38,6 +38,7 @@ namespace Simulations {
         private double h;
         private double sth;
         private double cth;
+        private double cot;
         private double sth2;
         private double ra2;
         private double D;
@@ -53,10 +54,10 @@ namespace Simulations {
         private double v4c;
         private double v4e;
         // Boyer-Lindquist Coordinates
-        private double t;
+        private double t = 0.0;
         private double r;
         private double th;
-        private double ph;
+        private double ph = 0.0;
         private double tDot;
         private double rP;
         private double thP;
@@ -78,7 +79,7 @@ namespace Simulations {
             this.a2E = a2 * E;
             this.L2 = L * L;
             this.aL = a * L;
-            this.L_aE2 = (L - a * E) * (L - a * E);
+            this.L_aE2 = (L - aE) * (L - aE);
             this.a2xE2_mu2 = - a2 * (E * E - mu2);
             this.starttime = starttime;
             this.endtime = starttime + duration;
@@ -87,7 +88,7 @@ namespace Simulations {
             // Coordinates
             this.r = r0;
             this.th = thetaMin;
-            refresh();
+            refresh(r, th);
             this.rP = sqrt(fabs(R));
             this.thP = sqrt(fabs(THETA));
         }
@@ -126,13 +127,14 @@ namespace Simulations {
             var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
             v4e = logError(error);
             v4Cum += error;
-            v4c = logError(v4Cum / (count + 1));
+            v4c = logError(v4Cum / count);
         }
 
-        private void refresh () {  // update intermediate variables
+        private void refresh (double r, double th) {  // update intermediate variables
             var r2 = r * r;
             sth = sin(th);
             cth = cos(th);
+            cot = cth / sth;
             sth2 = sth * sth;
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
@@ -153,12 +155,11 @@ namespace Simulations {
             r += d * h * rP;
             th += d * h * thP;
             ph += d * h * phDot;
-            refresh();
+            refresh(r, th);
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
             rP += c * h * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
-            var cot = cth / sth;
             thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
@@ -168,7 +169,7 @@ namespace Simulations {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
-            var count = 0;
+            var count = 1;
             while (mino <= endtime) {
                 errors(count);
                 if (mino >= starttime) {

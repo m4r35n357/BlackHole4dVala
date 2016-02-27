@@ -1,3 +1,17 @@
+/*
+Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 using GLib.Math;
 using Json;
 
@@ -24,7 +38,7 @@ namespace Simulations {
         private double D;
         private double S;
         private double R;
-        private double TH;
+        private double THETA;
         private double v4Cum;
         private double v4c;
         private double v4e;
@@ -41,7 +55,7 @@ namespace Simulations {
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
         private double sgnR = 1.0;
-        private double sgnTH = 1.0;
+        private double sgnTHETA = 1.0;
 
         private KerrGeodesicRk4 (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
                          double starttime, double duration, double timestep) {
@@ -101,11 +115,11 @@ namespace Simulations {
             S = r2 + a2 * cth2;
             var P = ra2 * E - aL;
             R = P * P - D * (Q + L_aE2 + mu2 * r2);  // see Wilkins
-            TH = Q - cth2 * (a2xE2_mu2 + L2 / sth2);  // see Wilkins
+            THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);  // see Wilkins
             var P_D = (ra2 * E - aL) / D;
             tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
             rP = sqrt(fabs(R));
-            thP = sqrt(fabs(TH));
+            thP = sqrt(fabs(THETA));
             phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
         }
 
@@ -122,17 +136,17 @@ namespace Simulations {
 
         private void rk4 () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
-            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
+            sgnTHETA = THETA > 0.0 ? sgnTHETA : -sgnTHETA;
             k(0);
-            refresh(r + 1.0 / 3.0 * sgnR * kr[0], th + 1.0 / 3.0 * sgnTH * kth[0]);
+            refresh(r + 1.0 / 3.0 * sgnR * kr[0], th + 1.0 / 3.0 * sgnTHETA * kth[0]);
             k(1);
-            refresh(r + 2.0 / 3.0 * sgnR * kr[1], th + 2.0 / 3.0 * sgnTH * kth[1]);
+            refresh(r + 2.0 / 3.0 * sgnR * kr[1], th + 2.0 / 3.0 * sgnTHETA * kth[1]);
             k(2);
-            refresh(r + sgnR * kr[2], th + sgnTH * kth[2]);
+            refresh(r + sgnR * kr[2], th + sgnTHETA * kth[2]);
             k(3);
             t += rk4update(kt);
             r += sgnR * rk4update(kr);
-            th += sgnTH * rk4update(kth);
+            th += sgnTHETA * rk4update(kth);
             ph += rk4update(kph);
             refresh(r, th);
         }
