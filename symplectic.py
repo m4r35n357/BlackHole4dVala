@@ -59,10 +59,10 @@ class Integrator(object):
 
 def logError (e):
     return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
-'''
+
 if __name__ == "__main__":
     main()
 else:
     print >> stderr, __name__ + " module loaded"
-'''
+
 

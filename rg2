@@ -19,9 +19,8 @@ jq . $ic
 C='\033[0;36m'
 NC='\033[0m' # No Color
 datafile='/tmp/data'
-errorfile='/tmp/errors'
 echo -n ${C}"Simulating with $program . . . "
-$program <$ic 2>$errorfile >$datafile
+$program <$ic >$datafile
 echo "Done!"${NC}
 
 # Plot errors

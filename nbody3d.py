@@ -88,7 +88,6 @@ class NBody(object):
         for i in self.pRange:
             data.append(str(self.bodies[i]))
         print >> stdout, "[" + ','.join(data) + "]"  # Log data
-        print >> stderr, '{"t":%.2f, "H":%.9e, "H0":%.9e, "ER":%.1f}' % (time, hNow, h0, dbValue)  # Log progress
 
 def icJson ():
     ic = loads(stdin.read())
