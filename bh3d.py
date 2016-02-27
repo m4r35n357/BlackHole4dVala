@@ -16,7 +16,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from sys import argv, stdin, stdout, stderr
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
-from array import array
 from symplectic import Integrator, logError
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2

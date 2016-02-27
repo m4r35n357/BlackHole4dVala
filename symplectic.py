@@ -15,26 +15,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 '''
 from sys import stderr
 from math import log10
-from array import array
 
 class Integrator(object):
     def __init__(self, model, order):
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.f2 = 1.0 / (2.0 - self.cbrt2)
-        self.coefficients = array('d', [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2])
+        self.coefficients = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
         if order == 'sb2':  # Second order base
             self.base = self.base2;
-            self.w = array('d', [1.0])
+            self.w = [1.0]
         elif order == 'sc4':  # Fourth order, composed from Second order
             self.base = self.base2;
-            self.w = array('d', [self.coefficients[1], self.coefficients[3], self.coefficients[1]])
+            self.w = [self.coefficients[1], self.coefficients[3], self.coefficients[1]]
         elif order == 'sb4':  # Fourth order base
             self.base = self.base4;
-            self.w = array('d', [1.0])
+            self.w = [1.0]
         elif order == 'sc6':  # Sixth order, composed from Fourth order
             self.base = self.base4;
             fthrt2 = 2.0**(1.0 / 5.0)
-            self.w = array('d', [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)])
+            self.w = [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)]
         else:  # Wrong value for integrator order
             raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
         self.wRange = range(len(self.w))
