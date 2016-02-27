@@ -65,8 +65,8 @@ namespace Simulations {
             p.load_from_data(input.str);
             obj = p.get_root().get_object();
         } catch (Error e) {
-            stderr.printf("Unable to parse the data file: %s\n", e.message);
-            return new Json.Object();
+            stderr.printf("Unable to parse the input data: %s\n", e.message);
+            return_if_reached();
         }
         return obj;
     }
