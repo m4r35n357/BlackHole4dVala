@@ -10,6 +10,7 @@ kerr-image
 *.aux
 *.log
 plot.py
+*.mp4
 RaytracingOutput
 *.c
 *.o
@@ -20,8 +21,8 @@ RaytracingOutput
 data
 progress
 bh3d
+bh3d.rk4
 newton
 nbody3d
 test.vala
 tmp/
-
