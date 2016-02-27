@@ -3,37 +3,44 @@
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 >test 2>potential
-jq . test
-for app in ./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d
+bh3ds='./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d'
+nbodys='./nbody3d.py ./nbody3d'
+
+ic='initial-conditions'
+
+int='./finterp.py'
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>potential
+jq . $ic
+for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+	$app <$ic | $int mino 0.02 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
-./genparam.py 12.0 0.0 1.0 1.0 >test 2>potential
-jq . test
-for app in ./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d
+./genparam.py 12.0 0.0 1.0 1.0 >$ic 2>potential
+jq . $ic
+for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+	$app <$ic | $int mino 0.02 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
 jq . ic/Light1
-for app in ./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d
+for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <ic/Light1 | ./plotBH.py `jq .M test` `jq .a test`
+	$app <ic/Light1 | $int t 0.5 | ./plotBH.py `jq .M ic/Light1` `jq .a ic/Light1`
 done
 
-for app in ./nbody3d.py ./nbody3d
+for app in $nbodys
 do
 	echo ${C}$app${NC}
 	$app <ic/SolarSystem 2>progress | ./plotNBody.py
 done
 
-./genparam.py 12.0 0.5 1.0 1.0 >test 2>potential
-jq . test
+./genparam.py 12.0 0.5 1.0 1.0 >$ic 2>potential
+jq . $ic
 echo ${C}"./newton"${NC}
-./newton <test | ./finterp.py mino 0.01 | ./plotBH.py `jq .M test` `jq .a test`
+./newton <$ic | $int t 0.1 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
