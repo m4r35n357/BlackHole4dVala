@@ -16,7 +16,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from sys import argv, stdin, stdout, stderr
 from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
-from symplectic import logError
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
     def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
@@ -92,6 +91,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.th += self.sgnTHETA * rk4update(self.kth)
         self.ph += rk4update(self.kph)
         self.refresh(self.r, self.th)
+
+def logError (e):
+    return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
