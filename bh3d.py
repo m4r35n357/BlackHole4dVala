@@ -58,7 +58,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
-        r2 = r * r
+        r2 = r**2
         self.sth = sin(th)
         self.cth = cos(th)
         self.sth2 = self.sth**2
@@ -67,7 +67,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.D = self.ra2 - 2.0 * r
         self.S = r2 + self.a2 * self.cth2
         self.P1 = self.ra2 * self.E - self.aL
-        self.P2 = self.Q + self.L_aE2 + self.mu2 * self.r**2
+        self.P2 = self.Q + self.L_aE2 + self.mu2 * r2
         self.R = self.P1**2 - self.D * self.P2
         self.TH = self.a2xE2_mu2 + self.L2 / self.sth2
         self.THETA = self.Q - self.cth2 * self.TH

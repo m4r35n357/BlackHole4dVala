@@ -61,7 +61,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ra2 = r2 + self.a2
         self.D = self.ra2 - 2.0 * r
         self.S = r2 + self.a2 * self.cth2
-        self.R = (self.ra2 * self.E - self.aL)**2 - self.D * (self.Q + self.L_aE2 + self.mu2 * self.r**2)
+        self.R = (self.ra2 * self.E - self.aL)**2 - self.D * (self.Q + self.L_aE2 + self.mu2 * r2)
         self.THETA = self.Q - self.cth2 * (self.a2xE2_mu2 + self.L2 / self.sth2)
         P_D = (self.ra2 * self.E - self.aL) / self.D
         self.tP = self.ra2 * P_D + self.aL - self.a2E * self.sth2
