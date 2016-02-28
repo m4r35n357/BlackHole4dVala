@@ -39,8 +39,6 @@ namespace Simulations {
         private double S;
         private double R;
         private double THETA;
-        private double v4Cum;
-        private double v4c;
         private double v4e;
         private double t = 0.0;
         private double r;
@@ -93,13 +91,11 @@ namespace Simulations {
                                     ic.get_double_member("step"));
         }
 
-        private void errors (int count) {
+        private void errors () {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
-            var error = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
-            v4e = logError(error);
-            v4Cum += error;
-            v4c = logError(v4Cum / count);
+            var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
+            v4e = 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
         }
 
         private void refresh (double r, double th) {  // update intermediate variables, see Wilkins
@@ -126,8 +122,8 @@ namespace Simulations {
             kph[i] = h * phDot;
         }
 
-        private double rk4update (double[] k) {
-            return (k[0] + 3.0 * (k[1] + k[2]) + k[3]) / 8.0;
+        private double rk4update (double[] kx) {
+            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
         }
 
         private void rk4 () {
@@ -149,20 +145,18 @@ namespace Simulations {
 
         public void solve () {
             var tau = 0.0;
-            var count = 1;
             while (tau <= endtime) {
-                errors(count);
+                errors();
                 if (tau >= starttime) {
                     output(tau);
                 }
                 rk4();
                 tau += h;
-                count++;
             }
         }
 
         public void output (double tau) {
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, v4e, v4c, -180.0, -180.0);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, v4e, -180.0, -180.0, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rDot\":%.9e, \"thDot\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
         }
@@ -187,10 +181,6 @@ namespace Simulations {
             return_if_reached();
         }
         return o;
-    }
-
-    private static double logError (double e) {
-        return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
     }
 
     public static int main (string[] args) {

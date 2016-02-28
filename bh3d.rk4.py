@@ -36,7 +36,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.kph = [0.0, 0.0, 0.0, 0.0]
         self.sgnR = self.sgnTHETA = 1.0
         self.t = self.ph = self.v4cum = 0.0
-        self.count = 0
         self.a2 = self.a**2
         self.aE = self.a * self.E
         self.a2E = self.a2 * self.E
@@ -47,11 +46,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r, self.th)
 
     def errors (self):  # Error analysis
-        error = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
-                   + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
-        self.v4cum += error
-        self.v4c = logError(self.v4cum / self.count)
-        self.v4e = logError(error)
+        e = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
+               + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
+        self.v4e = 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
         r2 = r**2
@@ -74,8 +71,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.kr[i] = self.h * self.rP
             self.kth[i] = self.h * self.thP
             self.kph[i] = self.h * self.phP
-        def rk4update (k):
-            return (k[0] + 3.0 * (k[1] + k[2]) + k[3]) / 8.0
+        def rk4update (kx):
+            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
         self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
         k(0)
@@ -91,18 +88,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ph += rk4update(self.kph)
         self.refresh(self.r, self.th)
 
-def logError (e):
-    return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
-
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['integrator'])
     tau = 0.0
     while not abs(tau) > bl.endtime:
-        bl.count += 1
         bl.errors()
         if abs(tau) > bl.starttime:
-            print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (0.0, tau, bl.v4e, bl.v4c, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP, bl.rP, bl.thP, bl.phP)  # Log data
+            print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (0.0, tau, bl.v4e, -180.0, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP, bl.rP, bl.thP, bl.phP)  # Log data
         bl.rk4()
         tau += bl.h
 
