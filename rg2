@@ -5,7 +5,7 @@ timeCoord=${2:-'mino'}
 timeStep=${3:-0.01}
 
 # Generate the parameter file
-ic='test'
+ic='initial-conditions'
 pot='/tmp/potential'
 if ! [ -f $ic ]
 then
