@@ -47,8 +47,8 @@ namespace Simulations {
         private double th;
         private double ph = 0.0;
         private double tDot;
-        private double rP;
-        private double thP;
+        private double rDot;
+        private double thDot;
         private double phDot;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
@@ -93,20 +93,16 @@ namespace Simulations {
                                     ic.get_double_member("step"));
         }
 
-        private double v4Error (double tDot, double rDot, double thDot, double phDot) {
+        private void errors (int count) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
-            return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
-        }
-
-        private void errors (int count) {
-            var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
+            var error = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
             v4e = logError(error);
             v4Cum += error;
             v4c = logError(v4Cum / count);
         }
 
-        private void refresh (double r, double th) {  // update intermediate variables
+        private void refresh (double r, double th) {  // update intermediate variables, see Wilkins
             var r2 = r * r;
             sth2 = sin(th) * sin(th);
             var cth2 = 1.0 - sth2;
@@ -114,19 +110,19 @@ namespace Simulations {
             D = ra2 - 2.0 * r;
             S = r2 + a2 * cth2;
             var P = ra2 * E - aL;
-            R = P * P - D * (Q + L_aE2 + mu2 * r2);  // see Wilkins
-            THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);  // see Wilkins
+            R = P * P - D * (Q + L_aE2 + mu2 * r2);
+            THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
             var P_D = (ra2 * E - aL) / D;
-            tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
-            rP = sqrt(fabs(R));
-            thP = sqrt(fabs(THETA));
-            phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
+            tDot = (ra2 * P_D + aL - a2E * sth2) / S;
+            rDot = sqrt(fabs(R)) / S;
+            thDot = sqrt(fabs(THETA)) / S;
+            phDot = (a * P_D - aE + L / sth2) / S;
         }
 
         private void k (int i) {
             kt[i] = h * tDot;
-            kr[i] = h * rP;
-            kth[i] = h * thP;
+            kr[i] = h * rDot;
+            kth[i] = h * thDot;
             kph[i] = h * phDot;
         }
 
@@ -152,28 +148,23 @@ namespace Simulations {
         }
 
         public void solve () {
-            var mino = 0.0;
             var tau = 0.0;
             var count = 1;
-            while (mino <= endtime) {
+            while (tau <= endtime) {
                 errors(count);
-                if (mino >= starttime) {
-                    output(mino, tau);
+                if (tau >= starttime) {
+                    output(tau);
                 }
                 rk4();
-                mino += h;
-                tau += h * S;
+                tau += h;
                 count++;
             }
         }
 
-        public void output (double mino, double tau) {
-            stdout.printf("{");
-            stdout.printf("\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                      // time variables
-            stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, -180.0, -180.0);             // errors
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);                              // coordinates
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
-            stdout.printf("}\n");
+        public void output (double tau) {
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, v4e, v4c, -180.0, -180.0);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
+            stdout.printf("\"tP\":%.9e, \"rDot\":%.9e, \"thDot\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
         }
     }
 
@@ -186,16 +177,16 @@ namespace Simulations {
                 input.append(chunk);
             }
         }
-        unowned Json.Object obj;
+        unowned Json.Object o;
         var p = new Parser();
         try {
             p.load_from_data(input.str);
-            obj = p.get_root().get_object();
+            o = p.get_root().get_object();
         } catch (Error e) {
             stderr.printf("Unable to parse the data file: %s\n", e.message);
-            return new Json.Object();
+            return_if_reached();
         }
-        return obj;
+        return o;
     }
 
     private static double logError (double e) {

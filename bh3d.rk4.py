@@ -46,13 +46,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
         self.refresh(self.r, self.th)
 
-    def errors (self, R, THETA, tP, rP, thP, phP):  # Error analysis
-        def v4Error (tP, rP, thP, phP):  # norm squared, xDot means dx/dTau !!!
-            return fabs(self.mu2 + self.sth2 / self.S * (self.a * tP - self.ra2 * phP)**2 + self.S / self.D * rP**2 + self.S * thP**2 - self.D / self.S * (tP - self.a * self.sth2 * phP)**2)
-        error = v4Error(tP / self.S, rP / self.S, thP / self.S, phP / self.S)
+    def errors (self):  # Error analysis
+        error = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
+                   + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
         self.v4cum += error
         self.v4c = logError(self.v4cum / self.count)
-        self.v4e = logError(error)  # d/dTau = 1/sigma * d/dLambda !!!
+        self.v4e = logError(error)
 
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
         r2 = r**2
@@ -64,10 +63,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.R = (self.ra2 * self.E - self.aL)**2 - self.D * (self.Q + self.L_aE2 + self.mu2 * r2)
         self.THETA = self.Q - self.cth2 * (self.a2xE2_mu2 + self.L2 / self.sth2)
         P_D = (self.ra2 * self.E - self.aL) / self.D
-        self.tP = self.ra2 * P_D + self.aL - self.a2E * self.sth2
-        self.rP = sqrt(fabs(self.R))
-        self.thP = sqrt(fabs(self.THETA))
-        self.phP = self.a * P_D - self.aE + self.L / self.sth2
+        self.tP = (self.ra2 * P_D + self.aL - self.a2E * self.sth2) / self.S
+        self.rP = sqrt(fabs(self.R)) / self.S
+        self.thP = sqrt(fabs(self.THETA)) / self.S
+        self.phP = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
 
     def rk4 (self):
         def k (i):
@@ -98,15 +97,14 @@ def logError (e):
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['integrator'])
-    mino = tau = 0.0
-    while not abs(mino) > bl.endtime:
+    tau = 0.0
+    while not abs(tau) > bl.endtime:
         bl.count += 1
-        bl.errors(bl.R, bl.THETA, bl.tP, bl.rP, bl.thP, bl.phP)
-        if abs(mino) > bl.starttime:
-            print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (mino, tau, bl.v4e, bl.v4c, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP / bl.S, bl.rP / bl.S, bl.thP / bl.S, bl.phP / bl.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+        bl.errors()
+        if abs(tau) > bl.starttime:
+            print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (0.0, tau, bl.v4e, bl.v4c, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP, bl.rP, bl.thP, bl.phP)  # Log data
         bl.rk4()
-        mino += bl.h
-        tau += bl.h * bl.S  # dTau = sigma * dLambda !!!
+        tau += bl.h
 
 if __name__ == "__main__":
     main()
