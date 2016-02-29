@@ -1,10 +1,10 @@
 #!/bin/sh
 
+bh3ds=${1:-'./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d'}
+nbodys=${2:-'./nbody3d.py ./nbody3d'}
+
 C='\033[0;36m'
 NC='\033[0m' # No Color
-
-bh3ds='./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d'
-nbodys='./nbody3d.py ./nbody3d'
 
 ic='initial-conditions'
 
@@ -15,7 +15,7 @@ jq . $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int mino 0.02 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
 ./genparam.py 12.0 0.0 1.0 1.0 >$ic 2>potential
@@ -23,7 +23,7 @@ jq . $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int mino 0.02 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+	$app <$ic | $int tau 1.0 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
 jq . ic/Light1
