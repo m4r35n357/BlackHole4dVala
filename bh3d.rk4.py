@@ -71,7 +71,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
             self.kr[i] = self.h * self.rP
             self.kth[i] = self.h * self.thP
             self.kph[i] = self.h * self.phP
-        def rk4update (kx):
+        def update (kx):
             return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
         self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
@@ -82,10 +82,10 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         k(2)
         self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
         k(3)
-        self.t += rk4update(self.kt)
-        self.r += self.sgnR * rk4update(self.kr)
-        self.th += self.sgnTHETA * rk4update(self.kth)
-        self.ph += rk4update(self.kph)
+        self.t += update(self.kt)
+        self.r += update(self.kr) * self.sgnR
+        self.th += update(self.kth) * self.sgnTHETA
+        self.ph += update(self.kph)
         self.refresh(self.r, self.th)
 
 def main ():  # Need to be inside a function to return . . .

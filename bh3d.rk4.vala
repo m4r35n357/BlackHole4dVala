@@ -77,8 +77,7 @@ namespace Simulations {
             refresh(r, th);
         }
 
-        public static KerrGeodesicRk4 fromJson () {
-            var ic = getJson();
+        public static KerrGeodesicRk4 fromJson (Json.Object ic) {
             return new KerrGeodesicRk4(ic.get_double_member("a"),
                                     ic.get_double_member("mu"),
                                     ic.get_double_member("E"),
@@ -105,8 +104,7 @@ namespace Simulations {
             ra2 = r2 + a2;
             D = ra2 - 2.0 * r;
             S = r2 + a2 * cth2;
-            var P = ra2 * E - aL;
-            R = P * P - D * (Q + L_aE2 + mu2 * r2);
+            R = (ra2 * E - aL) * (ra2 * E - aL) - D * (Q + L_aE2 + mu2 * r2);
             THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
             var P_D = (ra2 * E - aL) / D;
             tDot = (ra2 * P_D + aL - a2E * sth2) / S;
@@ -122,7 +120,7 @@ namespace Simulations {
             kph[i] = h * phDot;
         }
 
-        private double rk4update (double[] kx) {
+        private double update (double[] kx) {
             return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
         }
 
@@ -136,10 +134,10 @@ namespace Simulations {
             k(2);
             refresh(r + sgnR * kr[2], th + sgnTHETA * kth[2]);
             k(3);
-            t += rk4update(kt);
-            r += sgnR * rk4update(kr);
-            th += sgnTHETA * rk4update(kth);
-            ph += rk4update(kph);
+            t += update(kt);
+            r += update(kr) * sgnR;
+            th += update(kth) * sgnTHETA;
+            ph += update(kph);
             refresh(r, th);
         }
 
@@ -184,7 +182,7 @@ namespace Simulations {
     }
 
     public static int main (string[] args) {
-        KerrGeodesicRk4.fromJson().solve();
+        KerrGeodesicRk4.fromJson(getJson()).solve();
         return 0;
     }
 }
