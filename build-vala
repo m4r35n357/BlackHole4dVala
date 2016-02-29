@@ -17,7 +17,7 @@ for executable in $executables
 do
 	valafiles="$valafiles ${executable}.vala"
 done
-$valac -v -X -lm --pkg json-glib-1.0 $valafiles
+$valac -v -X -O$opt -X -lm --pkg json-glib-1.0 $valafiles
 
 # hard link executables
 for executable in $executables
@@ -26,7 +26,7 @@ do
 done
 rm -f $outfile
 
-$valac -v -X -lm --pkg json-glib-1.0 bh3d.rk4.vala
+$valac -v -X -O$opt -X -lm --pkg json-glib-1.0 bh3d.rk4.vala
 
 # admire our work
 ls -lAh $executables bh3d.rk4
