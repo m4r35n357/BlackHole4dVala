@@ -149,7 +149,7 @@ namespace Simulations {
         public void output (double tau) {
             stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, v4e, -180.0, -180.0, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rDot\":%.9e, \"thDot\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
         }
     }
 
