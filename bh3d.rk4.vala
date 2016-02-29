@@ -25,6 +25,7 @@ namespace Simulations {
         private double Q;
         private double starttime;
         private double endtime;
+        private double h;
         private double a2;
         private double aE;
         private double a2E;
@@ -32,7 +33,6 @@ namespace Simulations {
         private double aL;
         private double L_aE2;
         private double a2xE2_mu2;
-        private double h;
         private double sth2;
         private double ra2;
         private double D;
@@ -55,13 +55,12 @@ namespace Simulations {
         private double sgnR = 1.0;
         private double sgnTHETA = 1.0;
 
-        private KerrGeodesicRk4 (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep) {
-            this.a = spin;
-            this.mu2 = pMass2;
-            this.E = energy;
-            this.L = momentum;
-            this.Q = carter;
+        private KerrGeodesicRk4 (double a, double mu2, double E, double L, double Q, double r0, double thetaMin, double start, double duration, double ts) {
+            this.a = a;
+            this.mu2 = mu2;
+            this.E = E;
+            this.L = L;
+            this.Q = Q;
             this.a2 = a * a;
             this.aE = a * E;
             this.a2E = a2 * E;
@@ -69,9 +68,9 @@ namespace Simulations {
             this.aL = a * L;
             this.L_aE2 = (L - aE) * (L - aE);
             this.a2xE2_mu2 = - a2 * (E * E - mu2);
-            this.starttime = starttime;
+            this.starttime = start;
             this.endtime = starttime + duration;
-            this.h = timestep;
+            this.h = ts;
             this.r = r0;
             this.th = thetaMin;
             refresh(r, th);
@@ -79,15 +78,9 @@ namespace Simulations {
 
         public static KerrGeodesicRk4 fromJson (Json.Object ic) {
             return new KerrGeodesicRk4(ic.get_double_member("a"),
-                                    ic.get_double_member("mu"),
-                                    ic.get_double_member("E"),
-                                    ic.get_double_member("Lz"),
-                                    ic.get_double_member("C"),
-                                    ic.get_double_member("r"),
-                                    ic.get_double_member("theta"),
-                                    ic.get_double_member("start"),
-                                    ic.get_double_member("duration"),
-                                    ic.get_double_member("step"));
+                                       ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
+                                       ic.get_double_member("r"), ic.get_double_member("theta"),
+                                       ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"));
         }
 
         private void errors () {
