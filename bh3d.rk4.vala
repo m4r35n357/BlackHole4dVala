@@ -15,17 +15,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 using Json;
 
-namespace Simulations {
+namespace Sim {
 
-    public class KerrGeodesicRk4 : GLib.Object {
+    public class BL : GLib.Object {
         private double a;
         private double mu2;
         private double E;
         private double L;
         private double Q;
-        private double starttime;
-        private double endtime;
-        private double h;
+        private double start;
+        private double end;
+        private double ts;
         private double a2;
         private double aE;
         private double a2E;
@@ -39,7 +39,6 @@ namespace Simulations {
         private double S;
         private double R;
         private double THETA;
-        private double v4e;
         private double t = 0.0;
         private double r;
         private double th;
@@ -53,9 +52,9 @@ namespace Simulations {
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
         private double sgnR = 1.0;
-        private double sgnTHETA = 1.0;
+        private double sgnTH = 1.0;
 
-        private KerrGeodesicRk4 (double a, double mu2, double E, double L, double Q, double r0, double thetaMin, double start, double duration, double ts) {
+        private BL (double a, double mu2, double E, double L, double Q, double r0, double thetaMin, double tau0, double deltaTau, double tauStep) {
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
@@ -68,34 +67,20 @@ namespace Simulations {
             this.aL = a * L;
             this.L_aE2 = (L - aE) * (L - aE);
             this.a2xE2_mu2 = - a2 * (E * E - mu2);
-            this.starttime = start;
-            this.endtime = starttime + duration;
-            this.h = ts;
+            this.start = tau0;
+            this.end = tau0 + deltaTau;
+            this.ts = tauStep;
             this.r = r0;
             this.th = thetaMin;
             refresh(r, th);
         }
 
-        public static KerrGeodesicRk4 fromJson (Json.Object ic) {
-            return new KerrGeodesicRk4(ic.get_double_member("a"),
-                                       ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
-                                       ic.get_double_member("r"), ic.get_double_member("theta"),
-                                       ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"));
-        }
-
-        private void errors () {
-            var tmp1 = a * tDot - ra2 * phDot;
-            var tmp2 = tDot - a * sth2 * phDot;
-            var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
-            v4e = 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-        }
-
-        private void refresh (double r, double th) {  // update intermediate variables, see Wilkins
-            var r2 = r * r;
-            sth2 = sin(th) * sin(th);
+        private void refresh (double radius, double theta) {  // update intermediate variables, see Wilkins
+            var r2 = radius * radius;
+            sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
-            D = ra2 - 2.0 * r;
+            D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
             R = (ra2 * E - aL) * (ra2 * E - aL) - D * (Q + L_aE2 + mu2 * r2);
             THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
@@ -106,76 +91,76 @@ namespace Simulations {
             phDot = (a * P_D - aE + L / sth2) / S;
         }
 
-        private void k (int i) {
-            kt[i] = h * tDot;
-            kr[i] = h * rDot;
-            kth[i] = h * thDot;
-            kph[i] = h * phDot;
+        private void setK (int stage) {
+            kt[stage] = ts * tDot;
+            kr[stage] = ts * rDot;
+            kth[stage] = ts * thDot;
+            kph[stage] = ts * phDot;
         }
 
-        private double update (double[] kx) {
+        private double sumK (double[] kx) {
             return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
         }
 
-        private void rk4 () {
+        private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
-            sgnTHETA = THETA > 0.0 ? sgnTHETA : -sgnTHETA;
-            k(0);
-            refresh(r + 1.0 / 3.0 * sgnR * kr[0], th + 1.0 / 3.0 * sgnTHETA * kth[0]);
-            k(1);
-            refresh(r + 2.0 / 3.0 * sgnR * kr[1], th + 2.0 / 3.0 * sgnTHETA * kth[1]);
-            k(2);
-            refresh(r + sgnR * kr[2], th + sgnTHETA * kth[2]);
-            k(3);
-            t += update(kt);
-            r += update(kr) * sgnR;
-            th += update(kth) * sgnTHETA;
-            ph += update(kph);
+            sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
+            setK(0);
+            refresh(r + 1.0 / 3.0 * sgnR * kr[0], th + 1.0 / 3.0 * sgnTH * kth[0]);
+            setK(1);
+            refresh(r + 2.0 / 3.0 * sgnR * kr[1], th + 2.0 / 3.0 * sgnTH * kth[1]);
+            setK(2);
+            refresh(r + sgnR * kr[2], th + sgnTH * kth[2]);
+            setK(3);
+            t += sumK(kt);
+            r += sumK(kr) * sgnR;
+            th += sumK(kth) * sgnTH;
+            ph += sumK(kph);
             refresh(r, th);
         }
 
         public void solve () {
             var tau = 0.0;
-            while (tau <= endtime) {
-                errors();
-                if (tau >= starttime) {
-                    output(tau);
+            while (tau <= end) {
+                var tmp1 = a * tDot - ra2 * phDot;
+                var tmp2 = tDot - a * sth2 * phDot;
+                var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
+                if (tau >= start) {
+                    stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, ", tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0);
+                    stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
+                    stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
                 }
-                rk4();
-                tau += h;
+                rk4Step();
+                tau += ts;
             }
         }
 
-        public void output (double tau) {
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, v4e, -180.0, -180.0, -180.0);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
-        }
-    }
-
-    private static Json.Object getJson () {
-        var input = new StringBuilder();
-        var buffer = new char[1024];
-        while (!stdin.eof()) {
-            var chunk = stdin.gets(buffer);
-            if (chunk != null) {
-                input.append(chunk);
+        public static BL fromJson () {
+            var input = new StringBuilder();
+            var buffer = new char[1024];
+            while (!stdin.eof()) {
+                var chunk = stdin.gets(buffer);
+                if (chunk != null) {
+                    input.append(chunk);
+                }
             }
+            unowned Json.Object o;
+            var p = new Parser();
+            try {
+                p.load_from_data(input.str);
+                o = p.get_root().get_object();
+            } catch (Error e) {
+                stderr.printf("Unable to parse the input data: %s\n", e.message);
+                return_if_reached();
+            }
+            return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("Lz"), o.get_double_member("C"),
+                          o.get_double_member("r"), o.get_double_member("theta"),
+                          o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"));
         }
-        unowned Json.Object o;
-        var p = new Parser();
-        try {
-            p.load_from_data(input.str);
-            o = p.get_root().get_object();
-        } catch (Error e) {
-            stderr.printf("Unable to parse the data file: %s\n", e.message);
-            return_if_reached();
-        }
-        return o;
     }
 
     public static int main (string[] args) {
-        KerrGeodesicRk4.fromJson(getJson()).solve();
+        BL.fromJson().solve();
         return 0;
     }
 }
