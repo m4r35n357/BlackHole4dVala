@@ -46,11 +46,6 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
         self.refresh(self.r, self.th)
 
-    def errors (self):  # Error analysis
-        e = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
-               + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
-        self.v4e = 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
-
     def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
         r2 = r**2
         self.sth2 = sin(th)**2
@@ -89,18 +84,23 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.ph += update(self.kph)
         self.refresh(self.r, self.th)
 
+    def output (self, tau):
+        e = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
+               + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.tP, self.rP, self.thP, self.phP)  # Log data
+
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
     tau = 0.0
-    while not abs(tau) > bl.endtime:
-        bl.errors()
-        if abs(tau) > bl.starttime and count % bl.tr == 0:
-            print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (0.0, tau, bl.v4e, -180.0, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP, bl.rP, bl.thP, bl.phP)  # Log data
+    while abs(tau) <= bl.endtime:
+        if abs(tau) >= bl.starttime and count % bl.tr == 0:
+            bl.output(tau)
         bl.rk4()
         count += 1
         tau += bl.h
+    bl.output(tau)
 
 if __name__ == "__main__":
     main()

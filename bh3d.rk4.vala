@@ -121,22 +121,27 @@ namespace Sim {
             refresh(r, th);
         }
 
+        private void output (double tau) {
+            var tmp1 = a * tDot - ra2 * phDot;
+            var tmp2 = tDot - a * sth2 * phDot;
+            var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, ", tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
+        }
+
         public void solve () {
             int64 count = 0;
             var tau = 0.0;
             while (tau <= end) {
-                var tmp1 = a * tDot - ra2 * phDot;
-                var tmp2 = tDot - a * sth2 * phDot;
-                var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
                 if ((tau >= start) && (count % tr == 0)) {
-                    stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, ", tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0);
-                    stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-                    stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
+                    output(tau);
                 }
                 rk4Step();
                 count += 1;
                 tau += ts;
             }
+            output(tau);
         }
 
         public static BL fromJson () {
