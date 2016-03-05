@@ -31,7 +31,7 @@ class InitialConditions(object):
         self.factorL = factorL
         self.integrator = 'sb2'
         self.starttime = 0.0
-        self.duration = 10000.0
+        self.duration = 5000.0
         self.timestep = 0.01
         self.plotratio = 50
         self.ic = np.array([1.0, copysign(5.0, a), 0.0]) if a >= 0.0 else np.array([1.0, - copysign(5.0, a), 0.0])
