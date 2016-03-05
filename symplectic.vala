@@ -25,8 +25,6 @@ namespace Simulations {
         private int wRange;
         protected IModel model;
         protected double[] baseMethodCoefficients;
-        protected static double CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
-        protected static double FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
 
         /**
          * Protected constructor, use the static factory
@@ -45,10 +43,12 @@ namespace Simulations {
                 case "sb2":  // second order, basic
                     return new Base2(model, { 1.0 });
                 case "sc4":  // fourth order, composed
+                    var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
                     return new Base2(model, { 1.0 / (2.0 - CUBE_ROOT_2), - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2), 1.0 / (2.0 - CUBE_ROOT_2) });
                 case "sb4":  // fourth order, basic
                     return new Base4(model, { 1.0 });
                 case "sc6":  // sixth order, composed
+                    var FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
                     return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2), - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2), 1.0 / (2.0 - FIFTH_ROOT_2) });
             }
             return_if_reached();
@@ -102,6 +102,7 @@ namespace Simulations {
          */
         protected Base4 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
+            var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
             this.baseMethodCoefficients = { 0.5 / (2.0 - CUBE_ROOT_2), 1.0 / (2.0 - CUBE_ROOT_2), 0.5 * (1.0 - CUBE_ROOT_2) / (2.0 - CUBE_ROOT_2), - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2) };
         }
 
