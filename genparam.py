@@ -31,8 +31,9 @@ class InitialConditions(object):
         self.factorL = factorL
         self.integrator = 'sb2'
         self.starttime = 0.0
-        self.duration = 1000.0
+        self.duration = 10000.0
         self.timestep = 0.01
+        self.plotratio = 10
         self.ic = np.array([1.0, copysign(5.0, a), 0.0]) if a >= 0.0 else np.array([1.0, - copysign(5.0, a), 0.0])
         self.ic = np.array([1.0, 0.0, 5.0]) if thetaMin < 0.01 else self.ic
 
@@ -91,6 +92,7 @@ def main ():
     print >> stdout, "  \"start\" : " + str(ic.starttime) + ","
     print >> stdout, "  \"duration\" : " + str(ic.duration) + ","
     print >> stdout, "  \"step\" : " + str(ic.timestep) + ","
+    print >> stdout, "  \"plotratio\" : " + str(ic.plotratio) + ","
     print >> stdout, "  \"integrator\" : \"" + ic.integrator + "\","
     print >> stdout, "  \"error\" : " + str(ic.fun) + ","
     print >> stdout, "  \"success\" : \"" + str(ic.success) + "\","

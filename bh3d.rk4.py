@@ -18,7 +18,7 @@ from math import fabs, log10, sqrt, sin, cos, pi
 from json import loads
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
-    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, order):
+    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
         self.a = spin
         self.mu2 = pMass2
         self.E = energy
@@ -30,6 +30,7 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.duration = abs(duration)
         self.endtime = self.starttime + self.duration
         self.h = timestep
+        self.tr = tratio
         self.kt = [0.0, 0.0, 0.0, 0.0]
         self.kr = [0.0, 0.0, 0.0, 0.0]
         self.kth = [0.0, 0.0, 0.0, 0.0]
@@ -90,13 +91,15 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
 
 def main ():  # Need to be inside a function to return . . .
     ic = loads(stdin.read())
-    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['integrator'])
+    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
+    count = 0
     tau = 0.0
     while not abs(tau) > bl.endtime:
         bl.errors()
-        if abs(tau) > bl.starttime:
+        if abs(tau) > bl.starttime and count % bl.tr == 0:
             print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (0.0, tau, bl.v4e, -180.0, -180.0, -180.0, bl.t, bl.r, bl.th, bl.ph, bl.tP, bl.rP, bl.thP, bl.phP)  # Log data
         bl.rk4()
+        count += 1
         tau += bl.h
 
 if __name__ == "__main__":

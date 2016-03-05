@@ -26,6 +26,7 @@ namespace Sim {
         private double start;
         private double end;
         private double ts;
+        private int64 tr;
         private double a2;
         private double aE;
         private double a2E;
@@ -54,7 +55,7 @@ namespace Sim {
         private double sgnR = 1.0;
         private double sgnTH = 1.0;
 
-        private BL (double a, double mu2, double E, double L, double Q, double r0, double thetaMin, double tau0, double deltaTau, double tauStep) {
+        private BL (double a, double mu2, double E, double L, double Q, double r0, double thMin, double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
@@ -69,9 +70,10 @@ namespace Sim {
             this.a2xE2_mu2 = - a2 * (E * E - mu2);
             this.start = tau0;
             this.end = tau0 + deltaTau;
-            this.ts = tauStep;
+            this.ts = tStep;
+            this.tr = tRatio;
             this.r = r0;
-            this.th = thetaMin;
+            this.th = thMin;
             refresh(r, th);
         }
 
@@ -86,8 +88,8 @@ namespace Sim {
             THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
             var P_D = (ra2 * E - aL) / D;
             tDot = (ra2 * P_D + aL - a2E * sth2) / S;
-            rDot = sqrt(fabs(R)) / S;
-            thDot = sqrt(fabs(THETA)) / S;
+            rDot = sqrt(R > 0.0 ? R : -R) / S;
+            thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
             phDot = (a * P_D - aE + L / sth2) / S;
         }
 
@@ -120,17 +122,19 @@ namespace Sim {
         }
 
         public void solve () {
+            int64 count = 0;
             var tau = 0.0;
             while (tau <= end) {
                 var tmp1 = a * tDot - ra2 * phDot;
                 var tmp2 = tDot - a * sth2 * phDot;
                 var e = fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
-                if (tau >= start) {
+                if ((tau >= start) && (count % tr == 0)) {
                     stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, ", tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0);
                     stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
                     stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
                 }
                 rk4Step();
+                count += 1;
                 tau += ts;
             }
         }
@@ -155,7 +159,7 @@ namespace Sim {
             }
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("Lz"), o.get_double_member("C"),
                           o.get_double_member("r"), o.get_double_member("theta"),
-                          o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"));
+                          o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
     }
 
