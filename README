@@ -53,14 +53,18 @@ mplayer raytrace.mp4 -fps 10
 ./rg2
 
 
-8.	Some pipelines . . .
+8.	Some example pipelines . . .
 
 ./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
 
 ./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./raytrace.py 1000 0 | ./raytrace
 
 ic=initial-conditions
-jq . $ic; ./bh3d.rk4 <$ic | tee /tmp/data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+data=/tmp/data
+pot=/tmp/potential
+./genparam.py 9.0 12.0 0.25 -1.0 1.0 2>$pot
+jq . $ic; ./bh3d.rk4 <$ic | tee $data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+jq . $ic; ./bh3d.rk4 <$ic | ./raytrace.py 0 | ./raytrace
 
 
 REFERENCE DATA
