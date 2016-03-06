@@ -13,8 +13,8 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-from sys import argv, stdin, stdout, stderr
-from math import fabs, log10, sqrt, sin, cos, pi
+from sys import stdin, stdout, stderr
+from math import log10, sqrt, sin
 from json import loads
 
 class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
@@ -26,8 +26,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.Q = carter
         self.r = r0
         self.th = thetaMin
-        self.starttime = abs(starttime)
-        self.duration = abs(duration)
+        self.starttime = starttime
+        self.duration = duration
         self.endtime = self.starttime + self.duration
         self.h = timestep
         self.tr = tratio
@@ -46,12 +46,12 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
         self.refresh(self.r, self.th)
 
-    def refresh (self, r, th):  # Update quantities that depend on current values of r or theta
-        r2 = r**2
-        self.sth2 = sin(th)**2
+    def refresh (self, radius, theta):  # Update quantities that depend on current values of r or theta
+        r2 = radius**2
+        self.sth2 = sin(theta)**2
         self.cth2 = 1.0 - self.sth2
         self.ra2 = r2 + self.a2
-        self.D = self.ra2 - 2.0 * r
+        self.D = self.ra2 - 2.0 * radius
         self.S = r2 + self.a2 * self.cth2
         self.R = (self.ra2 * self.E - self.aL)**2 - self.D * (self.Q + self.L_aE2 + self.mu2 * r2)
         self.THETA = self.Q - self.cth2 * (self.a2xE2_mu2 + self.L2 / self.sth2)
@@ -106,5 +106,4 @@ if __name__ == "__main__":
     main()
 else:
     print >> stderr, __name__ + " module loaded"
-
 
