@@ -57,8 +57,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.THETA = self.Q - self.cth2 * (self.a2xE2_mu2 + self.L2 / self.sth2)
         P_D = (self.ra2 * self.E - self.aL) / self.D
         self.tP = (self.ra2 * P_D + self.aL - self.a2E * self.sth2) / self.S
-        self.rP = sqrt(fabs(self.R)) / self.S
-        self.thP = sqrt(fabs(self.THETA)) / self.S
+        self.rP = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
+        self.thP = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
         self.phP = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
 
     def rk4 (self):
@@ -85,8 +85,8 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.refresh(self.r, self.th)
 
     def output (self, tau):
-        e = fabs(self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2
-               + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2)
+        e = self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2 + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2
+        e = e if e >= 0.0 else -e
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.tP, self.rP, self.thP, self.phP)  # Log data
 
 def main ():  # Need to be inside a function to return . . .
