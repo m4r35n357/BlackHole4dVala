@@ -15,15 +15,19 @@ n=0
 while read line
 do
 	filename="$outputDir/$(printf "%04d.png" $n)"
-	if [ ! -f $filename ]
+	if [ ! -f $filename -a ! $STOP ]
 	then
-		{ echo -n $line | $raytracer 0 120 >$tmp1; } &
-		{ echo -n $line | $raytracer 120 240 >$tmp2; } &
-		{ echo -n $line | $raytracer 240 360 >$tmp3; } &
-		{ echo -n $line | $raytracer 360 480 >$tmp4; } &
+		{ echo -n $line | $raytracer 0 120 >$tmp1 2>/dev/null; } &
+		pids="$!"
+		{ echo -n $line | $raytracer 120 240 >$tmp2 2>/dev/null; } &
+		pids="$pids $!"
+		{ echo -n $line | $raytracer 240 360 >$tmp3 2>/dev/null; } &
+		pids="$pids $!"
+		{ echo -n $line | $raytracer 360 480 >$tmp4 2>/dev/null; } &
+		pids="$pids $!"
 		wait
 		cat $tmpfiles | convert - $filename
-		echo "Written $filename"
+		echo "Written  $filename"
 	else
 		echo "Skipping $filename"
 	fi
@@ -31,4 +35,6 @@ do
 done
 
 rm -f $tmpfiles
+
+#trap "STOP=''; kill -9 $pids; exit" SIGINT
 
