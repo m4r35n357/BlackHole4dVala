@@ -62,10 +62,12 @@ mplayer raytrace.mp4 -fps 10
 ic=initial-conditions
 data=/tmp/data
 pot=/tmp/potential
+
 ./genparam.py 3.0 12.0 0.15 1.0 1.0 1>$ic 2>$pot
 ./genparam.py 9.0 12.0 0.25 -1.0 1.0 1>$ic 2>$pot
 jq . $ic; ./bh3d.rk4 <$ic | tee $data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
-jq . $ic; ./bh3d.rk4 <$ic | ./raytrace.py 0 | ./raytrace
+
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace.py 0 | ./raytrace
 
 
 REFERENCE DATA
