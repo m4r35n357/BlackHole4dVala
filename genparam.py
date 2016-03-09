@@ -29,7 +29,7 @@ class InitialConditions(object):
         self.a = a
         self.a2 = self.a**2
         self.factorL = factorL
-        self.integrator = 'sb2'
+        self.integrator = 'sc4'
         self.starttime = 0.0
         self.duration = 5000.0
         self.timestep = 0.01
