@@ -55,7 +55,7 @@ namespace Sim {
         private double sgnR = 1.0;
         private double sgnTH = 1.0;
 
-        private BL (double a, double mu2, double E, double L, double Q, double r0, double thMin, double tau0, double deltaTau, double tStep, int64 tRatio) {
+        private BL (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
@@ -73,7 +73,7 @@ namespace Sim {
             this.ts = tStep;
             this.tr = tRatio;
             this.r = r0;
-            this.th = thMin;
+            this.th = th0;
             refresh(r, th);
         }
 

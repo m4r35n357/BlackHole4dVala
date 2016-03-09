@@ -9,5 +9,6 @@
   "start" : 0.0,
   "duration" : 50.0,
   "step" : 0.001,
+  "plotratio": 50,
   "integrator" : "sb4"
 }
