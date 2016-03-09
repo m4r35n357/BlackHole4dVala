@@ -23,8 +23,9 @@ namespace Simulations {
         private double E;
         private double L;
         private double Q;
-        private double starttime;
-        private double endtime;
+        private double start;
+        private double end;
+        private double ts;
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
@@ -35,7 +36,6 @@ namespace Simulations {
         private double L_aE2;
         private double a2xE2_mu2;
         // Variables
-        private double h;
         private double sth;
         private double cth;
         private double cot;
@@ -66,14 +66,13 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private KerrGeodesic (double spin, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep, string type) {
+        private KerrGeodesic (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, string type) {
             // Constants
-            this.a = spin;
-            this.mu2 = pMass2;
-            this.E = energy;
-            this.L = momentum;
-            this.Q = carter;
+            this.a = a;
+            this.mu2 = mu2;
+            this.E = E;
+            this.L = L;
+            this.Q = Q;
             this.a2 = a * a;
             this.aE = a * E;
             this.a2E = a2 * E;
@@ -81,13 +80,13 @@ namespace Simulations {
             this.aL = a * L;
             this.L_aE2 = (L - aE) * (L - aE);
             this.a2xE2_mu2 = - a2 * (E * E - mu2);
-            this.starttime = starttime;
-            this.endtime = starttime + duration;
-            this.h = timestep;
+            this.start = tau0;
+            this.end = tau0 + deltaTau;
+            this.ts = tStep;
             this.integrator = Integrator.getIntegrator(this, type);
             // Coordinates
             this.r = r0;
-            this.th = thetaMin;
+            this.th = th0;
             refresh(r, th);
             this.rP = sqrt(fabs(R));
             this.thP = sqrt(fabs(THETA));
@@ -99,15 +98,9 @@ namespace Simulations {
         public static KerrGeodesic fromJson () {
             var ic = getJson();
             return new KerrGeodesic(ic.get_double_member("a"),
-                                    ic.get_double_member("mu"),
-                                    ic.get_double_member("E"),
-                                    ic.get_double_member("Lz"),
-                                    ic.get_double_member("C"),
-                                    ic.get_double_member("r"),
-                                    ic.get_double_member("theta"),
-                                    ic.get_double_member("start"),
-                                    ic.get_double_member("duration"),
-                                    ic.get_double_member("step"),
+                                    ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
+                                    ic.get_double_member("r"), ic.get_double_member("theta"),
+                                    ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
                                     ic.get_string_member("integrator"));
         }
 
@@ -130,15 +123,15 @@ namespace Simulations {
             v4c = logError(v4Cum / count);
         }
 
-        private void refresh (double r, double th) {  // update intermediate variables
-            var r2 = r * r;
-            sth = sin(th);
-            cth = cos(th);
+        private void refresh (double radius, double theta) {  // update intermediate variables, see Wilkins
+            var r2 = radius * radius;
+            sth = sin(theta);
+            cth = cos(theta);
             cot = cth / sth;
             sth2 = sth * sth;
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
-            D = ra2 - 2.0 * r;
+            D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
             P1 = ra2 * E - aL;  // MTW eq.33.33b, ignoring charge term
             P2 = mu2 * r2 + L_aE2 + Q;
@@ -146,21 +139,21 @@ namespace Simulations {
             TH = a2xE2_mu2 + L2 / sth2;
             THETA = Q - cth2 * TH;  // see Wilkins
             var P_D = (ra2 * E - aL) / D;
-            tDot = ra2 * P_D + aL - a2E * sth2;  // MTW eq.33.32d
-            phDot = a * P_D - aE + L / sth2;  // MTW eq.33.32c
+            tDot = ra2 * P_D + aL - a2E * sth2;
+            phDot = a * P_D - aE + L / sth2;
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
-            t += d * h * tDot;
-            r += d * h * rP;
-            th += d * h * thP;
-            ph += d * h * phDot;
+            t += d * ts * tDot;
+            r += d * ts * rP;
+            th += d * ts * thP;
+            ph += d * ts * phDot;
             refresh(r, th);
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * h * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
-            thP += c * h * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
+            rP += c * ts * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
+            thP += c * ts * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
         }
 
         /**
@@ -170,25 +163,24 @@ namespace Simulations {
             var mino = 0.0;
             var tau = 0.0;
             var count = 1;
-            while (mino <= endtime) {
+            while (mino <= end) {
                 errors(count);
-                if (mino >= starttime) {
+                if (mino >= start) {
                     output(mino, tau);
                 }
                 integrator.compose();
-                mino += h;
-                tau += h * S;
-                count++;
+                mino += ts;
+                tau += ts * S;
+                count += 1;
             }
+            output(mino, tau);
         }
 
         public void output (double mino, double tau) {
-            stdout.printf("{");
-            stdout.printf("\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                      // time variables
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                      // time variables
             stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, eR, eTh);                    // errors
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);                              // coordinates
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
-            stdout.printf("}\n");
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
         }
     }
 }
