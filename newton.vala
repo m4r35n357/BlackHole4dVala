@@ -29,6 +29,7 @@ namespace Simulations {
         private double starttime;
         private double endtime;
         private double h;
+        private int64 tr;
         private double L2;
         private double rP;
         private double H0;
@@ -39,7 +40,7 @@ namespace Simulations {
          * Private constructor, use the static factory
          */
         private Newton (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep, string type) {
+                         double starttime, double duration, double timestep, int64 tRatio, string type) {
             this.E = energy;
             this.L = sqrt(r0);
             this.L2 = L * L;
@@ -48,6 +49,7 @@ namespace Simulations {
             this.starttime = starttime;
             this.endtime = starttime + duration;
             this.h = timestep;
+            this.tr = tRatio;
             this.integrator = Integrator.getIntegrator(this, type);
             this.E0 = V(r);
             this.L = lFac * L;
@@ -71,6 +73,7 @@ namespace Simulations {
                                 ic.get_double_member("start"),
                                 ic.get_double_member("duration"),
                                 ic.get_double_member("step"),
+                                ic.get_int_member("plotratio"),
                                 ic.get_string_member("integrator"));
         }
 
@@ -101,15 +104,18 @@ namespace Simulations {
          * Sole user method
          */
         public void solve () {
+            int64 count = 0;
             var t = 0.0;
             while (! (t > endtime)) {
                 errors();
-                if (t > starttime) {
+                if ((t > starttime) && (count % tr == 0)) {
                     output(t);
                 }
                 integrator.compose();
+                count += 1;
                 t += h;
             }
+            output(t);
         }
 
         public void output (double time) {
