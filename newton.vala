@@ -19,16 +19,14 @@ namespace Simulations {
     public class Newton : GLib.Object, IModel {
 
         private double E0;
-        private double E;
         private double L;
         private double r;
-        private double th;
         private double ph;
         private double rDot;
         private double phDot;
-        private double starttime;
-        private double endtime;
-        private double h;
+        private double start;
+        private double end;
+        private double ts;
         private int64 tr;
         private double L2;
         private double rP;
@@ -39,16 +37,13 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private Newton (double lFac, double pMass2, double energy, double momentum, double carter, double r0, double thetaMin,
-                         double starttime, double duration, double timestep, int64 tRatio, string type) {
-            this.E = energy;
+        private Newton (double lFac, double r0, double starttime, double duration, double timestep, int64 tRatio, string type) {
             this.L = sqrt(r0);
             this.L2 = L * L;
             this.r = r0;
-            this.th = thetaMin;
-            this.starttime = starttime;
-            this.endtime = starttime + duration;
-            this.h = timestep;
+            this.start = starttime;
+            this.end = starttime + duration;
+            this.ts = timestep;
             this.tr = tRatio;
             this.integrator = Integrator.getIntegrator(this, type);
             this.E0 = V(r);
@@ -63,18 +58,9 @@ namespace Simulations {
          */
         public static Newton fromJson () {
             var ic = getJson();
-            return new Newton(ic.get_double_member("a"),
-                                ic.get_double_member("mu"),
-                                ic.get_double_member("E"),
-                                ic.get_double_member("Lz"),
-                                ic.get_double_member("C"),
-                                ic.get_double_member("r"),
-                                ic.get_double_member("theta"),
-                                ic.get_double_member("start"),
-                                ic.get_double_member("duration"),
-                                ic.get_double_member("step"),
-                                ic.get_int_member("plotratio"),
-                                ic.get_string_member("integrator"));
+            return new Newton(ic.get_double_member("a"), ic.get_double_member("r"),
+                              ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_int_member("plotratio"),
+                              ic.get_string_member("integrator"));
         }
 
         private double V (double r) {
@@ -91,13 +77,13 @@ namespace Simulations {
 
         public void qUp (double d) {
             rDot = rP;
-            r += d * h * rDot;
+            r += d * ts * rDot;
             phDot = L / (r * r);
-            ph += d * h * phDot;
+            ph += d * ts * phDot;
         }
 
         public void pUp (double c) {
-            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
+            rP -= c * ts * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**
@@ -106,21 +92,21 @@ namespace Simulations {
         public void solve () {
             int64 count = 0;
             var t = 0.0;
-            while (! (t > endtime)) {
+            while (t <= end) {
                 errors();
-                if ((t > starttime) && (count % tr == 0)) {
+                if ((t > start) && (count % tr == 0)) {
                     output(t);
                 }
                 integrator.compose();
                 count += 1;
-                t += h;
+                t += ts;
             }
             output(t);
         }
 
         public void output (double time) {
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", time, time, eR, H() - H0, eR, -180.0);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", time, r, th, ph);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", time, r, PI_2, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }
     }
