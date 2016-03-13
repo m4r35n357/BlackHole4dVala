@@ -17,7 +17,7 @@ from sys import stdin, stdout, stderr
 from math import log10, sqrt, sin
 from json import loads
 
-class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
+class BL(object):
     def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
         self.a = spin
         self.mu2 = pMass2
@@ -27,15 +27,14 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.r = r0
         self.th = thetaMin
         self.starttime = starttime
-        self.duration = duration
-        self.endtime = self.starttime + self.duration
+        self.endtime = starttime + duration
         self.h = timestep
         self.tr = tratio
         self.kt = [0.0, 0.0, 0.0, 0.0]
         self.kr = [0.0, 0.0, 0.0, 0.0]
         self.kth = [0.0, 0.0, 0.0, 0.0]
         self.kph = [0.0, 0.0, 0.0, 0.0]
-        self.sgnR = self.sgnTHETA = 1.0
+        self.sgnR = self.sgnTH = 1.0
         self.t = self.ph = self.v4cum = 0.0
         self.a2 = self.a**2
         self.aE = self.a * self.E
@@ -44,9 +43,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.aL = self.a * self.L
         self.L_aE2 = (self.L - self.aE)**2
         self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
-        self.refresh(self.r, self.th, 0)
+        self.derivatives(self.r, self.th, 0)
 
-    def refresh (self, radius, theta, i):  # Update quantities that depend on current values of r or theta
+    def derivatives (self, radius, theta, i):
         r2 = radius**2
         self.sth2 = sin(theta)**2
         self.cth2 = 1.0 - self.sth2
@@ -56,43 +55,39 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.R = (self.ra2 * self.E - self.aL)**2 - self.D * (self.Q + self.L_aE2 + self.mu2 * r2)
         self.THETA = self.Q - self.cth2 * (self.a2xE2_mu2 + self.L2 / self.sth2)
         P_D = (self.ra2 * self.E - self.aL) / self.D
-        self.tP = (self.ra2 * P_D + self.aL - self.a2E * self.sth2) / self.S
-        self.rP = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
-        self.thP = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
-        self.phP = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
-        self.kt[i] = self.tP
-        self.kr[i] = self.rP
-        self.kth[i] = self.thP
-        self.kph[i] = self.phP
+        self.kt[i] = (self.ra2 * P_D + self.aL - self.a2E * self.sth2) / self.S
+        self.kr[i] = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
+        self.kth[i] = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
+        self.kph[i] = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
 
-    def rk4 (self):
+    def rk4Step (self):
         def update (kx):
             return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) * self.h / 8.0
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
-        self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
-        self.refresh(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0] * self.h, self.th + 1.0 / 3.0 * self.sgnTHETA * self.kth[0] * self.h, 1)
-        self.refresh(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1] * self.h, self.th + 2.0 / 3.0 * self.sgnTHETA * self.kth[1] * self.h, 2)
-        self.refresh(self.r + self.sgnR * self.kr[2] * self.h, self.th + self.sgnTHETA * self.kth[2] * self.h, 3)
+        self.sgnTH = self.sgnTH if self.THETA > 0.0 else - self.sgnTH
+        self.derivatives(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0] * self.h, self.th + 1.0 / 3.0 * self.sgnTH * self.kth[0] * self.h, 1)
+        self.derivatives(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1] * self.h, self.th + 2.0 / 3.0 * self.sgnTH * self.kth[1] * self.h, 2)
+        self.derivatives(self.r + self.sgnR * self.kr[2] * self.h, self.th + self.sgnTH * self.kth[2] * self.h, 3)
         self.t += update(self.kt)
         self.r += update(self.kr) * self.sgnR
-        self.th += update(self.kth) * self.sgnTHETA
+        self.th += update(self.kth) * self.sgnTH
         self.ph += update(self.kph)
-        self.refresh(self.r, self.th, 0)
+        self.derivatives(self.r, self.th, 0)
 
     def output (self, tau):
-        e = self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2 + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2
+        e = self.mu2 + self.sth2 / self.S * (self.a * self.kt[0] - self.ra2 * self.kph[0])**2 + self.S / self.D * self.kr[0]**2 + self.S * self.kth[0]**2 - self.D / self.S * (self.kt[0] - self.a * self.sth2 * self.kph[0])**2
         e = e if e >= 0.0 else -e
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.tP, self.rP, self.thP, self.phP)  # Log data
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.kt[0], self.kr[0], self.kth[0], self.kph[0])  # Log data
 
-def main ():  # Need to be inside a function to return . . .
+def main ():
     ic = loads(stdin.read())
     bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['Lz'], ic['C'], ic['r'], ic['theta'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
     tau = 0.0
-    while abs(tau) <= bl.endtime:
-        if abs(tau) >= bl.starttime and count % bl.tr == 0:
+    while tau <= bl.endtime:
+        if tau >= bl.starttime and count % bl.tr == 0:
             bl.output(tau)
-        bl.rk4()
+        bl.rk4Step()
         count += 1
         tau += bl.h
     bl.output(tau)
