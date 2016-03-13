@@ -9,7 +9,7 @@ outfile='utils'
 executables='bh3d nbody3d newton'
 
 # cleanup
-rm -f $outfile $executables bh3d.rk4 kerr-image
+rm -f $outfile $executables bh3d.rk4 raytrace-commands kerr-image
 
 # compile vala files
 valafiles="${outfile}.vala symplectic.vala"
@@ -27,9 +27,10 @@ done
 rm -f $outfile
 
 $valac -v -X -O$opt -X -lm --pkg json-glib-1.0 bh3d.rk4.vala
+$valac -v -X -O$opt -X -lm --pkg json-glib-1.0 raytrace-commands.vala
 
 gcc -o kerr-image kerr-image.c -Ofast -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 
 # admire our work
-ls -lAh --color $executables bh3d.rk4 kerr-image
+ls -lAh --color $executables bh3d.rk4 raytrace-commands kerr-image
 
