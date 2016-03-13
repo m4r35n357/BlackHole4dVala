@@ -44,9 +44,9 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.aL = self.a * self.L
         self.L_aE2 = (self.L - self.aE)**2
         self.a2xE2_mu2 = - self.a2 * (self.E**2 - self.mu2)
-        self.refresh(self.r, self.th)
+        self.refresh(self.r, self.th, 0)
 
-    def refresh (self, radius, theta):  # Update quantities that depend on current values of r or theta
+    def refresh (self, radius, theta, i):  # Update quantities that depend on current values of r or theta
         r2 = radius**2
         self.sth2 = sin(theta)**2
         self.cth2 = 1.0 - self.sth2
@@ -60,29 +60,24 @@ class BL(object):   # Boyer-Lindquist coordinates on the Kerr le2
         self.rP = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
         self.thP = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
         self.phP = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
+        self.kt[i] = self.tP
+        self.kr[i] = self.rP
+        self.kth[i] = self.thP
+        self.kph[i] = self.phP
 
     def rk4 (self):
-        def k (i):
-            self.kt[i] = self.h * self.tP
-            self.kr[i] = self.h * self.rP
-            self.kth[i] = self.h * self.thP
-            self.kph[i] = self.h * self.phP
         def update (kx):
-            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
+            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) * self.h / 8.0
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
         self.sgnTHETA = self.sgnTHETA if self.THETA > 0.0 else - self.sgnTHETA
-        k(0)
-        self.refresh(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0], self.th + 1.0 / 3.0 * self.sgnTHETA * self.kth[0])
-        k(1)
-        self.refresh(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1], self.th + 2.0 / 3.0 * self.sgnTHETA * self.kth[1])
-        k(2)
-        self.refresh(self.r + self.sgnR * self.kr[2], self.th + self.sgnTHETA * self.kth[2])
-        k(3)
+        self.refresh(self.r + 1.0 / 3.0 * self.sgnR * self.kr[0] * self.h, self.th + 1.0 / 3.0 * self.sgnTHETA * self.kth[0] * self.h, 1)
+        self.refresh(self.r + 2.0 / 3.0 * self.sgnR * self.kr[1] * self.h, self.th + 2.0 / 3.0 * self.sgnTHETA * self.kth[1] * self.h, 2)
+        self.refresh(self.r + self.sgnR * self.kr[2] * self.h, self.th + self.sgnTHETA * self.kth[2] * self.h, 3)
         self.t += update(self.kt)
         self.r += update(self.kr) * self.sgnR
         self.th += update(self.kth) * self.sgnTHETA
         self.ph += update(self.kph)
-        self.refresh(self.r, self.th)
+        self.refresh(self.r, self.th, 0)
 
     def output (self, tau):
         e = self.mu2 + self.sth2 / self.S * (self.a * self.tP - self.ra2 * self.phP)**2 + self.S / self.D * self.rP**2 + self.S * self.thP**2 - self.D / self.S * (self.tP - self.a * self.sth2 * self.phP)**2
