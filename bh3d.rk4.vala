@@ -44,10 +44,6 @@ namespace Sim {
         private double r;
         private double th;
         private double ph = 0.0;
-        private double tDot;
-        private double rDot;
-        private double thDot;
-        private double phDot;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -74,10 +70,10 @@ namespace Sim {
             this.tr = tRatio;
             this.r = r0;
             this.th = th0;
-            refresh(r, th, 0);
+            derivatives(r, th, 0);
         }
 
-        private void refresh (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
+        private void derivatives (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
             var r2 = radius * radius;
             sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
@@ -87,14 +83,10 @@ namespace Sim {
             R = (ra2 * E - aL) * (ra2 * E - aL) - D * (Q + L_aE2 + mu2 * r2);
             THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
             var P_D = (ra2 * E - aL) / D;
-            tDot = (ra2 * P_D + aL - a2E * sth2) / S;
-            rDot = sqrt(R > 0.0 ? R : -R) / S;
-            thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
-            phDot = (a * P_D - aE + L / sth2) / S;
-            kt[stage] = tDot;
-            kr[stage] = rDot;
-            kth[stage] = thDot;
-            kph[stage] = phDot;
+            kt[stage] = (ra2 * P_D + aL - a2E * sth2) / S;
+            kr[stage] = sqrt(R > 0.0 ? R : -R) / S;
+            kth[stage] = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
+            kph[stage] = (a * P_D - aE + L / sth2) / S;
         }
 
         private double sumK (double[] kx) {
@@ -104,17 +96,17 @@ namespace Sim {
         private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
             sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
-            refresh(r + 1.0 / 3.0 * sgnR * kr[0] * ts, th + 1.0 / 3.0 * sgnTH * kth[0] * ts, 1);
-            refresh(r + 2.0 / 3.0 * sgnR * kr[1] * ts, th + 2.0 / 3.0 * sgnTH * kth[1] * ts, 2);
-            refresh(r + sgnR * kr[2] * ts, th + sgnTH * kth[2] * ts, 3);
+            derivatives(r + 1.0 / 3.0 * sgnR * kr[0] * ts, th + 1.0 / 3.0 * sgnTH * kth[0] * ts, 1);
+            derivatives(r + 2.0 / 3.0 * sgnR * kr[1] * ts, th + 2.0 / 3.0 * sgnTH * kth[1] * ts, 2);
+            derivatives(r + sgnR * kr[2] * ts, th + sgnTH * kth[2] * ts, 3);
             t += sumK(kt);
             r += sumK(kr) * sgnR;
             th += sumK(kth) * sgnTH;
             ph += sumK(kph);
-            refresh(r, th, 0);
+            derivatives(r, th, 0);
         }
 
-        private void output (double tau) {
+        private void output (double tau, double tDot, double rDot, double thDot, double phDot) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
             var e = mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2;
@@ -129,13 +121,13 @@ namespace Sim {
             var tau = 0.0;
             while (tau <= end) {
                 if ((tau >= start) && (count % tr == 0)) {
-                    output(tau);
+                    output(tau, kt[0], kr[0], kth[0], kph[0]);
                 }
                 rk4Step();
                 count += 1;
                 tau += ts;
             }
-            output(tau);
+            output(tau, kt[0], kr[0], kth[0], kph[0]);
         }
 
         public static BL fromJson () {
