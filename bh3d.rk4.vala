@@ -74,10 +74,10 @@ namespace Sim {
             this.tr = tRatio;
             this.r = r0;
             this.th = th0;
-            refresh(r, th);
+            refresh(r, th, 0);
         }
 
-        private void refresh (double radius, double theta) {  // update intermediate variables, see Wilkins
+        private void refresh (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
             var r2 = radius * radius;
             sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
@@ -91,34 +91,27 @@ namespace Sim {
             rDot = sqrt(R > 0.0 ? R : -R) / S;
             thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
             phDot = (a * P_D - aE + L / sth2) / S;
-        }
-
-        private void setK (int stage) {
-            kt[stage] = ts * tDot;
-            kr[stage] = ts * rDot;
-            kth[stage] = ts * thDot;
-            kph[stage] = ts * phDot;
+            kt[stage] = tDot;
+            kr[stage] = rDot;
+            kth[stage] = thDot;
+            kph[stage] = phDot;
         }
 
         private double sumK (double[] kx) {
-            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
+            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) * ts / 8.0;
         }
 
         private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
             sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
-            setK(0);
-            refresh(r + 1.0 / 3.0 * sgnR * kr[0], th + 1.0 / 3.0 * sgnTH * kth[0]);
-            setK(1);
-            refresh(r + 2.0 / 3.0 * sgnR * kr[1], th + 2.0 / 3.0 * sgnTH * kth[1]);
-            setK(2);
-            refresh(r + sgnR * kr[2], th + sgnTH * kth[2]);
-            setK(3);
+            refresh(r + 1.0 / 3.0 * sgnR * kr[0] * ts, th + 1.0 / 3.0 * sgnTH * kth[0] * ts, 1);
+            refresh(r + 2.0 / 3.0 * sgnR * kr[1] * ts, th + 2.0 / 3.0 * sgnTH * kth[1] * ts, 2);
+            refresh(r + sgnR * kr[2] * ts, th + sgnTH * kth[2] * ts, 3);
             t += sumK(kt);
             r += sumK(kr) * sgnR;
             th += sumK(kth) * sgnTH;
             ph += sumK(kph);
-            refresh(r, th);
+            refresh(r, th, 0);
         }
 
         private void output (double tau) {
