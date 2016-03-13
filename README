@@ -68,7 +68,7 @@ pot=/tmp/potential
 jq . $ic; ./bh3d.rk4 <$ic | tee $data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd daria 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace.py 0 | ./raytrace
+./genparam.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace.py 0 2>/dev/null | ./raytrace
 
 
 REFERENCE DATA

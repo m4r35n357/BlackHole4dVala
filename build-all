@@ -9,7 +9,7 @@ outfile='utils'
 executables='bh3d nbody3d newton'
 
 # cleanup
-rm -f $outfile $executables
+rm -f $outfile $executables bh3d.rk4 kerr-image
 
 # compile vala files
 valafiles="${outfile}.vala symplectic.vala"

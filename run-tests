@@ -1,6 +1,6 @@
 #!/bin/sh
 
-bh3ds=${1:-'./bh3d.rk4.py ./bh3d.py ./bh3d.rk4 ./bh3d'}
+bh3ds=${1:-'./bh3d.rk4.py ./bh3d.rk4 ./bh3d.py ./bh3d'}
 nbodys=${2:-'./nbody3d.py ./nbody3d'}
 
 C='\033[0;36m'

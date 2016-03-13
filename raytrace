@@ -2,7 +2,7 @@
 
 raytracer=${1:-'./kerr-image'}
 
-outputDir='./RaytracingOutput'
+outputDir='RaytracingOutput'
 [ ! -d $outputDir ] && mkdir $outputDir
 
 tmp1='/tmp/tmp1'
@@ -21,13 +21,13 @@ trap 'assemble; exit' INT
 n=0
 while read line
 do
-	filename="$outputDir/$(printf "%04d.png" $n)"
+	filename=$outputDir/$(printf "%04d.png" $n)
 	if [ ! -f $filename ]
 	then
-		{ echo -n $line | $raytracer 0 120 >$tmp1 2>/dev/null; } &
-		{ echo -n $line | $raytracer 120 240 >$tmp2 2>/dev/null; } &
-		{ echo -n $line | $raytracer 240 360 >$tmp3 2>/dev/null; } &
 		{ echo -n $line | $raytracer 360 480 >$tmp4 2>/dev/null; } &
+		{ echo -n $line | $raytracer 240 360 >$tmp3 2>/dev/null; } &
+		{ echo -n $line | $raytracer 120 240 >$tmp2 2>/dev/null; } &
+		{ echo -n $line | $raytracer 0 120 >$tmp1 2>/dev/null; } &
 		assemble
 	else
 		echo "Skipping $filename"
