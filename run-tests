@@ -23,7 +23,7 @@ jq . $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 1.0 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
 jq . ic/Light1
@@ -42,5 +42,5 @@ done
 ./genparam.py 12.0 0.5 1.0 1.0 >$ic 2>/tmp/potential
 jq . $ic
 echo ${C}"./newton"${NC}
-./newton <$ic | $int t 0.1 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+./newton <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
