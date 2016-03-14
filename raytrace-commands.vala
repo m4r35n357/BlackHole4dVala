@@ -37,15 +37,6 @@ namespace Sim {
         var line = stdin.read_line();
         while (line != null) {
             var p = fromString(line);
-            /*
-                     print >> stdout, str(p['tau']) + ' 2 ' \
-            + str(p['r']) + ' ' + str(cos(p['th'])) + ' ' + str(p['t']) + ' ' + str(p['ph']) + ' ' \
-            + str(p['rP']) + ' ' + str(- sin(p['th']) * p['thP']) + ' ' + str(p['tP']) + ' ' + str(p['phP']) + ' ' \
-            + str(-c) + ' ' + str(0) + ' ' + str(0) + ' ' + str(s) + ' ' \
-            + str(s) + ' ' + str(0) + ' ' + str(0) + ' ' + str(c) + ' ' \
-            + str(0) + ' ' + str(1) + ' ' + str(0) + ' ' + str(0)
-            *
-            */
             stdout.printf("%.9e %.1d ", p.get_double_member("tau"), 2);
             stdout.printf("%.9e %.9e %.9e %.9e ", p.get_double_member("r"), cos(p.get_double_member("th")), p.get_double_member("t"), p.get_double_member("ph"));
             stdout.printf("%.9e %.9e %.9e %.9e ", p.get_double_member("rP"), -sin(p.get_double_member("th")) * p.get_double_member("thP"), p.get_double_member("tP"), p.get_double_member("phP"));

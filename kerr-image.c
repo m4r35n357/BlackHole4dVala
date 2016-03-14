@@ -131,11 +131,11 @@
 #include <assert.h>
 
 #ifndef NBLINS				// Number of lines in image
-#define NBLINS 240
+#define NBLINS 480
 #endif
 
 #ifndef NBCOLS				// Number of columns in image
-#define NBCOLS 320
+#define NBCOLS 640
 #endif
 
 #ifndef DO_USELESS			// Keep useless variables in integration
@@ -305,6 +305,7 @@ init_state (const struct geodesic_s *geo, double time, double r, double cth,
   // sqrt of R potential
   sta->v.n.rdot = sign(rdot_sign)
                 * sqrt((-geo->mu2 * r2 - geo->Q) * (r2 - 2.0 * blk->M * r + blk->a2) + square((r2 + blk->a2) * geo->E - blk->a * geo->Lz)) / SIGMA;
+//                * sqrt((-geo->mu2 * r2 - square(geo->Lz - blk->a * geo->E) - geo->Q) * (r2 - 2.0 * blk->M * r + blk->a2) + square((r2 + blk->a2) * geo->E - blk->a * geo->Lz)) / SIGMA;
   // sqrt of THETA potential
   sta->v.n.cthdot = sign(cthdot_sign)
                   * sqrt((geo->Q - geo->mu2 * blk->a2 * cth2) * (1.0 - cth2) - square(blk->a * geo->E * (1.0 - cth2) - geo->Lz)) / SIGMA;
@@ -620,8 +621,7 @@ main (int argc, char *argv[])
     fprintf (stderr, "%.8e\t%.8e\t%.8e\t%.8e\n", vecs[m][0], vecs[m][1], vecs[m][2], vecs[m][3]);
   int lin_min = argc>=2?atoi(argv[1]):0;
   int lin_max = argc>=3?atoi(argv[2]):NBLINS;
-  fprintf (stderr, "Computing image from line %d to line %d...\n",
-	   lin_min, lin_max);
+  fprintf (stderr, "Computing image from line %d to line %d...\n", lin_min, lin_max);
   if ( lin_min == 0 )
     printf ("P3\n%d %d\n255\n", NBCOLS, NBLINS);
   for ( int lin=lin_min ; lin<lin_max ; lin++ )
@@ -661,8 +661,7 @@ main (int argc, char *argv[])
 #endif
 	      memcpy (&oldsta, &sta, sizeof(struct state_s));
 	      // A heuristic on step size:
-	      double step = BASIC_STEP * ((1+fabs(oldsta.v.n.r))
-					  / (1+fabs(oldsta.v.n.rdot)));
+	      double step = BASIC_STEP * ((1+fabs(oldsta.v.n.r)) / (1+fabs(oldsta.v.n.rdot)));
 	      if ( oldsta.v.n.cth > 0.95 || oldsta.v.n.cth < -0.95 )
 		step /= 3; // Increase accuracy near the axis.
 	      evolve (step, &sta);
