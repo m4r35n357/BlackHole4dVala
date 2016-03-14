@@ -17,32 +17,25 @@ using Json;
 
 namespace Sim {
 
-    public static Json.Object fromString (string input) {
-        unowned Json.Object o;
-        var p = new Parser();
-        try {
-            p.load_from_data(input);
-            o = p.get_root().get_object();
-        } catch (Error e) {
-            stderr.printf("Unable to parse the input data: %s\n", e.message);
-            return_if_reached();
-        }
-        return o;
-    }
-
     public static int main (string[] args) {
         var angle = double.parse(args[1]) * PI / 180.0;
         var c = cos(angle);
         var s = sin(angle);
+        unowned Json.Object o;
+        var p = new Parser();
         var line = stdin.read_line();
         while (line != null) {
-            var p = fromString(line);
-            stdout.printf("%.9e %.1d ", p.get_double_member("tau"), 2);
-            stdout.printf("%.9e %.9e %.9e %.9e ", p.get_double_member("r"), cos(p.get_double_member("th")), p.get_double_member("t"), p.get_double_member("ph"));
-            stdout.printf("%.9e %.9e %.9e %.9e ", p.get_double_member("rP"), -sin(p.get_double_member("th")) * p.get_double_member("thP"), p.get_double_member("tP"), p.get_double_member("phP"));
-            stdout.printf("%.9e %.1d %.1d %.9e ", -c, 0, 0, s);
-            stdout.printf("%.9e %.1d %.1d %.9e ", s, 0, 0, c);
-            stdout.printf("%.1d %.1d %.1d %.1d\n", 0, 1, 0, 0);
+            try {
+                p.load_from_data(line);
+                o = p.get_root().get_object();
+            } catch (Error e) {
+                stderr.printf("Unable to parse the input data: %s\n", e.message);
+                return_if_reached();
+            }
+            stdout.printf("%.9e %.1d ", o.get_double_member("tau"), 2);
+            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("r"), cos(o.get_double_member("th")), o.get_double_member("t"), o.get_double_member("ph"));
+            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("rP"), -sin(o.get_double_member("th")) * o.get_double_member("thP"), o.get_double_member("tP"), o.get_double_member("phP"));
+            stdout.printf("%.9e %.1d %.1d %.9e %.9e %.1d %.1d %.9e %.1d %.1d %.1d %.1d\n", -c, 0, 0, s, s, 0, 0, c, 0, 1, 0, 0);
             line = stdin.read_line();
         }
         return 0;
