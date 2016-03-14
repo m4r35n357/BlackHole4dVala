@@ -14,8 +14,8 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from sys import argv, stderr, exit, stdin
-from math import sqrt, sin, cos, fabs
-from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color
+from math import sqrt, sin, cos, tan, fabs, pi
+from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color, cone
 from json import loads
 from array import array
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
@@ -52,6 +52,10 @@ def main():
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
     ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
+    #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
+    #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
+    #sphere(pos=(0,0,0), radius=3.0, opacity=0.2)
+    #sphere(pos=(0,0,0), radius=12.0, opacity=0.1)
     # animate!
     ball = sphere()  # Particle
     counter = 0
