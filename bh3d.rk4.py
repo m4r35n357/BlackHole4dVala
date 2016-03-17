@@ -77,7 +77,7 @@ class BL(object):
     def output (self, tau):
         e = self.mu2 + self.sth2 / self.S * (self.a * self.kt[0] - self.ra2 * self.kph[0])**2 + self.S / self.D * self.kr[0]**2 + self.S * self.kth[0]**2 - self.D / self.S * (self.kt[0] - self.a * self.sth2 * self.kph[0])**2
         e = e if e >= 0.0 else -e
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.kt[0], self.kr[0], self.kth[0], self.kph[0])  # Log data
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), -180.0, -180.0, -180.0, self.t, self.r, self.th, self.ph, self.kt[0], self.kr[0], self.kth[0], self.kph[0])  # Log data
 
 def main ():
     ic = loads(stdin.read())
