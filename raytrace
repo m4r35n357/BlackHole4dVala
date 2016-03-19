@@ -6,15 +6,20 @@ raytracer="nice -n 10 $raytracer"
 outputDir='RaytracingOutput'
 [ ! -d $outputDir ] && mkdir $outputDir
 
-tmp1='/tmp/tmp1'
-tmp2='/tmp/tmp2'
-tmp3='/tmp/tmp3'
-tmp4='/tmp/tmp4'
+tmp1="/tmp/$USER-raytracer-tmp-1"
+tmp2="/tmp/$USER-raytracer-tmp-2"
+tmp3="/tmp/$USER-raytracer-tmp-3"
+tmp4="/tmp/$USER-raytracer-tmp-4"
+
+GREY='\033[1;30m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
 
 assemble () {
 	wait
 	cat $tmp1 $tmp2 $tmp3 $tmp4 | convert - $filename
-	echo "Written  $filename"
+	echo "${GREEN}Written   $filename${NC}"
 }
 
 n=0
@@ -23,7 +28,7 @@ do
 	filename=$outputDir/$(printf "%04d.png" $n)
 	if [ ! -f $filename ]
 	then
-		trap 'assemble; exit' INT
+		trap 'echo ""; echo "${CYAN}Finishing $filename . . .${NC}"; assemble; exit' INT
 		{ echo -n $line | $raytracer 360 480 >$tmp4 2>/dev/null; } &
 		{ echo -n $line | $raytracer 240 360 >$tmp3 2>/dev/null; } &
 		{ echo -n $line | $raytracer 120 240 >$tmp2 2>/dev/null; } &
@@ -31,7 +36,7 @@ do
 		assemble
 		trap - INT
 	else
-		echo "Skipping $filename"
+		echo "${GREY}Skipping  $filename${NC}"
 	fi
 	n=$(expr $n + 1)
 done
