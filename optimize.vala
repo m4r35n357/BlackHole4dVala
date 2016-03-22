@@ -15,11 +15,8 @@ public class MultiRootSample : GLib.Object
         double x0 = x.get(0);
         double x1 = x.get(1);
 
-        double y0 = a * (1.0 - x0);
-        double y1 = b * (x1 - x0 * x0);
-
-        f.set(0, y0);
-        f.set(1, y1);
+        f.set(0, a * (1.0 - x0));
+        f.set(1, b * (x1 - x0 * x0));
 
         return Status.SUCCESS;
     }
@@ -44,7 +41,22 @@ public class MultiRootSample : GLib.Object
         x.set(0, x_init[0]);
         x.set(1, x_init[1]);
 
-        solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.dnewton, nDim);
+        switch (args[1]) {
+            case "dnewton":
+                solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.dnewton, nDim);
+                break;
+            case "broyden":
+                solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.broyden, nDim);
+                break;
+            case "hybrid":
+                solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.hybrid, nDim);
+                break;
+            case "hybrids":
+                solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.hybrids, nDim);
+                break;
+            default:
+                return_if_reached();
+        }
         solver.set (&f, x);
 
         print_state(iterations, solver);

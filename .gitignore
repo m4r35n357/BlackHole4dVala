@@ -20,5 +20,7 @@ bh3d
 bh3d.rk4
 newton
 nbody3d
+raytrace-commands
+optimize
 test.vala
 tmp/
