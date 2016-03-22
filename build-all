@@ -2,8 +2,9 @@
 
 opt="${1:-0}"
 
-valac="/usr/bin/valac -v --save-temps -X -O$opt -X -lm --pkg json-glib-1.0"
-#valac='/opt/vala/bin/valac'
+valac="valac -v --save-temps -X -O$opt -X -lm --pkg json-glib-1.0"
+valac --version
+which valac
 
 outfile='utils'
 executables='bh3d nbody3d newton'
@@ -28,7 +29,7 @@ do
 done
 rm -f $outfile
 
-rm f bh3d.rk4.c raytrace-commands.c
+rm -f bh3d.rk4.c raytrace-commands.c
 $valac bh3d.rk4.vala
 $valac raytrace-commands.vala
 
