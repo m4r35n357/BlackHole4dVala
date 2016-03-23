@@ -11,7 +11,7 @@ executables='bh3d nbody3d newton'
 
 # cleanup
 rm -f utils.c symplectic.c
-rm -f $outfile $executables bh3d.rk4 raytrace-commands kerr-image
+rm -f $outfile $executables bh3d.rk4 raytrace-commands kerr-image optimize
 
 # compile vala files
 valafiles="${outfile}.vala symplectic.vala"
@@ -35,6 +35,8 @@ $valac raytrace-commands.vala
 
 gcc -o kerr-image kerr-image.c -Ofast -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 
+valac -q --save-temps -X -lm --pkg gsl optimize.vala
+
 # admire our work
-ls -lAh --color $executables bh3d.rk4 raytrace-commands kerr-image
+ls -lAh --color $executables bh3d.rk4 raytrace-commands kerr-image optimize
 
