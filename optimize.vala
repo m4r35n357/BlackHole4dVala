@@ -1,14 +1,72 @@
 using GLib;
+using GLib.Math;
 using Gsl;
 
 public class MultiRootSample : GLib.Object
 {
+    struct IcGenParams {
+        public double a;
+        public double mu2;
+        public double rMin;
+        public double rMax;
+        public double thMin;
+    }
+
+    static double R (double r, double E, double L, double Q, void* params) {
+        double a = ((IcGenParams*) params) -> a;
+        double mu2 = ((IcGenParams*) params) -> mu2;
+        return (((r*r)+(a*a))*E - a*L) * (((r*r)+(a*a))*E - a*L) - (((r*r)+(a*a))-2.0*r) * (Q + (L - a*E) * (L - a*E) + mu2 * r*r);
+    }
+
+    static double dR (double r, double E, double L, double Q, void* params) {
+        double a = ((IcGenParams*) params) -> a;
+        double mu2 = ((IcGenParams*) params) -> mu2;
+        return - (2.0*r-2.0) * (Q + (L - a*E) * (L - a*E) + mu2 * r*r) - 2.0*mu2 * r * (-2.0*r + ((r*r)+(a*a))) + 4*r*E*(((r*r)+(a*a))*E - a*L);
+    }
+
+    static double THETA (double theta, double E, double L, double Q, void* params) {
+        double a = ((IcGenParams*) params) -> a;
+        double mu2 = ((IcGenParams*) params) -> mu2;
+        return Q - cos(theta)*cos(theta) * (a*a*(E*E-mu2) + L*L / (sin(theta)*sin(theta)));
+    }
+
+    static int spherical (Vector x, void* params, Vector f) {
+        double rMin = ((IcGenParams*) params) -> rMin;
+        double thMin = ((IcGenParams*) params) -> thMin;
+
+        double E = x.get(0);
+        double L = x.get(1);
+        double Q = x.get(1);
+
+        f.set(0, R(rMin, E, L, Q, params));
+        f.set(1, dR(rMin, E, L, Q, params));
+        f.set(2, THETA(thMin, E, L, Q, params));
+
+        return Status.SUCCESS;
+    }
+
+    static int nonSpherical (Vector x, void* params, Vector f) {
+        double rMin = ((IcGenParams*) params) -> rMin;
+        double rMax = ((IcGenParams*) params) -> rMax;
+        double thMin = ((IcGenParams*) params) -> thMin;
+
+        double E = x.get(0);
+        double L = x.get(1);
+        double Q = x.get(1);
+
+        f.set(0, R(rMin, E, L, Q, params));
+        f.set(1, R(rMax, E, L, Q, params));
+        f.set(2, THETA(thMin, E, L, Q, params));
+
+        return Status.SUCCESS;
+    }
+
     struct RParams {
         public double a;
         public double b;
     }
 
-    static int func (Vector x, void* params, Vector f) {
+    static int rosenbrock (Vector x, void* params, Vector f) {
         double a = ((RParams*) params) -> a;
         double b = ((RParams*) params) -> b;
 
@@ -26,21 +84,13 @@ public class MultiRootSample : GLib.Object
     }
 
     public static void main (string[] args) {
-        MultirootFsolver solver;
         size_t nDim = 2;
 
-        int status = 0;
-        size_t iterations = 0;
-
-        RParams params = { 1.0, 10.0 };
-        MultirootFunction f = MultirootFunction() { f = func, n = nDim, params = &params };
-
-        double[] x_init = { -10.0, -5.0 };
         Vector x = new Vector(nDim);
+        x.set(0, -10.0);
+        x.set(1, -5.0);
 
-        x.set(0, x_init[0]);
-        x.set(1, x_init[1]);
-
+        MultirootFsolver solver;
         switch (args[1]) {
             case "dnewton":
                 solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.dnewton, nDim);
@@ -57,8 +107,12 @@ public class MultiRootSample : GLib.Object
             default:
                 return_if_reached();
         }
+        RParams params = { 1.0, 10.0 };
+        MultirootFunction f = MultirootFunction() { f = rosenbrock, n = nDim, params = &params };
         solver.set (&f, x);
 
+        int status = 0;
+        size_t iterations = 0;
         print_state(iterations, solver);
         do {
             iterations++;
