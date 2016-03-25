@@ -44,6 +44,10 @@ namespace Sim {
         private double r;
         private double th;
         private double ph = 0.0;
+        private double tDot;
+        private double rDot;
+        private double thDot;
+        private double phDot;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -83,10 +87,14 @@ namespace Sim {
             R = (ra2 * E - aL) * (ra2 * E - aL) - D * (Q + L_aE2 + mu2 * r2);
             THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
             var P_D = (ra2 * E - aL) / D;
-            kt[stage] = (ra2 * P_D + aL - a2E * sth2) / S;
-            kr[stage] = sqrt(R > 0.0 ? R : -R) / S;
-            kth[stage] = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
-            kph[stage] = (a * P_D - aE + L / sth2) / S;
+            tDot = (ra2 * P_D + aL - a2E * sth2) / S;
+            rDot = sqrt(R > 0.0 ? R : -R) / S;
+            thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
+            phDot = (a * P_D - aE + L / sth2) / S;
+            kt[stage] = tDot;
+            kr[stage] = rDot;
+            kth[stage] = thDot;
+            kph[stage] = phDot;
         }
 
         private double sumK (double[] kx) {
@@ -106,7 +114,7 @@ namespace Sim {
             derivatives(r, th, 0);
         }
 
-        private void output (double tau, double tDot, double rDot, double thDot, double phDot) {
+        private void output (double tau) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
             var e = mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2;
@@ -121,13 +129,13 @@ namespace Sim {
             var tau = 0.0;
             while (tau <= end) {
                 if ((tau >= start) && (count % tr == 0)) {
-                    output(tau, kt[0], kr[0], kth[0], kph[0]);
+                    output(tau);
                 }
                 rk4Step();
                 count += 1;
                 tau += ts;
             }
-            output(tau, kt[0], kr[0], kth[0], kph[0]);
+            output(tau);
         }
 
         public static BL fromJson () {
