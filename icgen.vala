@@ -21,7 +21,7 @@ public class MultiRootSample : GLib.Object
     static double dR (double r, double E, double L, double Q, void* params) {
         double a = ((IcGenParams*) params) -> a;
         double mu2 = ((IcGenParams*) params) -> mu2;
-        return - (2.0*r - 2.0) * (mu2 * r*r + Q + (L - a * E) * (L - a * E)) - 2.0*mu2 * r * (r*r + a*a - 2.0*r) + 4*r*E*(E * (r*r + a*a) - a * L);
+        return - (2.0*r - 2.0) * (mu2 * r*r + Q + (L - a * E) * (L - a * E)) - 2.0*mu2*r*(r*r + a*a - 2.0*r) + 4.0*r*E*(E * (r*r + a*a) - a * L);
     }
 
     static double THETA (double theta, double E, double L, double Q, void* params) {
@@ -55,7 +55,24 @@ public class MultiRootSample : GLib.Object
     }
 
     static void print_state (size_t iter, MultirootFsolver s) {
-        stdout.printf("iter = %3u x = % .6f % .6f % .6f f(x) = % .3e % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
+        stderr.printf("iter = %3u x = % .6f % .6f % .6f f(x) = % .3e % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
+    }
+
+    static void print_inital_conditions (MultirootFsolver s, void* params) {
+        stdout.printf("{ \"M\" : %.1f,\n", 1.0);
+        stdout.printf("  \"a\" : %.1f,\n", ((IcGenParams*) params) -> a);
+        stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParams*) params) -> mu2);
+        stdout.printf("  \"E\" : %.12f,\n", s.x.get(0));
+        stdout.printf("  \"Lz\" : %.12f,\n", s.x.get(1));
+        stdout.printf("  \"C\" : %.12f,\n", s.x.get(2));
+        stdout.printf("  \"r\" : %.1f,\n", ((IcGenParams*) params) -> rMin);
+        stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
+        stdout.printf("  \"start\" : %.1f,\n", 0.0);
+        stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
+        stdout.printf("  \"step\" : %.3f,\n", 0.001);
+        stdout.printf("  \"plotratio\" : %.1d,\n", 500);
+        stdout.printf("  \"integrator\" : \"%s\"\n", "sc4");
+        stdout.printf("}\n");
     }
 
     public static void main (string[] args) {
@@ -85,12 +102,12 @@ public class MultiRootSample : GLib.Object
         IcGenParams params;
         MultirootFunction f;
         switch (args.length) {
-            case 7:
-                params = { 1.0, double.parse(args[2]), double.parse(args[3]), double.parse(args[4]) * PI, double.parse(args[5]) };
+            case 6:
+                params = { 1.0, double.parse(args[2]), double.parse(args[3]), (1.0 - double.parse(args[4])) * PI, double.parse(args[5]) };
                 f = MultirootFunction() { f = nonSpherical, n = nDim, params = &params };
                 break;
-            case 6:
-                params = { 1.0, double.parse(args[2]), double.parse(args[2]), double.parse(args[3]) * PI, double.parse(args[4]) };
+            case 5:
+                params = { 1.0, double.parse(args[2]), double.parse(args[2]), (1.0 - double.parse(args[3])) * PI, double.parse(args[4]) };
                 f = MultirootFunction() { f = spherical, n = nDim, params = &params };
                 break;
             default:
@@ -109,6 +126,8 @@ public class MultiRootSample : GLib.Object
                 break;
             status = MultirootTest.residual(solver.f, 1.0e-9);
         } while (status == Status.CONTINUE && iterations < 1000);
+
+        print_inital_conditions(solver, &params);
     }
 }
 
