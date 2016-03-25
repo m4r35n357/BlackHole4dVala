@@ -15,29 +15,29 @@ namespace Sim {
         }
 
         private static double R (double r, double E, double L, double Q, void* params) {
-            double a = ((IcGenParams*) params) -> a;
-            double mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParams*) params) -> a;
+            var mu2 = ((IcGenParams*) params) -> mu2;
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
 
         private static double dRdr (double r, double E, double L, double Q, void* params) {
-            double a = ((IcGenParams*) params) -> a;
-            double mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParams*) params) -> a;
+            var mu2 = ((IcGenParams*) params) -> mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
         }
 
         private static double THETA (double theta, double E, double L, double Q, void* params) {
-            double a = ((IcGenParams*) params) -> a;
-            double mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParams*) params) -> a;
+            var mu2 = ((IcGenParams*) params) -> mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
         private static int spherical (Vector x, void* params, Vector f) {
-            double E = x.get(0);
-            double L = x.get(1);
-            double Q = x.get(2);
+            var E = x.get(0);
+            var L = x.get(1);
+            var Q = x.get(2);
 
             f.set(0, R(((IcGenParams*) params) -> rMax, E, L, Q, params));
             f.set(1, dRdr(((IcGenParams*) params) -> rMax, E, L, Q, params));
@@ -47,9 +47,9 @@ namespace Sim {
         }
 
         private static int nonSpherical (Vector x, void* params, Vector f) {
-            double E = x.get(0);
-            double L = x.get(1);
-            double Q = x.get(2);
+            var E = x.get(0);
+            var L = x.get(1);
+            var Q = x.get(2);
 
             f.set(0, R(((IcGenParams*) params) -> rMin, E, L, Q, params));
             f.set(1, R(((IcGenParams*) params) -> rMax, E, L, Q, params));
@@ -64,13 +64,14 @@ namespace Sim {
         }
 
         private void print_inital_conditions (MultirootFsolver s, void* params) {
-            stdout.printf("{ \"M\" : %.1f,\n", 1.0);
+            stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
+            stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParams*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParams*) params) -> mu2);
-            stdout.printf("  \"E\" : %.12f,\n", s.x.get(0));
-            stdout.printf("  \"Lz\" : %.12f,\n", s.x.get(1));
-            stdout.printf("  \"C\" : %.12f,\n", s.x.get(2));
-            stdout.printf("  \"r\" : %.1f,\n", ((IcGenParams*) params) -> rMin);
+            stdout.printf("  \"E\" : %.17g,\n", s.x.get(0));
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1));
+            stdout.printf("  \"C\" : %.17g,\n", s.x.get(2));
+            stdout.printf("  \"r\" : %.1f,\n", 0.5 * ((((IcGenParams*) params) -> rMin) + ((IcGenParams*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
@@ -82,10 +83,10 @@ namespace Sim {
 
         public void generate (string[] args) {
             size_t nDim = 3;
-            Vector x = new Vector(nDim);
-            x.set(0, 1.0);
-            x.set(1, 5.0);
-            x.set(2, 0.0);
+            var x = new Vector(nDim);
+            x.set(0, 1.0);  // E
+            x.set(1, 5.0);  // L
+            x.set(2, 0.0);  // Q
 
             MultirootFsolver solver;
             switch (args[1]) {
@@ -118,7 +119,7 @@ namespace Sim {
                 default:
                     return_if_reached();
             }
-            solver.set (&f, x);
+            solver.set(&f, x);
 
             int status = 0;
             size_t iterations = 0;
@@ -129,7 +130,7 @@ namespace Sim {
                 print_state(iterations, solver);
                 if ((bool) status)
                     break;
-                status = MultirootTest.residual(solver.f, 1.0e-9);
+                status = MultirootTest.residual(solver.f, 1.0e-12);
             } while (status == Status.CONTINUE && iterations < 1000);
 
             print_inital_conditions(solver, &params);

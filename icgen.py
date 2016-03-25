@@ -81,7 +81,8 @@ def main ():
         print >> stderr, "Bad input data!"
         return
     # Initial conditions file
-    print >> stdout, "{ \"M\" : " + str(ic.M) + ","
+    print >> stdout, "{ \"optimizer\" : \"Nelder-Mead\","
+    print >> stdout, "  \"M\" : " + str(ic.M) + ","
     print >> stdout, "  \"a\" : " + str(ic.a) + ","
     print >> stdout, "  \"mu\" : " + str(ic.mu2) + ","
     print >> stdout, "  \"E\" : " + repr(ic.E) + ","
