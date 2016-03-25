@@ -35,8 +35,8 @@ public class MultiRootSample : GLib.Object
         double L = x.get(1);
         double Q = x.get(2);
 
-        f.set(0, R(((IcGenParams*) params) -> rMin, E, L, Q, params));
-        f.set(1, dR(((IcGenParams*) params) -> rMin, E, L, Q, params));
+        f.set(0, R(((IcGenParams*) params) -> rMax, E, L, Q, params));
+        f.set(1, dR(((IcGenParams*) params) -> rMax, E, L, Q, params));
         f.set(2, THETA(((IcGenParams*) params) -> thMin, E, L, Q, params));
 
         return Status.SUCCESS;
@@ -55,7 +55,7 @@ public class MultiRootSample : GLib.Object
     }
 
     static void print_state (size_t iter, MultirootFsolver s) {
-        stdout.printf("iter = %3u x = % .3f % .3f % .3f f(x) = % .3e % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
+        stdout.printf("iter = %3u x = % .6f % .6f % .6f f(x) = % .3e % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
     }
 
     public static void main (string[] args) {
@@ -82,8 +82,20 @@ public class MultiRootSample : GLib.Object
             default:
                 return_if_reached();
         }
-        IcGenParams params = { 1.0, 3.0, 12.0, 0.15 * PI, 1.0 };
-        MultirootFunction f = MultirootFunction() { f = nonSpherical, n = nDim, params = &params };
+        IcGenParams params;
+        MultirootFunction f;
+        switch (args.length) {
+            case 7:
+                params = { 1.0, double.parse(args[2]), double.parse(args[3]), double.parse(args[4]) * PI, double.parse(args[5]) };
+                f = MultirootFunction() { f = nonSpherical, n = nDim, params = &params };
+                break;
+            case 6:
+                params = { 1.0, double.parse(args[2]), double.parse(args[2]), double.parse(args[3]) * PI, double.parse(args[4]) };
+                f = MultirootFunction() { f = spherical, n = nDim, params = &params };
+                break;
+            default:
+                return_if_reached();
+        }
         solver.set (&f, x);
 
         int status = 0;
