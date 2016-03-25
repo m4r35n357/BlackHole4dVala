@@ -5,17 +5,17 @@ using Gsl;
 public class MultiRootSample : GLib.Object
 {
     struct IcGenParams {
-        public double a;
         public double mu2;
         public double rMin;
         public double rMax;
         public double thMin;
+        public double a;
     }
 
     static double R (double r, double E, double L, double Q, void* params) {
         double a = ((IcGenParams*) params) -> a;
         double mu2 = ((IcGenParams*) params) -> mu2;
-        return (((r*r)+(a*a))*E - a*L) * (((r*r)+(a*a))*E - a*L) - (((r*r)+(a*a))-2.0*r) * (Q + (L - a*E) * (L - a*E) + mu2 * r*r);
+        return (((r*r)+(a*a))*E - a*L) * (((r*r)+(a*a))*E - a*L) - (((r*r)+(a*a)) - 2.0*r) * (Q + (L - a*E) * (L - a*E) + mu2 * r*r);
     }
 
     static double dR (double r, double E, double L, double Q, void* params) {
@@ -27,7 +27,7 @@ public class MultiRootSample : GLib.Object
     static double THETA (double theta, double E, double L, double Q, void* params) {
         double a = ((IcGenParams*) params) -> a;
         double mu2 = ((IcGenParams*) params) -> mu2;
-        return Q - cos(theta)*cos(theta) * (a*a*(E*E-mu2) + L*L / (sin(theta)*sin(theta)));
+        return Q - cos(theta)*cos(theta) * (a*a*(E*E - mu2) + L*L / (sin(theta)*sin(theta)));
     }
 
     static int spherical (Vector x, void* params, Vector f) {
@@ -36,7 +36,7 @@ public class MultiRootSample : GLib.Object
 
         double E = x.get(0);
         double L = x.get(1);
-        double Q = x.get(1);
+        double Q = x.get(2);
 
         f.set(0, R(rMin, E, L, Q, params));
         f.set(1, dR(rMin, E, L, Q, params));
@@ -52,7 +52,7 @@ public class MultiRootSample : GLib.Object
 
         double E = x.get(0);
         double L = x.get(1);
-        double Q = x.get(1);
+        double Q = x.get(2);
 
         f.set(0, R(rMin, E, L, Q, params));
         f.set(1, R(rMax, E, L, Q, params));
@@ -80,15 +80,16 @@ public class MultiRootSample : GLib.Object
     }
 
     static void print_state (size_t iter, MultirootFsolver s) {
-        stdout.printf("iter = %3u x = % .3f % .3f f(x) = % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.f.get(0), s.f.get(1));
+        stdout.printf("iter = %3u x = % .3f % .3f % .3f f(x) = % .3e % .3e % .3e\n", (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
     }
 
     public static void main (string[] args) {
-        size_t nDim = 2;
+        size_t nDim = 3;
 
         Vector x = new Vector(nDim);
-        x.set(0, -10.0);
-        x.set(1, -5.0);
+        x.set(0, 1.0);
+        x.set(1, 5.0);
+        x.set(2, 0.0);
 
         MultirootFsolver solver;
         switch (args[1]) {
@@ -107,8 +108,8 @@ public class MultiRootSample : GLib.Object
             default:
                 return_if_reached();
         }
-        RParams params = { 1.0, 10.0 };
-        MultirootFunction f = MultirootFunction() { f = rosenbrock, n = nDim, params = &params };
+        IcGenParams params = { 1.0, 3.0, 12.0, 0.15, 1.0 };
+        MultirootFunction f = MultirootFunction() { f = nonSpherical, n = nDim, params = &params };
         solver.set (&f, x);
 
         int status = 0;
