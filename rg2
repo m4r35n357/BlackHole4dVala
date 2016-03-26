@@ -4,21 +4,29 @@ program=${1:-'./bh3d.rk4.py'}
 timeCoord=${2:-'tau'}
 timeStep=${3:-0.5}
 
+C='\033[0;36m'
+NC='\033[0m' # No Color
+
 # Generate the parameter file
 ic='initial-conditions'
 pot='/tmp/potential'
 if ! [ -f $ic ]
 then
-	./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>$pot
-#	./icgen.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
+	echo -n "${C}Creating fresh initial conditions file${NC}"
+	case $program in
+		*.py)	echo "${C} using Python IC generator${NC}"
+			./icgen.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot;;
+		*)	echo "${C} using Vala IC generator${NC}"	
+			./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>$pot;;
+	esac
+else
+	echo "${C}Using existing initial conditions file${NC}"
 fi
 
 # Pretty-print the parameter file
 jq . $ic
 
 # Run the simulator
-C='\033[0;36m'
-NC='\033[0m' # No Color
 datafile='/tmp/data'
 echo -n ${C}"Simulating with $program . . . "
 $program <$ic >$datafile
@@ -31,5 +39,9 @@ echo "Done!"${NC}
 ./filepotential.py <$pot &
 
 # Plot 3D graphics
-./finterp.py $timeCoord $timeStep <$datafile | ./plotBH.py $(jq .M $ic) $(jq .a $ic) &
+case $program in
+	*.rk4.*)./plotBH.py <$datafile $(jq .M $ic) $(jq .a $ic) &;;
+	*)	./finterp.py $timeCoord $timeStep <$datafile | ./plotBH.py $(jq .M $ic) $(jq .a $ic) &;;
+esac
+
 
