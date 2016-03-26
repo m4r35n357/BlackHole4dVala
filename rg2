@@ -1,6 +1,6 @@
 #!/bin/sh
 
-program=${1:-'./bh3d.rk4.py'}
+program=${1:-'./bh3d.rk4'}
 timeCoord=${2:-'tau'}
 timeStep=${3:-0.5}
 
@@ -13,12 +13,7 @@ pot='/tmp/potential'
 if ! [ -f $ic ]
 then
 	echo -n "${C}Creating fresh initial conditions file${NC}"
-	case $program in
-		*.py)	echo "${C} using Python IC generator${NC}"
-			./icgen.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot;;
-		*)	echo "${C} using Vala IC generator${NC}"	
-			./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>$pot;;
-	esac
+	./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>$pot
 else
 	echo "${C}Using existing initial conditions file${NC}"
 fi
@@ -33,14 +28,14 @@ $program <$ic >$datafile
 echo "Done!"${NC}
 
 # Plot errors
-./errorchart.py $timeCoord $(echo $(jq .duration $ic) / $(jq .step $ic) / 2000 | bc) <$datafile &
+./plotErrors.py $timeCoord $(echo $(jq .duration $ic) / $(jq .step $ic) / 2000 | bc) <$datafile &
 
 # Plot potentials
-./filepotential.py <$pot &
+./plotPotential.py <$pot &
 
 # Plot 3D graphics
 case $program in
-	*.rk4.*)./plotBH.py <$datafile $(jq .M $ic) $(jq .a $ic) &;;
+	*rk4*)	./plotBH.py <$datafile $(jq .M $ic) $(jq .a $ic) &;;
 	*)	./finterp.py $timeCoord $timeStep <$datafile | ./plotBH.py $(jq .M $ic) $(jq .a $ic) &;;
 esac
 

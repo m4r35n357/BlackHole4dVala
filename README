@@ -13,69 +13,62 @@ ffmpeg
 
 Sample usage:
 
-1.	Run and plot one of the initial conditions files:
+1.	Build all the Vala executables, and test them
 
-ic=ic/CircleUnStable
-jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
-
-
-2.	Generate initial conditions to stdout:
-(PARAMETERS: min r, max r, min theta, spin, Lz multiplier)
-
-./icgen dnewton 11.5 12.5 0.45 1.0 2>/dev/null
-
-or
-
-./icgen.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
-
-
-3.	Generate parameters, run, and plot a geodesic:
-
-pot=/tmp/potential
-
-./icgen.py 11.5 12.5 0.45 1.0 1.0 2>$pot | ./bh3d[|.rk4|.py|.rk4.py] | ./plotBH.py `jq .M $ic` `jq .a $ic` &
-
-
-4.	Edit the inital conditions file and run again with tau and t as the time parameter:
-
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
-
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
-
-
-5.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You will need to build the (included) source first, instructions are at the top of kerr-image.c.
-
-time { ./raytrace-command[.py] 0 </tmp/data | ./raytrace; }
-
-
-6.	Make a video out of the output files:
-
-ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
-mplayer raytrace.mp4 -fps 10
-
-
-7.	Two test commands . . .
-
-./run-tests 2>/dev/null
-./rg2 2>/dev/null
-
-
-8.	Some example pipelines . . .
-
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./plotBH.py `jq .M $ic` `jq .a $ic` &
-
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./raytrace.py 1000 0 | ./raytrace
+./build-all [fast]
 
 ic=initial-conditions
 data=/tmp/data
 pot=/tmp/potential
 
-./icgen.py 3.0 12.0 0.15 1.0 1.0 1>$ic 2>$pot
-./icgen.py 9.0 12.0 0.25 -1.0 1.0 1>$ic 2>$pot
+./run-tests 2>/dev/null
+rm -f $ic ./rg2 2>/dev/null
+
+
+2.	Run and plot one of the initial conditions files:
+
+ic=ic/CircleUnStable
+jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+
+
+3.	Generate initial conditions to stdout:
+(PARAMETERS: min r, max r, min theta, spin, Lz multiplier)
+
+./icgen dnewton 11.5 12.5 0.45 1.0 2>/dev/null
+
+
+4.	Generate parameters, run, and plot a geodesic:
+
+./icgen dnewton 11.5 12.5 0.45 1.0 2>$pot | ./bh3d.rk4 | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+
+
+5.	Edit the inital conditions file and run again with tau and t as the time parameter:
+
+./icgen dnewton 3.0 12.0 0.15 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+
+
+6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
+
+./icgen dnewton 3.0 12.0 0.15 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+
+
+7.	Make a video out of the output files:
+
+ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
+mplayer raytrace.mp4 -fps 10
+
+
+8.	Some example initial conditions pipelines . . .
+
+./icgen dnewton 3.0 12.0 0.15 1.0 1>$ic 2>$pot
+./icgen dnewton 9.0 12.0 0.25 -1.0 1>$ic 2>$pot
+
 jq . $ic; ./bh3d.rk4 <$ic | tee $data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-command[.py] 0 2>/dev/null | ./raytrace
+./icgen dnewton 3.0 12.0 0.15 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 REFERENCE DATA

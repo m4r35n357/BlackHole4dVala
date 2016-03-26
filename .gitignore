@@ -2,14 +2,11 @@
 *.zip
 *~
 initial-conditions
-kerr-image
 *.pdf
 *.dvi
 *.aux
 *.log
-plot.py
 *.mp4
-RaytracingOutput
 *.c
 *.o
 *.i
@@ -22,7 +19,9 @@ newton
 nbody3d
 raytrace-commands
 icgen
-test.vala
+kerr-image
+!kerr-image.c
+RaytracingOutput/
 tmp/
 images/
 
