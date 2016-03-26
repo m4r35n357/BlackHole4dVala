@@ -58,11 +58,6 @@ namespace Sim {
             return Status.SUCCESS;
         }
 
-        private void print_state (size_t iter, MultirootFsolver s) {
-            stderr.printf("iter = %3u x = % .6f % .6f % .6f f(x) = % .3e % .3e % .3e\n",
-                            (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
-        }
-
         private void print_potential (MultirootFsolver s, void* params) {
             var rMax = ((IcGenParams*) params) -> rMax;
             var E = s.x.get(0);
@@ -139,11 +134,9 @@ namespace Sim {
 
             int status = 0;
             size_t iterations = 0;
-            //print_state(iterations, solver);
             do {
                 iterations++;
                 status = solver.iterate();
-                //print_state(iterations, solver);
                 if ((bool) status) {
                     break;
                 }
