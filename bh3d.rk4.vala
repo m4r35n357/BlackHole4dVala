@@ -28,6 +28,7 @@ namespace Sim {
         private double ts;
         private int64 tr;
         private double a2;
+        private double horizon;
         private double aE;
         private double a2E;
         private double L2;
@@ -52,8 +53,8 @@ namespace Sim {
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
-        private double sgnR = 1.0;
-        private double sgnTH = 1.0;
+        private double sgnR = -1.0;
+        private double sgnTH = -1.0;
 
         private BL (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.a = a;
@@ -62,6 +63,7 @@ namespace Sim {
             this.L = L;
             this.Q = Q;
             this.a2 = a * a;
+            this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.a2E = a2 * E;
             this.L2 = L * L;
@@ -127,7 +129,7 @@ namespace Sim {
         public void solve () {
             int64 count = 0;
             var tau = 0.0;
-            while (tau <= end) {
+            while ((tau <= end) && (r >= horizon)) {
                 if ((tau >= start) && (count % tr == 0)) {
                     output(tau);
                 }

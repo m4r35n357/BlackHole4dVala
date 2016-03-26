@@ -26,6 +26,7 @@ namespace Sim {
             public double rMax;
             public double thMin;
             public double a;
+            public double Lfac;
         }
 
         private static double R (double r, double E, double L, double Q, void* params) {
@@ -92,9 +93,9 @@ namespace Sim {
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParams*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParams*) params) -> mu2);
             stdout.printf("  \"E\" : %.17g,\n", s.x.get(0));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1));
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1) * ((IcGenParams*) params) -> Lfac);
             stdout.printf("  \"C\" : %.17g,\n", s.x.get(2));
-            stdout.printf("  \"r\" : %.1f,\n", 0.5 * ((((IcGenParams*) params) -> rMin) + ((IcGenParams*) params) -> rMax));
+            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParams*) params) -> rMin + ((IcGenParams*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
@@ -131,13 +132,14 @@ namespace Sim {
             IcGenParams params;
             MultirootFunction func;
             switch (args.length) {
-                case 6:
+                case 7:
                     params = IcGenParams() {
                         mu2 = 1.0,
                         rMin = double.parse(args[2]),
                         rMax = double.parse(args[3]),
                         thMin = (1.0 - double.parse(args[4])) * PI,
-                        a = double.parse(args[5])
+                        a = double.parse(args[5]),
+                        Lfac = double.parse(args[6])
                     };
                     func = MultirootFunction() {
                         f = nonSpherical,
@@ -145,13 +147,14 @@ namespace Sim {
                         params = &params
                     };
                     break;
-                case 5:
+                case 6:
                     params = IcGenParams() {
                         mu2 = 1.0,
                         rMin = double.parse(args[2]),
                         rMax = double.parse(args[2]),
                         thMin = (1.0 - double.parse(args[3])) * PI,
-                        a = double.parse(args[4])
+                        a = double.parse(args[4]),
+                        Lfac = double.parse(args[5])
                     };
                     func = MultirootFunction() {
                         f = spherical,
