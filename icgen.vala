@@ -106,10 +106,10 @@ namespace Sim {
 
         public void generate (string[] args) {
             size_t nDim = 3;
-            var x = new Vector(nDim);
-            x.set(0, 1.0);  // E
-            x.set(1, 5.0);  // L
-            x.set(2, 0.0);  // Q
+            var vars = new Vector(nDim);
+            vars.set(0, 1.0);  // E
+            vars.set(1, 5.0);  // L
+            vars.set(2, 0.0);  // Q
 
             MultirootFsolver solver;
             switch (args[1]) {
@@ -129,20 +129,40 @@ namespace Sim {
                     return_if_reached();
             }
             IcGenParams params;
-            MultirootFunction f;
+            MultirootFunction func;
             switch (args.length) {
                 case 6:
-                    params = { 1.0, double.parse(args[2]), double.parse(args[3]), (1.0 - double.parse(args[4])) * PI, double.parse(args[5]) };
-                    f = MultirootFunction() { f = nonSpherical, n = nDim, params = &params };
+                    params = IcGenParams() {
+                        mu2 = 1.0,
+                        rMin = double.parse(args[2]),
+                        rMax = double.parse(args[3]),
+                        thMin = (1.0 - double.parse(args[4])) * PI,
+                        a = double.parse(args[5])
+                    };
+                    func = MultirootFunction() {
+                        f = nonSpherical,
+                        n = nDim,
+                        params = &params
+                    };
                     break;
                 case 5:
-                    params = { 1.0, double.parse(args[2]), double.parse(args[2]), (1.0 - double.parse(args[3])) * PI, double.parse(args[4]) };
-                    f = MultirootFunction() { f = spherical, n = nDim, params = &params };
+                    params = IcGenParams() {
+                        mu2 = 1.0,
+                        rMin = double.parse(args[2]),
+                        rMax = double.parse(args[2]),
+                        thMin = (1.0 - double.parse(args[3])) * PI,
+                        a = double.parse(args[4])
+                    };
+                    func = MultirootFunction() {
+                        f = spherical,
+                        n = nDim,
+                        params = &params
+                    };
                     break;
                 default:
                     return_if_reached();
             }
-            solver.set(&f, x);
+            solver.set(&func, vars);
 
             int status = 0;
             size_t iterations = 0;
