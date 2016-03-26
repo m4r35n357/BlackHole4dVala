@@ -77,8 +77,10 @@ namespace Sim {
             }
         }
 
-        private void print_inital_conditions (MultirootFsolver s, void* params) {
+        private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
+            stdout.printf("  \"iterations\" : %zu,\n", iterations);
+            stdout.printf("  \"errors\" : \"%.3e %.3e %.3e\",\n", s.f.get(0), s.f.get(1), s.f.get(2));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParams*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParams*) params) -> mu2);
@@ -148,7 +150,7 @@ namespace Sim {
                 status = MultirootTest.residual(solver.f, 1.0e-12);
             } while (status == Status.CONTINUE && iterations < 1000);
 
-            print_inital_conditions(solver, &params);
+            print_inital_conditions(solver, &params, iterations);
             print_potential(solver, &params);
         }
     }
