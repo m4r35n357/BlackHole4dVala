@@ -63,6 +63,20 @@ namespace Sim {
                             (uint) iter, s.x.get(0), s.x.get(1), s.x.get(2), s.f.get(0), s.f.get(1), s.f.get(2));
         }
 
+        private void print_potential (MultirootFsolver s, void* params) {
+            var rMax = ((IcGenParams*) params) -> rMax;
+            var E = s.x.get(0);
+            var L = s.x.get(1);
+            var Q = s.x.get(2);
+            for (var x = 1; x <= 1001; x++) {
+                var xValue = 1.0 * x / 1001;
+                stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
+                                xValue * rMax * 1.1,
+                                R(xValue * rMax * 1.1, E, L, Q, params),
+                                THETA(xValue * PI, E, L, Q, params));
+            }
+        }
+
         private void print_inital_conditions (MultirootFsolver s, void* params) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
@@ -91,16 +105,16 @@ namespace Sim {
             MultirootFsolver solver;
             switch (args[1]) {
                 case "dnewton":
-                    solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.dnewton, nDim);
+                    solver = new MultirootFsolver(MultirootFsolverTypes.dnewton, nDim);
                     break;
                 case "broyden":
-                    solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.broyden, nDim);
+                    solver = new MultirootFsolver(MultirootFsolverTypes.broyden, nDim);
                     break;
                 case "hybrid":
-                    solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.hybrid, nDim);
+                    solver = new MultirootFsolver(MultirootFsolverTypes.hybrid, nDim);
                     break;
                 case "hybrids":
-                    solver = new MultirootFsolver((MultirootFsolverType*) MultirootFsolverTypes.hybrids, nDim);
+                    solver = new MultirootFsolver(MultirootFsolverTypes.hybrids, nDim);
                     break;
                 default:
                     return_if_reached();
@@ -123,17 +137,19 @@ namespace Sim {
 
             int status = 0;
             size_t iterations = 0;
-            print_state(iterations, solver);
+            //print_state(iterations, solver);
             do {
                 iterations++;
                 status = solver.iterate();
-                print_state(iterations, solver);
-                if ((bool) status)
+                //print_state(iterations, solver);
+                if ((bool) status) {
                     break;
+                }
                 status = MultirootTest.residual(solver.f, 1.0e-12);
             } while (status == Status.CONTINUE && iterations < 1000);
 
             print_inital_conditions(solver, &params);
+            print_potential(solver, &params);
         }
     }
 

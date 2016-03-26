@@ -9,7 +9,8 @@ ic='initial-conditions'
 pot='/tmp/potential'
 if ! [ -f $ic ]
 then
-	./genparam.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
+	./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>$pot
+#	./icgen.py 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
 fi
 
 # Pretty-print the parameter file
