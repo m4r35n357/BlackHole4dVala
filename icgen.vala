@@ -66,9 +66,7 @@ namespace Sim {
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * rMax * 1.1,
-                                R(xValue * rMax * 1.1, E, L, Q, params),
-                                THETA(xValue * PI, E, L, Q, params));
+                                xValue * rMax * 1.1, R(xValue * rMax * 1.1, E, L, Q, params), THETA(xValue * PI, E, L, Q, params));
             }
         }
 

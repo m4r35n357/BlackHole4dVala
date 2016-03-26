@@ -22,21 +22,25 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 2.	Generate initial conditions to stdout:
 (PARAMETERS: min r, max r, min theta, spin, Lz multiplier)
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
+./icgen dnewton 11.5 12.5 0.45 1.0 2>/dev/null
+
+or
+
+./icgen.py 11.5 12.5 0.45 1.0 1.0 2>/dev/null
 
 
 3.	Generate parameters, run, and plot a geodesic:
 
 pot=/tmp/potential
 
-./genparam.py 11.5 12.5 0.45 1.0 1.0 2>$pot | ./bh3d[|.rk4|.py|.rk4.py] | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+./icgen.py 11.5 12.5 0.45 1.0 1.0 2>$pot | ./bh3d[|.rk4|.py|.rk4.py] | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 
 4.	Edit the inital conditions file and run again with tau and t as the time parameter:
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
 
 
 5.	Interpolate 1000 points of geodesic data and pass to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).  You will need to build the (included) source first, instructions are at the top of kerr-image.c.
@@ -58,20 +62,20 @@ mplayer raytrace.mp4 -fps 10
 
 8.	Some example pipelines . . .
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./raytrace.py 1000 0 | ./raytrace
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py mino 0.01 | ./raytrace.py 1000 0 | ./raytrace
 
 ic=initial-conditions
 data=/tmp/data
 pot=/tmp/potential
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 1>$ic 2>$pot
-./genparam.py 9.0 12.0 0.25 -1.0 1.0 1>$ic 2>$pot
+./icgen.py 3.0 12.0 0.15 1.0 1.0 1>$ic 2>$pot
+./icgen.py 9.0 12.0 0.25 -1.0 1.0 1>$ic 2>$pot
 jq . $ic; ./bh3d.rk4 <$ic | tee $data | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./genparam.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-command[.py] 0 2>/dev/null | ./raytrace
+./icgen.py 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-command[.py] 0 2>/dev/null | ./raytrace
 
 
 REFERENCE DATA
