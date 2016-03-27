@@ -10,7 +10,7 @@ ic='initial-conditions'
 
 int='./finterp.py'
 
-./icgen dnewton 3.0 12.0 0.15 1.0 >$ic 2>/tmp/potential
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 >$ic 2>/tmp/potential
 jq . $ic
 for app in $bh3ds
 do
@@ -18,7 +18,7 @@ do
 	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
-./icgen dnewton 12.0 0.0 1.0 >$ic 2>/tmp/potential
+./icgen dnewton 12.0 0.0 1.0 1.0 >$ic 2>/tmp/potential
 jq . $ic
 for app in $bh3ds
 do
@@ -39,7 +39,7 @@ do
 	$app <ic/SolarSystem 2>/tmp/progress | ./plotNBody.py
 done
 
-./icgen dnewton 12.0 0.5 1.0 >$ic 2>/tmp/potential
+./icgen dnewton 12.0 0.5 1.0 1.0 >$ic 2>/tmp/potential
 jq . $ic
 echo ${C}"./newton"${NC}
 ./newton <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic`
