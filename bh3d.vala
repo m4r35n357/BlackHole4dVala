@@ -26,9 +26,11 @@ namespace Simulations {
         private double start;
         private double end;
         private double ts;
+        private double tr;
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
+        private double horizon;
         private double aE;
         private double a2E;
         private double L2;
@@ -66,7 +68,7 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private KerrGeodesic (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, string type) {
+        private KerrGeodesic (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
             // Constants
             this.a = a;
             this.mu2 = mu2;
@@ -74,6 +76,7 @@ namespace Simulations {
             this.L = L;
             this.Q = Q;
             this.a2 = a * a;
+            this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.a2E = a2 * E;
             this.L2 = L * L;
@@ -83,13 +86,14 @@ namespace Simulations {
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
+            this.tr = tRatio;
             this.integrator = Integrator.getIntegrator(this, type);
             // Coordinates
             this.r = r0;
             this.th = th0;
             refresh(r, th);
-            this.rP = sqrt(fabs(R));
-            this.thP = sqrt(fabs(THETA));
+            this.rP = - sqrt(fabs(R));
+            this.thP = - sqrt(fabs(THETA));
         }
 
         /**
@@ -101,7 +105,7 @@ namespace Simulations {
                                     ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("Lz"), ic.get_double_member("C"),
                                     ic.get_double_member("r"), ic.get_double_member("theta"),
                                     ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
-                                    ic.get_string_member("integrator"));
+                                    ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
         }
 
         private double modH (double xDot, double X) {
@@ -163,10 +167,12 @@ namespace Simulations {
             var mino = 0.0;
             var tau = 0.0;
             var count = 1;
-            while (mino <= end) {
-                errors(count);
-                if (mino >= start) {
+            var tmp = 0;
+            while ((tau <= end) && (r >= horizon)) {
+                if ((tau >= start) && (tau >= tmp * tr * ts)) {
+                    errors(count);
                     output(mino, tau);
+                    tmp += 1;
                 }
                 integrator.compose();
                 mino += ts;
