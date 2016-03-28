@@ -6,14 +6,14 @@
 \usepackage{graphicx}
 \title{\textbf{Simulating Geodesics in the Kerr Spacetime}}
 \author{Ian Smith}
-\date{June 2015}
+\date{March 2016}
 \graphicspath{ {images/} }
 \begin{document}
 
 \maketitle
 
 \abstract
-A simple and accurate numerical procedure is presented, aimed at efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the method of generating a wide variety of useful initial conditions for the simulator.  The core is written both in Python and Vala, whilst graphical output and processing, including error plots, is provided by Python modules.  The source code for the suite of programs is published on GitHub under a BSD licence.
+A simple and accurate numerical procedure is presented, aimed at efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the method of generating a wide variety of useful initial conditions for the simulator.  The core is written in Vala, whilst graphical output and processing, including error plots, are provided by Python modules.  The source code for the suite of programs is published on GitHub under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
@@ -60,9 +60,9 @@ Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the
   \frac{d \Theta}{d \theta} (\theta) &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta } \label{eq:4}
 \end{align}
 
-The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using the Euler method, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots the "brute force" integration approach is severely hampered by the need to identify turning points, which is difficult to achieve reliably, and even harder to do without compromising the accuracy of the simulation.
+The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using RK4, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots of the potential functions, the "brute force" integration approach is made more difficult by the need to identify turning points, which is troublesome to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  I have implemented two integrators here.  One is an RK4 integrator, with a simple empirical solution to the turning point issue, and the other is a symplectic integrator which avoids the turning point issue entirely, at the cost of needing derivativs of the potentials.
 
-The alternative approach described here is to square $R$ and $\Theta$ equations, and use a symplectic Stormer-Verlet integrator \cite{hairer} to evolve the resulting equations, which are each treated as a "hamiltonian" system of first order differential equations.  This turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
+The symplectic approach is to square the $R$ and $\Theta$ equations, and use a Stormer-Verlet based integrator \cite{hairer} to evolve the resulting equations, which are each treated as a "hamiltonian" system of first order differential equations.  This turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
 
 \begin{equation}
 \frac {\dot x^2 - V(x)}{2} = 0
@@ -104,42 +104,47 @@ These "orbits" are not the focus of this article, but it is possible to experime
 
 \subsection{Finding the roots}
 
-Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, but the equations and algorithms can often become messy and potentially error-prone, with no easy way to check intermediate results.  For this work I took a simpler approach; forming a sum-of-squares error function from the constraints described above, minimizing it, then making sure it is sufficiently close to zero.  By experience I have found that the Nelder-Mead algorithm from the Scipy package converges reliably from zero initial conditions on $E$, $L$, and $Q$, and so far have found no reason to look elsewhere.
+Equations 11-13 and 14-16 can of course be solved by various root-finding techniques, the programs described here use the "MultirootFsolver" nonlinear solvers from the Gnu Scientific Library (GSL).
 
 A typical invocation of the suite of programs might be:
 \begin{verbatim}
-./genparam.py 3.0 12.0 0.3 1.0 1.0 >test 2>potential; ./rungraphics test
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
 \end{verbatim}
-which generates an orbit bound between 3 and 12 radial units and with a minimum latitude of 0.3 radians (starting from the "north pole" of course).
-Once the optimization has terminated the generation script then writes an initial conditions file (including the final values of $E$, $L$, and $Q$ as well as optimizer status) in JSON format for use as input to the simulator.  Here is an example:
+(where \$ic and \$pot represent file locations for the initial conditions and potential plot data) which generates an orbit bound between 3 and 12 radial units and with a minimum latitude of 0.15 radians (starting from the "north pole" of course).  In this example the spin parameter is 1.0, whilst the final parameter is a scaling factor for the computed angular momentum (this is normally left at 1.0; smaller values allow generation of plummeting trajectories).
+
+Once the solver has terminated successfully it writes an initial conditions file (including the final values of $E$, $L$, and $Q$ as well as optimizer status) in JSON format for use as input to the simulator.  Here is an example corresponding to the command above:
 \begin{verbatim}
-{ "M" : 1.0,
+{ "solver" : "dnewton",
+  "iterations" : 7,
+  "errors" : "-1.421e-14 0.000e+00 0.000e+00",
+  "M" : 1.0,
   "a" : 1.0,
   "mu" : 1.0,
-  "E" : 0.937868402897,
-  "Lz" : 2.16351904692,
-  "C" : 2.51243192834,
+  "E" : 0.94243182428522676,
+  "Lz" : 1.3515589497079128,
+  "C" : 7.124975646505507,
   "r" : 7.5,
-  "theta" : 1.57079632679,
-  "time" : 20.0,
+  "theta" : 1.570796327,
+  "start" : 0.0,
+  "duration" : 5000.0,
   "step" : 0.001,
-  "integratorOrder" : 2,
-  "error" : 3.106239408e-24,
-  "success" : "True",
-  "message" : "Optimization terminated successfully."
+  "plotratio" : 500,
+  "integrator" : "sc4"
 }
 \end{verbatim}
-The simulator takes this input, calculates the geodesic and writes its output data in JSON format (for the default timestep the output file is approximately 6.7MB).  A static image of the corresponding geodesic is shown below.  VPython allows the user to zoom and rotate the view, and watch it evolve.
+The simulator is invoked like so:
+\begin{verbatim}
+./bh3d.rk4 <$ic
+\end{verbatim}
+The simulator takes this input, calculates the geodesic and writes its output data to standard output in JSON format (which can be redirected to a file or piped to another program for display or other purposes).  A static image of the corresponding geodesic (displayed using a VPython script) is shown below.  VPython allows the user to zoom and rotate the view, and watch it evolve as it is being plotted.
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{Screenshot}
 \end{figure}
 The output of the simulator has been informally checked against a number of publicly available result sets and programs to guard against the possibility of gross errors.  This includes  but is not limited to the program GRorbits for equatorial geodesics \cite{grorbits}, together with published papers for spherical particle orbits \cite{teo}, and photon orbits \cite{kheng}.
 
-One important point to note about the simulator is that it is not set to terminate at any particular radius, only at the end of the specified simulation period.  This means that a particle can enter the black hole and emerge, without ever encountering the singularity or the "centre" of the BH.  This is not meant to imply anything physical; it is merely the nature of the mathematics of the Kerr spacetime.
-
 \subsection{. . . but are they REALLY geodesics?}
 
-Despite the high level of accuracy which the symplectic integrator can achieve for $r$ and $\theta$, this provides no guarantee that the complete solution is an accurate geodesic.  To verify this, we can evaluate the four-velocity norm of the path by plugging all the coordinate derivatives into the line element.  This error data is part of the JSON output of the simulation.  The figure below shows the error plot for the simulation above: blue is the radial error, red the latitudinal, and green the (deviation from) four-velocity norm, all plotted against a false dB scale (where 0dB = 1.0).
+Despite the high level of accuracy which the RK4 and symplectic integrators can achieve for $r$ and $\theta$, this provides no guarantee that the complete solution is an accurate geodesic.  To verify this, we can evaluate the four-velocity norm of the path by plugging all the coordinate derivatives into the line element.  This error data is part of the JSON output of the simulation.  The figure below shows the error plot for the simulation above: blue is the radial error, red the latitudinal, and green the (deviation from) four-velocity norm, all plotted against a false dB scale (where 0dB = 1.0).
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{figure_1}
 \end{figure}
@@ -155,7 +160,7 @@ The sources for the programs \cite{m4r35n357} described here are publicly availa
 \bibitem{kheng} Lim Yen Kheng, Seah Chu Perng, Tan Boon Sze Jackson, "Massive Particle Orbits Around Kerr Black Holes"
 \bibitem{teo} Teo, E, "Spherical photon orbits around a Kerr black hole"
 \bibitem{grorbits} Tujela, S., "GRorbits, http://stuleja.org/grorbits/"
-\bibitem{m4r35n357} Smith, I. C., "4D Kerr Spacetime Geodesic calculation and display, https://github.com/m4r35n357/BlackHole4DPython.git"
+\bibitem{m4r35n357} Smith, I. C., "4D Kerr Spacetime Geodesic calculation and display, https://github.com/m4r35n357/BlackHole4DVala.git"
 \end{thebibliography}
 
 \end{document}
