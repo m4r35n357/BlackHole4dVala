@@ -37,6 +37,11 @@ gcc -o kerr-image kerr-image.c -Ofast -Wall -std=c99 -pedantic -Wextra -Wno-unus
 
 valac -q --save-temps -X -w -X -lm --pkg gsl icgen.vala
 
+# strip executables
+case $opt in
+	fast)	strip $executables bh3d.rk4 raytrace-commands kerr-image icgen;;
+esac
+
 # admire our work
 ls -lAh --color $executables bh3d.rk4 raytrace-commands kerr-image icgen
 
