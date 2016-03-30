@@ -76,10 +76,10 @@ namespace Sim {
             this.tr = tRatio;
             this.r = r0;
             this.th = th0;
-            derivatives(r, th, 0);
+            f(r, th, 0);
         }
 
-        private void derivatives (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
+        private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
             var r2 = radius * radius;
             sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
@@ -93,27 +93,27 @@ namespace Sim {
             rDot = sqrt(R > 0.0 ? R : -R) / S;
             thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
             phDot = (a * P_D - aE + L / sth2) / S;
-            kt[stage] = tDot;
-            kr[stage] = rDot;
-            kth[stage] = thDot;
-            kph[stage] = phDot;
+            kt[stage] = ts * tDot;
+            kr[stage] = ts * rDot;
+            kth[stage] = ts * thDot;
+            kph[stage] = ts * phDot;
         }
 
         private double sumK (double[] kx) {
-            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) * ts / 8.0;
+            return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0;
         }
 
         private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
             sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
-            derivatives(r + 1.0 / 3.0 * sgnR * kr[0] * ts, th + 1.0 / 3.0 * sgnTH * kth[0] * ts, 1);
-            derivatives(r + 2.0 / 3.0 * sgnR * kr[1] * ts, th + 2.0 / 3.0 * sgnTH * kth[1] * ts, 2);
-            derivatives(r + sgnR * kr[2] * ts, th + sgnTH * kth[2] * ts, 3);
+            f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
+            f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
+            f(r + kr[2], th + kth[2], 3);
             t += sumK(kt);
             r += sumK(kr) * sgnR;
             th += sumK(kth) * sgnTH;
             ph += sumK(kph);
-            derivatives(r, th, 0);
+            f(r, th, 0);
         }
 
         private void output (double tau) {
