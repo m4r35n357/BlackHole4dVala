@@ -37,12 +37,12 @@ def main():
     ax1.yaxis.set_minor_locator(minorLocator)
     ax1.set_xlabel('Time: ' + timeCoordinate, color='0.20')
     ax1.set_ylabel('4-Velocity Norm Error', color='#006000')
-    ax1.set_ylim(-150.0, 0.0)
+    ax1.set_ylim(-180.0, 0.0)
     ax2 = ax1.twinx()
     ax2.yaxis.set_major_locator(majorLocator)
     ax2.yaxis.set_minor_locator(minorLocator)
     ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
-    ax2.set_ylim(-150.0, 0.0)
+    ax2.set_ylim(-180.0, 0.0)
     count = 0
     line = stdin.readline()
     while line:  # build raw data arrays
@@ -51,8 +51,8 @@ def main():
             timeValue = p[timeCoordinate]
             ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
             ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-            ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=1, zorder=9)
-            ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=1, zorder=8)
+            ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=2, zorder=9)
+            ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=2, zorder=8)
         line = stdin.readline()
         count += 1
     try:
