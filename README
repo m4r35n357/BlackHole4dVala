@@ -27,7 +27,7 @@ data=/tmp/data
 pot=/tmp/potential
 
 ./run-tests 2>/dev/null
-rm -f $ic ./rg2 2>/dev/null
+rm -f $ic; ./rg2 2>/dev/null
 
 
 2.	Run and plot one of the initial conditions files:
