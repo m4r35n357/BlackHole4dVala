@@ -2,9 +2,14 @@ Kerr Spacetime Geodesic Generator documentation (WIP)
 
 DEPENDENCIES:
 
-pypy (optional)
-matplotlib
+Build:
+valac
+libjson-glib-dev
+libgsl0-dev
+
+Run:
 vpython
+matplotlib
 jq
 bc
 imagemagick
@@ -34,24 +39,20 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 3.	Generate initial conditions to stdout:
 (PARAMETERS: min r, max r, min theta, spin, Lz multiplier)
 
-./icgen dnewton 11.5 12.5 0.45 1.0 2>/dev/null
+./icgen dnewton 11.5 12.5 0.45 1.0 1.0 2>$pot
 
-
-4.	Generate parameters, run, and plot a geodesic:
-
-./icgen dnewton 11.5 12.5 0.45 1.0 2>$pot | ./bh3d.rk4 | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 
 5.	Edit the inital conditions file and run again with tau and t as the time parameter:
 
-./icgen dnewton 3.0 12.0 0.15 1.0 2>potential | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
-./icgen.py 3.0 12.0 0.15 1.0 1.0 2>potential | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M initial-conditions` `jq .a initial-conditions`
+./icgen.py 3.0 12.0 0.15 1.0 1.0 1.0 2>$pot | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
-./icgen dnewton 3.0 12.0 0.15 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 7.	Make a video out of the output files:
@@ -62,8 +63,8 @@ mplayer raytrace.mp4 -fps 10
 
 8.	Some example initial conditions pipelines . . .
 
-./icgen dnewton 3.0 12.0 0.15 1.0 1.0 1>$ic 2>$pot
-./icgen dnewton 9.0 12.0 0.25 -1.0 1.0 1>$ic 2>$pot
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
+./icgen dnewton 9.0 12.0 0.25 -1.0 1.0 >$ic 2>$pot
 
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
