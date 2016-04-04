@@ -32,7 +32,7 @@ rm -f $ic; ./rg2 2>/dev/null
 
 2.	Run and plot one of the initial conditions files:
 
-ic=ic/CircleUnStable
+ic=ic/Light1
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 
