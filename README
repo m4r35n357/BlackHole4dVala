@@ -69,7 +69,7 @@ mplayer raytrace.mp4 -fps 10
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./icgen dnewton 3.0 12.0 0.15 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 REFERENCE DATA

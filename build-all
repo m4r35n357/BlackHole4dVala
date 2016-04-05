@@ -2,7 +2,7 @@
 
 opt="${1:-0}"
 
-valac="valac -v --save-temps -X -O$opt -X -lm --pkg json-glib-1.0"
+valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
@@ -20,7 +20,7 @@ do
 	rm -f ${executable}.c
 	valafiles="$valafiles ${executable}.vala"
 done
-$valac $valafiles
+$valac --pkg json-glib-1.0 $valafiles
 
 # hard link executables
 for executable in $executables
@@ -30,12 +30,12 @@ done
 rm -f $outfile
 
 rm -f bh3d.rk4.c raytrace-commands.c
-$valac bh3d.rk4.vala
-$valac raytrace-commands.vala
+$valac --pkg json-glib-1.0 bh3d.rk4.vala
+$valac --pkg json-glib-1.0 raytrace-commands.vala
 
-gcc -o kerr-image kerr-image.c -Ofast -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
+gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 
-valac -q --save-temps -X -w -X -lm --pkg gsl icgen.vala
+valac -q -X -w --pkg gsl icgen.vala
 
 # strip executables
 case $opt in

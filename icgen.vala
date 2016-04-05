@@ -106,6 +106,7 @@ namespace Sim {
 
         public void generate (string[] args) {
             size_t nDim = 3;
+
             var vars = new Vector(nDim);
             vars.set(0, 1.0);  // E
             vars.set(1, 5.0);  // L
@@ -128,6 +129,7 @@ namespace Sim {
                 default:
                     return_if_reached();
             }
+
             IcGenParams params;
             MultirootFunction func;
             switch (args.length) {
