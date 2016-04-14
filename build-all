@@ -35,7 +35,7 @@ $valac --pkg json-glib-1.0 raytrace-commands.vala
 
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 
-valac -q -X -w --pkg gsl icgen.vala
+$valac -q -X -w --pkg gsl icgen.vala
 
 # strip executables
 case $opt in
