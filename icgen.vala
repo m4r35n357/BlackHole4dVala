@@ -75,7 +75,7 @@ namespace Sim {
         private void print_potential (MultirootFsolver s, void* params) {
             var rMax = ((IcGenParams*) params) -> rMax;
             var E = s.x.get(0);
-            var L = s.x.get(1);
+            var L = s.x.get(1) * ((IcGenParams*) params) -> Lfac;
             var Q = s.x.get(2);
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
