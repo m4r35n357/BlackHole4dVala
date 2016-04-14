@@ -17,9 +17,6 @@ from sys import argv, stderr, exit, stdin
 from math import sqrt, sin, cos, tan, fabs, pi
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color, cone
 from json import loads
-from array import array
-from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
-import numpy as np
 
 def isco (a):
     z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
@@ -51,7 +48,7 @@ def main():
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
     ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
-    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
+    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))  # z axis
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #sphere(pos=(0,0,0), radius=3.0, opacity=0.2)
