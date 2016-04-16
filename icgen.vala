@@ -13,6 +13,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 using GLib.Math;
+using Json;
 using Gsl;
 
 namespace Sim {
@@ -108,7 +109,7 @@ namespace Sim {
             stdout.printf("}\n");
         }
 
-        public void generate (string[] args) {
+        public void generate (Json.Object input) {
             size_t nDim = 3;
 
             var constantsOfMotion = new Vector(nDim);
@@ -117,7 +118,7 @@ namespace Sim {
             constantsOfMotion.set(ConstantOfMotion.Q, 0.0);
 
             MultirootFsolver solver;
-            switch (args[1]) {
+            switch (input.get_string_member("method")) {
                 case "dnewton":
                     solver = new MultirootFsolver(MultirootFsolverTypes.dnewton, nDim);
                     break;
@@ -136,15 +137,15 @@ namespace Sim {
 
             IcGenParam parameters;
             MultirootFunction objectiveFunction;
-            switch (args.length) {
-                case 7:
+            switch (input.get_size()) {
+                case 6:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
-                        rMin = double.parse(args[2]),
-                        rMax = double.parse(args[3]),
-                        thMin = (1.0 - double.parse(args[4])) * PI,
-                        a = double.parse(args[5]),
-                        Lfac = double.parse(args[6])
+                        rMin = input.get_double_member("rMin"),
+                        rMax = input.get_double_member("rMax"),
+                        thMin = (1.0 - input.get_double_member("thMin")) * PI,
+                        a = input.get_double_member("spin"),
+                        Lfac = input.get_double_member("Lfac")
                     };
                     objectiveFunction = MultirootFunction() {
                         f = nonSpherical,
@@ -152,14 +153,14 @@ namespace Sim {
                         params = &parameters
                     };
                     break;
-                case 6:
+                case 5:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
-                        rMin = double.parse(args[2]),
-                        rMax = double.parse(args[2]),
-                        thMin = (1.0 - double.parse(args[3])) * PI,
-                        a = double.parse(args[4]),
-                        Lfac = double.parse(args[5])
+                        rMin = input.get_double_member("r"),
+                        rMax = input.get_double_member("r"),
+                        thMin = (1.0 - input.get_double_member("thMin")) * PI,
+                        a = input.get_double_member("spin"),
+                        Lfac = input.get_double_member("Lfac")
                     };
                     objectiveFunction = MultirootFunction() {
                         f = spherical,
@@ -186,9 +187,30 @@ namespace Sim {
             print_inital_conditions(solver, &parameters, iterations);
             print_potential(solver, &parameters);
         }
+
+        public static Json.Object fromJson () {
+            var input = new StringBuilder();
+            var buffer = new char[1024];
+            while (!stdin.eof()) {
+                var chunk = stdin.gets(buffer);
+                if (chunk != null) {
+                    input.append(chunk);
+                }
+            }
+            unowned Json.Object o;
+            var p = new Parser();
+            try {
+                p.load_from_data(input.str);
+                o = p.get_root().get_object();
+            } catch (GLib.Error e) {
+                stderr.printf("Unable to parse the input data: %s\n", e.message);
+                return_if_reached();
+            }
+            return o;
+        }
     }
 
     public static void main (string[] args) {
-        new IcGenerator().generate(args);
+        new IcGenerator().generate(IcGenerator.fromJson());
     }
 }

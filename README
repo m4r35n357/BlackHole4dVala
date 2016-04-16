@@ -37,22 +37,23 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 
 3.	Generate initial conditions to stdout:
-(PARAMETERS: min r, max r, min theta, spin, Lz multiplier)
 
-./icgen dnewton 11.5 12.5 0.45 1.0 1.0 2>$pot
+Spherical orbit:
+echo '{ "method": "dnewton", "r": 12.0, "thMin": 0.45, "spin": 1.0, "Lfac": 1.0 }' | ./icgen 2>$pot | jq .
+
+Non-spherical orbit:
+echo '{ "method": "dnewton", "rMin": 11.5, "rMax": 12.5, "thMin": 0.45, "spin": 1.0, "Lfac": 1.0 }' | ./icgen 2>$pot | jq .
 
 
+5.	Edit the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
 
-5.	Edit the inital conditions file and run again with tau and t as the time parameter:
+./bh3d <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
-./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
-
-./icgen.py 3.0 12.0 0.15 1.0 1.0 1.0 2>$pot | ./bh3d | ./finterp.py t 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
-./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+echo '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | ./icgen 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 7.	Make a video out of the output files:
@@ -63,13 +64,13 @@ mplayer raytrace.mp4 -fps 10
 
 8.	Some example initial conditions pipelines . . .
 
-./icgen dnewton 3.0 12.0 0.15 1.0 1.0 >$ic 2>$pot
-./icgen dnewton 9.0 12.0 0.25 -1.0 1.0 >$ic 2>$pot
+echo '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | ./icgen >$ic 2>$pot
+echo '{ "method": "dnewton", "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Lfac": 1.0 }' | ./icgen >$ic 2>$pot
 
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-./icgen dnewton 3.0 12.0 0.15 1.0 1.0 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+echo '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | ./icgen 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 REFERENCE DATA
