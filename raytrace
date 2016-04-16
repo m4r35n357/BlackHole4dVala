@@ -16,6 +16,10 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Colour
 
+fragment () {
+    { echo -n $line | $raytracer $1 $2 >$3 2>/dev/null; } &
+}
+
 assemble () {
     wait
     cat $tmp1 $tmp2 $tmp3 $tmp4 | convert - $filename
@@ -29,10 +33,10 @@ do
     if [ ! -f $filename ]
     then
         trap 'echo ""; echo -n "${CYAN}Finishing $filename . . . ${NC}"; assemble "Done!"; exit' INT
-        { echo -n $line | $raytracer 360 480 >$tmp4 2>/dev/null; } &
-        { echo -n $line | $raytracer 240 360 >$tmp3 2>/dev/null; } &
-        { echo -n $line | $raytracer 120 240 >$tmp2 2>/dev/null; } &
-        { echo -n $line | $raytracer 0 120 >$tmp1 2>/dev/null; } &
+        fragment 360 480 $tmp4
+        fragment 240 360 $tmp3
+        fragment 120 240 $tmp2
+        fragment   0 120 $tmp1
         assemble "Written   $filename"
         trap - INT
     else
