@@ -26,15 +26,17 @@ namespace Sim {
             public double rMax;
             public double thMin;
             public double a;
+            public double Efac;
             public double Lfac;
+            public double Qfac;
         }
 
         private enum ConstantOfMotion {
-            E, L, Q
+            E, L, Q;
         }
 
         private enum Objective {
-            R1, R2, THETA
+            R1, R2, THETA;
         }
 
         private static double R (double r, double E, double L, double Q, void* params) {
@@ -83,9 +85,9 @@ namespace Sim {
 
         private void print_potential (MultirootFsolver s, void* params) {
             var rMax = ((IcGenParam*) params) -> rMax;
-            var E = s.x.get(ConstantOfMotion.E);
+            var E = s.x.get(ConstantOfMotion.E) * ((IcGenParam*) params) -> Efac;
             var L = s.x.get(ConstantOfMotion.L) * ((IcGenParam*) params) -> Lfac;
-            var Q = s.x.get(ConstantOfMotion.Q);
+            var Q = s.x.get(ConstantOfMotion.Q) * ((IcGenParam*) params) -> Qfac;
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
@@ -100,9 +102,9 @@ namespace Sim {
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParam*) params) -> mu2);
-            stdout.printf("  \"E\" : %.17g,\n", s.x.get(ConstantOfMotion.E));
+            stdout.printf("  \"E\" : %.17g,\n", s.x.get(ConstantOfMotion.E) * ((IcGenParam*) params) -> Efac);
             stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(ConstantOfMotion.L) * ((IcGenParam*) params) -> Lfac);
-            stdout.printf("  \"C\" : %.17g,\n", s.x.get(ConstantOfMotion.Q));
+            stdout.printf("  \"C\" : %.17g,\n", s.x.get(ConstantOfMotion.Q) * ((IcGenParam*) params) -> Qfac);
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParam*) params) -> rMin + ((IcGenParam*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
@@ -142,14 +144,16 @@ namespace Sim {
             IcGenParam parameters;
             MultirootFunction objectiveFunctionData;
             switch (input.get_size()) {
-                case 6:
+                case 8:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = input.get_double_member("rMin"),
                         rMax = input.get_double_member("rMax"),
                         thMin = (1.0 - input.get_double_member("thMin")) * PI,
                         a = input.get_double_member("spin"),
-                        Lfac = input.get_double_member("Lfac")
+                        Efac = input.get_double_member("Efac"),
+                        Lfac = input.get_double_member("Lfac"),
+                        Qfac = input.get_double_member("Qfac")
                     };
                     objectiveFunctionData = MultirootFunction() {
                         f = nonSphericalOrbit,
@@ -157,14 +161,16 @@ namespace Sim {
                         params = &parameters
                     };
                     break;
-                case 5:
+                case 7:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = input.get_double_member("r"),
                         rMax = input.get_double_member("r"),
                         thMin = (1.0 - input.get_double_member("thMin")) * PI,
                         a = input.get_double_member("spin"),
-                        Lfac = input.get_double_member("Lfac")
+                        Efac = input.get_double_member("Efac"),
+                        Lfac = input.get_double_member("Lfac"),
+                        Qfac = input.get_double_member("Qfac")
                     };
                     objectiveFunctionData = MultirootFunction() {
                         f = sphericalOrbit,

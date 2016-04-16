@@ -11,7 +11,7 @@ pot='/tmp/potential'
 
 int='./finterp.py'
 
-params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }'
+params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }'
 echo $params | jq .
 echo $params | ./icgen >$ic 2>$pot
 jq . $ic
@@ -21,7 +21,7 @@ do
 	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
-params='{ "method": "dnewton", "r": 12.0, "thMin": 0.0, "spin": 1.0, "Lfac": 1.0 }'
+params='{ "method": "dnewton", "r": 12.0, "thMin": 0.0, "spin": 1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }'
 echo $params | jq .
 echo $params | ./icgen >$ic 2>$pot
 jq . $ic
@@ -44,7 +44,7 @@ do
 	$app <ic/SolarSystem 2>/tmp/progress | ./plotNBody.py
 done
 
-params='{ "method": "dnewton", "r": 12.0, "thMin": 0.5, "spin": 1.0, "Lfac": 1.0 }'
+params='{ "method": "dnewton", "r": 12.0, "thMin": 0.5, "spin": 1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }'
 echo $params | jq .
 echo $params | ./icgen >$ic 2>$pot
 jq . $ic
