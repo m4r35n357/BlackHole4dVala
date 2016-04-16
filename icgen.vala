@@ -26,9 +26,7 @@ namespace Sim {
             public double rMax;
             public double thMin;
             public double a;
-            public double Efac;
             public double Lfac;
-            public double Qfac;
         }
 
         private enum Variable {
@@ -85,9 +83,9 @@ namespace Sim {
 
         private void print_potential (MultirootFsolver s, void* params) {
             var rMax = ((IcGenParam*) params) -> rMax;
-            var E = s.x.get(Variable.E) * ((IcGenParam*) params) -> Efac;
+            var E = s.x.get(Variable.E);
             var L = s.x.get(Variable.L) * ((IcGenParam*) params) -> Lfac;
-            var Q = s.x.get(Variable.Q) * ((IcGenParam*) params) -> Qfac;
+            var Q = s.x.get(Variable.Q);
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
@@ -102,9 +100,9 @@ namespace Sim {
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParam*) params) -> mu2);
-            stdout.printf("  \"E\" : %.17g,\n", s.x.get(Variable.E) * ((IcGenParam*) params) -> Efac);
+            stdout.printf("  \"E\" : %.17g,\n", s.x.get(Variable.E));
             stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(Variable.L) * ((IcGenParam*) params) -> Lfac);
-            stdout.printf("  \"C\" : %.17g,\n", s.x.get(Variable.Q) * ((IcGenParam*) params) -> Qfac);
+            stdout.printf("  \"C\" : %.17g,\n", s.x.get(Variable.Q));
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParam*) params) -> rMin + ((IcGenParam*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
@@ -144,16 +142,14 @@ namespace Sim {
             IcGenParam parameters;
             MultirootFunction objectiveFunctionData;
             switch (input.get_size()) {
-                case 8:
+                case 6:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = input.get_double_member("rMin"),
                         rMax = input.get_double_member("rMax"),
                         thMin = (1.0 - input.get_double_member("thMin")) * PI,
                         a = input.get_double_member("spin"),
-                        Efac = input.get_double_member("Efac"),
-                        Lfac = input.get_double_member("Lfac"),
-                        Qfac = input.get_double_member("Qfac")
+                        Lfac = input.get_double_member("Lfac")
                     };
                     objectiveFunctionData = MultirootFunction() {
                         f = nonSphericalOrbit,
@@ -161,16 +157,14 @@ namespace Sim {
                         params = &parameters
                     };
                     break;
-                case 7:
+                case 5:
                     parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = input.get_double_member("r"),
                         rMax = input.get_double_member("r"),
                         thMin = (1.0 - input.get_double_member("thMin")) * PI,
                         a = input.get_double_member("spin"),
-                        Efac = input.get_double_member("Efac"),
-                        Lfac = input.get_double_member("Lfac"),
-                        Qfac = input.get_double_member("Qfac")
+                        Lfac = input.get_double_member("Lfac")
                     };
                     objectiveFunctionData = MultirootFunction() {
                         f = sphericalOrbit,
