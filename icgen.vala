@@ -19,7 +19,7 @@ namespace Sim {
 
     public class IcGenerator : GLib.Object {
 
-        private struct IcGenParams {
+        private struct IcGenParam {
             public double mu2;
             public double rMin;
             public double rMax;
@@ -28,55 +28,59 @@ namespace Sim {
             public double Lfac;
         }
 
+        private enum ConstantOfMotion {
+            E, L, Q
+        }
+
         private static double R (double r, double E, double L, double Q, void* params) {
-            var a = ((IcGenParams*) params) -> a;
-            var mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParam*) params) -> a;
+            var mu2 = ((IcGenParam*) params) -> mu2;
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
 
         private static double dRdr (double r, double E, double L, double Q, void* params) {
-            var a = ((IcGenParams*) params) -> a;
-            var mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParam*) params) -> a;
+            var mu2 = ((IcGenParam*) params) -> mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
         }
 
         private static double THETA (double theta, double E, double L, double Q, void* params) {
-            var a = ((IcGenParams*) params) -> a;
-            var mu2 = ((IcGenParams*) params) -> mu2;
+            var a = ((IcGenParam*) params) -> a;
+            var mu2 = ((IcGenParam*) params) -> mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
         private static int spherical (Vector x, void* params, Vector f) {
-            var E = x.get(0);
-            var L = x.get(1);
-            var Q = x.get(2);
+            var E = x.get(ConstantOfMotion.E);
+            var L = x.get(ConstantOfMotion.L);
+            var Q = x.get(ConstantOfMotion.Q);
 
-            f.set(0, R(((IcGenParams*) params) -> rMax, E, L, Q, params));
-            f.set(1, dRdr(((IcGenParams*) params) -> rMax, E, L, Q, params));
-            f.set(2, THETA(((IcGenParams*) params) -> thMin, E, L, Q, params));
+            f.set(0, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(1, dRdr(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(2, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
 
         private static int nonSpherical (Vector x, void* params, Vector f) {
-            var E = x.get(0);
-            var L = x.get(1);
-            var Q = x.get(2);
+            var E = x.get(ConstantOfMotion.E);
+            var L = x.get(ConstantOfMotion.L);
+            var Q = x.get(ConstantOfMotion.Q);
 
-            f.set(0, R(((IcGenParams*) params) -> rMin, E, L, Q, params));
-            f.set(1, R(((IcGenParams*) params) -> rMax, E, L, Q, params));
-            f.set(2, THETA(((IcGenParams*) params) -> thMin, E, L, Q, params));
+            f.set(0, R(((IcGenParam*) params) -> rMin, E, L, Q, params));
+            f.set(1, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(2, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
 
         private void print_potential (MultirootFsolver s, void* params) {
-            var rMax = ((IcGenParams*) params) -> rMax;
-            var E = s.x.get(0);
-            var L = s.x.get(1) * ((IcGenParams*) params) -> Lfac;
-            var Q = s.x.get(2);
+            var rMax = ((IcGenParam*) params) -> rMax;
+            var E = s.x.get(ConstantOfMotion.E);
+            var L = s.x.get(ConstantOfMotion.L) * ((IcGenParam*) params) -> Lfac;
+            var Q = s.x.get(ConstantOfMotion.Q);
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
@@ -89,12 +93,12 @@ namespace Sim {
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
             stdout.printf("  \"errors\" : \"%.3e %.3e %.3e\",\n", s.f.get(0), s.f.get(1), s.f.get(2));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
-            stdout.printf("  \"a\" : %.1f,\n", ((IcGenParams*) params) -> a);
-            stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParams*) params) -> mu2);
+            stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
+            stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParam*) params) -> mu2);
             stdout.printf("  \"E\" : %.17g,\n", s.x.get(0));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1) * ((IcGenParams*) params) -> Lfac);
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1) * ((IcGenParam*) params) -> Lfac);
             stdout.printf("  \"C\" : %.17g,\n", s.x.get(2));
-            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParams*) params) -> rMin + ((IcGenParams*) params) -> rMax));
+            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParam*) params) -> rMin + ((IcGenParam*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
@@ -107,10 +111,10 @@ namespace Sim {
         public void generate (string[] args) {
             size_t nDim = 3;
 
-            var vars = new Vector(nDim);
-            vars.set(0, 1.0);  // E
-            vars.set(1, 5.0);  // L
-            vars.set(2, 0.0);  // Q
+            var constantsOfMotion = new Vector(nDim);
+            constantsOfMotion.set(ConstantOfMotion.E, 1.0);
+            constantsOfMotion.set(ConstantOfMotion.L, 5.0);
+            constantsOfMotion.set(ConstantOfMotion.Q, 0.0);
 
             MultirootFsolver solver;
             switch (args[1]) {
@@ -130,11 +134,11 @@ namespace Sim {
                     return_if_reached();
             }
 
-            IcGenParams params;
-            MultirootFunction func;
+            IcGenParam parameters;
+            MultirootFunction objectiveFunction;
             switch (args.length) {
                 case 7:
-                    params = IcGenParams() {
+                    parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = double.parse(args[2]),
                         rMax = double.parse(args[3]),
@@ -142,14 +146,14 @@ namespace Sim {
                         a = double.parse(args[5]),
                         Lfac = double.parse(args[6])
                     };
-                    func = MultirootFunction() {
+                    objectiveFunction = MultirootFunction() {
                         f = nonSpherical,
                         n = nDim,
-                        params = &params
+                        params = &parameters
                     };
                     break;
                 case 6:
-                    params = IcGenParams() {
+                    parameters = IcGenParam() {
                         mu2 = 1.0,
                         rMin = double.parse(args[2]),
                         rMax = double.parse(args[2]),
@@ -157,16 +161,16 @@ namespace Sim {
                         a = double.parse(args[4]),
                         Lfac = double.parse(args[5])
                     };
-                    func = MultirootFunction() {
+                    objectiveFunction = MultirootFunction() {
                         f = spherical,
                         n = nDim,
-                        params = &params
+                        params = &parameters
                     };
                     break;
                 default:
                     return_if_reached();
             }
-            solver.set(&func, vars);
+            solver.set(&objectiveFunction, constantsOfMotion);
 
             int status = 0;
             size_t iterations = 0;
@@ -179,8 +183,8 @@ namespace Sim {
                 status = MultirootTest.residual(solver.f, 1.0e-12);
             } while (status == Status.CONTINUE && iterations < 1000);
 
-            print_inital_conditions(solver, &params, iterations);
-            print_potential(solver, &params);
+            print_inital_conditions(solver, &parameters, iterations);
+            print_potential(solver, &parameters);
         }
     }
 
