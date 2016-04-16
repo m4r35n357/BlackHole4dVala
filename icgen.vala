@@ -33,6 +33,10 @@ namespace Sim {
             E, L, Q
         }
 
+        private enum Objective {
+            R1, R2, THETA
+        }
+
         private static double R (double r, double E, double L, double Q, void* params) {
             var a = ((IcGenParam*) params) -> a;
             var mu2 = ((IcGenParam*) params) -> mu2;
@@ -53,26 +57,26 @@ namespace Sim {
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
-        private static int spherical (Vector x, void* params, Vector f) {
+        private static int sphericalOrbit (Vector x, void* params, Vector f) {
             var E = x.get(ConstantOfMotion.E);
             var L = x.get(ConstantOfMotion.L);
             var Q = x.get(ConstantOfMotion.Q);
 
-            f.set(0, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(1, dRdr(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(2, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
+            f.set(Objective.R1, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(Objective.R2, dRdr(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(Objective.THETA, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
 
-        private static int nonSpherical (Vector x, void* params, Vector f) {
+        private static int nonSphericalOrbit (Vector x, void* params, Vector f) {
             var E = x.get(ConstantOfMotion.E);
             var L = x.get(ConstantOfMotion.L);
             var Q = x.get(ConstantOfMotion.Q);
 
-            f.set(0, R(((IcGenParam*) params) -> rMin, E, L, Q, params));
-            f.set(1, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(2, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
+            f.set(Objective.R1, R(((IcGenParam*) params) -> rMin, E, L, Q, params));
+            f.set(Objective.R2, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
+            f.set(Objective.THETA, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
@@ -92,13 +96,13 @@ namespace Sim {
         private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
-            stdout.printf("  \"errors\" : \"%.3e %.3e %.3e\",\n", s.f.get(0), s.f.get(1), s.f.get(2));
+            stdout.printf("  \"errors\" : \"%.3e %.3e %.3e\",\n", s.f.get(Objective.R1), s.f.get(Objective.R2), s.f.get(Objective.THETA));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
             stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParam*) params) -> mu2);
-            stdout.printf("  \"E\" : %.17g,\n", s.x.get(0));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(1) * ((IcGenParam*) params) -> Lfac);
-            stdout.printf("  \"C\" : %.17g,\n", s.x.get(2));
+            stdout.printf("  \"E\" : %.17g,\n", s.x.get(ConstantOfMotion.E));
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(ConstantOfMotion.L) * ((IcGenParam*) params) -> Lfac);
+            stdout.printf("  \"C\" : %.17g,\n", s.x.get(ConstantOfMotion.Q));
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParam*) params) -> rMin + ((IcGenParam*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
@@ -112,10 +116,10 @@ namespace Sim {
         public void generate (Json.Object input) {
             size_t nDim = 3;
 
-            var constantsOfMotion = new Vector(nDim);
-            constantsOfMotion.set(ConstantOfMotion.E, 1.0);
-            constantsOfMotion.set(ConstantOfMotion.L, 5.0);
-            constantsOfMotion.set(ConstantOfMotion.Q, 0.0);
+            var initialValues = new Vector(nDim);
+            initialValues.set(ConstantOfMotion.E, 1.0);
+            initialValues.set(ConstantOfMotion.L, 5.0);
+            initialValues.set(ConstantOfMotion.Q, 0.0);
 
             MultirootFsolver solver;
             switch (input.get_string_member("method")) {
@@ -136,7 +140,7 @@ namespace Sim {
             }
 
             IcGenParam parameters;
-            MultirootFunction objectiveFunction;
+            MultirootFunction objectiveFunctionData;
             switch (input.get_size()) {
                 case 6:
                     parameters = IcGenParam() {
@@ -147,8 +151,8 @@ namespace Sim {
                         a = input.get_double_member("spin"),
                         Lfac = input.get_double_member("Lfac")
                     };
-                    objectiveFunction = MultirootFunction() {
-                        f = nonSpherical,
+                    objectiveFunctionData = MultirootFunction() {
+                        f = nonSphericalOrbit,
                         n = nDim,
                         params = &parameters
                     };
@@ -162,8 +166,8 @@ namespace Sim {
                         a = input.get_double_member("spin"),
                         Lfac = input.get_double_member("Lfac")
                     };
-                    objectiveFunction = MultirootFunction() {
-                        f = spherical,
+                    objectiveFunctionData = MultirootFunction() {
+                        f = sphericalOrbit,
                         n = nDim,
                         params = &parameters
                     };
@@ -171,7 +175,7 @@ namespace Sim {
                 default:
                     return_if_reached();
             }
-            solver.set(&objectiveFunction, constantsOfMotion);
+            solver.set(&objectiveFunctionData, initialValues);
 
             int status = 0;
             size_t iterations = 0;
