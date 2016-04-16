@@ -39,9 +39,9 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 3.	Create an initial conditions data file
 
-echo '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }' >$icdata
+echo '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }' >$icdata; jq . $icdata
 
-echo '{ "method": "dnewton", "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }' >$icdata
+echo '{ "method": "dnewton", "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Efac": 1.0, "Lfac": 1.0, "Qfac": 1.0 }' >$icdata; jq . $icdata
 
 
 4.	Generate initial conditions to stdout:
@@ -55,16 +55,14 @@ echo '{ "method": "dnewton", "rMin": 11.5, "rMax": 12.5, "thMin": 0.45, "spin": 
 
 5.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
 
-vi $icdata
-./icgen <$icdata >$ic 2>$pot
+vi $icdata; jq . $icdata
+./icgen <$icdata >$ic 2>$pot; jq . $ic
+vi $ic; jq . $ic
 
-vi $ic
 ./bh3d <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
 
 6.	Some example initial conditions pipelines . . .
-
-./icgen <$icdata >$ic 2>$pot
 
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
