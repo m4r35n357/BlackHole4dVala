@@ -122,7 +122,7 @@ namespace Sim {
             initialValues.set(Variable.Q, 0.0);
 
             MultirootFsolver solver;
-            switch (input.get_string_member("method")) {
+            switch (input.has_member("method") ? input.get_string_member("method") : "dnewton") {
                 case "dnewton":
                     solver = new MultirootFsolver(MultirootFsolverTypes.dnewton, nDim);
                     break;
@@ -141,39 +141,36 @@ namespace Sim {
 
             IcGenParam parameters;
             MultirootFunction objectiveFunctionData;
-            switch (input.get_size()) {
-                case 6:
-                    parameters = IcGenParam() {
-                        mu2 = 1.0,
-                        rMin = input.get_double_member("rMin"),
-                        rMax = input.get_double_member("rMax"),
-                        thMin = (1.0 - input.get_double_member("thMin")) * PI,
-                        a = input.get_double_member("spin"),
-                        Lfac = input.get_double_member("Lfac")
-                    };
-                    objectiveFunctionData = MultirootFunction() {
-                        f = nonSphericalOrbit,
-                        n = nDim,
-                        params = &parameters
-                    };
-                    break;
-                case 5:
-                    parameters = IcGenParam() {
-                        mu2 = 1.0,
-                        rMin = input.get_double_member("r"),
-                        rMax = input.get_double_member("r"),
-                        thMin = (1.0 - input.get_double_member("thMin")) * PI,
-                        a = input.get_double_member("spin"),
-                        Lfac = input.get_double_member("Lfac")
-                    };
-                    objectiveFunctionData = MultirootFunction() {
-                        f = sphericalOrbit,
-                        n = nDim,
-                        params = &parameters
-                    };
-                    break;
-                default:
-                    return_if_reached();
+            if (input.has_member("r")) {
+                parameters = IcGenParam() {
+                    mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
+                    rMin = input.get_double_member("r"),
+                    rMax = input.get_double_member("r"),
+                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
+                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+                };
+                objectiveFunctionData = MultirootFunction() {
+                    f = sphericalOrbit,
+                    n = nDim,
+                    params = &parameters
+                };
+            } else if (input.has_member("rMin") && input.has_member("rMax")) {
+                parameters = IcGenParam() {
+                    mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
+                    rMin = input.get_double_member("rMin"),
+                    rMax = input.get_double_member("rMax"),
+                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
+                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+                };
+                objectiveFunctionData = MultirootFunction() {
+                    f = nonSphericalOrbit,
+                    n = nDim,
+                    params = &parameters
+                };
+            } else {
+                return_if_reached();
             }
             solver.set(&objectiveFunctionData, initialValues);
 
@@ -185,8 +182,8 @@ namespace Sim {
                 if ((bool) status) {
                     break;
                 }
-                status = MultirootTest.residual(solver.f, 1.0e-12);
-            } while (status == Status.CONTINUE && iterations < 1000);
+                status = MultirootTest.residual(solver.f, input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12);
+            } while (status == Status.CONTINUE && iterations < (input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000));
 
             print_inital_conditions(solver, &parameters, iterations);
             print_potential(solver, &parameters);

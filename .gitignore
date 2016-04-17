@@ -1,7 +1,7 @@
 # comment
 *.zip
 *~
-icgen-data
+icgen-data*
 initial-conditions
 *.pdf
 *.dvi
