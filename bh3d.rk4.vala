@@ -18,6 +18,10 @@ using Json;
 namespace Sim {
 
     public class BL : GLib.Object {
+
+        /**
+         * All fields are private
+         */
         private double a;
         private double mu2;
         private double E;
@@ -56,6 +60,9 @@ namespace Sim {
         private double sgnR = -1.0;
         private double sgnTH = -1.0;
 
+        /**
+         * Private constructor, use the static factory
+         */
         private BL (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.a = a;
             this.mu2 = mu2;
@@ -79,6 +86,9 @@ namespace Sim {
             f(r, th, 0);
         }
 
+        /**
+         * Calculate potentials & coordinate velocites, and populate RK4 arrays for each stage
+         */
         private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
             var r2 = radius * radius;
             sth2 = sin(theta) * sin(theta);
@@ -99,10 +109,16 @@ namespace Sim {
             kph[stage] = ts * phDot;
         }
 
+        /**
+         * Sum the RK4 terms for each coordinate
+         */
         private double sumK (double[] kx) {
             return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0;
         }
 
+        /**
+         * The RK4 algorithm including turning point handling
+         */
         private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
             sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
@@ -116,6 +132,9 @@ namespace Sim {
             f(r, th, 0);
         }
 
+        /**
+         * Write the simulated data to STDOUT
+         */
         private void output (double tau) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
@@ -126,6 +145,9 @@ namespace Sim {
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
         }
 
+        /**
+         * Externally visible method, sets up and controls the simulation
+         */
         public void solve () {
             int64 count = 0;
             var tau = 0.0;
@@ -140,6 +162,9 @@ namespace Sim {
             output(tau);
         }
 
+        /**
+         * Static factory from STDIN in JSON format
+         */
         public static BL fromJson () {
             var input = new StringBuilder();
             var buffer = new char[1024];

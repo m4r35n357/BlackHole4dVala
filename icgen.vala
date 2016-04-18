@@ -20,6 +20,9 @@ namespace Sim {
 
     public class IcGenerator : GLib.Object {
 
+        /**
+         * Fixed parameters and constraints
+         */
         private struct IcGenParam {
             public double mu2;
             public double rMin;
@@ -29,14 +32,23 @@ namespace Sim {
             public double Lfac;
         }
 
+        /**
+         * Array indices for variables
+         */
         private enum Variable {
-            E, L, Q;
+            E = 0, L = 1, Q = 2;
         }
 
+        /**
+         * Array indices for objective functions
+         */
         private enum Objective {
-            R1, R2, THETA;
+            R1 = 0, R2 = 1, THETA = 2;
         }
 
+        /**
+         * R potential
+         */
         private static double R (double r, double E, double L, double Q, void* params) {
             var a = ((IcGenParam*) params) -> a;
             var mu2 = ((IcGenParam*) params) -> mu2;
@@ -44,6 +56,9 @@ namespace Sim {
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
 
+        /**
+         * Derivative of R potential wrt R
+         */
         private static double dRdr (double r, double E, double L, double Q, void* params) {
             var a = ((IcGenParam*) params) -> a;
             var mu2 = ((IcGenParam*) params) -> mu2;
@@ -51,12 +66,18 @@ namespace Sim {
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
         }
 
+        /**
+         * THETA potential
+         */
         private static double THETA (double theta, double E, double L, double Q, void* params) {
             var a = ((IcGenParam*) params) -> a;
             var mu2 = ((IcGenParam*) params) -> mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
+        /**
+         * Spherical orbits are determined by R potential at constant radius, its derivative, and THETA potential
+         */
         private static int sphericalOrbit (Vector x, void* params, Vector f) {
             var E = x.get(Variable.E);
             var L = x.get(Variable.L);
@@ -69,6 +90,9 @@ namespace Sim {
             return Status.SUCCESS;
         }
 
+        /**
+         * Non-spherical orbits are determined by R potentials at maximum and minimum radii, and THETA potential
+         */
         private static int nonSphericalOrbit (Vector x, void* params, Vector f) {
             var E = x.get(Variable.E);
             var L = x.get(Variable.L);
@@ -81,6 +105,9 @@ namespace Sim {
             return Status.SUCCESS;
         }
 
+        /**
+         * Potential data to STDERR for plotting
+         */
         private void print_potential (MultirootFsolver s, void* params) {
             var rMax = ((IcGenParam*) params) -> rMax;
             var E = s.x.get(Variable.E);
@@ -93,6 +120,9 @@ namespace Sim {
             }
         }
 
+        /**
+         * Write the initial conditions file to STDOUT
+         */
         private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
@@ -113,14 +143,19 @@ namespace Sim {
             stdout.printf("}\n");
         }
 
+        /**
+         * Externally visible method, sets up and controls the solver
+         */
         public void generate (Json.Object input) {
             size_t nDim = 3;
 
+            // initialize variables
             var initialValues = new Vector(nDim);
             initialValues.set(Variable.E, 1.0);
             initialValues.set(Variable.L, 5.0);
             initialValues.set(Variable.Q, 0.0);
 
+            // get a solver
             MultirootFsolver solver;
             switch (input.has_member("method") ? input.get_string_member("method") : "dnewton") {
                 case "dnewton":
@@ -139,6 +174,7 @@ namespace Sim {
                     return_if_reached();
             }
 
+            // configure the solver
             IcGenParam parameters;
             MultirootFunction objectiveFunctionData;
             if (input.has_member("r")) {
@@ -174,6 +210,7 @@ namespace Sim {
             }
             solver.set(&objectiveFunctionData, initialValues);
 
+            // run the solver
             int status = 0;
             size_t iterations = 0;
             do {
@@ -185,10 +222,14 @@ namespace Sim {
                 status = MultirootTest.residual(solver.f, input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12);
             } while (status == Status.CONTINUE && iterations < (input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000));
 
+            // generate output
             print_inital_conditions(solver, &parameters, iterations);
             print_potential(solver, &parameters);
         }
 
+        /**
+         * Read from STDIN and parse into a JSON object
+         */
         public static Json.Object fromJson () {
             var input = new StringBuilder();
             var buffer = new char[1024];
