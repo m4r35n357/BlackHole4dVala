@@ -211,6 +211,8 @@ namespace Sim {
             solver.set(&objectiveFunctionData, initialValues);
 
             // run the solver
+            var errorLimit = input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12;
+            var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
             int status = 0;
             size_t iterations = 0;
             do {
@@ -219,8 +221,8 @@ namespace Sim {
                 if ((bool) status) {
                     break;
                 }
-                status = MultirootTest.residual(solver.f, input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12);
-            } while (status == Status.CONTINUE && iterations < (input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000));
+                status = MultirootTest.residual(solver.f, errorLimit);
+            } while (status == Status.CONTINUE && iterations < maxIterations);
 
             // generate output
             print_inital_conditions(solver, &parameters, iterations);
