@@ -67,6 +67,10 @@ vi $ic; jq . $ic
 jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgen 2>/dev/null | ./bh3d.rk4 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgen 2>/dev/null | tee $ic | jq .; ./bh3d.rk4 <$ic| ./plotBH.py `jq .M $ic` `jq .a $ic`
+
 
 7.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
