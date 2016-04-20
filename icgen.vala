@@ -215,18 +215,18 @@ namespace Sim {
             var errorLimit = input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
             int status = 0;
-            int status1 = 0;
-            int status2 = 0;
+            int errorStatus = 0;
+            int deltaStatus = 0;
             size_t iterations = 0;
             do {
                 iterations++;
                 status = solver.iterate();
-                if ((bool) status) {
+                if (status == Status.ENOPROG || status == Status.EBADFUNC) {
                     break;
                 }
-                status1 = MultirootTest.residual(solver.f, errorLimit);
-                status2 = MultirootTest.delta(solver.dx, solver.x, errorLimit, errorLimit);
-            } while (status1 == Status.CONTINUE && status2 == Status.CONTINUE && iterations < maxIterations);
+                errorStatus = MultirootTest.residual(solver.f, errorLimit);
+                deltaStatus = MultirootTest.delta(solver.dx, solver.x, errorLimit, errorLimit);
+            } while (errorStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE && iterations < maxIterations);
 
             // generate output
             print_inital_conditions(solver, &parameters, iterations);
