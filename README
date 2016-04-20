@@ -52,6 +52,10 @@ echo '{ "r": 12.0, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
 Non-spherical orbit:
 echo '{ "rMin": 11.5, "rMax": 12.5, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
 
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "errorLimit": 1e-12, "method": "hybrids" }' | ./icgen 2>$pot | | tee $ic jq .
+
+echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "errorLimit": 1e-12, "method": "dnewton" }' | ./icgen 2>$pot | tee $ic | jq .
+
 
 5.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
 
