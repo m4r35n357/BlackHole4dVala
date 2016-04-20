@@ -126,6 +126,7 @@ namespace Sim {
         private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
+            stdout.printf("  \"laststep\" : \"%.3e %.3e %.3e\",\n", s.dx.get(Variable.E), s.dx.get(Variable.L), s.dx.get(Variable.Q));
             stdout.printf("  \"errors\" : \"%.3e %.3e %.3e\",\n", s.f.get(Objective.R1), s.f.get(Objective.R2), s.f.get(Objective.THETA));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
@@ -214,6 +215,8 @@ namespace Sim {
             var errorLimit = input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
             int status = 0;
+            int status1 = 0;
+            int status2 = 0;
             size_t iterations = 0;
             do {
                 iterations++;
@@ -221,8 +224,9 @@ namespace Sim {
                 if ((bool) status) {
                     break;
                 }
-                status = MultirootTest.residual(solver.f, errorLimit);
-            } while (status == Status.CONTINUE && iterations < maxIterations);
+                status1 = MultirootTest.residual(solver.f, errorLimit);
+                status2 = MultirootTest.delta(solver.dx, solver.x, errorLimit, errorLimit);
+            } while (status1 == Status.CONTINUE && status2 == Status.CONTINUE && iterations < maxIterations);
 
             // generate output
             print_inital_conditions(solver, &parameters, iterations);
