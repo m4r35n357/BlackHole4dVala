@@ -212,7 +212,8 @@ namespace Sim {
             solver.set(&objectiveFunctionData, initialValues);
 
             // run the solver
-            var errorLimit = input.has_member("errorLimit") ? input.get_double_member("errorLimit") : 1.0e-12;
+            var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
+            var epsrel = input.has_member("epsrel") ? input.get_double_member("epsrel") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
             int solverStatus = 0;
             int residualStatus = 0;
@@ -224,8 +225,8 @@ namespace Sim {
                 if (solverStatus == Status.ENOPROG || solverStatus == Status.EBADFUNC) {
                     break;
                 }
-                residualStatus = MultirootTest.residual(solver.f, errorLimit);
-                deltaStatus = MultirootTest.delta(solver.dx, solver.x, errorLimit, errorLimit);
+                residualStatus = MultirootTest.residual(solver.f, epsabs);
+                deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
             } while (residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE && iterations < maxIterations);
 
             // generate output
