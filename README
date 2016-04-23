@@ -39,9 +39,11 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 3.	Create an initial conditions data file
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' >$icdata; jq . $icdata
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | jq . >$icdata
 
-echo '{ "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0 }' >$icdata; jq . $icdata
+echo '{ "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Lfac": 1.0 }' | jq . >$icdata
+
+echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "dnewton" }' | jq . >$icdata
 
 
 4.	Generate initial conditions to stdout:
@@ -52,9 +54,9 @@ echo '{ "r": 12.0, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
 Non-spherical orbit:
 echo '{ "rMin": 11.5, "rMax": 12.5, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "errorLimit": 1e-12, "method": "hybrids" }' | ./icgen 2>$pot | | tee $ic jq .
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "hybrids" }' | ./icgen 2>$pot | tee $ic jq .
 
-echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "errorLimit": 1e-12, "method": "dnewton" }' | ./icgen 2>$pot | tee $ic | jq .
+echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "dnewton" }' | ./icgen 2>$pot | tee $ic | jq .
 
 
 5.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
