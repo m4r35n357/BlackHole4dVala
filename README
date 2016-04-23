@@ -39,6 +39,8 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 3.	Create an initial conditions data file
 
+cp icgen-data.example icgen-data
+
 echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | jq . >$icdata
 
 echo '{ "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Lfac": 1.0 }' | jq . >$icdata

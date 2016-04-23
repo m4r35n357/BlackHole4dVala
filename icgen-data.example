@@ -1,0 +1,14 @@
+{
+  "rMin": 3.0,
+  "rMax": 400.0,
+  "thMin": 0.15,
+  "spin": 1.0,
+  "Lfac": 1.0,
+  "E0": 1.0,
+  "L0": 5.0,
+  "Q0": 0.0,
+  "method": "hybrids",
+  "maxIterations": 1000,
+  "epsabs": 1e-12,
+  "epsrel": 1e-12
+}

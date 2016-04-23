@@ -152,9 +152,9 @@ namespace Sim {
 
             // initialize variables
             var initialValues = new Vector(nDim);
-            initialValues.set(Variable.E, 1.0);
-            initialValues.set(Variable.L, 5.0);
-            initialValues.set(Variable.Q, 0.0);
+            initialValues.set(Variable.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
+            initialValues.set(Variable.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
+            initialValues.set(Variable.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
 
             // get a solver
             MultirootFsolver solver;
