@@ -9,7 +9,7 @@
   "Q0": 0.0,
   "method": "dnewton",
   "maxIterations": 1000,
-  "termination": "either",
+  "termination": "deltas",
   "epsabs": 1.0e-12,
   "epsrel": 1.0e-12
 }

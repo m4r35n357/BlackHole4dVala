@@ -1,8 +1,7 @@
 # comment
 *.zip
 *~
-icgen-data
-initial-conditions
+*.json
 *.pdf
 *.dvi
 *.aux

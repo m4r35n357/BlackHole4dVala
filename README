@@ -22,8 +22,8 @@ Sample usage:
 
 ./build-all [fast]
 
-icdata=icgen-data
-ic=initial-conditions
+icdata=icgen-data.json
+ic=initial-conditions.json
 data=/tmp/data
 pot=/tmp/potential
 
@@ -39,7 +39,7 @@ jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 3.	Create an initial conditions data file
 
-cp icgen-data.example icgen-data
+cp icgen-data.example $icdata
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | jq . >$icdata
 
