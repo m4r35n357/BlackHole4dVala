@@ -156,7 +156,7 @@ namespace Sim {
             initialValues.set(Variable.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
             initialValues.set(Variable.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
 
-            // get a solver
+            // choose a solver
             MultirootFsolver solver;
             switch (input.has_member("method") ? input.get_string_member("method") : "dnewton") {
                 case "dnewton":
@@ -215,6 +215,8 @@ namespace Sim {
             var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
             var epsrel = input.has_member("epsrel") ? input.get_double_member("epsrel") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
+            var termination = input.has_member("termination") ? input.get_string_member("termination") : "both";
+            bool cont = true;
             int solverStatus = 0;
             int residualStatus = 0;
             int deltaStatus = 0;
@@ -227,7 +229,20 @@ namespace Sim {
                 }
                 residualStatus = MultirootTest.residual(solver.f, epsabs);
                 deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
-            } while (residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE && iterations < maxIterations);
+                switch (termination) {
+                    case "both":
+                        cont = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE && iterations < maxIterations;
+                        break;
+                    case "residuals":
+                        cont = residualStatus == Status.CONTINUE && iterations < maxIterations;
+                        break;
+                    case "delta":
+                        cont = deltaStatus == Status.CONTINUE && iterations < maxIterations;
+                        break;
+                    default:
+                        return_if_reached();
+                }
+            } while (cont);
 
             // generate output
             print_inital_conditions(solver, &parameters, iterations);
