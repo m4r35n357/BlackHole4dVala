@@ -126,8 +126,8 @@ namespace Sim {
         private void print_inital_conditions (MultirootFsolver s, P* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
-            stdout.printf("  \"residuals\" : \"R1 = %.1e, R2 = %.1e, TH = %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
-            stdout.printf("  \"deltas\" : \"dE = %.1e, dL = %.1e, dQ = %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
+            stdout.printf("  \"residuals\" : \"R1: %.1e, R2: %.1e, TH: %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
+            stdout.printf("  \"deltas\" : \"dE: %.1e, dL: %.1e, dQ: %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", params -> a);
             stdout.printf("  \"mu\" : %.1f,\n", params -> mu2);
@@ -217,7 +217,7 @@ namespace Sim {
             var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
             var epsrel = input.has_member("epsrel") ? input.get_double_member("epsrel") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
-            var termination = input.has_member("termination") ? input.get_string_member("termination") : "both";
+            var termination = input.has_member("termination") ? input.get_string_member("termination") : "either";
             bool continuing = true;
             int solverStatus = 0;
             int residualStatus = 0;
@@ -232,14 +232,14 @@ namespace Sim {
                 residualStatus = MultirootTest.residual(solver.f, epsabs);
                 deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
                 switch (termination) {
-                    case "both":
-                        continuing = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE;
-                        break;
                     case "residuals":
                         continuing = residualStatus == Status.CONTINUE;
                         break;
                     case "deltas":
                         continuing = deltaStatus == Status.CONTINUE;
+                        break;
+                    case "either":
+                        continuing = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE;
                         break;
                     default:
                         stderr.printf("ERROR: Invalid termination criteria!");
