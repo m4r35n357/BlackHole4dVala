@@ -183,7 +183,7 @@ namespace Sim {
                 stderr.printf("ERROR: Unable to parse the input data: %s\n", e.message);
                 return_if_reached();
             }
-            return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("Lz"), o.get_double_member("C"),
+            return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("C"),
                           o.get_double_member("r"), o.get_double_member("theta"),
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }

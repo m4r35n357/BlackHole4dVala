@@ -132,7 +132,7 @@ namespace Sim {
             stdout.printf("  \"a\" : %.1f,\n", params -> a);
             stdout.printf("  \"mu\" : %.1f,\n", params -> mu2);
             stdout.printf("  \"E\" : %.17g,\n", s.x.get(X.E));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(X.L) * params -> Lfac);
+            stdout.printf("  \"L\" : %.17g,\n", s.x.get(X.L) * params -> Lfac);
             stdout.printf("  \"C\" : %.17g,\n", s.x.get(X.Q));
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (params -> rMin + params -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
@@ -181,7 +181,7 @@ namespace Sim {
             MultirootFunction objectiveFunctionData;
             if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
                 parameters = P() {
-                    mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
+                    mu2 = 1.0,
                     rMin = input.get_double_member("r"),
                     rMax = input.get_double_member("r"),
                     thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
@@ -195,7 +195,7 @@ namespace Sim {
                 };
             } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
                 parameters = P() {
-                    mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
+                    mu2 = 1.0,
                     rMin = input.get_double_member("rMin"),
                     rMax = input.get_double_member("rMax"),
                     thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
