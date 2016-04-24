@@ -49,9 +49,9 @@ namespace Sim {
         /**
          * R potential
          */
-        private static double R (double r, double E, double L, double Q, void* params) {
-            var a = ((P*) params) -> a;
-            var mu2 = ((P*) params) -> mu2;
+        private static double R (double r, double E, double L, double Q, P* params) {
+            var a = params -> a;
+            var mu2 = params -> mu2;
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
@@ -59,9 +59,9 @@ namespace Sim {
         /**
          * Derivative of R potential wrt R
          */
-        private static double dRdr (double r, double E, double L, double Q, void* params) {
-            var a = ((P*) params) -> a;
-            var mu2 = ((P*) params) -> mu2;
+        private static double dRdr (double r, double E, double L, double Q, P* params) {
+            var a = params -> a;
+            var mu2 = params -> mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
         }
@@ -69,23 +69,23 @@ namespace Sim {
         /**
          * THETA potential
          */
-        private static double THETA (double theta, double E, double L, double Q, void* params) {
-            var a = ((P*) params) -> a;
-            var mu2 = ((P*) params) -> mu2;
+        private static double THETA (double theta, double E, double L, double Q, P* params) {
+            var a = params -> a;
+            var mu2 = params -> mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
         /**
          * Spherical orbits are determined by R potential at constant radius, its derivative, and THETA potential
          */
-        private static int sphericalOrbit (Vector x, void* params, Vector f) {
+        private static int sphericalOrbit (Vector x, P* params, Vector f) {
             var E = x.get(X.E);
             var L = x.get(X.L);
             var Q = x.get(X.Q);
 
-            f.set(F.R1, R(((P*) params) -> rMax, E, L, Q, params));
-            f.set(F.R2, dRdr(((P*) params) -> rMax, E, L, Q, params));
-            f.set(F.TH, THETA(((P*) params) -> thMin, E, L, Q, params));
+            f.set(F.R1, R(params -> rMax, E, L, Q, params));
+            f.set(F.R2, dRdr(params -> rMax, E, L, Q, params));
+            f.set(F.TH, THETA(params -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
@@ -93,14 +93,14 @@ namespace Sim {
         /**
          * Non-spherical orbits are determined by R potentials at maximum and minimum radii, and THETA potential
          */
-        private static int nonSphericalOrbit (Vector x, void* params, Vector f) {
+        private static int nonSphericalOrbit (Vector x, P* params, Vector f) {
             var E = x.get(X.E);
             var L = x.get(X.L);
             var Q = x.get(X.Q);
 
-            f.set(F.R1, R(((P*) params) -> rMin, E, L, Q, params));
-            f.set(F.R2, R(((P*) params) -> rMax, E, L, Q, params));
-            f.set(F.TH, THETA(((P*) params) -> thMin, E, L, Q, params));
+            f.set(F.R1, R(params -> rMin, E, L, Q, params));
+            f.set(F.R2, R(params -> rMax, E, L, Q, params));
+            f.set(F.TH, THETA(params -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
@@ -108,10 +108,10 @@ namespace Sim {
         /**
          * Potential data to STDERR for plotting
          */
-        private void print_potential (MultirootFsolver s, void* params) {
-            var rMax = ((P*) params) -> rMax;
+        private void print_potential (MultirootFsolver s, P* params) {
+            var rMax = params -> rMax;
             var E = s.x.get(X.E);
-            var L = s.x.get(X.L) * ((P*) params) -> Lfac;
+            var L = s.x.get(X.L) * params -> Lfac;
             var Q = s.x.get(X.Q);
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
@@ -123,18 +123,18 @@ namespace Sim {
         /**
          * Write the initial conditions file to STDOUT
          */
-        private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
+        private void print_inital_conditions (MultirootFsolver s, P* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
             stdout.printf("  \"residuals\" : \"R1 = %.1e, R2 = %.1e, TH = %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
             stdout.printf("  \"deltas\" : \"dE = %.1e, dL = %.1e, dQ = %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
-            stdout.printf("  \"a\" : %.1f,\n", ((P*) params) -> a);
-            stdout.printf("  \"mu\" : %.1f,\n", ((P*) params) -> mu2);
+            stdout.printf("  \"a\" : %.1f,\n", params -> a);
+            stdout.printf("  \"mu\" : %.1f,\n", params -> mu2);
             stdout.printf("  \"E\" : %.17g,\n", s.x.get(X.E));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(X.L) * ((P*) params) -> Lfac);
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(X.L) * params -> Lfac);
             stdout.printf("  \"C\" : %.17g,\n", s.x.get(X.Q));
-            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((P*) params) -> rMin + ((P*) params) -> rMax));
+            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (params -> rMin + params -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
