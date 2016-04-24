@@ -172,13 +172,14 @@ namespace Sim {
                     solver = new MultirootFsolver(MultirootFsolverTypes.hybrids, nDim);
                     break;
                 default:
+                    stderr.printf("ERROR: Invalid solver name!");
                     return_if_reached();
             }
 
             // configure the solver
             IcGenParam parameters;
             MultirootFunction objectiveFunctionData;
-            if (input.has_member("r")) {
+            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
                 parameters = IcGenParam() {
                     mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
                     rMin = input.get_double_member("r"),
@@ -192,7 +193,7 @@ namespace Sim {
                     n = nDim,
                     params = &parameters
                 };
-            } else if (input.has_member("rMin") && input.has_member("rMax")) {
+            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
                 parameters = IcGenParam() {
                     mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
                     rMin = input.get_double_member("rMin"),
@@ -207,6 +208,7 @@ namespace Sim {
                     params = &parameters
                 };
             } else {
+                stderr.printf("ERROR: Invalid radius constraint!");
                 return_if_reached();
             }
             solver.set(&objectiveFunctionData, initialValues);
@@ -231,18 +233,19 @@ namespace Sim {
                 deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
                 switch (termination) {
                     case "both":
-                        continuing = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE && iterations < maxIterations;
+                        continuing = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE;
                         break;
                     case "residuals":
-                        continuing = residualStatus == Status.CONTINUE && iterations < maxIterations;
+                        continuing = residualStatus == Status.CONTINUE;
                         break;
                     case "deltas":
-                        continuing = deltaStatus == Status.CONTINUE && iterations < maxIterations;
+                        continuing = deltaStatus == Status.CONTINUE;
                         break;
                     default:
+                        stderr.printf("ERROR: Invalid termination criteria!");
                         return_if_reached();
                 }
-            } while (continuing);
+            } while (continuing && iterations < maxIterations);
 
             // generate output
             print_inital_conditions(solver, &parameters, iterations);

@@ -180,7 +180,7 @@ namespace Sim {
                 p.load_from_data(input.str);
                 o = p.get_root().get_object();
             } catch (Error e) {
-                stderr.printf("Unable to parse the input data: %s\n", e.message);
+                stderr.printf("ERROR: Unable to parse the input data: %s\n", e.message);
                 return_if_reached();
             }
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("Lz"), o.get_double_member("C"),
