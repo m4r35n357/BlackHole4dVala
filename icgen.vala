@@ -23,7 +23,7 @@ namespace Sim {
         /**
          * Fixed parameters and constraints
          */
-        private struct IcGenParam {
+        private struct P {
             public double mu2;
             public double rMin;
             public double rMax;
@@ -35,23 +35,23 @@ namespace Sim {
         /**
          * Array indices for variables
          */
-        private enum Variable {
+        private enum X {
             E = 0, L = 1, Q = 2;
         }
 
         /**
          * Array indices for objective functions
          */
-        private enum Objective {
-            R1 = 0, R2 = 1, THETA = 2;
+        private enum F {
+            R1 = 0, R2 = 1, TH = 2;
         }
 
         /**
          * R potential
          */
         private static double R (double r, double E, double L, double Q, void* params) {
-            var a = ((IcGenParam*) params) -> a;
-            var mu2 = ((IcGenParam*) params) -> mu2;
+            var a = ((P*) params) -> a;
+            var mu2 = ((P*) params) -> mu2;
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
@@ -60,8 +60,8 @@ namespace Sim {
          * Derivative of R potential wrt R
          */
         private static double dRdr (double r, double E, double L, double Q, void* params) {
-            var a = ((IcGenParam*) params) -> a;
-            var mu2 = ((IcGenParam*) params) -> mu2;
+            var a = ((P*) params) -> a;
+            var mu2 = ((P*) params) -> mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
         }
@@ -70,8 +70,8 @@ namespace Sim {
          * THETA potential
          */
         private static double THETA (double theta, double E, double L, double Q, void* params) {
-            var a = ((IcGenParam*) params) -> a;
-            var mu2 = ((IcGenParam*) params) -> mu2;
+            var a = ((P*) params) -> a;
+            var mu2 = ((P*) params) -> mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
@@ -79,13 +79,13 @@ namespace Sim {
          * Spherical orbits are determined by R potential at constant radius, its derivative, and THETA potential
          */
         private static int sphericalOrbit (Vector x, void* params, Vector f) {
-            var E = x.get(Variable.E);
-            var L = x.get(Variable.L);
-            var Q = x.get(Variable.Q);
+            var E = x.get(X.E);
+            var L = x.get(X.L);
+            var Q = x.get(X.Q);
 
-            f.set(Objective.R1, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(Objective.R2, dRdr(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(Objective.THETA, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
+            f.set(F.R1, R(((P*) params) -> rMax, E, L, Q, params));
+            f.set(F.R2, dRdr(((P*) params) -> rMax, E, L, Q, params));
+            f.set(F.TH, THETA(((P*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
@@ -94,13 +94,13 @@ namespace Sim {
          * Non-spherical orbits are determined by R potentials at maximum and minimum radii, and THETA potential
          */
         private static int nonSphericalOrbit (Vector x, void* params, Vector f) {
-            var E = x.get(Variable.E);
-            var L = x.get(Variable.L);
-            var Q = x.get(Variable.Q);
+            var E = x.get(X.E);
+            var L = x.get(X.L);
+            var Q = x.get(X.Q);
 
-            f.set(Objective.R1, R(((IcGenParam*) params) -> rMin, E, L, Q, params));
-            f.set(Objective.R2, R(((IcGenParam*) params) -> rMax, E, L, Q, params));
-            f.set(Objective.THETA, THETA(((IcGenParam*) params) -> thMin, E, L, Q, params));
+            f.set(F.R1, R(((P*) params) -> rMin, E, L, Q, params));
+            f.set(F.R2, R(((P*) params) -> rMax, E, L, Q, params));
+            f.set(F.TH, THETA(((P*) params) -> thMin, E, L, Q, params));
 
             return Status.SUCCESS;
         }
@@ -109,10 +109,10 @@ namespace Sim {
          * Potential data to STDERR for plotting
          */
         private void print_potential (MultirootFsolver s, void* params) {
-            var rMax = ((IcGenParam*) params) -> rMax;
-            var E = s.x.get(Variable.E);
-            var L = s.x.get(Variable.L) * ((IcGenParam*) params) -> Lfac;
-            var Q = s.x.get(Variable.Q);
+            var rMax = ((P*) params) -> rMax;
+            var E = s.x.get(X.E);
+            var L = s.x.get(X.L) * ((P*) params) -> Lfac;
+            var Q = s.x.get(X.Q);
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
@@ -126,15 +126,15 @@ namespace Sim {
         private void print_inital_conditions (MultirootFsolver s, void* params, size_t iterations) {
             stdout.printf("{ \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
-            stdout.printf("  \"laststep\" : \"%.3e %.3e %.3e\",\n", s.dx.get(Variable.E), s.dx.get(Variable.L), s.dx.get(Variable.Q));
-            stdout.printf("  \"residuals\" : \"%.3e %.3e %.3e\",\n", s.f.get(Objective.R1), s.f.get(Objective.R2), s.f.get(Objective.THETA));
+            stdout.printf("  \"residuals\" : \"R1 = %.1e, R2 = %.1e, TH = %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
+            stdout.printf("  \"deltas\" : \"dE = %.1e, dL = %.1e, dQ = %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
-            stdout.printf("  \"a\" : %.1f,\n", ((IcGenParam*) params) -> a);
-            stdout.printf("  \"mu\" : %.1f,\n", ((IcGenParam*) params) -> mu2);
-            stdout.printf("  \"E\" : %.17g,\n", s.x.get(Variable.E));
-            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(Variable.L) * ((IcGenParam*) params) -> Lfac);
-            stdout.printf("  \"C\" : %.17g,\n", s.x.get(Variable.Q));
-            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((IcGenParam*) params) -> rMin + ((IcGenParam*) params) -> rMax));
+            stdout.printf("  \"a\" : %.1f,\n", ((P*) params) -> a);
+            stdout.printf("  \"mu\" : %.1f,\n", ((P*) params) -> mu2);
+            stdout.printf("  \"E\" : %.17g,\n", s.x.get(X.E));
+            stdout.printf("  \"Lz\" : %.17g,\n", s.x.get(X.L) * ((P*) params) -> Lfac);
+            stdout.printf("  \"C\" : %.17g,\n", s.x.get(X.Q));
+            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (((P*) params) -> rMin + ((P*) params) -> rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
@@ -152,9 +152,9 @@ namespace Sim {
 
             // initialize variables
             var initialValues = new Vector(nDim);
-            initialValues.set(Variable.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
-            initialValues.set(Variable.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
-            initialValues.set(Variable.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
+            initialValues.set(X.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
+            initialValues.set(X.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
+            initialValues.set(X.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
 
             // choose a solver
             MultirootFsolver solver;
@@ -177,10 +177,10 @@ namespace Sim {
             }
 
             // configure the solver
-            IcGenParam parameters;
+            P parameters;
             MultirootFunction objectiveFunctionData;
             if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
-                parameters = IcGenParam() {
+                parameters = P() {
                     mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
                     rMin = input.get_double_member("r"),
                     rMax = input.get_double_member("r"),
@@ -194,7 +194,7 @@ namespace Sim {
                     params = &parameters
                 };
             } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
-                parameters = IcGenParam() {
+                parameters = P() {
                     mu2 = input.has_member("mu2") ? input.get_double_member("mu2") : 1.0,
                     rMin = input.get_double_member("rMin"),
                     rMax = input.get_double_member("rMax"),
