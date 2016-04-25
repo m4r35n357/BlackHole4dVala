@@ -110,5 +110,10 @@ namespace Simulations {
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }
     }
+
+    public static int main (string[] args) {
+        Newton.fromJson().solve();
+        return 0;
+    }
 }
 

@@ -186,4 +186,9 @@ namespace Simulations {
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);
         }
     }
+
+    public static int main (string[] args) {
+        NBody.fromJson().solve();
+        return 0;
+    }
 }

@@ -18,36 +18,6 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Interface for the physical model (client)
-     */
-    public interface IModel : GLib.Object {
-        /**
-         * Coordinate updates, called by ISymplectic.compose()
-         */
-        public abstract void qUp (double d);
-
-        /**
-         * Momentum updates, called by ISymplectic.compose()
-         */
-        public abstract void pUp (double c);
-
-        /**
-         * Sole method called by main(), calls ISymplectic.compose() method on the integrator as needed
-         */
-        public abstract void solve ();
-    }
-
-    /**
-     * Interface for the integrators
-     */
-    public interface ISymplectic : GLib.Object {
-        /**
-         * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
-         */
-        public abstract void compose ();
-    }
-
-    /**
      * Parse JSON initial conditions data from stdin
      */
     private static Json.Object getJson () {
@@ -69,48 +39,6 @@ namespace Simulations {
             return_if_reached();
         }
         return obj;
-    }
-
-    /**
-     * Used by all models
-     */
-    private static double logError (double e) {
-        return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
-    }
-
-    /**
-     * Entry point
-     */
-    public static int main (string[] args) {
-        var arg0 = args[0].split("/");
-        switch (arg0[arg0.length - 1]) {  // basename
-            case "bh3d":
-                KerrGeodesic.fromJson().solve();
-                break;
-            case "newton":
-                Newton.fromJson().solve();
-                break;
-            case "nbody3d":
-                NBody.fromJson().solve();
-                break;
-            default:  // for debugging "utils" binary
-                switch (args[1]) {  // command line argument
-                    case "bh3d":
-                        KerrGeodesic.fromJson().solve();
-                        break;
-                    case "newton":
-                        Newton.fromJson().solve();
-                        break;
-                    case "nbody3d":
-                        NBody.fromJson().solve();
-                        break;
-                    default:
-                        stdout.printf("Please specify an executable by name or by program argument");
-                        break;
-                }
-                break;
-        }
-        return 0;
     }
 }
 

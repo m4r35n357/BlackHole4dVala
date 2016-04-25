@@ -6,36 +6,31 @@ valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
-outfile='utils'
 executables='bh3d nbody3d newton'
 
 # cleanup
-rm -f utils.c symplectic.c
 rm -f $outfile $executables bh3d.rk4 raytrace-commands kerr-image icgen
+echo ""
 
 # compile vala files
-valafiles="${outfile}.vala symplectic.vala"
 for executable in $executables
 do
 	rm -f ${executable}.c
-	valafiles="$valafiles ${executable}.vala"
+	$valac --pkg json-glib-1.0 $executable.vala symplectic.vala utils.vala
+	echo ""
 done
-$valac --pkg json-glib-1.0 $valafiles
 
-# hard link executables
-for executable in $executables
-do
-	ln $outfile $executable
-done
-rm -f $outfile
+$valac --pkg json-glib-1.0 bh3d.rk4.vala utils.vala
+echo ""
 
-rm -f bh3d.rk4.c raytrace-commands.c
-$valac --pkg json-glib-1.0 bh3d.rk4.vala
 $valac --pkg json-glib-1.0 raytrace-commands.vala
+echo ""
 
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
+echo ""
 
-$valac -q -X -w --pkg json-glib-1.0 --pkg gsl icgen.vala
+$valac -q -X -w --pkg json-glib-1.0 --pkg gsl icgen.vala utils.vala
+echo ""
 
 # strip executables
 case $opt in

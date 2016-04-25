@@ -189,5 +189,10 @@ namespace Simulations {
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
         }
     }
+
+    public static int main (string[] args) {
+        KerrGeodesic.fromJson().solve();
+        return 0;
+    }
 }
 

@@ -166,23 +166,7 @@ namespace Sim {
          * Static factory from STDIN in JSON format
          */
         public static BL fromJson () {
-            var input = new StringBuilder();
-            var buffer = new char[1024];
-            while (!stdin.eof()) {
-                var chunk = stdin.gets(buffer);
-                if (chunk != null) {
-                    input.append(chunk);
-                }
-            }
-            unowned Json.Object o;
-            var p = new Parser();
-            try {
-                p.load_from_data(input.str);
-                o = p.get_root().get_object();
-            } catch (Error e) {
-                stderr.printf("ERROR: Unable to parse the input data: %s\n", e.message);
-                return_if_reached();
-            }
+            Json.Object o = Simulations.getJson();
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                           o.get_double_member("r"), o.get_double_member("theta"),
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));

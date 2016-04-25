@@ -253,33 +253,9 @@ namespace Sim {
             // generate output
             printOutput(solver, iterations);
         }
-
-        /**
-         * Read from STDIN and parse into a JSON object
-         */
-        public static Json.Object fromJson () {
-            var input = new StringBuilder();
-            var buffer = new char[1024];
-            while (!stdin.eof()) {
-                var chunk = stdin.gets(buffer);
-                if (chunk != null) {
-                    input.append(chunk);
-                }
-            }
-            unowned Json.Object o;
-            var p = new Parser();
-            try {
-                p.load_from_data(input.str);
-                o = p.get_root().get_object();
-            } catch (GLib.Error e) {
-                stderr.printf("Unable to parse the input data: %s\n", e.message);
-                return_if_reached();
-            }
-            return o;
-        }
     }
 
     public static void main (string[] args) {
-        new IcGenerator().generate(IcGenerator.fromJson());
+        new IcGenerator().generate(Simulations.getJson());
     }
 }
