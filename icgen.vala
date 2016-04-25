@@ -134,7 +134,7 @@ namespace Sim {
             stdout.printf("  \"mu\" : %.1f,\n", p->mu2);
             stdout.printf("  \"E\" : %.17g,\n", s.x.get(X.E));
             stdout.printf("  \"L\" : %.17g,\n", s.x.get(X.L) * p->Lfac);
-            stdout.printf("  \"C\" : %.17g,\n", s.x.get(X.Q));
+            stdout.printf("  \"Q\" : %.17g,\n", s.x.get(X.Q));
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
@@ -218,7 +218,7 @@ namespace Sim {
             var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
             var epsrel = input.has_member("epsrel") ? input.get_double_member("epsrel") : 1.0e-12;
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
-            var termination = input.has_member("termination") ? input.get_string_member("termination") : "either";
+            var termination = input.has_member("termination") ? input.get_string_member("termination") : "deltas";
             bool continuing = true;
             int solverStatus = 0;
             int residualStatus = 0;
@@ -241,6 +241,9 @@ namespace Sim {
                         break;
                     case "either":
                         continuing = residualStatus == Status.CONTINUE && deltaStatus == Status.CONTINUE;
+                        break;
+                    case "both":
+                        continuing = residualStatus == Status.CONTINUE || deltaStatus == Status.CONTINUE;
                         break;
                     default:
                         stderr.printf("ERROR: Invalid termination criteria!");

@@ -6,7 +6,7 @@ nbodys=${2:-'./nbody3d'}
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-ic='initial-conditions'
+ic='initial-conditions.json'
 pot='/tmp/potential'
 
 int='./finterp.py'

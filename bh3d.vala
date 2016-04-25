@@ -102,7 +102,7 @@ namespace Simulations {
         public static KerrGeodesic fromJson () {
             var ic = getJson();
             return new KerrGeodesic(ic.get_double_member("a"),
-                                    ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("C"),
+                                    ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
                                     ic.get_double_member("r"), ic.get_double_member("theta"),
                                     ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
                                     ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
