@@ -106,24 +106,13 @@ namespace Sim {
         }
 
         /**
-         * Potential data to STDERR for plotting
+         * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void print_potential (MultirootFsolver s, Params* p) {
-            var rMax = p->rMax;
+        private void printOutput (MultirootFsolver s, size_t iterations) {
+            var p = ((Params*) s.function.params);
             var E = s.x.get(X.E);
             var L = s.x.get(X.L) * p->Lfac;
             var Q = s.x.get(X.Q);
-            for (var x = 1; x <= 1001; x++) {
-                var xValue = 1.0 * x / 1001;
-                stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * rMax * 1.1, R(xValue * rMax * 1.1, E, L, Q, p), THETA(xValue * PI, E, L, Q, p));
-            }
-        }
-
-        /**
-         * Write the initial conditions file to STDOUT
-         */
-        private void print_inital_conditions (MultirootFsolver s, Params* p, size_t iterations) {
             stdout.printf("{\n");
             stdout.printf("  \"solver\" : \"%s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
@@ -132,9 +121,9 @@ namespace Sim {
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", p->a);
             stdout.printf("  \"mu\" : %.1f,\n", p->mu2);
-            stdout.printf("  \"E\" : %.17g,\n", s.x.get(X.E));
-            stdout.printf("  \"L\" : %.17g,\n", s.x.get(X.L) * p->Lfac);
-            stdout.printf("  \"Q\" : %.17g,\n", s.x.get(X.Q));
+            stdout.printf("  \"E\" : %.17g,\n", E);
+            stdout.printf("  \"L\" : %.17g,\n", L);
+            stdout.printf("  \"Q\" : %.17g,\n", Q);
             stdout.printf("  \"r\" : %.1f,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
@@ -143,19 +132,66 @@ namespace Sim {
             stdout.printf("  \"plotratio\" : %.1d,\n", 500);
             stdout.printf("  \"integrator\" : \"%s\"\n", "sc4");
             stdout.printf("}\n");
+            for (var x = 1; x <= 1001; x++) {
+                var xValue = 1.0 * x / 1001;
+                stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
+                                xValue * p->rMax * 1.1, R(xValue * p->rMax * 1.1, E, L, Q, p), THETA(xValue * PI, E, L, Q, p));
+            }
+        }
+
+        private Vector initializeVariables (Json.Object input) {
+            size_t nDim = 3;
+            var initialValues = new Vector(nDim);
+            initialValues.set(X.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
+            initialValues.set(X.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
+            initialValues.set(X.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
+            return initialValues;
+        }
+
+        private void configureSolver (MultirootFsolver solver, Vector initialValues, Json.Object input) {
+            Params parameters;
+            MultirootFunction objectiveFunctionData;
+            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
+                parameters = Params() {
+                    mu2 = 1.0,
+                    rMin = input.get_double_member("r"),
+                    rMax = input.get_double_member("r"),
+                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
+                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+                };
+                objectiveFunctionData = MultirootFunction() {
+                    f = sphericalOrbit,
+                    n = initialValues.size,
+                    params = &parameters
+                };
+            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
+                parameters = Params() {
+                    mu2 = 1.0,
+                    rMin = input.get_double_member("rMin"),
+                    rMax = input.get_double_member("rMax"),
+                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
+                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+                };
+                objectiveFunctionData = MultirootFunction() {
+                    f = nonSphericalOrbit,
+                    n = initialValues.size,
+                    params = &parameters
+                };
+            } else {
+                stderr.printf("ERROR: Invalid radius constraint!");
+                return_if_reached();
+            }
+            solver.set(&objectiveFunctionData, initialValues);
         }
 
         /**
          * Externally visible method, sets up and controls the solver
          */
         public void generate (Json.Object input) {
-            size_t nDim = 3;
-
-            // initialize variables
-            var initialValues = new Vector(nDim);
-            initialValues.set(X.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
-            initialValues.set(X.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
-            initialValues.set(X.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
+            var initialValues = initializeVariables(input);
+            size_t nDim = initialValues.size;
 
             // choose a solver
             MultirootFsolver solver;
@@ -178,41 +214,7 @@ namespace Sim {
             }
 
             // configure the solver
-            Params parameters;
-            MultirootFunction objectiveFunctionData;
-            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
-                parameters = Params() {
-                    mu2 = 1.0,
-                    rMin = input.get_double_member("r"),
-                    rMax = input.get_double_member("r"),
-                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
-                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
-                };
-                objectiveFunctionData = MultirootFunction() {
-                    f = sphericalOrbit,
-                    n = nDim,
-                    params = &parameters
-                };
-            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
-                parameters = Params() {
-                    mu2 = 1.0,
-                    rMin = input.get_double_member("rMin"),
-                    rMax = input.get_double_member("rMax"),
-                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
-                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
-                };
-                objectiveFunctionData = MultirootFunction() {
-                    f = nonSphericalOrbit,
-                    n = nDim,
-                    params = &parameters
-                };
-            } else {
-                stderr.printf("ERROR: Invalid radius constraint!");
-                return_if_reached();
-            }
-            solver.set(&objectiveFunctionData, initialValues);
+            configureSolver(solver, initialValues, input);
 
             // run the solver
             var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
@@ -252,8 +254,7 @@ namespace Sim {
             } while (continuing && iterations < maxIterations);
 
             // generate output
-            print_inital_conditions(solver, &parameters, iterations);
-            print_potential(solver, &parameters);
+            printOutput(solver, iterations);
         }
 
         /**
