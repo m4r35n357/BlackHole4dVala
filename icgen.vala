@@ -109,7 +109,7 @@ namespace Sim {
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
         private void printOutput (MultirootFsolver s, size_t iterations) {
-            var p = ((Params*) s.function.params);
+            var p = (Params*) s.function.params;
             var E = s.x.get(X.E);
             var L = s.x.get(X.L) * p->Lfac;
             var Q = s.x.get(X.Q);
@@ -191,7 +191,7 @@ namespace Sim {
          */
         public void generate (Json.Object input) {
             var initialValues = initializeVariables(input);
-            size_t nDim = initialValues.size;
+            var nDim = initialValues.size;
 
             // choose a solver
             MultirootFsolver solver;
@@ -222,18 +222,15 @@ namespace Sim {
             var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
             var termination = input.has_member("termination") ? input.get_string_member("termination") : "deltas";
             bool continuing = true;
-            int solverStatus = 0;
-            int residualStatus = 0;
-            int deltaStatus = 0;
-            size_t iterations = 0;
+            var iterations = 0;
             do {
                 iterations++;
-                solverStatus = solver.iterate();
+                var solverStatus = solver.iterate();
                 if (solverStatus == Status.ENOPROG || solverStatus == Status.EBADFUNC) {
                     break;
                 }
-                residualStatus = MultirootTest.residual(solver.f, epsabs);
-                deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
+                var residualStatus = MultirootTest.residual(solver.f, epsabs);
+                var deltaStatus = MultirootTest.delta(solver.dx, solver.x, epsabs, epsrel);
                 switch (termination) {
                     case "residuals":
                         continuing = residualStatus == Status.CONTINUE;
