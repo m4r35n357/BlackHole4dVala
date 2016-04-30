@@ -19,6 +19,7 @@ newton
 nbody3d
 raytrace-commands
 icgen
+icgenLight
 kerr-image
 !kerr-image.c
 RaytracingOutput/
