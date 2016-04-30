@@ -13,7 +13,7 @@ int='./finterp.py'
 
 params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }'
 echo $params | jq .
-echo $params | ./icgen >$ic 2>$pot
+echo $params | ./icgenParticle >$ic 2>$pot
 jq . $ic
 for app in $bh3ds
 do
@@ -23,7 +23,17 @@ done
 
 params='{ "method": "dnewton", "r": 12.0, "thMin": 0.0, "spin": 1.0, "Lfac": 1.0 }'
 echo $params | jq .
-echo $params | ./icgen >$ic 2>$pot
+echo $params | ./icgenParticle >$ic 2>$pot
+jq . $ic
+for app in $bh3ds
+do
+	echo ${C}$app${NC}
+	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+done
+
+params='{ "r": 3, "spin": 1.0 }'
+echo $params | jq .
+echo $params | ./icgenLight >$ic 2>$pot
 jq . $ic
 for app in $bh3ds
 do
@@ -46,7 +56,7 @@ done
 
 params='{ "method": "dnewton", "r": 12.0, "thMin": 0.5, "spin": 1.0, "Lfac": 1.0 }'
 echo $params | jq .
-echo $params | ./icgen >$ic 2>$pot
+echo $params | ./icgenParticle >$ic 2>$pot
 jq . $ic
 echo ${C}"./newton"${NC}
 ./newton <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic`

@@ -114,7 +114,7 @@ namespace Sim {
             var L = s.x.get(X.L) * p->Lfac;
             var Q = s.x.get(X.Q);
             stdout.printf("{\n");
-            stdout.printf("  \"generator\" : \"icgen %s\",\n", s.name());
+            stdout.printf("  \"generator\" : \"icgenParticle %s\",\n", s.name());
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
             stdout.printf("  \"residuals\" : \"R1: %.1e, R2: %.1e, TH: %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
             stdout.printf("  \"deltas\" : \"dE: %.1e, dL: %.1e, dQ: %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));

@@ -81,7 +81,7 @@ namespace Sim {
          */
         public void generate (Json.Object input) {
             // generate output
-            printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0, input.has_member("a") ? input.get_double_member("a") : 1.0);
+            printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0, input.has_member("spin") ? input.get_double_member("spin") : 1.0);
         }
     }
 

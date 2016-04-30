@@ -14,7 +14,7 @@ params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin":
 if ! [ -f $ic ]
 then
 	echo "${C}Creating fresh initial conditions file${NC}"
-	echo $params | ./icgen >$ic 2>$pot
+	echo $params | ./icgenParticle >$ic 2>$pot
         echo $params | jq .
 else
 	echo "${C}Using existing initial conditions file${NC}"

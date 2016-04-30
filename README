@@ -18,7 +18,7 @@ ffmpeg
 
 Sample usage:
 
-1.	Build all the Vala executables, and test them
+1.	Build all the Vala executables, and set up a basic environment
 
 ./build-all [fast]
 
@@ -27,17 +27,8 @@ ic=initial-conditions.json
 data=/tmp/data
 pot=/tmp/potential
 
-./run-tests 2>/dev/null
-rm -f $ic; ./rg2 2>/dev/null
 
-
-2.	Run and plot one of the initial conditions files:
-
-ic=ic/Light1
-jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
-
-
-3.	Create an initial conditions generator data file
+2.	Create an initial conditions generator data file
 
 icgen=./icgenParticle
 cp icgenParticle-data.example $icdata
@@ -46,11 +37,17 @@ icgen=./icgenLight
 cp icgenLight-data.example $icdata
 
 
-4.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
+3.	Edit the inital conditions data and/or the inital conditions file
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic 2>$pot; jq . $ic
 vi $ic; jq . $ic
+
+
+4.	Run tests
+
+./run-tests 2>/dev/null
+./rg2 2>/dev/null
 
 
 5.	Some example pipelines . . .
@@ -59,8 +56,6 @@ jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 jq . $ic; ./bh3dSymp <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
-
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | ./bh3dRk4 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; ./bh3dRk4 <$ic| ./plotBH.py `jq .M $ic` `jq .a $ic`
 
@@ -84,5 +79,6 @@ http://staff.science.nus.edu.sg/~phylyk/downloads/reports/sp2172_report.pdf
 
 Light trajectories
 
+http://www.physics.nus.edu.sg/~phyteoe/kerr/
 http://www.physics.nus.edu.sg/~phyteoe/kerr/paper.pdf
 
