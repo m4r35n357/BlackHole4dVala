@@ -34,10 +34,10 @@ rm -f $ic; ./rg2 2>/dev/null
 2.	Run and plot one of the initial conditions files:
 
 ic=ic/Light1
-jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
 
-3.	Create an initial conditions data file
+3.	Create an initial conditions generator data file
 
 icgen=./icgenParticle
 cp icgenParticle-data.example $icdata
@@ -45,51 +45,32 @@ cp icgenParticle-data.example $icdata
 icgen=./icgenLight
 cp icgenLight-data.example $icdata
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0 }' | jq . >$icdata
 
-echo '{ "rMin": 9.0, "rMax": 12.0, "thMin": 0.25, "spin": -1.0, "Lfac": 1.0 }' | jq . >$icdata
-
-echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "Lfac": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "dnewton" }' | jq . >$icdata
-
-
-4.	Generate initial conditions to stdout:
-
-Spherical orbit:
-echo '{ "r": 12.0, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
-
-Non-spherical orbit:
-echo '{ "rMin": 11.5, "rMax": 12.5, "thMin": 0.45, "spin": 1.0 }' | ./icgen 2>$pot | jq .
-
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "hybrids" }' | ./icgen 2>$pot | tee $ic jq .
-
-echo '{ "rMin": 3.0, "rMax": 400.0, "thMin": 0.15, "spin": 1.0, "maxIterations": 1000, "epsabs": 1e-12, "epsrel": 1e-12, "method": "dnewton" }' | ./icgen 2>$pot | tee $ic | jq .
-
-
-5.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
+4.	Edit the inital conditions data and/or the inital conditions file and run again with symplectic integrator and tau or t as the time parameter:
 
 vi $icdata; jq . $icdata
-./icgen <$icdata >$ic 2>$pot; jq . $ic
+$icgen <$icdata >$ic 2>$pot; jq . $ic
 vi $ic; jq . $ic
 
-./bh3d <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
+5.	Some example pipelines . . .
 
-6.	Some example initial conditions pipelines . . .
-
-jq . $ic; ./bh3d.rk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
+jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` &
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgen 2>/dev/null | ./bh3d.rk4 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+jq . $ic; ./bh3dSymp <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgen 2>/dev/null | tee $ic | jq .; ./bh3d.rk4 <$ic| ./plotBH.py `jq .M $ic` `jq .a $ic`
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | ./bh3dRk4 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 
-
-7.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
-
-./icgen <$icdata 2>$pot | ./bh3d.rk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; ./bh3dRk4 <$ic| ./plotBH.py `jq .M $ic` `jq .a $ic`
 
 
-8.	Make a video out of the output files:
+6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
+
+./icgenParticle <$icdata 2>$pot | ./bh3dRk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+
+
+7.	Make a video out of the output files:
 
 ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
 mplayer raytrace.mp4 -fps 10

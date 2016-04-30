@@ -13,8 +13,8 @@
 *.s
 *.pyc
 .valencia
-bh3d
-bh3d.rk4
+bh3dSymp
+bh3dRk4
 newton
 nbody3d
 raytrace-commands
