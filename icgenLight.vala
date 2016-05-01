@@ -20,14 +20,11 @@ namespace Sim {
     public class IcGenerator : GLib.Object {
 
         private static double R (double r, double a, double E, double L, double Q) {
-            var mu2 = 0.0;
-            return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
-                    - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
+            return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L) - (r * r + a * a - 2.0 * r) * (Q + (L - a * E) * (L - a * E));
         }
 
         private static double THETA (double theta, double a, double E, double L, double Q) {
-            var mu2 = 0.0;
-            return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
+            return Q - cos(theta) * cos(theta) * (L * L / (sin(theta) * sin(theta)) - a * a * E * E);
         }
 
         private double r1 (double a) {
@@ -43,22 +40,24 @@ namespace Sim {
         }
 
         private double Q (double r, double a) {
-            var q =  - r * r * r * (r * r * r - 6.0 * r * r + 9.0 * r - 4.0 * a * a) / (a * a * (r - 1.0) * (r - 1.0));
-            return q >= 0.0 ? q : 0.0;
+            return - r * r * r * (r * r * r - 6.0 * r * r + 9.0 * r - 4.0 * a * a) / (a * a * (r - 1.0) * (r - 1.0));
         }
 
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
         private void printOutput (double r, double a) {
+            var E = 1.0;
+            var L = L(r,a);
+            var Q = Q(r,a);
             stdout.printf("{\n");
             stdout.printf("  \"generator\" : \"icgenLight\",\n");
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", a);
             stdout.printf("  \"mu\" : %.1f,\n", 0.0);
-            stdout.printf("  \"E\" : %.17g,\n", 1.0);
-            stdout.printf("  \"L\" : %.17g,\n", L(r,a));
-            stdout.printf("  \"Q\" : %.17g,\n", Q(r,a));
+            stdout.printf("  \"E\" : %.17g,\n", E);
+            stdout.printf("  \"L\" : %.17g,\n", L);
+            stdout.printf("  \"Q\" : %.17g,\n", Q);
             stdout.printf("  \"r\" : %.1f,\n", r);
             stdout.printf("  \"r1\" : %.1f,\n", r1(a));
             stdout.printf("  \"r2\" : %.1f,\n", r2(a));
@@ -72,7 +71,7 @@ namespace Sim {
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, 1.0, L(r,a), Q(r,a)), THETA(xValue * PI, a, 1.0, L(r,a), Q(r,a)));
+                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), THETA(xValue * PI, a, E, L, Q));
             }
         }
 
