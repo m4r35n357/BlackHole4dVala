@@ -38,7 +38,7 @@ jq . $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic`
+	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .M $ic` `jq .a $ic`
 done
 
 jq . ic/Light1
