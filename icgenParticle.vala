@@ -27,7 +27,7 @@ namespace Sim {
             public double mu2;
             public double rMin;
             public double rMax;
-            public double thMin;
+            public double elevation;
             public double a;
             public double Lfac;
         }
@@ -85,7 +85,7 @@ namespace Sim {
 
             f.set(F.R1, R(p->rMax, E, L, Q, p));
             f.set(F.R2, dRdr(p->rMax, E, L, Q, p));
-            f.set(F.TH, THETA(p->thMin, E, L, Q, p));
+            f.set(F.TH, THETA(p->elevation, E, L, Q, p));
 
             return Status.SUCCESS;
         }
@@ -100,7 +100,7 @@ namespace Sim {
 
             f.set(F.R1, R(p->rMin, E, L, Q, p));
             f.set(F.R2, R(p->rMax, E, L, Q, p));
-            f.set(F.TH, THETA(p->thMin, E, L, Q, p));
+            f.set(F.TH, THETA(p->elevation, E, L, Q, p));
 
             return Status.SUCCESS;
         }
@@ -124,8 +124,8 @@ namespace Sim {
             stdout.printf("  \"E\" : %.17g,\n", E);
             stdout.printf("  \"L\" : %.17g,\n", L);
             stdout.printf("  \"Q\" : %.17g,\n", Q);
-            stdout.printf("  \"r\" : %.1f,\n", 0.5 * (p->rMin + p->rMax));
-            stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
+            stdout.printf("  \"r0\" : %.1f,\n", 0.5 * (p->rMin + p->rMax));
+            stdout.printf("  \"th0\" : %.0f,\n", 0.0);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
             stdout.printf("  \"step\" : %.3f,\n", 0.001);
@@ -156,7 +156,7 @@ namespace Sim {
                     mu2 = 1.0,
                     rMin = input.get_double_member("r"),
                     rMax = input.get_double_member("r"),
-                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                     a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
                     Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
                 };
@@ -170,7 +170,7 @@ namespace Sim {
                     mu2 = 1.0,
                     rMin = input.get_double_member("rMin"),
                     rMax = input.get_double_member("rMax"),
-                    thMin = (1.0 - (input.has_member("thMin") ? input.get_double_member("thMin") : 0.5)) * PI,
+                    elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                     a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
                     Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
                 };

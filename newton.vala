@@ -58,7 +58,7 @@ namespace Simulations {
          */
         public static Newton fromJson () {
             var ic = getJson();
-            return new Newton(ic.get_double_member("a"), ic.get_double_member("r"),
+            return new Newton(ic.get_double_member("a"), ic.get_double_member("r0"),
                               ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"), ic.get_int_member("plotratio"),
                               ic.get_string_member("integrator"));
         }

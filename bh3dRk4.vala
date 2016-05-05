@@ -168,7 +168,7 @@ namespace Sim {
         public static BL fromJson () {
             Json.Object o = Simulations.getJson();
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                          o.get_double_member("r"), o.get_double_member("theta"),
+                          o.get_double_member("r0"), (90.0 - o.get_double_member("th0")) * PI / 180.0,
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
     }

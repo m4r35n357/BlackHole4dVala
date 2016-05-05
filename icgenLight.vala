@@ -58,10 +58,10 @@ namespace Sim {
             stdout.printf("  \"E\" : %.17g,\n", E);
             stdout.printf("  \"L\" : %.17g,\n", L);
             stdout.printf("  \"Q\" : %.17g,\n", Q);
-            stdout.printf("  \"r\" : %.3f,\n", r);
+            stdout.printf("  \"r0\" : %.3f,\n", r);
             stdout.printf("  \"r1\" : %.3f,\n", r1(a));
             stdout.printf("  \"r2\" : %.3f,\n", r2(a));
-            stdout.printf("  \"theta\" : %.9f,\n", 0.5 * PI);
+            stdout.printf("  \"th0\" : %.0f,\n", 0.0);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
             stdout.printf("  \"step\" : %.3f,\n", 0.001);
