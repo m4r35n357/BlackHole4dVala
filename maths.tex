@@ -6,33 +6,38 @@
 \usepackage{graphicx}
 \title{\textbf{Simulating Geodesics in the Kerr Spacetime}}
 \author{Ian Smith}
-\date{March 2016}
+\date{May 2016}
 \graphicspath{ {images/} }
 \begin{document}
 
 \maketitle
 
 \abstract
-A simple and accurate numerical procedure is presented, aimed at efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.  Particular attention is paid to the method of generating a wide variety of useful initial conditions for the simulator.  The core is written in Vala, whilst graphical output and processing, including error plots, are provided by Python modules.  The source code for the suite of programs is published on GitHub under a BSD licence.
+A simple and accurate numerical approach is presented for efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.
+This is achieved by working with the constants of motion for the Kerr spacetime rather than solving the geodesic equations directly.
+Particular attention is paid to techniques for generating a wide variety of useful initial conditions for the simulator.
+There are two simulation methods described here; one using a Runge-Kutta (RK4) integrator, and one using symplectic integration.
+The parameter generation and simulation core is written in Vala, whilst graphical output and processing, including error plots, are provided by Python modules and shell scripts.
+The source code for the suite of programs is publicly available under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
 
-The starting point for the procedure is the Kerr line element, expressed in terms of the widely used Boyer-Lindquist coordinates.
+The starting point for the simulation procedure is the Kerr line element, expressed in terms of the widely used Boyer-Lindquist coordinates.
 \begin{equation}
 \begin{aligned}
 d s^2 &= \frac{ \sin^2 \theta } {r^2 + a^2 \cos^2 \theta} (a dt - (r^2 + a^2)d \phi )^2 + \frac{ r^2 + a^2 \cos^2 \theta } {(r^2 - 2Mr  + a^2)} d r^2 \\
 &+ (r^2 + a^2 \cos^2 \theta) d \theta^2 + \frac{ (r^2 - 2Mr  + a^2) } {r^2 + a^2 \cos^2 \theta} (dt - a \sin^2 \theta d \phi )^2
 \end{aligned}
 \end{equation}
-The geodesic equations corresponding to the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.  Unfortunately this approach is unsuitable for studying horizon approaching or crossing scenarios because in these cases the $t$ variable becomes "unresponsive" near the outer horizon and slows the simulation to a near standstill without ever getting there.
+From a line element there is a well-defined but complicated process to generate the Christoffel Symbols, form the geodesic equations, and solve them.
+The geodesic equations corresponding to the Kerr spacetime are complex second order differential equations which are well known and can be solved using standard numerical integration techniques, typically one of the Runge-Kutta methods.
 
-Rather than attempting to formulate and solve these geodesic equations directly, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).  Because $t$ is not an integration variable here, these equations do not grind to a halt at the horizon.
-
-The approach is so straightforward that the complete simulator script consists of just over a hundred lines of Python code \cite{m4r35n357}.
+Rather than attempting to formulate and solve these geodesic equations directly, the approach taken here is to evolve the first order equations of motion expressed in terms of the constants of motion $E$ (energy), $L$ (equatorial angular momentum), and $Q$ (Carter's constant).
+The approach is so straightforward that the RK4 version of the simulator script consists of just over a hundred lines of Python code, and well under 200 in Vala \cite{m4r35n357}.
 
 \subsection {Equations of motion}
 
-This is the well known set of equations describing Kerr orbits in terms of $E$, $L$, and $Q$:
+Here is the well established set of first order equations describing Kerr orbits in terms of $E$, $L$, and $Q$:
 \begin{align}
 \frac{d t}{d \lambda} &= \frac{(r^2 + a^2) \left((r^2 + a^2) E - aL \right)} {(r^2 - 2Mr  + a^2)} + a(L - aE \sin^2 \theta) \\
 \frac{d r}{d \lambda} &= \pm \sqrt {R(r)} \\
@@ -43,9 +48,10 @@ where
 \begin{equation}
 d \lambda = \frac {d \tau} {(r^2 + a^2 \cos^2\theta)}
 \end{equation}
-These are essentially equations 2 and 3 from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations 6-9 below.
+These are essentially equations 2 and 3 from \cite{wilkins}, fully expanded except for the two potential functions $R$ and $\Theta$ which, together with their differentials, are defined in equations 7-10 below.
 
-Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent.  In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
+Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the $R$ and $\Theta$ equations (plus their differentials of course) mutually independent (essential for the symplectic integrators, but not for the RK4 integrator).
+In terms of this time variable, the potentials are simply the squares of the $r$ and $\theta$ velocities.
 \begin{align}
    \begin{split}
     R(r) &= \left((r^2 + a^2) E - aL \right)^2 \label{eq:1}\\
@@ -60,27 +66,36 @@ Notice also the use of the "Carter-Mino" time variable, $\lambda$, to render the
   \frac{d \Theta}{d \theta} (\theta) &= 2 \cos \theta \sin \theta \left(\frac{L^2} {\sin^2 \theta } + a^2(\mu^2 - E^2) \right) +\frac{2 L^2 \cos^3 \theta } {\sin^3 \theta } \label{eq:4}
 \end{align}
 
-The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using RK4, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.  Because of the square roots of the potential functions, the "brute force" integration approach is made more difficult by the need to identify turning points, which is troublesome to achieve reliably, and even harder to do without compromising the accuracy of the simulation.  I have implemented two integrators here.  One is an RK4 integrator, with a simple empirical solution to the turning point issue, and the other is a symplectic integrator which avoids the turning point issue entirely, at the cost of needing derivativs of the potentials.
+The $t$ and $\phi$ equations (1 and 4) can be evolved trivially using RK4, but the $R$ and $\Theta$ equations (2 and 3) require a little more effort.
+Because of the square roots of the potential functions, the RK4 integration approach is made more difficult by the need to identify turning points, which is troublesome to achieve reliably, and even harder to do without compromising the accuracy of the simulation.
+I have therefore implemented two integrators here.
+One is an RK4 integrator, with a simple empirical solution to the turning point issue, and the other is a symplectic integrator which avoids the turning point issue entirely, at the cost of needing derivatives of the potentials.
 
-The symplectic approach is to square the $R$ and $\Theta$ equations, and use a Stormer-Verlet based integrator \cite{hairer} to evolve the resulting equations, which are each treated as a "hamiltonian" system of first order differential equations.  This turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
+The key to the symplectic approach is to square the $R$ and $\Theta$ equations, and use a Stormer-Verlet based integrator \cite{hairer} to evolve the resulting equations, which are each treated as a "pseudo hamiltonian" system of first order differential equations.  This turns out to be a surprisingly simple solution, and is possible because the potential equations (when squared) are both of the form:
 
 \begin{equation}
 \frac {\dot x^2 - V(x)}{2} = 0
 \end{equation}
 
-This expresison can be treated in the same way as a hamiltonian (there is no mass in the "kinetic" term so the velocity is also the canonical momentum), in particular it is amenable to symplectic integration \cite{hairer}.  It is also used to quantify the integration errors for $r$ and $\theta$, whilst the two differentiated potentials in equations 7 and 9 are used for velocity/momentum updates in the integrator routines.
+This expression can be treated numerically in the same way as a regular hamiltonian (there is no mass in the "kinetic" term so the velocity is also the canonical momentum), in particular it is amenable to symplectic integration \cite{hairer}.
+It is also used to quantify the integration errors for $r$ and $\theta$.
+The two differentiated potentials in equations 7 and 9 are used for velocity/momentum updates in the integrator routines.
 
-The simulator uses composition \cite{hairer} to enable changing the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 10th order.  Rather than using Euler, the $t$ and $\phi$ equations are actually processed alongside the composed Stormer-Verlet updates, increasing the order and accuracy for $t$ and $\phi$ (according to the four-velocity norm error).
+The symplectic uses composition \cite{hairer} to enable changing the (even) integration order from 2 in the case of basic Stormer-Verlet, up to a maximum of 6th order.
+Rather than using Euler or RK4, the $t$ and $\phi$ equations are actually processed alongside the composed Stormer-Verlet updates, empirically increasing the order and accuracy for $t$ and $\phi$ (according to the four-velocity norm error).
 
 \section{Finding initial conditions}
 
-Another difficulty in generating orbits is the problem of generating initial conditions.  Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical, and extreme sensitivity to some parameters (particularly $E$).
+Another practical difficulty in generating orbits is the problem of generating suitable initial conditions. Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical, and also because of extreme sensitivity to some parameters (particularly $E$).
+In the case of light there already exist closed form expressions for $L$ and $Q$ ($E$ is generally taken to be 1) in terms of $r$ and $a$ in \cite{teo}
 
-Here I present a straightforward way of generating two types of bound orbits in three spatial dimensions.  It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials (with respect to these variables) as constraint parameters.
+Here I present a straightforward way of generating two types of bound orbits for particles in three spatial dimensions.
+It is based on solving sets of three potential equations under various conditions using the three constants of motion $E$, $L$, and $Q$ as variables, and turning points of the potentials (with respect to these variables) as constraint parameters.
 
 \subsection{Constant radius ("spherical") orbits}
 
-For constant radius orbits at $r_0$, we are looking for a double root (local maximum) of the quartic $R(r)$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.  $\Theta (\theta)$ will also be zero at the maximum deviation from equatorial (the minimum value of $\theta$).
+For constant radius orbits at $r_0$, we are looking for a double root (local maximum) of the quartic $R(r)$, in other words we want the radial velocity to be zero, and its differential to also be zero so that the radial speed remains zero during the orbit.
+$\Theta (\theta)$ will also be zero at the maximum deviation from equatorial (the minimum value of $\theta$).
 
 \begin{align}
 R(r_0, E, L, Q) &= 0 \\
@@ -90,7 +105,8 @@ R(r_0, E, L, Q) &= 0 \\
 
 \subsection{Variable radius ("spherical shell") orbits}
 
-For variable radius orbits we are looking for two distinct roots of the quartic $R(r)$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.  The $\Theta (\theta)$ condition is unchanged from the constant radius case above.
+For variable radius orbits we are looking for two distinct roots of the quartic $R(r)$, in other words that the orbit is bound between two $r$ values, $r_1$ and $r_2$.
+The $\Theta (\theta)$ condition is unchanged from the constant radius case above.
 
 \begin{align}
 R(r_1, E, L, Q) &= 0 \\
