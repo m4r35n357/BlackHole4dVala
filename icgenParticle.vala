@@ -140,8 +140,7 @@ namespace Sim {
         }
 
         private Vector initializeVariables (Json.Object input) {
-            size_t nDim = 3;
-            var initialValues = new Vector(nDim);
+            var initialValues = new Vector(3);
             initialValues.set(X.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
             initialValues.set(X.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
             initialValues.set(X.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
