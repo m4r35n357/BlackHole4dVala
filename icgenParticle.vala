@@ -147,32 +147,29 @@ namespace Sim {
             return initialValues;
         }
 
+        private Params initializeParams (Json.Object input, double rMin, double rMax) {
+            return Params() {
+                mu2 = 1.0,
+                rMin = rMin,
+                rMax = rMax,
+                elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
+                a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
+                Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+            };
+        }
+
         private void configureSolver (MultirootFsolver solver, Vector initialValues, Json.Object input) {
             Params parameters;
             MultirootFunction objectiveFunctionData;
             if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
-                parameters = Params() {
-                    mu2 = 1.0,
-                    rMin = input.get_double_member("r"),
-                    rMax = input.get_double_member("r"),
-                    elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
-                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
-                };
+                parameters = initializeParams(input, input.get_double_member("r"), input.get_double_member("r"));
                 objectiveFunctionData = MultirootFunction() {
                     f = sphericalOrbit,
                     n = initialValues.size,
                     params = &parameters
                 };
             } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
-                parameters = Params() {
-                    mu2 = 1.0,
-                    rMin = input.get_double_member("rMin"),
-                    rMax = input.get_double_member("rMax"),
-                    elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
-                    a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                    Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
-                };
+                parameters = initializeParams(input, input.get_double_member("rMin"), input.get_double_member("rMax"));
                 objectiveFunctionData = MultirootFunction() {
                     f = nonSphericalOrbit,
                     n = initialValues.size,
