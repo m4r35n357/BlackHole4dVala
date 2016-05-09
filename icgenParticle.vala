@@ -158,30 +158,6 @@ namespace Sim {
             };
         }
 
-        private void configureSolver (MultirootFsolver solver, Vector initialValues, Json.Object input) {
-            Params parameters;
-            MultirootFunction objectiveFunctionData;
-            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
-                parameters = initializeParams(input, input.get_double_member("r"), input.get_double_member("r"));
-                objectiveFunctionData = MultirootFunction() {
-                    f = sphericalOrbit,
-                    n = initialValues.size,
-                    params = &parameters
-                };
-            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
-                parameters = initializeParams(input, input.get_double_member("rMin"), input.get_double_member("rMax"));
-                objectiveFunctionData = MultirootFunction() {
-                    f = nonSphericalOrbit,
-                    n = initialValues.size,
-                    params = &parameters
-                };
-            } else {
-                stderr.printf("ERROR: Invalid radius constraint!");
-                return_if_reached();
-            }
-            solver.set(&objectiveFunctionData, initialValues);
-        }
-
         /**
          * Externally visible method, sets up and controls the solver
          */
@@ -210,7 +186,27 @@ namespace Sim {
             }
 
             // configure the solver
-            configureSolver(solver, initialValues, input);
+            MultirootFunction objectiveFunctionData;
+            Params parameters;
+            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
+                parameters = initializeParams(input, input.get_double_member("r"), input.get_double_member("r"));
+                objectiveFunctionData = MultirootFunction() {
+                    f = sphericalOrbit,
+                    n = initialValues.size,
+                    params = &parameters
+                };
+            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
+                parameters = initializeParams(input, input.get_double_member("rMin"), input.get_double_member("rMax"));
+                objectiveFunctionData = MultirootFunction() {
+                    f = nonSphericalOrbit,
+                    n = initialValues.size,
+                    params = &parameters
+                };
+            } else {
+                stderr.printf("ERROR: Invalid radius constraint!");
+                return_if_reached();
+            }
+            solver.set(&objectiveFunctionData, initialValues);
 
             // run the solver
             var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
