@@ -18,10 +18,10 @@ from math import sqrt, sin, cos, tan, fabs, pi, atan2
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color, cone, label
 from json import loads
 
-def isco (a):
+def isco (a, l):
     z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
     z2 = sqrt(3.0 * a * a + z1 * z1)
-    if a >= 0.0:
+    if a * l >= 0.0:
         return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
     else:
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
@@ -31,6 +31,7 @@ def main():
         raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0] and spin [0.0 - 1.0] <<<')
     m = float(argv[1])
     a = float(argv[2])
+    l = float(argv[3])
     horizon = m * (1.0 + sqrt(1.0 - a * a))
     cauchy = m * (1.0 - sqrt(1.0 - a * a))
     #  set up the scene
@@ -47,9 +48,9 @@ def main():
         ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = color.white, thickness=0.01)  # Singularity
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))  # z axis
-    mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=350, yoffset=340, line=False, border=10, font='monospace', height=16, color=color.gray(0.5), linecolor=color.gray(0.1))
+    mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=350, yoffset=340, line=False, border=10, font='Monospace', height=16, color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #sphere(pos=(0,0,0), radius=3.0, opacity=0.2)
@@ -83,7 +84,7 @@ def main():
         sth = sin(th)
         ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
-        mylabel.text = u"\u03bb: %.1f\nt: %.1f\nr: %.1f\n\u03b8: %.0f\n\u03d5: %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         counter += 1
         dataLine = stdin.readline()
 
