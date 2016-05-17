@@ -1,6 +1,6 @@
 #!/bin/sh
 
-opt="${1:-0}"
+opt="${1:-fast}"
 
 valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
