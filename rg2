@@ -39,5 +39,5 @@ echo "Done!"${NC}
 ./plotPotential.py <$pot &
 
 # Plot 3D graphics
-./plotBH.py <$datafile $(jq .M $ic) $(jq .a $ic) &
+./plotBH.py <$datafile $(jq .M $ic) $(jq .a $ic) $(jq .L $ic) &
 

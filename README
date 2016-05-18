@@ -47,7 +47,7 @@ vi $ic; jq . $ic
 4.	Run tests
 
 ./run-tests 2>/dev/null
-./rg2 2>/dev/null
+rm -f $ic; ./rg2 2>/dev/null
 
 
 5.	Some example pipelines . . .
