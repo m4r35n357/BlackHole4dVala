@@ -203,7 +203,7 @@ namespace Sim {
                     params = &parameters
                 };
             } else {
-                stderr.printf("ERROR: Invalid radius constraint!");
+                stderr.printf("ERROR: Invalid radius constraint: use either r alone or rMin & rMax together");
                 return_if_reached();
             }
             solver.set(&objectiveFunctionData, initialValues);

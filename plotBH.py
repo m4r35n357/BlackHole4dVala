@@ -26,12 +26,19 @@ def isco (a, l):
     else:
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
+def speed (gamma, a, r, theta):
+    return sqrt(gamma**2 * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0) / gamma
+
 def main():
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0] and spin [0.0 - 1.0] <<<')
     m = float(argv[1])
     a = float(argv[2])
     l = float(argv[3])
+    if len(argv) == 5:
+        mu = float(argv[4])
+    else:
+        mu = None
     horizon = m * (1.0 + sqrt(1.0 - a * a))
     cauchy = m * (1.0 - sqrt(1.0 - a * a))
     #  set up the scene
@@ -84,7 +91,10 @@ def main():
         sth = sin(th)
         ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
-        mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        if mu is not None and fabs(mu) > 0.0:
+            mylabel.text = u"v  %.3f\n\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        else:
+            mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         counter += 1
         dataLine = stdin.readline()
 
