@@ -27,7 +27,8 @@ def isco (a, l):
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
 def speed (gamma, a, r, theta):
-    return sqrt(gamma**2 * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0) / gamma
+    return sqrt(1.0 - 1.0 / gamma**2)
+    #return sqrt(gamma * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0 / gamma**2)
 
 def main():
     if len(argv) < 3:
