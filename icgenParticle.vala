@@ -118,6 +118,11 @@ namespace Sim {
             stdout.printf("  \"iterations\" : %zu,\n", iterations);
             stdout.printf("  \"residuals\" : \"R1: %.1e, R2: %.1e, TH: %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
             stdout.printf("  \"deltas\" : \"dE: %.1e, dL: %.1e, dQ: %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
+            if (p->a * L >= 0.0) {
+                stdout.printf("  \"direction\" : \"PROGRADE\",\n");
+            } else {
+                stdout.printf("  \"direction\" : \"RETROGRADE\",\n");
+            }
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", p->a);
             stdout.printf("  \"mu\" : %.1f,\n", p->mu2);

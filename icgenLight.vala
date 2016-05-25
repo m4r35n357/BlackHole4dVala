@@ -52,6 +52,11 @@ namespace Sim {
             var Q = Q(r,a);
             stdout.printf("{\n");
             stdout.printf("  \"generator\" : \"icgenLight\",\n");
+            if (a * L >= 0.0) {
+                stdout.printf("  \"direction\" : \"PROGRADE\",\n");
+            } else {
+                stdout.printf("  \"direction\" : \"RETROGRADE\",\n");
+            }
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", a);
             stdout.printf("  \"mu\" : %.1f,\n", 0.0);
