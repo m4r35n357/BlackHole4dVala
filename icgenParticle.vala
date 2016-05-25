@@ -129,7 +129,7 @@ namespace Sim {
             stdout.printf("  \"E\" : %.17g,\n", E);
             stdout.printf("  \"L\" : %.17g,\n", L);
             stdout.printf("  \"Q\" : %.17g,\n", Q);
-            stdout.printf("  \"r0\" : %.1f,\n", 0.5 * (p->rMin + p->rMax));
+            stdout.printf("  \"r0\" : %.17g,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("  \"th0\" : %.0f,\n", 0.0);
             stdout.printf("  \"start\" : %.1f,\n", 0.0);
             stdout.printf("  \"duration\" : %.1f,\n", 5000.0);
