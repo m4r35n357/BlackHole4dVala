@@ -14,7 +14,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from sys import argv, stderr, exit, stdin
-from math import sqrt, sin, cos, tan, fabs, pi, atan2
+from math import sqrt, sin, cos, tan, fabs, pi, atan2, acos
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color, cone, label
 from json import loads
 
@@ -25,6 +25,12 @@ def isco (a, l):
         return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
     else:
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
+
+def pSphere1 (a, l):
+    return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(- fabs(a))))
+
+def pSphere2 (a, l):
+    return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
 
 def speed (gamma, a, r, theta):
     return sqrt(1.0 - 1.0 / gamma**2)
@@ -56,7 +62,9 @@ def main():
         ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = color.white, thickness=0.01)  # Singularity
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # ISCO
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere1(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # Photon Sphere
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere2(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # Photon Sphere
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))  # z axis
     mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=350, yoffset=340, line=False, border=10, font='Monospace', height=16, color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
@@ -93,7 +101,7 @@ def main():
         ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
         if mu is not None and fabs(mu) > 0.0:
-            mylabel.text = u"v  %.3f\n\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            mylabel.text = u"v  %.3f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
             mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         counter += 1
