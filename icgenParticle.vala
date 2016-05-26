@@ -186,7 +186,7 @@ namespace Sim {
                     solver = new MultirootFsolver(MultirootFsolverTypes.hybrids, nDim);
                     break;
                 default:
-                    stderr.printf("ERROR: Invalid solver name!");
+                    stderr.printf("\nERROR: Invalid solver name!\n");
                     return_if_reached();
             }
 
@@ -208,7 +208,7 @@ namespace Sim {
                     params = &parameters
                 };
             } else {
-                stderr.printf("ERROR: Invalid radius constraint: use either r alone or rMin & rMax together");
+                stderr.printf("\nERROR: Invalid radius constraint: use either r alone or rMin & rMax together\n");
                 return_if_reached();
             }
             solver.set(&objectiveFunctionData, initialValues);
@@ -242,7 +242,7 @@ namespace Sim {
                         continuing = residualStatus == Status.CONTINUE || deltaStatus == Status.CONTINUE;
                         break;
                     default:
-                        stderr.printf("ERROR: Invalid termination criteria!");
+                        stderr.printf("\nERROR: Invalid termination criteria!\n");
                         return_if_reached();
                 }
             } while (continuing && iterations < maxIterations);
