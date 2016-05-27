@@ -62,11 +62,11 @@ def main():
         ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = color.white, thickness=0.01)  # Singularity
     else:
         sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # ISCO
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere1(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # Photon Sphere
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere2(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # Photon Sphere
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere1(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # Photon Sphere
+    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere2(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # Photon Sphere
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))  # z axis
-    mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=350, yoffset=340, line=False, border=10, font='Monospace', height=16, color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
+    mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16, color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #sphere(pos=(0,0,0), radius=3.0, opacity=0.2)
@@ -101,7 +101,7 @@ def main():
         ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
         ball.trail.append(pos = ball.pos, color = ball.color)
         if mu is not None and fabs(mu) > 0.0:
-            mylabel.text = u"v  %.3f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            mylabel.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
             mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         counter += 1
