@@ -1,0 +1,21 @@
+{
+  "integrator": "sc6",
+  "plotratio": 5,
+  "mu": 1,
+  "a": -1,
+  "M": 1,
+  "direction": "RETROGRADE",
+  "deltas": "dE: -1.6e-16, dL: 1.4e-15, dQ: 2.1e-47",
+  "residuals": "R1: -2.8e-14, R2: -2.8e-14, TH: 2.7e-48",
+  "iterations": 8,
+  "generator": "icgenParticle dnewton",
+  "E": 22.373954889412,
+  "L": 156.550614063433,
+  "Q": 0,
+  "r0": 4.001,
+  "th0": 0,
+  "start": 0,
+  "duration": 5000,
+  "step": 0.001
+}
+
