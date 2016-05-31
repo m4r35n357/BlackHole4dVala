@@ -22,6 +22,7 @@ icgenParticle
 icgenLight
 kerr-image
 !kerr-image.c
+VPythonOutput/
 RaytracingOutput/
 tmp/
 images/

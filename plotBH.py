@@ -17,6 +17,7 @@ from sys import argv, stderr, exit, stdin
 from math import sqrt, sin, cos, tan, fabs, pi, atan2, acos
 from visual import scene, sphere, curve, points, rate, ellipsoid, ring, color, cone, label
 from json import loads
+from os import popen
 
 def isco (a, l):
     z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
@@ -104,6 +105,7 @@ def main():
             mylabel.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
             mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        #popen('import -window 0x3600003 -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         counter += 1
         dataLine = stdin.readline()
 
