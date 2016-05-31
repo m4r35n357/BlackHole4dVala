@@ -72,11 +72,19 @@ ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
 mplayer raytrace.mp4 -fps 10
 
 
+
 REFERENCE DATA
+
+
+Black Hole model
+
+http://www.icra.it/Publications/Scientific/files/LenseThirring/pdf/b_Wilkins.pdf
+
 
 Particle trajectories
 
 http://staff.science.nus.edu.sg/~phylyk/downloads/reports/sp2172_report.pdf
+
 
 Light trajectories
 
