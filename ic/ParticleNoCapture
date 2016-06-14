@@ -1,0 +1,20 @@
+{
+  "generator" : "icgenParticle dnewton",
+  "iterations" : 5,
+  "residuals" : "R1: 4.5e-13, R2: 0.0e+00, TH: 5.5e-48",
+  "deltas" : "dE: -4.6e-15, dL: -2.5e-12, dQ: -3.6e-45",
+  "direction" : "PROGRADE",
+  "M" : 1.0,
+  "a" : 0.0,
+  "mu" : 1.0,
+  "E" : 0.94868329805051377,
+  "L" : 3.5777087639996612,
+  "Q" : 4.7992313045179383e-32,
+  "r0" : 12,
+  "th0" : 0,
+  "start" : 0.0,
+  "duration" : 5000.0,
+  "step" : 0.001,
+  "plotratio" : 500,
+  "integrator" : "sc4"
+}
