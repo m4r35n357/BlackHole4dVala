@@ -37,7 +37,7 @@ namespace Sim {
         private double a2E;
         private double L2;
         private double aL;
-        private double L_aE2;
+        private double E2_mu2;
         private double a2xE2_mu2;
         private double sth2;
         private double ra2;
@@ -53,6 +53,7 @@ namespace Sim {
         private double rDot;
         private double thDot;
         private double phDot;
+        private double[] c;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -75,8 +76,9 @@ namespace Sim {
             this.a2E = a2 * E;
             this.L2 = L * L;
             this.aL = a * L;
-            this.L_aE2 = (L - aE) * (L - aE);
-            this.a2xE2_mu2 = - a2 * (E * E - mu2);
+            this.E2_mu2 = E * E - mu2;
+            this.a2xE2_mu2 = a2 * E2_mu2;
+            this.c = { E2_mu2, 2.0 * mu2, a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
@@ -89,15 +91,15 @@ namespace Sim {
         /**
          * Calculate potentials & coordinate velocites, and populate RK4 arrays for each stage
          */
-        private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins
+        private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins 1972 eqns. 1 to 5
             var r2 = radius * radius;
             sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
             D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
-            R = (ra2 * E - aL) * (ra2 * E - aL) - D * (Q + L_aE2 + mu2 * r2);
-            THETA = Q - cth2 * (a2xE2_mu2 + L2 / sth2);
+            R = (((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4];
+            THETA = Q - cth2 * (L2 / sth2 - a2xE2_mu2);
             var P_D = (ra2 * E - aL) / D;
             tDot = (ra2 * P_D + aL - a2E * sth2) / S;
             rDot = sqrt(R > 0.0 ? R : -R) / S;
