@@ -98,7 +98,7 @@ namespace Sim {
             ra2 = r2 + a2;
             D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
-            R = (((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4];
+            R = (((c[0] * radius + c[1]) * radius + c[2]) * radius + c[3]) * radius + c[4];
             THETA = Q - cth2 * (L2 / sth2 - a2xE2_mu2);
             var P_D = (ra2 * E - aL) / D;
             tDot = (ra2 * P_D + aL - a2E * sth2) / S;
