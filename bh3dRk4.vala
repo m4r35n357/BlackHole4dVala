@@ -37,7 +37,6 @@ namespace Sim {
         private double a2E;
         private double L2;
         private double aL;
-        private double E2_mu2;
         private double a2xE2_mu2;
         private double sth2;
         private double ra2;
@@ -76,7 +75,7 @@ namespace Sim {
             this.a2E = a2 * E;
             this.L2 = L * L;
             this.aL = a * L;
-            this.E2_mu2 = E * E - mu2;
+            var E2_mu2 = E * E - mu2;
             this.a2xE2_mu2 = a2 * E2_mu2;
             this.c = { E2_mu2, 2.0 * mu2, a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
             this.start = tau0;
@@ -112,7 +111,7 @@ namespace Sim {
         }
 
         /**
-         * Sum the RK4 terms for each coordinate
+         * Sum the RK4 terms for a single coordinate
          */
         private double sumK (double[] kx) {
             return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0;
