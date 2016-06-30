@@ -71,8 +71,8 @@ echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenPartic
 ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
 mplayer raytrace.mp4 -fps 10
 
-ffmpeg -y -i VPythonOutput/vp%04d.png -c:v libx264 -crf 1 vpython.mp4
-
+ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -crf 1 vpython.mp4
+ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -preset veryslow -qp 0 vpython.mp4
 
 
 REFERENCE DATA
