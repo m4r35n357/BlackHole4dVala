@@ -83,5 +83,6 @@
   "g" : 6.67384e-20,
   "integratorOrder" : "sc4",
   "simulationTime" : 1.0e10,
-  "timeStep" : 1.0e5
+  "timeStep" : 1.0e5,
+  "plotratio" : 1
 }

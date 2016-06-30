@@ -47,6 +47,7 @@ namespace Simulations {
         private int np;
         private double g;
         private double ts;
+        private int64 tr;
         private double errorLimit;
         private double simulationTime;
         private ISymplectic integrator;
@@ -54,11 +55,12 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private NBody (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, string type) {
+        private NBody (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, int64 tRatio, string type) {
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
             this.ts = timeStep;
+            this.tr = tRatio;
             this.errorLimit = errorLimit;
             this.simulationTime = simulationTime;
             this.integrator = Integrator.getIntegrator(this, type);
@@ -98,6 +100,7 @@ namespace Simulations {
                               ic.get_double_member("timeStep"),
                               ic.get_double_member("errorLimit"),
                               ic.get_double_member("simulationTime"),
+                              ic.get_int_member("plotratio"),
                               ic.get_string_member("integratorOrder"));
         }
 
@@ -164,15 +167,19 @@ namespace Simulations {
          */
         public void solve () {
             var h0 = h();
+            int64 count = 0;
             var t = 0.0;
             while (true) {
                 var hNow = h();
                 var dbValue = logError(fabs(hNow / h0 - 1.0));
-                output(t, hNow, h0, dbValue);
+                if (count % tr == 0) {
+                    output(t, hNow, h0, dbValue);
+                }
                 if (fabs(t) > simulationTime || dbValue > errorLimit) {
                     return;
                 }
                 integrator.compose();
+                count += 1;
                 t += ts;
             }
         }
