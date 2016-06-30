@@ -26,7 +26,7 @@ jq . $ic
 datafile='/tmp/data'
 echo -n ${C}"Simulating with $program . . . "
 case $program in
-	*Rk4)	$program <$ic >$datafile;;
+	*Rk4*)	$program <$ic >$datafile;;
 	*)	$program <$ic | ./finterp.py $timeCoord $timeStep >$datafile;;
 esac
 echo "Done!"${NC}
