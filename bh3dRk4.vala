@@ -164,10 +164,34 @@ namespace Sim {
         }
 
         /**
+         * Parse JSON initial conditions data from stdin
+         */
+        private static Json.Object getJson () {
+            var input = new StringBuilder();
+            var buffer = new char[1024];
+            while (!stdin.eof()) {
+                var chunk = stdin.gets(buffer);
+                if (chunk != null) {
+                    input.append(chunk);
+                }
+            }
+            unowned Json.Object obj;
+            var p = new Parser();
+            try {
+                p.load_from_data(input.str);
+                obj = p.get_root().get_object();
+            } catch (Error e) {
+                stderr.printf("Unable to parse the input data: %s\n", e.message);
+                return_if_reached();
+            }
+            return obj;
+        }
+
+        /**
          * Static factory from STDIN in JSON format
          */
         public static BL fromJson () {
-            Json.Object o = Simulations.getJson();
+            Json.Object o = getJson();
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                           o.get_double_member("r0"), (90.0 - o.get_double_member("th0")) * PI / 180.0,
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
