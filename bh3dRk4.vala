@@ -164,9 +164,9 @@ namespace Sim {
         }
 
         /**
-         * Parse JSON initial conditions data from stdin
+         * Static factory from STDIN in JSON format
          */
-        private static Json.Object getJson () {
+        public static BL fromJson () {
             var input = new StringBuilder();
             var buffer = new char[1024];
             while (!stdin.eof()) {
@@ -175,23 +175,15 @@ namespace Sim {
                     input.append(chunk);
                 }
             }
-            unowned Json.Object obj;
+            unowned Json.Object o;
             var p = new Parser();
             try {
                 p.load_from_data(input.str);
-                obj = p.get_root().get_object();
+                o = p.get_root().get_object();
             } catch (Error e) {
                 stderr.printf("Unable to parse the input data: %s\n", e.message);
                 return_if_reached();
             }
-            return obj;
-        }
-
-        /**
-         * Static factory from STDIN in JSON format
-         */
-        public static BL fromJson () {
-            Json.Object o = getJson();
             return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                           o.get_double_member("r0"), (90.0 - o.get_double_member("th0")) * PI / 180.0,
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
