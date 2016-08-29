@@ -24,12 +24,13 @@ namespace Sim {
          * Fixed parameters and constraints
          */
         private struct Params {
+            public double a;
+            public double lambda;
             public double mu2;
+            public double Lfac;
             public double rMin;
             public double rMax;
             public double elevation;
-            public double a;
-            public double Lfac;
         }
 
         /**
@@ -51,6 +52,7 @@ namespace Sim {
          */
         private static double R (double r, double E, double L, double Q, Params* p) {
             var a = p->a;
+            var lambda = p->lambda;
             var mu2 = p->mu2;
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
@@ -61,6 +63,7 @@ namespace Sim {
          */
         private static double dRdr (double r, double E, double L, double Q, Params* p) {
             var a = p->a;
+            var lambda = p->lambda;
             var mu2 = p->mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);
@@ -71,6 +74,7 @@ namespace Sim {
          */
         private static double THETA (double theta, double E, double L, double Q, Params* p) {
             var a = p->a;
+            var lambda = p->lambda;
             var mu2 = p->mu2;
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
@@ -125,6 +129,7 @@ namespace Sim {
             }
             stdout.printf("  \"M\" : %.1f,\n", 1.0);
             stdout.printf("  \"a\" : %.1f,\n", p->a);
+            stdout.printf("  \"lambda\" : %.17g,\n", 0.0);
             stdout.printf("  \"mu\" : %.1f,\n", p->mu2);
             stdout.printf("  \"E\" : %.17g,\n", E);
             stdout.printf("  \"L\" : %.17g,\n", L);
