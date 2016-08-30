@@ -22,23 +22,25 @@ namespace Sim {
         /**
          * All fields are private
          */
-        private double lambda;
+        private double lambda_3;
         private double a;
+        private double a2;
+        private double a2lambda_3;
         private double mu2;
+        private double a2mu2;
+        private double chi2;
         private double E;
         private double L;
         private double K;
+        private double aE;
+        private double aL;
         private double start;
         private double end;
         private double ts;
         private int64 tr;
-        private double a2;
         private double horizon;
-        private double aE;
-        private double aL;
         private double sth2;
         private double ra2;
-        private double chi2;
         private double Delta_r;
         private double Delta_th;
         private double S;
@@ -64,17 +66,19 @@ namespace Sim {
          */
         private BL (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                     double tau0, double deltaTau, double tStep, int64 tRatio) {
-            this.lambda = lambda;
+            this.lambda_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
             this.L = L;
             this.a2 = a * a;
+            this.a2lambda_3 = a2 * lambda_3;
+            this.a2mu2 = a2 * mu2;
             this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.aL = a * L;
-            this.chi2 = (1.0 + a2 * lambda / 3.0) * (1.0 + a2 * lambda / 3.0);
-            this.K = Q + chi2 * (L - a * E) * (L - a * E);
+            this.chi2 = (1.0 + a2lambda_3) * (1.0 + a2lambda_3);
+            this.K = Q + chi2 * (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
@@ -94,17 +98,15 @@ namespace Sim {
             ra2 = r2 + a2;
             S = r2 + a2 * cth2;
             var P1 = ra2 * E - aL;
-            Delta_r = (1.0 - lambda / 3 * r2) * ra2 - 2 * r;
+            Delta_r = (1.0 - lambda_3 * r2) * ra2 - 2 * r;
             R = chi2 * P1 * P1 - Delta_r * (mu2 * r2 + K);
             var T1 = aE * sth2 - L;
-            Delta_th = 1.0 + lambda / 3 * a2 * cth2;
-            THETA = Delta_th * (K - mu2 * a2 * cth2) - chi2 / sth2 * T1 * T1;
-            //THETA = Q + (L - a * E) * (L - a * E) - (a * E * sth2 - L) * (a * E * sth2 - L) / sth2 - mu2 * a2 * cth2;
+            Delta_th = 1.0 + a2lambda_3 * cth2;
+            THETA = Delta_th * (K - a2mu2 * cth2) - chi2 / sth2 * T1 * T1;
             tDot = (P1 * ra2 / Delta_r - T1 * a / Delta_th) * chi2 / S;
             rDot = sqrt(R > 0.0 ? R : -R) / S;
             thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
             phDot = (P1 * a / Delta_r - T1 / (Delta_th * sth2)) * chi2 / S;
-
             kt[stage] = ts * tDot;
             kr[stage] = ts * rDot;
             kth[stage] = ts * thDot;
