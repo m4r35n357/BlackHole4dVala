@@ -98,7 +98,7 @@ namespace Sim {
             ra2 = r2 + a2;
             S = r2 + a2 * cth2;
             var P1 = ra2 * E - aL;
-            Delta_r = (1.0 - lambda_3 * r2) * ra2 - 2 * r;
+            Delta_r = (1.0 - lambda_3 * r2) * ra2 - 2 * radius;
             R = chi2 * P1 * P1 - Delta_r * (mu2 * r2 + K);
             var T1 = aE * sth2 - L;
             Delta_th = 1.0 + a2lambda_3 * cth2;
