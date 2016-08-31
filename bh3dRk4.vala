@@ -22,25 +22,27 @@ namespace Sim {
         /**
          * All fields are private
          */
+        private double lambda_3;
         private double a;
+        private double a2;
+        private double a2lambda_3;
         private double mu2;
+        private double a2mu2;
+        private double chi2;
         private double E;
         private double L;
-        private double Q;
+        private double K;
+        private double aE;
+        private double aL;
         private double start;
         private double end;
         private double ts;
         private int64 tr;
-        private double a2;
         private double horizon;
-        private double aE;
-        private double a2E;
-        private double L2;
-        private double aL;
-        private double a2xE2_mu2;
         private double sth2;
         private double ra2;
-        private double D;
+        private double Delta_r;
+        private double Delta_th;
         private double S;
         private double R;
         private double THETA;
@@ -52,7 +54,6 @@ namespace Sim {
         private double rDot;
         private double thDot;
         private double phDot;
-        private double[] c;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -63,21 +64,21 @@ namespace Sim {
         /**
          * Private constructor, use the static factory
          */
-        private BL (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio) {
+        private BL (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+                    double tau0, double deltaTau, double tStep, int64 tRatio) {
+            this.lambda_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
             this.L = L;
-            this.Q = Q;
             this.a2 = a * a;
+            this.a2lambda_3 = a2 * lambda_3;
+            this.a2mu2 = a2 * mu2;
             this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
-            this.a2E = a2 * E;
-            this.L2 = L * L;
             this.aL = a * L;
-            var E2_mu2 = E * E - mu2;
-            this.a2xE2_mu2 = a2 * E2_mu2;
-            this.c = { E2_mu2, 2.0 * mu2, a2xE2_mu2 - L2 - Q, 2.0 * ((aE - L) * (aE - L) + Q), - a2 * Q };
+            this.chi2 = (1.0 + a2lambda_3) * (1.0 + a2lambda_3);
+            this.K = Q + chi2 * (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
@@ -95,15 +96,17 @@ namespace Sim {
             sth2 = sin(theta) * sin(theta);
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
-            D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
-            R = (((c[0] * radius + c[1]) * radius + c[2]) * radius + c[3]) * radius + c[4];
-            THETA = Q - cth2 * (L2 / sth2 - a2xE2_mu2);
-            var P_D = (ra2 * E - aL) / D;
-            tDot = (ra2 * P_D + aL - a2E * sth2) / S;
+            var P1 = ra2 * E - aL;
+            Delta_r = (1.0 - lambda_3 * r2) * ra2 - 2 * r;
+            R = chi2 * P1 * P1 - Delta_r * (mu2 * r2 + K);
+            var T1 = aE * sth2 - L;
+            Delta_th = 1.0 + a2lambda_3 * cth2;
+            THETA = Delta_th * (K - a2mu2 * cth2) - chi2 / sth2 * T1 * T1;
+            tDot = (P1 * ra2 / Delta_r - T1 * a / Delta_th) * chi2 / S;
             rDot = sqrt(R > 0.0 ? R : -R) / S;
             thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
-            phDot = (a * P_D - aE + L / sth2) / S;
+            phDot = (P1 * a / Delta_r - T1 / (Delta_th * sth2)) * chi2 / S;
             kt[stage] = ts * tDot;
             kr[stage] = ts * rDot;
             kth[stage] = ts * thDot;
@@ -139,9 +142,11 @@ namespace Sim {
         private void output (double tau) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
-            var e = mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2;
+            var e = mu2 + sth2 * Delta_th / (S * chi2) * tmp1 * tmp1 + S / Delta_r * rDot * rDot
+                        + S / Delta_th * thDot * thDot - Delta_r / (S * chi2) * tmp2 * tmp2;
             e = e > 0.0 ? e : -e;
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0, -180.0, -180.0);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
+                            tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0, -180.0, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
         }
@@ -184,7 +189,8 @@ namespace Sim {
                 stderr.printf("Unable to parse the input data: %s\n", e.message);
                 return_if_reached();
             }
-            return new BL(o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
+            return new BL(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"),
+                          o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                           o.get_double_member("r0"), (90.0 - o.get_double_member("th0")) * PI / 180.0,
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
