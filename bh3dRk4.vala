@@ -22,13 +22,13 @@ namespace Sim {
         /**
          * All fields are private
          */
-        private double lambda_3;
+        private double l_3;
         private double a;
         private double a2;
-        private double a2lambda_3;
+        private double a2l_3;
         private double mu2;
         private double a2mu2;
-        private double chi2;
+        private double X2;
         private double E;
         private double L;
         private double K;
@@ -41,8 +41,8 @@ namespace Sim {
         private double horizon;
         private double sth2;
         private double ra2;
-        private double Delta_r;
-        private double Delta_th;
+        private double D_r;
+        private double D_th;
         private double S;
         private double R;
         private double THETA;
@@ -66,19 +66,19 @@ namespace Sim {
          */
         private BL (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                     double tau0, double deltaTau, double tStep, int64 tRatio) {
-            this.lambda_3 = lambda / 3.0;
+            this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
             this.L = L;
             this.a2 = a * a;
-            this.a2lambda_3 = a2 * lambda_3;
+            this.a2l_3 = a2 * l_3;
             this.a2mu2 = a2 * mu2;
             this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.aL = a * L;
-            this.chi2 = (1.0 + a2lambda_3) * (1.0 + a2lambda_3);
-            this.K = Q + chi2 * (L - aE) * (L - aE);
+            this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
+            this.K = Q + X2 * (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
@@ -98,15 +98,15 @@ namespace Sim {
             ra2 = r2 + a2;
             S = r2 + a2 * cth2;
             var P1 = ra2 * E - aL;
-            Delta_r = (1.0 - lambda_3 * r2) * ra2 - 2 * radius;
-            R = chi2 * P1 * P1 - Delta_r * (mu2 * r2 + K);
+            D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
+            R = X2 * P1 * P1 - D_r * (mu2 * r2 + K);
             var T1 = aE * sth2 - L;
-            Delta_th = 1.0 + a2lambda_3 * cth2;
-            THETA = Delta_th * (K - a2mu2 * cth2) - chi2 / sth2 * T1 * T1;
-            tDot = (P1 * ra2 / Delta_r - T1 * a / Delta_th) * chi2 / S;
+            D_th = 1.0 + a2l_3 * cth2;
+            THETA = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T1 * T1;
+            tDot = (P1 * ra2 / D_r - T1 * a / D_th) * X2 / S;
             rDot = sqrt(R > 0.0 ? R : -R) / S;
             thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
-            phDot = (P1 * a / Delta_r - T1 / (Delta_th * sth2)) * chi2 / S;
+            phDot = (P1 * a / D_r - T1 / (D_th * sth2)) * X2 / S;
             kt[stage] = ts * tDot;
             kr[stage] = ts * rDot;
             kth[stage] = ts * thDot;
@@ -142,8 +142,7 @@ namespace Sim {
         private void output (double tau) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
-            var e = mu2 + sth2 * Delta_th / (S * chi2) * tmp1 * tmp1 + S / Delta_r * rDot * rDot
-                        + S / Delta_th * thDot * thDot - Delta_r / (S * chi2) * tmp2 * tmp2;
+            var e = mu2 + sth2 * D_th / (S * X2) * tmp1 * tmp1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / (S * X2) * tmp2 * tmp2;
             e = e > 0.0 ? e : -e;
             stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
                             tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0, -180.0, -180.0);
@@ -174,7 +173,7 @@ namespace Sim {
         public static BL fromJson () {
             var input = new StringBuilder();
             var buffer = new char[1024];
-            while (!stdin.eof()) {
+            while (! stdin.eof()) {
                 var chunk = stdin.gets(buffer);
                 if (chunk != null) {
                     input.append(chunk);
