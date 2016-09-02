@@ -52,13 +52,13 @@ rm -f $ic; ./rg2 2>/dev/null
 
 5.	Some example pipelines . . .
 
-jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic` &
+jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
 
-jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic` &
+jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
 
-jq . $ic; ./bh3dSymp <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic` &
+jq . $ic; ./bh3dSymp <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; ./bh3dRk4 <$ic| ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic`  
+echo '{ "rMin": 3.0, "rMax": 12.0, "thMin": 0.15, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; ./bh3dRk4 <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).

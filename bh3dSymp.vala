@@ -100,7 +100,7 @@ namespace Simulations {
          * Static factory
          */
         public static KerrGeodesic fromJson () {
-            var ic = getJson();
+            var ic = getJson().get_object_member("IC");
             return new KerrGeodesic(ic.get_double_member("a"),
                                     ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
                                     ic.get_double_member("r0"), (90.0 - ic.get_double_member("th0")) * PI / 180.0,

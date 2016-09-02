@@ -12,43 +12,43 @@ pot='/tmp/potential'
 int='./finterp.py'
 
 params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
+echo $params | jq .IC.
 echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
+jq .IC. $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic`
+	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 done
 
 params='{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
+echo $params | jq .IC.
 echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
+jq .IC. $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic`
+	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 done
 
 params='{ "r": 3, "spin": 1.0 }'
-echo $params | jq .
+echo $params | jq .IC.
 echo $params | ./icgenLight >$ic 2>$pot
-jq . $ic
+jq .IC. $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic`
+	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 done
 
 params='{ "r": 2, "spin": 1.0 }'
-echo $params | jq .
+echo $params | jq .IC.
 echo $params | ./icgenLight >$ic 2>$pot
-jq . $ic
+jq .IC. $ic
 for app in $bh3ds
 do
 	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic` `jq .mu $ic`
+	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 done
 
 for app in $nbodys
@@ -58,9 +58,9 @@ do
 done
 
 params='{ "method": "dnewton", "r": 12.0, "elevation": 0.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
+echo $params | jq .IC.
 echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
+jq .IC. $ic
 echo ${C}"./newton"${NC}
-./newton <$ic | ./plotBH.py `jq .M $ic` `jq .a $ic` `jq .L $ic`
+./newton <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic`
 

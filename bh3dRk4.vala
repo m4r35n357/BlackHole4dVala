@@ -183,7 +183,7 @@ namespace Sim {
             var p = new Parser();
             try {
                 p.load_from_data(input.str);
-                o = p.get_root().get_object();
+                o = p.get_root().get_object().get_object_member("IC");
             } catch (Error e) {
                 stderr.printf("Unable to parse the input data: %s\n", e.message);
                 return_if_reached();
