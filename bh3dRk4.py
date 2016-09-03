@@ -19,7 +19,7 @@ from json import loads
 
 class BL(object):
     def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
-        self.l_3 = Lambda
+        self.l_3 = Lambda / 3.0
         self.a = spin
         self.mu2 = pMass2
         self.E = energy
@@ -57,10 +57,10 @@ class BL(object):
         self.R = self.X2 * P1**2 - self.D_r * (self.mu2 * r2 + self.K)
         T1 = self.aE * self.sth2 - self.L
         self.D_th = 1.0 + self.a2l_3 * cth2
-        self.THETA = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 / self.sth2 * T1**2
+        self.TH = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 / self.sth2 * T1**2
         self.tDot = (P1 * self.ra2 / self.D_r - T1 * self.a / self.D_th) * self.X2 / self.S
         self.rDot = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
-        self.thDot = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
+        self.thDot = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
         self.phDot = (P1 * self.a / self.D_r - T1 / (self.D_th * self.sth2)) * self.X2 / self.S
         self.kt[stage] = self.h * self.tDot
         self.kr[stage] = self.h * self.rDot
@@ -71,7 +71,7 @@ class BL(object):
         def sumK (kx):
             return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
-        self.sgnTH = self.sgnTH if self.THETA > 0.0 else - self.sgnTH
+        self.sgnTH = self.sgnTH if self.TH > 0.0 else - self.sgnTH
         self.f(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
         self.f(self.r + 0.5 * self.kr[1], self.th + 0.5 * self.kth[1], 2)
         self.f(self.r + self.kr[2], self.th + self.kth[2], 3)
@@ -86,8 +86,8 @@ class BL(object):
                      + self.S / self.D_r * self.rDot**2 + self.S / self.D_th * self.thDot**2 \
                      - self.D_r / (self.S * self.X2) * (self.tDot - self.a * self.sth2 * self.phDot)**2
         e = e if e >= 0.0 else -e
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f,' % \
-                          (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), -180.0, -180.0, -180.0),
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' % \
+                          (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
         print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e,' % (self.t, self.r, self.th, self.ph),
         print >> stdout, '"tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (self.tDot, self.rDot, self.thDot, self.phDot)  # Log data
 
@@ -97,7 +97,7 @@ def main ():
             ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
     tau = 0.0
-    while tau <= bl.endtime and bl.r >= bl.horizon:
+    while tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:
         if tau >= bl.starttime and count % bl.tr == 0:
             bl.output(tau)
         bl.rk4Step()

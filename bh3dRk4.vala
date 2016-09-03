@@ -36,7 +36,7 @@ namespace Sim {
         private double aL;
         private double start;
         private double end;
-        private double ts;
+        private double h;
         private int64 tr;
         private double horizon;
         private double sth2;
@@ -45,7 +45,7 @@ namespace Sim {
         private double D_th;
         private double S;
         private double R;
-        private double THETA;
+        private double TH;
         private double t = 0.0;
         private double r;
         private double th;
@@ -81,7 +81,7 @@ namespace Sim {
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
-            this.ts = tStep;
+            this.h = tStep;
             this.tr = tRatio;
             this.r = r0;
             this.th = th0;
@@ -102,15 +102,15 @@ namespace Sim {
             R = X2 * P1 * P1 - D_r * (mu2 * r2 + K);
             var T1 = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
-            THETA = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T1 * T1;
+            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T1 * T1;
             tDot = (P1 * ra2 / D_r - T1 * a / D_th) * X2 / S;
             rDot = sqrt(R > 0.0 ? R : -R) / S;
-            thDot = sqrt(THETA > 0.0 ? THETA : -THETA) / S;
+            thDot = sqrt(TH > 0.0 ? TH : -TH) / S;
             phDot = (P1 * a / D_r - T1 / (D_th * sth2)) * X2 / S;
-            kt[stage] = ts * tDot;
-            kr[stage] = ts * rDot;
-            kth[stage] = ts * thDot;
-            kph[stage] = ts * phDot;
+            kt[stage] = h * tDot;
+            kr[stage] = h * rDot;
+            kth[stage] = h * thDot;
+            kph[stage] = h * phDot;
         }
 
         /**
@@ -125,7 +125,7 @@ namespace Sim {
          */
         private void rk4Step () {
             sgnR = R > 0.0 ? sgnR : -sgnR;
-            sgnTH = THETA > 0.0 ? sgnTH : -sgnTH;
+            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
             f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
             f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
             f(r + kr[2], th + kth[2], 3);
@@ -156,13 +156,13 @@ namespace Sim {
         public void solve () {
             int64 count = 0;
             var tau = 0.0;
-            while ((tau <= end) && (r >= horizon)) {
+            while ((tau <= end) && (r >= horizon) && (D_r >= 0.0)) {
                 if ((tau >= start) && (count % tr == 0)) {
                     output(tau);
                 }
                 rk4Step();
                 count += 1;
-                tau += ts;
+                tau += h;
             }
             output(tau);
         }
