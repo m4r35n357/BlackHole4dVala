@@ -18,14 +18,20 @@ from math import log10, sqrt, sin, pi
 from json import loads
 
 class BL(object):
-    def __init__(self, bhMass, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
+        self.l_3 = Lambda
         self.a = spin
         self.mu2 = pMass2
         self.E = energy
         self.L = momentum
-        self.Q = carter
-        self.r = r0
-        self.th = thetaMin
+        self.a2 = self.a**2
+        self.a2l_3 = self.a2 * self.l_3
+        self.a2mu2 = self.a2 * self.mu2
+        self.horizon = 1.0 + sqrt(1.0 - self.a2)
+        self.aE = self.a * self.E
+        self.aL = self.a * self.L
+        self.X2 = (1.0 + self.a2l_3)**2
+        self.K = carter + self.X2 * (self.L - self.aE)**2
         self.starttime = starttime
         self.endtime = starttime + duration
         self.h = timestep
@@ -36,31 +42,26 @@ class BL(object):
         self.kph = [0.0, 0.0, 0.0, 0.0]
         self.sgnR = self.sgnTH = -1.0
         self.t = self.ph = self.v4cum = 0.0
-        self.a2 = self.a**2
-        self.horizon = 1.0 + sqrt(1.0 - self.a2)
-        self.aE = self.a * self.E
-        self.a2E = self.a2 * self.E
-        self.L2 = self.L**2
-        self.aL = self.a * self.L
-        E2_mu2 = self.E**2 - self.mu2
-        self.a2xE2_mu2 = self.a2 * E2_mu2
-        self.c = [E2_mu2, 2.0 * self.mu2, self.a2xE2_mu2 - self.L2 - self.Q, 2.0 * ((self.aE - self.L)**2 + self.Q), - self.a2 * self.Q]
+        self.r = r0
+        self.th = thetaMin
         self.f(self.r, self.th, 0)
 
     def f (self, radius, theta, stage):
         r2 = radius**2
         self.sth2 = sin(theta)**2
-        self.cth2 = 1.0 - self.sth2
+        cth2 = 1.0 - self.sth2
         self.ra2 = r2 + self.a2
-        self.D = self.ra2 - 2.0 * radius
-        self.S = r2 + self.a2 * self.cth2
-        self.R = (((self.c[0] * radius + self.c[1]) * radius + self.c[2]) * radius + self.c[3]) * radius + self.c[4]
-        self.THETA = self.Q - self.cth2 * (self.L2 / self.sth2 - self.a2xE2_mu2)
-        P_D = (self.ra2 * self.E - self.aL) / self.D
-        self.tDot = (self.ra2 * P_D + self.aL - self.a2E * self.sth2) / self.S
+        self.S = r2 + self.a2 * cth2
+        P1 = self.ra2 * self.E - self.aL
+        self.D_r = (1.0 - self.l_3 * r2) * self.ra2 - 2.0 * radius
+        self.R = self.X2 * P1**2 - self.D_r * (self.mu2 * r2 + self.K)
+        T1 = self.aE * self.sth2 - self.L
+        self.D_th = 1.0 + self.a2l_3 * cth2
+        self.THETA = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 / self.sth2 * T1**2
+        self.tDot = (P1 * self.ra2 / self.D_r - T1 * self.a / self.D_th) * self.X2 / self.S
         self.rDot = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
         self.thDot = sqrt(self.THETA if self.THETA >= 0.0 else -self.THETA) / self.S
-        self.phDot = (self.a * P_D - self.aE + self.L / self.sth2) / self.S
+        self.phDot = (P1 * self.a / self.D_r - T1 / (self.D_th * self.sth2)) * self.X2 / self.S
         self.kt[stage] = self.h * self.tDot
         self.kr[stage] = self.h * self.rDot
         self.kth[stage] = self.h * self.thDot
@@ -81,13 +82,19 @@ class BL(object):
         self.f(self.r, self.th, 0)
 
     def output (self, tau):
-        e = self.mu2 + self.sth2 / self.S * (self.a * self.tDot - self.ra2 * self.phDot)**2 + self.S / self.D * self.rDot**2 + self.S * self.thDot**2 - self.D / self.S * (self.tDot - self.a * self.sth2 * self.phDot)**2
+        e = self.mu2 + self.sth2 * self.D_th / (self.S * self.X2) * (self.a * self.tDot - self.ra2 * self.phDot)**2 \
+                     + self.S / self.D_r * self.rDot**2 + self.S / self.D_th * self.thDot**2 \
+                     - self.D_r / (self.S * self.X2) * (self.tDot - self.a * self.sth2 * self.phDot)**2
         e = e if e >= 0.0 else -e
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), -180.0, -180.0, -180.0, self.t, self.r, self.th, self.ph, self.tDot, self.rDot, self.thDot, self.phDot)  # Log data
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f,' % \
+                          (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), -180.0, -180.0, -180.0),
+        print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e,' % (self.t, self.r, self.th, self.ph),
+        print >> stdout, '"tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (self.tDot, self.rDot, self.thDot, self.phDot)  # Log data
 
 def main ():
     ic = loads(stdin.read())['IC']
-    bl = BL(ic['M'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], (90.0 - ic['th0']) * pi / 180.0, ic['start'], ic['duration'], ic['step'], ic['plotratio'])
+    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], (90.0 - ic['th0']) * pi / 180.0,
+            ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
     tau = 0.0
     while tau <= bl.endtime and bl.r >= bl.horizon:
