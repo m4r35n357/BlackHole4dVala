@@ -2,36 +2,41 @@
 /* [ Created with wxMaxima version 13.04.2 ] */
 
 /* [wxMaxima: input   start ] */
-(" ****** Kerr-deSitter ******")$
+(" ****** Kerr-deSitter ******");
 kill(all)$
 
 xM: 1$
 xa: 0$
 x%mu: 1$
 x%Lambda: 0$
-x%theta: pi / 2$
+x%theta: %pi / 2$
 
-%rho2: r^2 + a^2 * cos(%theta)^2$
-%chi: 1 + a^2 * %Lambda / 3$
-K: Q + %chi^2 * (L - a * E)^2$
+(" *** Intermediate Variables *** ");
+%Sigma = sigma: r^2 + a^2 * cos(%theta)^2;
+%Chi = X: 1 + a^2 * %Lambda / 3;
+Carter = K: Q + X^2 * (L - a * E)^2;
 
-(" Potential R: ");
+(" *** Potential R *** ");
 P1: (r^2 + a^2) * E - a * L$
-%Delta_r: (1 - %Lambda / 3 * r^2) * (r^2 + a^2) - 2 * M * r$
-R = potentialR: %chi^2 * P1^2 - %Delta_r * (%mu^2 * r^2 + K);
+%Delta[r] = Dr: (1 - %Lambda / 3 * r^2) * (r^2 + a^2) - 2 * M * r;
+R = potentialR: X^2 * P1^2 - Dr * (%mu^2 * r^2 + K);
 'diff(R, r) = diff(potentialR, r)$
 
-(" Potential THETA: ");
+(" *** Potential THETA *** ");
 T1: a * E * sin(%theta)^2 - L$
-%Delta_th: 1 + %Lambda / 3 * a^2 * cos(%theta)^2$
-%Theta = potentialTHETA: %Delta_th * (K - %mu^2 * a^2 * cos(%theta)^2) - %chi^2 / sin(%theta)^2 * T1^2;
+%Delta[th] = Dth: 1 + %Lambda / 3 * a^2 * cos(%theta)^2;
+%Theta = potentialTHETA: Dth * (K - %mu^2 * a^2 * cos(%theta)^2) - X^2 / sin(%theta)^2 * T1^2;
 'diff(%Theta, %theta) = diff(potentialTHETA, %theta)$
 
-(" Equations of Motion");
-'diff(t, %tau) =  (P1 * (r^2 + a^2) / %Delta_r - T1 * a / %Delta_th) * %chi^2 / %rho2;
-'diff(r, %tau) = sqrt(potentialR) / %rho2;
-'diff(%theta, %tau) = sqrt(potentialTHETA) / %rho2;
-'diff(%phi, %tau) = (P1 * a / %Delta_r - T1 / (%Delta_th * sin(%theta)^2)) * %chi^2 / %rho2;
+(" *** Equations of Motion *** ");
+(" t ");
+'diff(t, %tau) =  (P1 * (r^2 + a^2) / Dr - T1 * a / Dth) * X^2 / sigma;
+(" r ");
+'diff(r, %tau) = sqrt(potentialR) / sigma;
+( %theta );
+'diff(%theta, %tau) = sqrt(potentialTHETA) / sigma;
+( %phi );
+'diff(%phi, %tau) = (P1 * a / Dr - T1 / (Dth * sin(%theta)^2)) * X^2 / sigma;
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
