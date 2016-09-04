@@ -26,16 +26,13 @@ R = potentialR: X^2 * P1^2 - Dr * (%mu^2 * r^2 + K);
 T1: a * E * sin(%theta)^2 - L$
 %Delta[th] = Dth: 1 + %Lambda / 3 * a^2 * cos(%theta)^2;
 %Theta = potentialTHETA: Dth * (K - %mu^2 * a^2 * cos(%theta)^2) - X^2 / sin(%theta)^2 * T1^2;
+DiffToWilkins = trigsimp((potentialTHETA) - (Q - cos(%theta)^2 * (a^2 * (%mu^2 - E^2) + L^2 / sin(%theta)^2)))$
 'diff(%Theta, %theta) = diff(potentialTHETA, %theta)$
 
 (" *** Equations of Motion *** ");
-(" t ");
-'diff(t, %tau) =  (P1 * (r^2 + a^2) / Dr - T1 * a / Dth) * X^2 / sigma;
-(" r ");
+'diff(t, %tau) = (P1 * (r^2 + a^2) / Dr - T1 * a / Dth) * X^2 / sigma;
 'diff(r, %tau) = sqrt(potentialR) / sigma;
-( %theta );
 'diff(%theta, %tau) = sqrt(potentialTHETA) / sigma;
-( %phi );
 'diff(%phi, %tau) = (P1 * a / Dr - T1 / (Dth * sin(%theta)^2)) * X^2 / sigma;
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
