@@ -22,7 +22,6 @@ namespace Simulations {
         private double mu2;
         private double E;
         private double L;
-        private double Q;
         private double start;
         private double end;
         private double ts;
@@ -30,26 +29,23 @@ namespace Simulations {
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
+        private double a2mu2;
         private double horizon;
         private double aE;
-        private double a2E;
-        private double L2;
         private double aL;
-        private double L_aE2;
-        private double a2xE2_mu2;
+        private double K;
         // Variables
         private double sth;
         private double cth;
-        private double cot;
         private double sth2;
+        private double r2;
         private double ra2;
-        private double D;
+        private double D_r;
         private double S;
         private double P1;
-        private double P2;
+        private double T1;
         private double R;
         private double TH;
-        private double THETA;
         private double eR;
         private double eTh;
         private double v4Cum;
@@ -74,15 +70,12 @@ namespace Simulations {
             this.mu2 = mu2;
             this.E = E;
             this.L = L;
-            this.Q = Q;
             this.a2 = a * a;
+            this.a2mu2 = a2 * mu2;
             this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
-            this.a2E = a2 * E;
-            this.L2 = L * L;
             this.aL = a * L;
-            this.L_aE2 = (L - aE) * (L - aE);
-            this.a2xE2_mu2 = - a2 * (E * E - mu2);
+            this.K = Q + (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
             this.ts = tStep;
@@ -93,7 +86,7 @@ namespace Simulations {
             this.th = th0;
             refresh(r, th);
             this.rP = - sqrt(fabs(R));
-            this.thP = - sqrt(fabs(THETA));
+            this.thP = - sqrt(fabs(TH));
         }
 
         /**
@@ -115,12 +108,12 @@ namespace Simulations {
         private double v4Error (double tDot, double rDot, double thDot, double phDot) {
             var tmp1 = a * tDot - ra2 * phDot;
             var tmp2 = tDot - a * sth2 * phDot;
-            return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D * rDot * rDot + S * thDot * thDot - D / S * tmp2 * tmp2);
+            return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D_r * rDot * rDot + S * thDot * thDot - D_r / S * tmp2 * tmp2);
         }
 
         private void errors (int count) {
             eR = logError(modH(rP, R));
-            eTh = logError(modH(thP, THETA));
+            eTh = logError(modH(thP, TH));
             var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
             v4e = logError(error);
             v4Cum += error;
@@ -128,23 +121,20 @@ namespace Simulations {
         }
 
         private void refresh (double radius, double theta) {  // update intermediate variables, see Wilkins
-            var r2 = radius * radius;
+            r2 = radius * radius;
             sth = sin(theta);
             cth = cos(theta);
-            cot = cth / sth;
             sth2 = sth * sth;
             var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
-            D = ra2 - 2.0 * radius;
             S = r2 + a2 * cth2;
-            P1 = ra2 * E - aL;  // MTW eq.33.33b, ignoring charge term
-            P2 = mu2 * r2 + L_aE2 + Q;
-            R = P1 * P1 - D * P2;  // MTW eq.33.33c
-            TH = a2xE2_mu2 + L2 / sth2;
-            THETA = Q - cth2 * TH;  // see Wilkins
-            var P_D = (ra2 * E - aL) / D;
-            tDot = ra2 * P_D + aL - a2E * sth2;
-            phDot = a * P_D - aE + L / sth2;
+            P1 = ra2 * E - aL;
+            D_r = ra2 - 2.0 * radius;
+            R = P1 * P1 - D_r * (mu2 * r2 + K);
+            T1 = aE * sth2 - L;
+            TH = K - a2mu2 * cth2 - T1 * T1 / sth2;
+            tDot = (P1 * ra2 / D_r - T1 * a);
+            phDot = (P1 * a / D_r - T1 / sth2);
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
@@ -156,8 +146,8 @@ namespace Simulations {
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * ts * (2.0 * r * E * P1 - P2 * (r - 1.0) - mu2 * r * D);  // dR/dr see Maxima file maths.wxm, "My Equations (Mino Time)"
-            thP += c * ts * (cth * sth * TH + L2 * cot * cot * cot);  // dTheta/dtheta see Maxima file maths.wxm, "My Equations (Mino Time)"
+            rP += c * ts * (2.0 * r * E * P1 - (r - 1.0) * (K + mu2 * r2) - mu2 * r * D_r);  // dR/dr, see Maxima file maths.wxm, "Kerr-deSitter"
+            thP += c * ts * (cth * T1 * T1 / (sth * sth2) + a2mu2 * cth * sth - 2.0 * cth * a * E * T1 / sth);  // dTheta/dtheta
         }
 
         /**
