@@ -57,7 +57,7 @@ class BL(object):
         self.R = self.X2 * P1**2 - self.D_r * (self.mu2 * r2 + self.K)
         T1 = self.aE * self.sth2 - self.L
         self.D_th = 1.0 + self.a2l_3 * cth2
-        self.TH = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 / self.sth2 * T1**2
+        self.TH = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 * T1**2 / self.sth2
         self.tDot = (P1 * self.ra2 / self.D_r - T1 * self.a / self.D_th) * self.X2 / self.S
         self.rDot = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
         self.thDot = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
