@@ -61,14 +61,14 @@ class BL(object):
         T_Dth = T / self.D_th
         self.S = r2 + self.a2 * cth2
         X2_S = self.X2 / self.S
-        self.tDot = (P_Dr * self.ra2 - T_Dth * self.a) * X2_S
-        self.rDot = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
-        self.thDot = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
-        self.phDot = (P_Dr * self.a - T_Dth / self.sth2) * X2_S
-        self.kt[stage] = self.h * self.tDot
-        self.kr[stage] = self.h * self.rDot
-        self.kth[stage] = self.h * self.thDot
-        self.kph[stage] = self.h * self.phDot
+        self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * X2_S
+        self.Ur = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
+        self.Uth = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
+        self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * X2_S
+        self.kt[stage] = self.h * self.Ut
+        self.kr[stage] = self.h * self.Ur
+        self.kth[stage] = self.h * self.Uth
+        self.kph[stage] = self.h * self.Uph
 
     def rk4Step (self):
         def sumK (kx):
@@ -85,14 +85,15 @@ class BL(object):
         self.f(self.r, self.th, 0)
 
     def output (self, tau):
-        e = self.mu2 + self.sth2 * self.D_th / (self.S * self.X2) * (self.a * self.tDot - self.ra2 * self.phDot)**2 \
-                     + self.S / self.D_r * self.rDot**2 + self.S / self.D_th * self.thDot**2 \
-                     - self.D_r / (self.S * self.X2) * (self.tDot - self.a * self.sth2 * self.phDot)**2
+        SX2 = self.S * self.X2
+        e = self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2 \
+                     + self.S / self.D_r * self.Ur**2 + self.S / self.D_th * self.Uth**2 \
+                     - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2
         e = e if e >= 0.0 else -e
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' % \
                           (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
         print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e,' % (self.t, self.r, self.th, self.ph),
-        print >> stdout, '"tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (self.tDot, self.rDot, self.thDot, self.phDot)  # Log data
+        print >> stdout, '"tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (self.Ut, self.Ur, self.Uth, self.Uph)  # Log data
 
 def main ():
     ic = loads(stdin.read())['IC']
