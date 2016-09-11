@@ -43,7 +43,7 @@ class BL(object):
         self.sgnR = self.sgnTH = -1.0
         self.t = self.ph = self.v4cum = 0.0
         self.r = r0
-        self.th = thetaMin
+        self.th = (90.0 - thetaMin) * pi / 180.0
         self.f(self.r, self.th, 0)
 
     def f (self, radius, theta, stage):
@@ -51,17 +51,20 @@ class BL(object):
         self.sth2 = sin(theta)**2
         cth2 = 1.0 - self.sth2
         self.ra2 = r2 + self.a2
-        self.S = r2 + self.a2 * cth2
-        P1 = self.ra2 * self.E - self.aL
+        P = self.ra2 * self.E - self.aL
         self.D_r = (1.0 - self.l_3 * r2) * self.ra2 - 2.0 * radius
-        self.R = self.X2 * P1**2 - self.D_r * (self.mu2 * r2 + self.K)
-        T1 = self.aE * self.sth2 - self.L
+        self.R = self.X2 * P**2 - self.D_r * (self.mu2 * r2 + self.K)
+        T = self.aE * self.sth2 - self.L
         self.D_th = 1.0 + self.a2l_3 * cth2
-        self.TH = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 * T1**2 / self.sth2
-        self.tDot = (P1 * self.ra2 / self.D_r - T1 * self.a / self.D_th) * self.X2 / self.S
+        self.TH = self.D_th * (self.K - self.a2mu2 * cth2) - self.X2 * T**2 / self.sth2
+        P_Dr = P / self.D_r
+        T_Dth = T / self.D_th
+        self.S = r2 + self.a2 * cth2
+        X2_S = self.X2 / self.S
+        self.tDot = (P_Dr * self.ra2 - T_Dth * self.a) * X2_S
         self.rDot = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
         self.thDot = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
-        self.phDot = (P1 * self.a / self.D_r - T1 / (self.D_th * self.sth2)) * self.X2 / self.S
+        self.phDot = (P_Dr * self.a - T_Dth / self.sth2) * X2_S
         self.kt[stage] = self.h * self.tDot
         self.kr[stage] = self.h * self.rDot
         self.kth[stage] = self.h * self.thDot
@@ -93,8 +96,7 @@ class BL(object):
 
 def main ():
     ic = loads(stdin.read())['IC']
-    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], (90.0 - ic['th0']) * pi / 180.0,
-            ic['start'], ic['duration'], ic['step'], ic['plotratio'])
+    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
     tau = 0.0
     while tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:

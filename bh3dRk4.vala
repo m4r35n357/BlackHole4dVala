@@ -50,10 +50,10 @@ namespace Sim {
         private double r;
         private double th;
         private double ph = 0.0;
-        private double tDot;
-        private double rDot;
-        private double thDot;
-        private double phDot;
+        private double Ut;
+        private double Ur;
+        private double Uth;
+        private double Uph;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -84,7 +84,7 @@ namespace Sim {
             this.h = tStep;
             this.tr = tRatio;
             this.r = r0;
-            this.th = th0;
+            this.th = (90.0 - th0) * PI / 180.0;
             f(r, th, 0);
         }
 
@@ -92,25 +92,33 @@ namespace Sim {
          * Calculate potentials & coordinate velocites, and populate RK4 arrays for each stage
          */
         private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins 1972 eqns. 1 to 5
+            // R potential
             var r2 = radius * radius;
-            sth2 = sin(theta) * sin(theta);
-            var cth2 = 1.0 - sth2;
             ra2 = r2 + a2;
-            S = r2 + a2 * cth2;
-            var P1 = ra2 * E - aL;
+            var P = ra2 * E - aL;
             D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
-            R = X2 * P1 * P1 - D_r * (mu2 * r2 + K);
-            var T1 = aE * sth2 - L;
+            R = X2 * P * P - D_r * (mu2 * r2 + K);
+            // THETA potential
+            var sth = sin(theta);
+            sth2 = sth * sth;
+            var cth2 = 1.0 - sth2;
+            var T = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
-            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T1 * T1;
-            tDot = (P1 * ra2 / D_r - T1 * a / D_th) * X2 / S;
-            rDot = sqrt(R > 0.0 ? R : -R) / S;
-            thDot = sqrt(TH > 0.0 ? TH : -TH) / S;
-            phDot = (P1 * a / D_r - T1 / (D_th * sth2)) * X2 / S;
-            kt[stage] = h * tDot;
-            kr[stage] = h * rDot;
-            kth[stage] = h * thDot;
-            kph[stage] = h * phDot;
+            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T * T;
+            // Equations of motion
+            var P_Dr = P / D_r;
+            var T_Dth = T / D_th;
+            S = r2 + a2 * cth2;
+            var X2_S = X2 / S;
+            Ut = (P_Dr * ra2 - T_Dth * a) * X2_S;
+            Ur = sqrt(R > 0.0 ? R : -R) / S;
+            Uth = sqrt(TH > 0.0 ? TH : -TH) / S;
+            Uph = (P_Dr * a - T_Dth / sth2) * X2_S;
+            // RK4 arrays
+            kt[stage] = h * Ut;
+            kr[stage] = h * Ur;
+            kth[stage] = h * Uth;
+            kph[stage] = h * Uph;
         }
 
         /**
@@ -140,14 +148,15 @@ namespace Sim {
          * Write the simulated data to STDOUT
          */
         private void output (double tau) {
-            var tmp1 = a * tDot - ra2 * phDot;
-            var tmp2 = tDot - a * sth2 * phDot;
-            var e = mu2 + sth2 * D_th / (S * X2) * tmp1 * tmp1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / (S * X2) * tmp2 * tmp2;
+            var U1 = a * Ut - ra2 * Uph;
+            var U4 = Ut - a * sth2 * Uph;
+            var SX2 = S * X2;
+            var e = mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4;
             e = e > 0.0 ? e : -e;
             stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
                             tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0, -180.0, -180.0);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot, rDot, thDot, phDot);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
+                            t, r, th, ph, Ut, Ur, Uth, Uph);
         }
 
         /**
@@ -190,7 +199,7 @@ namespace Sim {
             }
             return new BL(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"),
                           o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                          o.get_double_member("r0"), (90.0 - o.get_double_member("th0")) * PI / 180.0,
+                          o.get_double_member("r0"), o.get_double_member("th0"),
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
     }
