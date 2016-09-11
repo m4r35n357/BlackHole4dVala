@@ -1,5 +1,5 @@
 /* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
-/* [ Created with wxMaxima version 13.04.2 ] */
+/* [ Created with wxMaxima version 15.08.2 ] */
 
 /* [wxMaxima: input   start ] */
 (" ****** Kerr-deSitter ******");
@@ -10,33 +10,35 @@ xa: 0$
 x%mu: 1$
 x%Lambda: 0$
 x%theta: %pi / 2$
+xQ: 0;
 
 (" *** Intermediate Variables *** ");
-%Sigma = sigma: r^2 + a^2 * cos(%theta)^2;
+%Sigma = S: r^2 + a^2 * cos(%theta)^2;
 %Chi = X: 1 + a^2 * %Lambda / 3;
-Carter = K: Q + X^2 * (L - a * E)^2;
+K = cc: Q + X^2 * (L - a * E)^2;
 
 (" *** Potential R *** ");
-P1: (r^2 + a^2) * E - a * L$
+P: (r^2 + a^2) * E - a * L;
 %Delta[r] = Dr: (1 - %Lambda / 3 * r^2) * (r^2 + a^2) - 2 * M * r;
-R = potentialR: X^2 * P1^2 - Dr * (%mu^2 * r^2 + K);
-'diff(R, r) = diff(potentialR, r)$
+R = potentialR: X^2 * P^2 - Dr * (%mu^2 * r^2 + cc);
+'diff(R, r) = diff(potentialR, r);
 
 (" *** Potential THETA *** ");
-T1: a * E * sin(%theta)^2 - L$
-%Delta[th] = Dth: 1 + %Lambda / 3 * a^2 * cos(%theta)^2;
-%Theta = potentialTHETA: Dth * (K - %mu^2 * a^2 * cos(%theta)^2) - X^2 / sin(%theta)^2 * T1^2;
+T: a * E * sin(%theta)^2 - L;
+%Delta[%theta] = Dth: 1 + %Lambda / 3 * a^2 * cos(%theta)^2;
+%Theta = potentialTHETA: Dth * (cc - %mu^2 * a^2 * cos(%theta)^2) - X^2 / sin(%theta)^2 * T^2;
 DiffToWilkins = trigsimp((potentialTHETA) - (Q - cos(%theta)^2 * (a^2 * (%mu^2 - E^2) + L^2 / sin(%theta)^2)))$
-'diff(%Theta, %theta) = diff(potentialTHETA, %theta)$
+'diff(%Theta, %theta) = diff(potentialTHETA, %theta);
 
 (" *** Equations of Motion *** ");
-'diff(t, %tau) = (P1 * (r^2 + a^2) / Dr - T1 * a / Dth) * X^2 / sigma;
-'diff(r, %tau) = sqrt(potentialR) / sigma;
-'diff(%theta, %tau) = sqrt(potentialTHETA) / sigma;
-'diff(%phi, %tau) = (P1 * a / Dr - T1 / (Dth * sin(%theta)^2)) * X^2 / sigma;
+'diff(t, %tau) = (P * (r^2 + a^2) / Dr - T * a / Dth) * X^2 / S;
+'diff(r, %tau) = sqrt(potentialR) / S;
+'diff(%theta, %tau) = sqrt(potentialTHETA) / S;
+'diff(%phi, %tau) = (P * a / Dr - T / (Dth * sin(%theta)^2)) * X^2 / S;
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: hide output   ] */
 /* [wxMaxima: input   start ] */
 (" ****** My Equations (Mino Time) ******")$
 kill(all)$
@@ -64,6 +66,7 @@ collectterms(y, r);
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: hide output   ] */
 /* [wxMaxima: input   start ] */
 kill(all)$
 (" Potential THETA: ");
