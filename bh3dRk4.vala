@@ -22,6 +22,7 @@ namespace Sim {
         /**
          * All fields are private
          */
+        // constants
         private double l_3;
         private double a;
         private double a2;
@@ -39,6 +40,7 @@ namespace Sim {
         private double h;
         private int64 tr;
         private double horizon;
+        // variables
         private double sth2;
         private double ra2;
         private double D_r;
@@ -46,6 +48,14 @@ namespace Sim {
         private double S;
         private double R;
         private double TH;
+        private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
+        private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
+        private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
+        private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
+        private double sgnR = -1.0;
+        private double sgnTH = -1.0;
+        // state
+        private double tau = 0.0;
         private double t = 0.0;
         private double r;
         private double th;
@@ -54,12 +64,6 @@ namespace Sim {
         private double Ur;
         private double Uth;
         private double Uph;
-        private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
-        private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
-        private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
-        private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
-        private double sgnR = -1.0;
-        private double sgnTH = -1.0;
 
         /**
          * Private constructor, use the static factory
@@ -91,7 +95,7 @@ namespace Sim {
         /**
          * Calculate potentials & coordinate velocites, and populate RK4 arrays for each stage
          */
-        private void f (double radius, double theta, int stage) {  // update intermediate variables, see Wilkins 1972 eqns. 1 to 5
+        private void f (double radius, double theta, int stage) {  // see maths.wxm in Maxima
             // R potential
             var r2 = radius * radius;
             ra2 = r2 + a2;
@@ -147,7 +151,7 @@ namespace Sim {
         /**
          * Write the simulated data to STDOUT
          */
-        private void output (double tau) {
+        private void output () {
             var U1 = a * Ut - ra2 * Uph;
             var U4 = Ut - a * sth2 * Uph;
             var SX2 = S * X2;
@@ -164,16 +168,15 @@ namespace Sim {
          */
         public void solve () {
             int64 count = 0;
-            var tau = 0.0;
             while ((tau <= end) && (r >= horizon) && (D_r >= 0.0)) {
                 if ((tau >= start) && (count % tr == 0)) {
-                    output(tau);
+                    output();
                 }
                 rk4Step();
                 count += 1;
                 tau += h;
             }
-            output(tau);
+            output();
         }
 
         /**

@@ -41,7 +41,7 @@ class BL(object):
         self.kth = [0.0, 0.0, 0.0, 0.0]
         self.kph = [0.0, 0.0, 0.0, 0.0]
         self.sgnR = self.sgnTH = -1.0
-        self.t = self.ph = self.v4cum = 0.0
+        self.tau = self.t = self.ph = self.v4cum = 0.0
         self.r = r0
         self.th = (90.0 - thetaMin) * pi / 180.0
         self.f(self.r, self.th, 0)
@@ -84,29 +84,27 @@ class BL(object):
         self.ph += sumK(self.kph)
         self.f(self.r, self.th, 0)
 
-    def output (self, tau):
+    def output (self):
         SX2 = self.S * self.X2
-        e = self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2 \
-                     + self.S / self.D_r * self.Ur**2 + self.S / self.D_th * self.Uth**2 \
-                     - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2
+        e = self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2  + self.S / self.D_r * self.Ur**2 \
+                     + self.S / self.D_th * self.Uth**2  - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2
         e = e if e >= 0.0 else -e
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' % \
-                          (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
-        print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e,' % (self.t, self.r, self.th, self.ph),
-        print >> stdout, '"tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' % (self.Ut, self.Ur, self.Uth, self.Uph)  # Log data
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' \
+                         % (self.tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
+        print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
+                         % (self.t, self.r, self.th, self.ph, self.Ut, self.Ur, self.Uth, self.Uph)  # Log data
 
 def main ():
     ic = loads(stdin.read())['IC']
     bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
     count = 0
-    tau = 0.0
-    while tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:
-        if tau >= bl.starttime and count % bl.tr == 0:
-            bl.output(tau)
+    while bl.tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:
+        if bl.tau >= bl.starttime and count % bl.tr == 0:
+            bl.output()
         bl.rk4Step()
         count += 1
-        tau += bl.h
-    bl.output(tau)
+        bl.tau += bl.h
+    bl.output()
 
 if __name__ == "__main__":
     main()
