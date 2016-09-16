@@ -52,9 +52,9 @@ rm -f $ic; ./rg2 2>/dev/null
 
 5.	Some example pipelines . . .
 
-jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
+jq . $ic; ./bh3dRk4 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
 
-jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
+jq . $ic; nc.openbsd pi 1234 <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
 
 jq . $ic; ./bh3dSymp <$ic | ./finterp.py tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` &
 
@@ -73,6 +73,16 @@ mplayer raytrace.mp4 -fps 10
 
 ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -crf 1 vpython.mp4
 ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -preset veryslow -qp 0 vpython.mp4
+
+
+8.	Run a geodesic server from eg. /etc/rc.local:
+
+on a PI 1:
+su -c "cd /home/pi/projects/Vala/BlackHole4dVala; exec ./geodesic-server" pi &
+
+on a PI 2 or 3:
+su -c "cd /home/pi/projects/Vala/BlackHole4dVala; exec ./geodesic-server 1234 & exec ./geodesic-server 1235 & exec ./geodesic-server 1236 & exec ./geodesic-server 1237 &" pi
+
 
 
 REFERENCE DATA
