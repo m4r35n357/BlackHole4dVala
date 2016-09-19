@@ -18,18 +18,21 @@ namespace Simulations {
 
     public class KerrGeodesic : GLib.Object, IModel {
         // Constants from IC file
+        private double l_3;
         private double a;
         private double mu2;
         private double E;
         private double L;
         private double start;
         private double end;
-        private double ts;
+        private double h;
         private double tr;
         private ISymplectic integrator;
         // Derived Constants
         private double a2;
+        private double a2l_3;
         private double a2mu2;
+        private double X2;
         private double horizon;
         private double aE;
         private double aL;
@@ -38,12 +41,14 @@ namespace Simulations {
         private double sth;
         private double cth;
         private double sth2;
+        private double cth2;
         private double r2;
         private double ra2;
         private double D_r;
+        private double D_th;
         private double S;
-        private double P1;
-        private double T1;
+        private double P;
+        private double T;
         private double R;
         private double TH;
         private double eR;
@@ -64,26 +69,29 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private KerrGeodesic (double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
+        private KerrGeodesic (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
             // Constants
+            this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
             this.E = E;
             this.L = L;
             this.a2 = a * a;
+            this.a2l_3 = a2 * l_3;
             this.a2mu2 = a2 * mu2;
             this.horizon = 1.0 + sqrt(1.0 - a2);
             this.aE = a * E;
             this.aL = a * L;
-            this.K = Q + (L - aE) * (L - aE);
+            this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
+            this.K = Q + X2 * (L - aE) * (L - aE);
             this.start = tau0;
             this.end = tau0 + deltaTau;
-            this.ts = tStep;
+            this.h = tStep;
             this.tr = tRatio;
             this.integrator = Integrator.getIntegrator(this, type);
             // Coordinates
             this.r = r0;
-            this.th = th0;
+            this.th = (90.0 - th0) * PI / 180.0;
             refresh(r, th);
             this.rP = - sqrt(fabs(R));
             this.thP = - sqrt(fabs(TH));
@@ -94,9 +102,9 @@ namespace Simulations {
          */
         public static KerrGeodesic fromJson () {
             var ic = getJson().get_object_member("IC");
-            return new KerrGeodesic(ic.get_double_member("a"),
+            return new KerrGeodesic(ic.get_double_member("lambda"), ic.get_double_member("a"),
                                     ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
-                                    ic.get_double_member("r0"), (90.0 - ic.get_double_member("th0")) * PI / 180.0,
+                                    ic.get_double_member("r0"), ic.get_double_member("th0"),
                                     ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
                                     ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
         }
@@ -106,9 +114,10 @@ namespace Simulations {
         }
 
         private double v4Error (double tDot, double rDot, double thDot, double phDot) {
-            var tmp1 = a * tDot - ra2 * phDot;
-            var tmp2 = tDot - a * sth2 * phDot;
-            return fabs(mu2 + sth2 / S * tmp1 * tmp1 + S / D_r * rDot * rDot + S * thDot * thDot - D_r / S * tmp2 * tmp2);
+            var U1 = a * tDot - ra2 * phDot;
+            var U4 = tDot - a * sth2 * phDot;
+            var SX2 = S * X2;
+            return fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4);
         }
 
         private void errors (int count) {
@@ -120,34 +129,42 @@ namespace Simulations {
             v4c = logError(v4Cum / count);
         }
 
-        private void refresh (double radius, double theta) {  // update intermediate variables, see Wilkins
+        private void refresh (double radius, double theta) {  // update intermediate variables, see Maxima file maths.wxm, "Kerr-deSitter"
+            // R potential
             r2 = radius * radius;
+            ra2 = r2 + a2;
+            P = ra2 * E - aL;
+            D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
+            R = X2 * P * P - D_r * (mu2 * r2 + K);
+            // THETA potential
             sth = sin(theta);
             cth = cos(theta);
             sth2 = sth * sth;
-            var cth2 = 1.0 - sth2;
-            ra2 = r2 + a2;
+            cth2 = 1.0 - sth2;
+            T = aE * sth2 - L;
+            D_th = 1.0 + a2l_3 * cth2;
+            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T * T;
+            // Equations of motion
+            var P_Dr = P / D_r;
+            var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
-            P1 = ra2 * E - aL;
-            D_r = ra2 - 2.0 * radius;
-            R = P1 * P1 - D_r * (mu2 * r2 + K);
-            T1 = aE * sth2 - L;
-            TH = K - a2mu2 * cth2 - T1 * T1 / sth2;
-            tDot = (P1 * ra2 / D_r - T1 * a);
-            phDot = (P1 * a / D_r - T1 / sth2);
+            tDot = (P_Dr * ra2 - T_Dth * a) * X2;
+            phDot = (P_Dr * a - T_Dth / sth2) * X2;
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
-            t += d * ts * tDot;
-            r += d * ts * rP;
-            th += d * ts * thP;
-            ph += d * ts * phDot;
+            t += d * h * tDot;
+            r += d * h * rP;
+            th += d * h * thP;
+            ph += d * h * phDot;
             refresh(r, th);
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
-            rP += c * ts * (2.0 * r * E * P1 - (r - 1.0) * (K + mu2 * r2) - mu2 * r * D_r);  // dR/dr, see Maxima file maths.wxm, "Kerr-deSitter"
-            thP += c * ts * (cth * T1 * T1 / (sth * sth2) + a2mu2 * cth * sth - 2.0 * cth * a * E * T1 / sth);  // dTheta/dtheta
+            // dR/dr, see Maxima file maths.wxm, "Kerr-deSitter"
+            rP += c * h * (2.0 * r * E * P * X2 - (r * (1.0 - l_3 * r2) - 1.0 - l_3 * r * ra2) * (K + mu2 * r2) - mu2 * r * D_r);
+            // dTheta/dtheta
+            thP += c * h * (cth * sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + cth * X2 * T / sth * (T / sth2 - 2.0 * a * E ));
         }
 
         /**
@@ -158,15 +175,15 @@ namespace Simulations {
             var tau = 0.0;
             var count = 1;
             var tmp = 0;
-            while ((tau <= end) && (r >= horizon)) {
-                if ((tau >= start) && (tau >= tmp * tr * ts)) {
+            while ((tau <= end) && (r >= horizon) && (D_r >= 0.0)) {
+                if ((tau >= start) && (tau >= tmp * tr * h)) {
                     errors(count);
                     output(mino, tau);
                     tmp += 1;
                 }
                 integrator.compose();
-                mino += ts;
-                tau += ts * S;
+                mino += h;
+                tau += h * S;
                 count += 1;
             }
             output(mino, tau);
