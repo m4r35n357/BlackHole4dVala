@@ -16,9 +16,9 @@ using GLib.Math;
 using Json;
 using Gsl;
 
-namespace Sim {
+namespace Generators {
 
-    public class IcGenerator : GLib.Object {
+    public class Particle : GLib.Object {
 
         /**
          * Fixed parameters and constraints
@@ -262,6 +262,6 @@ namespace Sim {
     }
 
     public static void main (string[] args) {
-        new IcGenerator().generate(Simulations.getJson());
+        new Particle().generate(Simulations.getJson());
     }
 }
