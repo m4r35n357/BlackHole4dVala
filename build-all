@@ -20,7 +20,7 @@ do
 	echo ""
 done
 
-$valac --pkg json-glib-1.0 bh3dRk4.vala
+$valac --pkg json-glib-1.0 bh3dRk4.vala utils.vala
 echo ""
 
 $valac --pkg json-glib-1.0 raytrace-commands.vala

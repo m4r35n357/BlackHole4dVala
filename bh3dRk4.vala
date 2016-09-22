@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 using Json;
 
-namespace Sim {
+namespace Simulations {
 
     public class BL : GLib.Object {
 
@@ -157,8 +157,7 @@ namespace Sim {
             var SX2 = S * X2;
             var e = mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4;
             e = e > 0.0 ? e : -e;
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
-                            tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), -180.0, -180.0, -180.0);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", tau, logError(e), -180.0, -180.0, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
                             t, r, th, ph, Ut, Ur, Uth, Uph);
         }
@@ -183,23 +182,7 @@ namespace Sim {
          * Static factory from STDIN in JSON format
          */
         public static BL fromJson () {
-            var input = new StringBuilder();
-            var buffer = new char[1024];
-            while (! stdin.eof()) {
-                var chunk = stdin.gets(buffer);
-                if (chunk != null) {
-                    input.append(chunk);
-                }
-            }
-            unowned Json.Object o;
-            var p = new Parser();
-            try {
-                p.load_from_data(input.str);
-                o = p.get_root().get_object().get_object_member("IC");
-            } catch (Error e) {
-                stderr.printf("Unable to parse the input data: %s\n", e.message);
-                return_if_reached();
-            }
+            var o = getJson().get_object_member("IC");
             return new BL(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
                           o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
