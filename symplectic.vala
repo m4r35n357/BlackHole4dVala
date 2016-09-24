@@ -15,7 +15,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 
 namespace Simulations {
-
     /**
      * Interface for the physical model (client)
      */
@@ -148,13 +147,6 @@ namespace Simulations {
             model.qUp(baseMethodCoefficients[1] * compositionWeight);
             model.pUp(baseMethodCoefficients[0] * compositionWeight);
         }
-    }
-
-    /**
-     * Used by all models
-     */
-    private static double logError (double e) {
-        return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
     }
 }
 

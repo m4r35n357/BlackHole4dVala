@@ -16,97 +16,35 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class KerrGeodesic : GLib.Object, IModel {
+    public class KerrGeodesic : KerrBase, IModel {
+        /**
+         * All fields are private
+         */
         // Constants from IC file
-        private double l_3;
-        private double a;
-        private double mu2;
-        private double E;
-        private double L;
-        private double start;
-        private double end;
-        private double h;
-        private double tr;
         private ISymplectic integrator;
-        // Derived Constants
-        private double a2;
-        private double a2l_3;
-        private double a2mu2;
-        private double X2;
-        private double horizon;
-        private double aE;
-        private double aL;
-        private double K;
         // Variables
         private double sth;
         private double cth;
-        private double sth2;
         private double cth2;
         private double r2;
-        private double ra2;
-        private double D_r;
-        private double D_th;
-        private double S;
         private double P;
         private double T;
-        private double R;
-        private double TH;
         private double eR;
         private double eTh;
         private double v4Cum;
         private double v4c;
         private double v4e;
-        // Boyer-Lindquist Coordinates
-        private double t = 0.0;
-        private double r;
-        private double th;
-        private double ph = 0.0;
-        private double tDot;
-        private double rP;
-        private double thP;
-        private double phDot;
 
         /**
          * Private constructor, use the static factory
          */
         private KerrGeodesic (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
-            // Constants
-            this.l_3 = lambda / 3.0;
-            this.a = a;
-            this.mu2 = mu2;
-            this.E = E;
-            this.L = L;
-            this.a2 = a * a;
-            this.a2l_3 = a2 * l_3;
-            this.a2mu2 = a2 * mu2;
-            this.horizon = 1.0 + sqrt(1.0 - a2);
-            this.aE = a * E;
-            this.aL = a * L;
-            this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
-            this.K = Q + X2 * (L - aE) * (L - aE);
-            this.start = tau0;
-            this.end = tau0 + deltaTau;
-            this.h = tStep;
-            this.tr = tRatio;
+            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             this.integrator = Integrator.getIntegrator(this, type);
             // Coordinates
-            this.r = r0;
-            this.th = (90.0 - th0) * PI / 180.0;
             refresh(r, th);
-            this.rP = - sqrt(fabs(R));
-            this.thP = - sqrt(fabs(TH));
-        }
-
-        /**
-         * Static factory
-         */
-        public static KerrGeodesic fromJson () {
-            var ic = getJson().get_object_member("IC");
-            return new KerrGeodesic(ic.get_double_member("lambda"), ic.get_double_member("a"),
-                                    ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
-                                    ic.get_double_member("r0"), ic.get_double_member("th0"),
-                                    ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
-                                    ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
+            this.Ur = - sqrt(fabs(R));
+            this.Uth = - sqrt(fabs(TH));
         }
 
         private double modH (double xDot, double X) {
@@ -121,14 +59,17 @@ namespace Simulations {
         }
 
         private void errors (int count) {
-            eR = logError(modH(rP, R));
-            eTh = logError(modH(thP, TH));
-            var error = v4Error(tDot / S, rP / S, thP / S, phDot / S);
+            eR = logError(modH(Ur, R));
+            eTh = logError(modH(Uth, TH));
+            var error = v4Error(Ut / S, Ur / S, Uth / S, Uph / S);
             v4e = logError(error);
             v4Cum += error;
             v4c = logError(v4Cum / count);
         }
 
+        /**i
+         * Calculate potentials & coordinate velocites
+         */
         private void refresh (double radius, double theta) {  // update intermediate variables, see Maxima file maths.wxm, "Kerr-deSitter"
             // R potential
             r2 = radius * radius;
@@ -148,27 +89,27 @@ namespace Simulations {
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
-            tDot = (P_Dr * ra2 - T_Dth * a) * X2;
-            phDot = (P_Dr * a - T_Dth / sth2) * X2;
+            Ut = (P_Dr * ra2 - T_Dth * a) * X2;
+            Uph = (P_Dr * a - T_Dth / sth2) * X2;
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
-            t += d * h * tDot;
-            r += d * h * rP;
-            th += d * h * thP;
-            ph += d * h * phDot;
+            t += d * h * Ut;
+            r += d * h * Ur;
+            th += d * h * Uth;
+            ph += d * h * Uph;
             refresh(r, th);
         }
 
         public void pUp (double c) {  // dxP/dTau = - dH/dx
             // dR/dr, see Maxima file maths.wxm, "Kerr-deSitter"
-            rP += c * h * (2.0 * r * E * P * X2 - (r * (1.0 - l_3 * r2) - 1.0 - l_3 * r * ra2) * (K + mu2 * r2) - mu2 * r * D_r);
+            Ur += c * h * (2.0 * r * E * P * X2 - (r * (1.0 - l_3 * r2) - 1.0 - l_3 * r * ra2) * (K + mu2 * r2) - mu2 * r * D_r);
             // dTheta/dtheta
-            thP += c * h * (cth * sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + cth * X2 * T / sth * (T / sth2 - 2.0 * a * E ));
+            Uth += c * h * (cth * sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + cth * X2 * T / sth * (T / sth2 - 2.0 * a * E ));
         }
 
         /**
-         * Sole user method
+         * Externally visible method, sets up and controls the simulation
          */
         public void solve () {
             var mino = 0.0;
@@ -189,11 +130,26 @@ namespace Simulations {
             output(mino, tau);
         }
 
+        /**
+         * Write the simulated data to STDOUT
+         */
         public void output (double mino, double tau) {
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                      // time variables
             stdout.printf("\"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", v4e, v4c, eR, eTh);                    // errors
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);                              // coordinates
-            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", tDot / S, rP / S, thP / S, phDot / S);    // coordinate derivatives
+            stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", Ut / S, Ur / S, Uth / S, Uph / S);    // coordinate derivatives
+        }
+
+        /**
+         * Static factory from STDIN in JSON format
+         */
+        public static KerrGeodesic fromJson () {
+            var ic = getJson().get_object_member("IC");
+            return new KerrGeodesic(ic.get_double_member("lambda"), ic.get_double_member("a"),
+                                    ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
+                                    ic.get_double_member("r0"), ic.get_double_member("th0"),
+                                    ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
+                                    ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
         }
     }
 

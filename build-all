@@ -6,7 +6,7 @@ valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
-symplectics='bh3dSymp nbody3d newton'
+symplectics='nbody3d newton'
 
 # cleanup
 rm -f $outfile $symplectics bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight
@@ -20,7 +20,10 @@ do
 	echo ""
 done
 
-$valac --pkg json-glib-1.0 bh3dRk4.vala
+$valac --pkg json-glib-1.0 bh3dRk4.vala KerrBase.vala utils.vala
+echo ""
+
+$valac --pkg json-glib-1.0 bh3dSymp.vala KerrBase.vala symplectic.vala utils.vala
 echo ""
 
 $valac --pkg json-glib-1.0 raytrace-commands.vala
@@ -37,9 +40,9 @@ echo ""
 
 # strip symplectics
 case $opt in
-	fast)	strip $symplectics bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight;;
+	fast)	strip $symplectics bh3dRk4 bh3dSymp raytrace-commands kerr-image icgenParticle icgenLight;;
 esac
 
 # admire our work
-ls -lAh --color $symplectics bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight
+ls -lAh --color $symplectics bh3dRk4 bh3dSymp raytrace-commands kerr-image icgenParticle icgenLight
 

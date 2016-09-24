@@ -15,9 +15,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 using Json;
 
-namespace Sim {
+namespace Generators {
 
-    public class IcGenerator : GLib.Object {
+    public class Light : GLib.Object {
 
         private static double R (double r, double a, double E, double L, double Q) {
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L) - (r * r + a * a - 2.0 * r) * (Q + (L - a * E) * (L - a * E));
@@ -95,6 +95,6 @@ namespace Sim {
     }
 
     public static void main (string[] args) {
-        new IcGenerator().generate(Simulations.getJson());
+        new Light().generate(Simulations.getJson());
     }
 }
