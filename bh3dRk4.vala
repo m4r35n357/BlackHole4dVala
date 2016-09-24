@@ -16,83 +16,29 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class BL : GLib.Object {
-
+    public class BL : KerrBase {
         /**
          * All fields are private
          */
-        // constants
-        private double l_3;
-        private double a;
-        private double a2;
-        private double a2l_3;
-        private double mu2;
-        private double a2mu2;
-        private double X2;
-        private double E;
-        private double L;
-        private double K;
-        private double aE;
-        private double aL;
-        private double start;
-        private double end;
-        private double h;
-        private int64 tr;
-        private double horizon;
         // variables
-        private double sth2;
-        private double ra2;
-        private double D_r;
-        private double D_th;
-        private double S;
-        private double R;
-        private double TH;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
         private double sgnR = -1.0;
         private double sgnTH = -1.0;
-        // state
-        private double tau = 0.0;
-        private double t = 0.0;
-        private double r;
-        private double th;
-        private double ph = 0.0;
-        private double Ut;
-        private double Ur;
-        private double Uth;
-        private double Uph;
 
         /**
          * Private constructor, use the static factory
          */
         private BL (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                     double tau0, double deltaTau, double tStep, int64 tRatio) {
-            this.l_3 = lambda / 3.0;
-            this.a = a;
-            this.mu2 = mu2;
-            this.E = E;
-            this.L = L;
-            this.a2 = a * a;
-            this.a2l_3 = a2 * l_3;
-            this.a2mu2 = a2 * mu2;
-            this.horizon = 1.0 + sqrt(1.0 - a2);
-            this.aE = a * E;
-            this.aL = a * L;
-            this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
-            this.K = Q + X2 * (L - aE) * (L - aE);
-            this.start = tau0;
-            this.end = tau0 + deltaTau;
-            this.h = tStep;
-            this.tr = tRatio;
-            this.r = r0;
-            this.th = (90.0 - th0) * PI / 180.0;
+            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             f(r, th, 0);
         }
 
         /**
-         * Calculate potentials & coordinate velocites, and populate RK4 arrays for each stage
+         * Calculate potentials & coordinate velocities, and populate RK4 arrays for each stage
          */
         private void f (double radius, double theta, int stage) {  // see maths.wxm in Maxima
             // R potential
@@ -148,20 +94,6 @@ namespace Simulations {
         }
 
         /**
-         * Write the simulated data to STDOUT
-         */
-        private void output () {
-            var U1 = a * Ut - ra2 * Uph;
-            var U4 = Ut - a * sth2 * Uph;
-            var SX2 = S * X2;
-            var e = mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4;
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
-                            tau, logError(e = e > 0.0 ? e : -e), -180.0, -180.0, -180.0);
-            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
-                            t, r, th, ph, Ut, Ur, Uth, Uph);
-        }
-
-        /**
          * Externally visible method, sets up and controls the simulation
          */
         public void solve () {
@@ -175,6 +107,20 @@ namespace Simulations {
                 tau += h;
             }
             output();
+        }
+
+        /**
+         * Write the simulated data to STDOUT
+         */
+        private void output () {
+            var U1 = a * Ut - ra2 * Uph;
+            var U4 = Ut - a * sth2 * Uph;
+            var SX2 = S * X2;
+            var e = mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4;
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
+                            tau, logError(e = e > 0.0 ? e : -e), -180.0, -180.0, -180.0);
+            stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
+                            t, r, th, ph, Ut, Ur, Uth, Uph);
         }
 
         /**
