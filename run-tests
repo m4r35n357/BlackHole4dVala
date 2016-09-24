@@ -1,8 +1,5 @@
 #!/bin/sh
 
-bh3ds=${1:-'./bh3dRk4 ./bh3dSymp'}
-nbodys=${2:-'./nbody3d'}
-
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
@@ -11,56 +8,49 @@ pot='/tmp/potential'
 
 int='./finterp.py'
 
-params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
-echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
-for app in $bh3ds
-do
-	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
-done
+run_particle () {
+	params=$*
+	echo ${C}"./KdS"${NC}
+	echo $params | jq .
+	echo $params | ./icgenParticle >$ic 2>$pot
+	jq . $ic
+	./KdS <$ic | $int tau 1.0 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+}
 
-params='{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
-echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
-for app in $bh3ds
-do
-	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.5 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
-done
+run_light () {
+	params=$*
+	echo ${C}"./KdS"${NC}
+	echo $params | jq .
+	echo $params | ./icgenLight >$ic 2>$pot
+	jq . $ic
+	./KdS <$ic | $int tau 0.2 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+}
 
-params='{ "r": 3, "spin": 1.0 }'
-echo $params | jq .
-echo $params | ./icgenLight >$ic 2>$pot
-jq . $ic
-for app in $bh3ds
-do
-	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
-done
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk4" }'
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6" }'
 
-params='{ "r": 2, "spin": 1.0 }'
-echo $params | jq .
-echo $params | ./icgenLight >$ic 2>$pot
-jq . $ic
-for app in $bh3ds
-do
-	echo ${C}$app${NC}
-	$app <$ic | $int tau 0.1 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
-done
+run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk4" }'
+run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
+run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6" }'
 
-for app in $nbodys
-do
-	echo ${C}$app${NC}
-	$app <ic/SolarSystem 2>/tmp/progress | ./plotNBody.py
-done
+run_light '{ "r": 3, "spin": 1.0, "integrator": "rk4" }'
+run_light '{ "r": 3, "spin": 1.0, "integrator": "sc4" }'
+run_light '{ "r": 3, "spin": 1.0, "integrator": "sc6" }'
 
-params='{ "method": "dnewton", "r": 12.0, "elevation": 0.0, "spin": 1.0, "Lfac": 1.0 }'
-echo $params | jq .
-echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
+run_light '{ "r": 2, "spin": 1.0, "integrator": "rk4" }'
+run_light '{ "r": 2, "spin": 1.0, "integrator": "sc4" }'
+run_light '{ "r": 2, "spin": 1.0, "integrator": "sc6" }'
+
+echo ${C}"./nbody3d"${NC}
+ssic='ic/SolarSystem'
+jq . $ssic
+./nbody3d <$ssic 2>/tmp/progress | ./plotNBody.py
+
+params='{ "method": "dnewton", "r": 12.0, "elevation": 0.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
 echo ${C}"./newton"${NC}
+echo $params | jq .
+echo $params | ./icgenParticle >$ic 2>$pot
+jq . $ic
 ./newton <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic`
 

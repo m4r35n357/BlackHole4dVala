@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class BhSymp : KerrBase, IModel {
+    public class BhSymp : KdSBase, IModel {
         /**
          * All fields are private
          */

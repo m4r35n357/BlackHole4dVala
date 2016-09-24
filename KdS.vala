@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    protected class KerrBase : GLib.Object {
+    protected class KdSBase : GLib.Object {
         /**
          * All fields are protected
          */
@@ -66,7 +66,7 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in subclass
          */
-        protected KerrBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+        protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                             double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.l_3 = lambda / 3.0;
             this.a = a;
@@ -128,7 +128,7 @@ namespace Simulations {
 
     public static int main (string[] args) {
         var ic = getJson().get_object_member("IC");
-        if (ic.get_string_member("integrator") == "rk4") {
+        if (! ic.has_member("integrator") || ic.get_string_member("integrator") == "rk4") {
             BhRk4.getInstance(ic).solve();
         } else {
             BhSymp.getInstance(ic).solve();

@@ -71,15 +71,16 @@ namespace Simulations {
             switch (type) {
                 case "sb2":  // second order, basic
                     return new Base2(model, { 1.0 });
+                case "sb4":  // fourth order, basic
+                    return new Base4(model, { 1.0 });
                 case "sc4":  // fourth order, composed
                     var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
                     return new Base2(model, { 1.0 / (2.0 - CUBE_ROOT_2), - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2), 1.0 / (2.0 - CUBE_ROOT_2) });
-                case "sb4":  // fourth order, basic
-                    return new Base4(model, { 1.0 });
                 case "sc6":  // sixth order, composed
                     var FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
                     return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2), - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2), 1.0 / (2.0 - FIFTH_ROOT_2) });
             }
+            stderr.printf("Bad integrator type, valid choices are: [ sb2 | sb4 ] sc4 | sc6 ]\n");
             return_if_reached();
         }
 
