@@ -125,4 +125,14 @@ namespace Simulations {
             return fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4);
         }
     }
+
+    public static int main (string[] args) {
+        var ic = getJson().get_object_member("IC");
+        if (ic.get_string_member("integrator") == "rk4") {
+            BhRk4.getInstance(ic).solve();
+        } else {
+            BhSymp.getInstance(ic).solve();
+        }
+        return 0;
+    }
 }

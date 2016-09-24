@@ -13,8 +13,7 @@
 *.s
 *.pyc
 .valencia
-bh3dSymp
-bh3dRk4
+KdS
 newton
 nbody3d
 raytrace-commands
@@ -26,8 +25,6 @@ VPythonOutput/
 RaytracingOutput/
 tmp/
 images/
-
-#bh3dRk4.py
 
 .idea
 
