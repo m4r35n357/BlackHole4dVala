@@ -41,7 +41,6 @@ namespace Simulations {
         private KerrGeodesic (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             this.integrator = Integrator.getIntegrator(this, type);
-            // Coordinates
             refresh(r, th);
             this.Ur = - sqrt(fabs(R));
             this.Uth = - sqrt(fabs(TH));
@@ -101,10 +100,8 @@ namespace Simulations {
             refresh(r, th);
         }
 
-        public void pUp (double c) {  // dxP/dTau = - dH/dx
-            // dR/dr, see Maxima file maths.wxm, "Kerr-deSitter"
+        public void pUp (double c) {  // dxP/dTau = - dH/dx (dR/dr & dTheta/dtheta), see Maxima file maths.wxm, "Kerr-deSitter"
             Ur += c * h * (2.0 * r * E * P * X2 - (r * (1.0 - l_3 * r2) - 1.0 - l_3 * r * ra2) * (K + mu2 * r2) - mu2 * r * D_r);
-            // dTheta/dtheta
             Uth += c * h * (cth * sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + cth * X2 * T / sth * (T / sth2 - 2.0 * a * E ));
         }
 
