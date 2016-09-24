@@ -16,11 +16,11 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class Rk4 : KerrBase {
+    public class BhRk4 : KerrBase {
         /**
          * All fields are private
          */
-        // variables
+        // Variables
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -31,7 +31,7 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private Rk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+        private BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                      double tau0, double deltaTau, double tStep, int64 tRatio) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             f(r, th, 0);
@@ -107,16 +107,16 @@ namespace Simulations {
         /**
          * Static factory from STDIN in JSON format
          */
-        public static Rk4 fromJson () {
+        public static BhRk4 fromJson () {
             var o = getJson().get_object_member("IC");
-            return new Rk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
-                           o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
-                           o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
+            return new BhRk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
+                             o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
+                             o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
     }
 
     public static int main (string[] args) {
-        Rk4.fromJson().solve();
+        BhRk4.fromJson().solve();
         return 0;
     }
 }

@@ -38,12 +38,12 @@ namespace Simulations {
         protected double h;
         protected int64 tr;
         protected double horizon;
-        // variables
+        // Variables
         protected double r2;
         protected double ra2;
         protected double sth;
-        protected double sth2;
         protected double cth;
+        protected double sth2;
         protected double cth2;
         protected double D_r;
         protected double D_th;
@@ -52,7 +52,7 @@ namespace Simulations {
         protected double P;
         protected double T;
         protected double TH;
-        // state
+        // State
         protected double tau = 0.0;
         protected double t = 0.0;
         protected double r;

@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class Symp : KerrBase, IModel {
+    public class BhSymp : KerrBase, IModel {
         /**
          * All fields are private
          */
@@ -26,17 +26,13 @@ namespace Simulations {
         /**
          * Private constructor, use the static factory
          */
-        private Symp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+        private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                       double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             this.integrator = Integrator.getIntegrator(this, type);
             refresh(r, th);
             this.Ur = - sqrt(fabs(R));
             this.Uth = - sqrt(fabs(TH));
-        }
-
-        private double modH (double xDot, double X) {
-            return 0.5 * fabs(xDot * xDot - X);
         }
 
         public void qUp (double d) {  // dx/dTau = dH/dxP
@@ -71,6 +67,10 @@ namespace Simulations {
             output(mino, tau);
         }
 
+        private double modH (double xDot, double X) {
+            return 0.5 * fabs(xDot * xDot - X);
+        }
+
         /**
          * Write the simulated data to STDOUT
          */
@@ -87,18 +87,18 @@ namespace Simulations {
         /**
          * Static factory from STDIN in JSON format
          */
-        public static Symp fromJson () {
+        public static BhSymp fromJson () {
             var ic = getJson().get_object_member("IC");
-            return new Symp(ic.get_double_member("lambda"), ic.get_double_member("a"),
-                            ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
-                            ic.get_double_member("r0"), ic.get_double_member("th0"),
-                            ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
-                            ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
+            return new BhSymp(ic.get_double_member("lambda"), ic.get_double_member("a"),
+                              ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"),
+                              ic.get_double_member("r0"), ic.get_double_member("th0"),
+                              ic.get_double_member("start"), ic.get_double_member("duration"), ic.get_double_member("step"),
+                              ic.get_int_member("plotratio"), ic.get_string_member("integrator"));
         }
     }
 
     public static int main (string[] args) {
-        Symp.fromJson().solve();
+        BhSymp.fromJson().solve();
         return 0;
     }
 }
