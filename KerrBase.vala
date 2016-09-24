@@ -39,12 +39,18 @@ namespace Simulations {
         protected int64 tr;
         protected double horizon;
         // variables
-        protected double sth2;
+        protected double r2;
         protected double ra2;
+        protected double sth;
+        protected double sth2;
+        protected double cth;
+        protected double cth2;
         protected double D_r;
         protected double D_th;
         protected double S;
         protected double R;
+        protected double P;
+        protected double T;
         protected double TH;
         // state
         protected double tau = 0.0;
@@ -61,7 +67,7 @@ namespace Simulations {
          * Protected constructor, use the static factory in subclass
          */
         protected KerrBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                    double tau0, double deltaTau, double tStep, int64 tRatio) {
+                            double tau0, double deltaTau, double tStep, int64 tRatio) {
             this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
@@ -81,6 +87,42 @@ namespace Simulations {
             this.tr = tRatio;
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
+        }
+
+        /**
+         * Calculate potentials & coordinate velocites
+         */
+        protected void refresh (double radius, double theta) {  // update intermediate variables, see Maxima file maths.wxm, "Kerr-deSitter"
+            // R potential
+            r2 = radius * radius;
+            ra2 = r2 + a2;
+            P = ra2 * E - aL;
+            D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
+            R = X2 * P * P - D_r * (mu2 * r2 + K);
+            // THETA potential
+            sth = sin(theta);
+            cth = cos(theta);
+            sth2 = sth * sth;
+            cth2 = 1.0 - sth2;
+            T = aE * sth2 - L;
+            D_th = 1.0 + a2l_3 * cth2;
+            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T * T;
+            // Equations of motion (partial)
+            var P_Dr = P / D_r;
+            var T_Dth = T / D_th;
+            S = r2 + a2 * cth2;
+            Ut = (P_Dr * ra2 - T_Dth * a) * X2;
+            Uph = (P_Dr * a - T_Dth / sth2) * X2;
+        }
+
+        /**
+         * Calculate 4 velocity norm error
+         */
+        protected double v4Error (double tDot, double rDot, double thDot, double phDot) {
+            var U1 = a * tDot - ra2 * phDot;
+            var U4 = tDot - a * sth2 * phDot;
+            var SX2 = S * X2;
+            return fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4);
         }
     }
 }
