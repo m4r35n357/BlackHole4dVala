@@ -1,26 +1,18 @@
 #!/bin/sh
 
-params='{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0 }'
-
-data=${1:-$params}
+ic=${1:-'initial-conditions.json'}
 timeCoord=${2:-'tau'}
 timeStep=${3:-0.5}
 
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Generate the parameter file
-ic='initial-conditions.json'
-pot='/tmp/potential'
-echo $data | ./icgenParticle >$ic 2>$pot
-echo $data | jq .
-
 # Pretty-print the parameter file
 jq . $ic
 
 # Run the simulator
 datafile='/tmp/data'
-echo -n ${C}"Simulating with $data . . . "
+echo -n ${C}"Simulating with $ic . . . "
 case $(echo $data | jq .integrator) in
 	rk4*)	./KdS <$ic >$datafile;;
 	*)	./KdS <$ic | ./finterp.py $timeCoord $timeStep >$datafile;;

@@ -47,10 +47,11 @@ vi $ic; jq . $ic
 4.	Run tests
 
 ./run-tests 2>/dev/null
-rm -f $ic; ./rg2 2>/dev/null
 
 
 5.	Some example pipelines . . .
+
+./rg2 2>/dev/null
 
 jq . $ic; ./KdS <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
 
