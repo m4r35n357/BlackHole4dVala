@@ -1,5 +1,7 @@
 #!/bin/sh
 
+exe=${1:-'./KdS'}
+
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
@@ -14,7 +16,7 @@ run_particle () {
 	echo $params | jq .
 	echo $params | ./icgenParticle >$ic 2>$pot
 	jq . $ic
-	./KdS <$ic | $int tau 1.0 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | $int tau 1.0 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 }
 
 run_light () {
@@ -23,7 +25,7 @@ run_light () {
 	echo $params | jq .
 	echo $params | ./icgenLight >$ic 2>$pot
 	jq . $ic
-	./KdS <$ic | $int tau 0.2 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | $int tau 0.2 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 }
 
 run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk4" }'
