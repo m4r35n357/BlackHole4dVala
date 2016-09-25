@@ -45,11 +45,11 @@ class BL(object):
         self.r = r0
         self.th = (90.0 - thetaMin) * pi / 180.0
         if integrator == 'rk4':
-            self.evaluator = self.rk4Step
-            self.updater = self.sumK4
+            self.evaluator = self.evaluator4
+            self.updater = self.updater4
         elif integrator == 'rk438':
-            self.evaluator = self.rk438Step
-            self.updater = self.sumK438
+            self.evaluator = self.evaluator438
+            self.updater = self.updater438
         else:
             print >> stderr("Bad integrator type, valid choices are: [ rk4 | rk438 ]")
         self.f(self.r, self.th, 0)
@@ -78,18 +78,20 @@ class BL(object):
         self.kth[stage] = self.h * self.Uth
         self.kph[stage] = self.h * self.Uph
 
-    def sumK4 (self, kx):
+    @staticmethod
+    def updater4 (kx):
         return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0
 
-    def sumK438 (self, kx):
+    @staticmethod
+    def updater438 (kx):
         return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
 
-    def rk4Step (self):
+    def evaluator4 (self):
         self.f(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
         self.f(self.r + 0.5 * self.kr[1], self.th + 0.5 * self.kth[1], 2)
         self.f(self.r + self.kr[2], self.th + self.kth[2], 3)
 
-    def rk438Step (self):
+    def evaluator438 (self):
         self.f(self.r + 1.0 / 3.0 * self.kr[0], self.th + 1.0 / 3.0 * self.kth[0], 1)
         self.f(self.r - 1.0 / 3.0 * self.kr[0] + self.kr[1], self.th - 1.0 / 3.0 * self.kth[0] + self.kth[1], 2)
         self.f(self.r + self.kr[0] - self.kr[1] + self.kr[2], self.th + self.kth[0] - self.kth[1] + self.kth[2], 3)
@@ -117,7 +119,8 @@ class BL(object):
 
 def main ():
     ic = loads(stdin.read())['IC']
-    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['start'], ic['duration'], ic['step'], ic['plotratio'], ic['integrator'])
+    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], \
+            ic['start'], ic['duration'], ic['step'], ic['plotratio'], ic['integrator'])
     count = 0
     while bl.tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:
         if bl.tau >= bl.starttime and count % bl.tr == 0:

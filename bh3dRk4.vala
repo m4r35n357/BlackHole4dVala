@@ -21,8 +21,8 @@ namespace Simulations {
          * All fields are private
          */
         // Constants derived from IC file
-        private Rk4StepType evaluator;
-        private Rk4SumkType updater;
+        private EvaluatorType evaluator;
+        private UpdaterType updater;
         // Variables
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
@@ -39,12 +39,12 @@ namespace Simulations {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
             switch (type) {
                 case "rk4":  // fourth order, basic
-                    this.evaluator = rk4Step;
-                    this.updater = sumK4;
+                    this.evaluator = evaluator4;
+                    this.updater = updater4;
                     break;
                 case "rk438":  // fourth order, 3/8 method
-                    this.evaluator = rk438Step;
-                    this.updater = sumK438;
+                    this.evaluator = evaluator438;
+                    this.updater = updater438;
                     break;
                 default:
                     stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ]\n");
@@ -56,8 +56,8 @@ namespace Simulations {
         /**
          * For handling different RK4 implementations
          */
-        delegate double Rk4SumkType(double[] x);
-        delegate void Rk4StepType();
+        delegate double UpdaterType(double[] x);
+        delegate void EvaluatorType();
 
         /**
          * Calculate potentials & coordinate velocities, and populate RK4 arrays for each stage
@@ -79,21 +79,21 @@ namespace Simulations {
         /**
          * updater - Sum the RK4 terms for a single coordinate
          */
-        private double sumK4 (double[] kx) {
+        private double updater4 (double[] kx) {
             return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0;
         }
 
         /**
          * updater - Sum the RK4 terms for a single coordinate (3/8 method)
          */
-        private double sumK438 (double[] kx) {
+        private double updater438 (double[] kx) {
             return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
         }
 
         /**
          * evaluator - (most of) the RK4 algorithm
          */
-        private void rk4Step () {
+        private void evaluator4 () {
             f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
             f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
             f(r + kr[2], th + kth[2], 3);
@@ -102,7 +102,7 @@ namespace Simulations {
         /**
          * evaluator - (most of) the RK4 algorithm (3/8 method)
          */
-        private void rk438Step () {
+        private void evaluator438 () {
             f(r + 1.0 / 3.0 * kr[0], th + 1.0 / 3.0 * kth[0], 1);
             f(r - 1.0 / 3.0 * kr[0] + kr[1], th - 1.0 / 3.0 * kth[0] + kth[1], 2);
             f(r + kr[0] - kr[1] + kr[2], th + kth[0] - kth[1] + kth[2], 3);
