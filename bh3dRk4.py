@@ -18,7 +18,7 @@ from math import log10, sqrt, sin, pi
 from json import loads
 
 class BL(object):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio, integrator):
         self.l_3 = Lambda / 3.0
         self.a = spin
         self.mu2 = pMass2
@@ -44,6 +44,14 @@ class BL(object):
         self.tau = self.t = self.ph = self.v4cum = 0.0
         self.r = r0
         self.th = (90.0 - thetaMin) * pi / 180.0
+        if integrator == 'rk4':
+            self.evaluator = self.rk4Step
+            self.updater = self.sumK4
+        elif integrator == 'rk438':
+            self.evaluator = self.rk438Step
+            self.updater = self.sumK438
+        else:
+            print >> stderr("Bad integrator type, valid choices are: [ rk4 | rk438 ]")
         self.f(self.r, self.th, 0)
 
     def f (self, radius, theta, stage):
@@ -70,24 +78,37 @@ class BL(object):
         self.kth[stage] = self.h * self.Uth
         self.kph[stage] = self.h * self.Uph
 
+    def sumK4 (self, kx):
+        return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0
+
+    def sumK438 (self, kx):
+        return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
+
     def rk4Step (self):
-        def sumK (kx):
-            return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0
-        self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
-        self.sgnTH = self.sgnTH if self.TH > 0.0 else - self.sgnTH
         self.f(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
         self.f(self.r + 0.5 * self.kr[1], self.th + 0.5 * self.kth[1], 2)
         self.f(self.r + self.kr[2], self.th + self.kth[2], 3)
-        self.t += sumK(self.kt)
-        self.r += sumK(self.kr) * self.sgnR
-        self.th += sumK(self.kth) * self.sgnTH
-        self.ph += sumK(self.kph)
+
+    def rk438Step (self):
+        self.f(self.r + 1.0 / 3.0 * self.kr[0], self.th + 1.0 / 3.0 * self.kth[0], 1)
+        self.f(self.r - 1.0 / 3.0 * self.kr[0] + self.kr[1], self.th - 1.0 / 3.0 * self.kth[0] + self.kth[1], 2)
+        self.f(self.r + self.kr[0] - self.kr[1] + self.kr[2], self.th + self.kth[0] - self.kth[1] + self.kth[2], 3)
+
+    def iterate (self):
+        self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
+        self.sgnTH = self.sgnTH if self.TH > 0.0 else - self.sgnTH
+        self.evaluator()
+        self.t += self.updater(self.kt)
+        self.r += self.updater(self.kr) * self.sgnR
+        self.th += self.updater(self.kth) * self.sgnTH
+        self.ph += self.updater(self.kph)
         self.f(self.r, self.th, 0)
 
     def output (self):
         SX2 = self.S * self.X2
-        e = self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2  + self.S / self.D_r * self.Ur**2 \
-                     + self.S / self.D_th * self.Uth**2  - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2
+        e = self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2 \
+                        + self.S / self.D_r * self.Ur**2 + self.S / self.D_th * self.Uth**2 \
+                        - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2
         e = e if e >= 0.0 else -e
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' \
                          % (self.tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
@@ -96,12 +117,12 @@ class BL(object):
 
 def main ():
     ic = loads(stdin.read())['IC']
-    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['start'], ic['duration'], ic['step'], ic['plotratio'])
+    bl = BL(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['start'], ic['duration'], ic['step'], ic['plotratio'], ic['integrator'])
     count = 0
     while bl.tau <= bl.endtime and bl.r >= bl.horizon and bl.D_r >= 0.0:
         if bl.tau >= bl.starttime and count % bl.tr == 0:
             bl.output()
-        bl.rk4Step()
+        bl.iterate()
         count += 1
         bl.tau += bl.h
     bl.output()

@@ -107,7 +107,7 @@ namespace Simulations {
             T = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
             TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T * T;
-            // Equations of motion (partial)
+            // Equations of motion (Mino time, partial)
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
@@ -128,7 +128,7 @@ namespace Simulations {
 
     public static int main (string[] args) {
         var ic = getJson().get_object_member("IC");
-        if (! ic.has_member("integrator") || ic.get_string_member("integrator") == "rk4") {
+        if (! ic.has_member("integrator") || ic.get_string_member("integrator").contains("rk4")) {
             BhRk4.getInstance(ic).solve();
         } else {
             BhSymp.getInstance(ic).solve();

@@ -20,6 +20,9 @@ namespace Simulations {
         /**
          * All fields are private
          */
+        // Constants from IC file
+        private Rk4StepType evaluator;
+        private Rk4SumkType updater;
         // Variables
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
@@ -32,17 +35,33 @@ namespace Simulations {
          * Private constructor, use the static factory
          */
         private BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                     double tau0, double deltaTau, double tStep, int64 tRatio) {
+                     double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
+            switch (type) {
+                case "rk4":  // fourth order, basic
+                    this.evaluator = rk4Step;
+                    this.updater = sumK4;
+                    break;
+                case "rk438":  // fourth order, 3/8 method
+                    this.evaluator = rk438Step;
+                    this.updater = sumK438;
+                    break;
+                default:
+                    stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ]\n");
+                    return_if_reached();
+            }
             f(r, th, 0);
         }
+
+        delegate double Rk4SumkType(double[] x);
+        delegate void Rk4StepType();
 
         /**
          * Calculate potentials & coordinate velocities, and populate RK4 arrays for each stage
          */
         private void f (double radius, double theta, int stage) {  // see maths.wxm in Maxima
             refresh(radius, theta);
-            // Equations of motion
+            // Equations of motion; base class uses expressions for Mino time, so divide by Sigma
             Ut /= S;
             Ur = sqrt(R > 0.0 ? R : -R) / S;
             Uth = sqrt(TH > 0.0 ? TH : -TH) / S;
@@ -55,25 +74,48 @@ namespace Simulations {
         }
 
         /**
-         * Sum the RK4 terms for a single coordinate
+         * updater - Sum the RK4 terms for a single coordinate
          */
-        private double sumK (double[] kx) {
+        private double sumK4 (double[] kx) {
             return (kx[0] + 2.0 * (kx[1] + kx[2]) + kx[3]) / 6.0;
         }
 
         /**
-         * The RK4 algorithm including turning point handling
+         * updater - Sum the RK4 terms for a single coordinate (3/8 method)
+         */
+        private double sumK438 (double[] kx) {
+            return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0;
+        }
+
+        /**
+         * evaluator - (most of) the RK4 algorithm
          */
         private void rk4Step () {
-            sgnR = R > 0.0 ? sgnR : -sgnR;
-            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
             f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
             f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
             f(r + kr[2], th + kth[2], 3);
-            t += sumK(kt);
-            r += sumK(kr) * sgnR;
-            th += sumK(kth) * sgnTH;
-            ph += sumK(kph);
+        }
+
+        /**
+         * evaluator - (most of) the RK4 algorithm (3/8 method)
+         */
+        private void rk438Step () {
+            f(r + 1.0 / 3.0 * kr[0], th + 1.0 / 3.0 * kth[0], 1);
+            f(r - 1.0 / 3.0 * kr[0] + kr[1], th - 1.0 / 3.0 * kth[0] + kth[1], 2);
+            f(r + kr[0] - kr[1] + kr[2], th + kth[0] - kth[1] + kth[2], 3);
+        }
+
+        /**
+         * RK4 common code including turning point handling
+         */
+        private void iterate () {
+            sgnR = R > 0.0 ? sgnR : -sgnR;
+            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
+            evaluator();
+            t += updater(kt);
+            r += updater(kr) * sgnR;
+            th += updater(kth) * sgnTH;
+            ph += updater(kph);
             f(r, th, 0);
         }
 
@@ -86,7 +128,7 @@ namespace Simulations {
                 if ((tau >= start) && (count % tr == 0)) {
                     output();
                 }
-                rk4Step();
+                iterate();
                 count += 1;
                 tau += h;
             }
@@ -110,7 +152,8 @@ namespace Simulations {
         public static BhRk4 getInstance (Json.Object o) {
             return new BhRk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
                              o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
-                             o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
+                             o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"),
+                             o.get_int_member("plotratio"), o.get_string_member("integrator"));
         }
     }
 }

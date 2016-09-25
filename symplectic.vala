@@ -80,7 +80,7 @@ namespace Simulations {
                     var FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
                     return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2), - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2), 1.0 / (2.0 - FIFTH_ROOT_2) });
             }
-            stderr.printf("Bad integrator type, valid choices are: [ sb2 | sb4 ] sc4 | sc6 ]\n");
+            stderr.printf("Bad integrator type, valid choices are: [ sb2 | sb4 | sc4 | sc6 ]\n");
             return_if_reached();
         }
 

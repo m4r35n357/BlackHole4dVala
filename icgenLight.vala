@@ -46,7 +46,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a) {
+        private void printOutput (double r, double a, string integrator) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -75,7 +75,7 @@ namespace Generators {
             stdout.printf("    \"duration\" : %.1f,\n", 5000.0);
             stdout.printf("    \"step\" : %.3f,\n", 0.001);
             stdout.printf("    \"plotratio\" : %.1d,\n", 50);
-            stdout.printf("    \"integrator\" : \"%s\"\n", "sc4");
+            stdout.printf("    \"integrator\" : \"%s\"\n", integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
             for (var x = 1; x <= 1001; x++) {
@@ -90,7 +90,9 @@ namespace Generators {
          */
         public void generate (Json.Object input) {
             // generate output
-            printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0, input.has_member("spin") ? input.get_double_member("spin") : 1.0);
+            printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
+                        input.has_member("spin") ? input.get_double_member("spin") : 1.0,
+                        input.has_member("integrator") ? input.get_string_member("integrator") : "rk4");
         }
     }
 
