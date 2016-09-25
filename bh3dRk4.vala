@@ -20,7 +20,7 @@ namespace Simulations {
         /**
          * All fields are private
          */
-        // Constants from IC file
+        // Constants derived from IC file
         private Rk4StepType evaluator;
         private Rk4SumkType updater;
         // Variables
@@ -53,6 +53,9 @@ namespace Simulations {
             f(r, th, 0);
         }
 
+        /**
+         * For handling different RK4 implementations
+         */
         delegate double Rk4SumkType(double[] x);
         delegate void Rk4StepType();
 
