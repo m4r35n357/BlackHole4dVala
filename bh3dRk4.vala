@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class BhRk4 : KerrBase {
+    public class BhRk4 : KdSBase {
         /**
          * All fields are private
          */
@@ -107,16 +107,10 @@ namespace Simulations {
         /**
          * Static factory from STDIN in JSON format
          */
-        public static BhRk4 fromJson () {
-            var o = getJson().get_object_member("IC");
+        public static BhRk4 getInstance (Json.Object o) {
             return new BhRk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
                              o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
                              o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"), o.get_int_member("plotratio"));
         }
-    }
-
-    public static int main (string[] args) {
-        BhRk4.fromJson().solve();
-        return 0;
     }
 }

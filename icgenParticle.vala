@@ -31,6 +31,7 @@ namespace Generators {
             public double rMin;
             public double rMax;
             public double elevation;
+            public string integrator;
         }
 
         /**
@@ -143,7 +144,7 @@ namespace Generators {
             stdout.printf("    \"duration\" : %.1f,\n", 5000.0);
             stdout.printf("    \"step\" : %.3f,\n", 0.001);
             stdout.printf("    \"plotratio\" : %.1d,\n", 500);
-            stdout.printf("    \"integrator\" : \"%s\"\n", "sc4");
+            stdout.printf("    \"integrator\" : \"%s\"\n", p->integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
             for (var x = 1; x <= 1001; x++) {
@@ -168,7 +169,8 @@ namespace Generators {
                 rMax = rMax,
                 elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                 a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0
+                Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0,
+                integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "rk4"
             };
         }
 
