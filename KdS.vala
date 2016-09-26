@@ -53,7 +53,6 @@ namespace Simulations {
         protected double T;
         protected double TH;
         // State
-        protected double tau = 0.0;
         protected double t = 0.0;
         protected double r;
         protected double th;

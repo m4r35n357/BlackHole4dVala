@@ -126,22 +126,23 @@ namespace Simulations {
          * Externally visible method, sets up and controls the simulation
          */
         public void solve () {
+            var tau = 0.0;
             int64 count = 0;
             while ((tau <= end) && (r >= horizon) && (D_r >= 0.0)) {
                 if ((tau >= start) && (count % tr == 0)) {
-                    output();
+                    output(tau);
                 }
                 iterate();
                 count += 1;
                 tau += h;
             }
-            output();
+            output(tau);
         }
 
         /**
          * Write the simulated data to STDOUT
          */
-        private void output () {
+        private void output (double tau) {
             var e = v4Error(Ut, Ur, Uth, Uph);
             stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
                             tau, logError(e = e > 0.0 ? e : -e), -180.0, -180.0, -180.0);
