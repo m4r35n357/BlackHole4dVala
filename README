@@ -62,7 +62,7 @@ echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenPa
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
-./icgenParticle <$icdata 2>$pot | ./bh3dRk4 | ./raytrace-commands 0 2>/dev/null | ./raytrace
+./icgenParticle <$icdata 2>$pot | ./KdS | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 7.	Make a video out of the output files:
@@ -85,7 +85,7 @@ on a PI 2 or 3:
 gsdir='/home/pi/projects/Vala/BlackHole4dVala'
 gs='./geodesic-server'
 script1='./KdS'
-script2='./bh3dRk4.py'
+script2='./KdS.py'
 script3='./KdS'
 su -c "cd $gsdir; $gs 1234 $script1 & $gs 1233 $script2 & $gs 1232 $script3 & $gs 1231 &" pi
 
