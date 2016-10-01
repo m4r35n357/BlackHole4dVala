@@ -171,7 +171,7 @@ class BhSymp(KdSBase):
                                  - (self.r * (1.0 - self.l_3 * self.r2) - 1.0 - self.l_3 * self.r * self.ra2) * (self.K + self.mu2 * self.r2)
                                  - self.mu2 * self.r * self.D_r)
         self.Uth += c * self.h * (self.cth * self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
-                                  + self.cth * self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.a * self.E))
+                                  + self.cth * self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE))
 
     def output(self, mino, tau):
         eR = self.log_error(self.modH(self.Ur, self.R))
