@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
 All rights reserved.
 
@@ -12,34 +12,51 @@ Redistribution and use in source and binary forms, with or without modification,
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
-from sys import argv, stderr, exit, stdin
-from math import sqrt, sin, cos, tan, fabs, pi, atan2, acos
-from visual import display, scene, sphere, curve, points, rate, ellipsoid, ring, color, cone, label
+"""
 from json import loads
-from os import popen
+from math import sqrt, sin, cos, fabs, pi, atan2, acos
+from sys import argv, stderr, stdin
+from visual import display, sphere, curve, rate, ellipsoid, ring, color, label
+
 
 def isco (a, l):
-    z1 = 1.0 + pow(1.0 - a * a, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
-    z2 = sqrt(3.0 * a * a + z1 * z1)
+    z1 = 1.0 + pow(1.0 - a**2, 1.0 / 3.0) * (pow(1.0 + a, 1.0 / 3.0) + pow(1.0 - a, 1.0 / 3.0))
+    z2 = sqrt(3.0 * a**2 + z1 * z1)
     if a * l >= 0.0:
         return 3.0 + z2 - sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
     else:
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
-def pSphere1 (a, l):
-    return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(- fabs(a))))
+def pSphere (a, l):
+    if a * l >= 0.0:
+        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(-fabs(a))))
+    else:
+        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
 
-def pSphere2 (a, l):
-    return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
-
-def speed (gamma, a, r, theta):
+def speed (gamma):
     return sqrt(1.0 - 1.0 / gamma**2)
     #return sqrt(gamma * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0 / gamma**2)
 
+def to_rectangular (polar, a):
+    ra = sqrt(polar[0]**2 + a**2)
+    sth = sin(polar[1])
+    return ra * sth * cos(polar[2]), ra * sth * sin(polar[2]), polar[0] * cos(polar[1])
+
+def error_colour (e, ball):
+    if e < -120.0:
+        ball.color = color.green
+    elif e < -90.0:
+        ball.color = color.cyan
+    elif e < -60.0:
+        ball.color = color.yellow
+    elif e < -30.0:
+        ball.color = color.orange
+    else:
+        ball.color = color.red
+
 def main():
     if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0] and spin [0.0 - 1.0] <<<')
+        raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0], spin [0.0 - 1.0] and angular momentum <<<')
     m = float(argv[1])
     a = float(argv[2])
     l = float(argv[3])
@@ -47,29 +64,47 @@ def main():
         mu = float(argv[4])
     else:
         mu = None
-    horizon = m * (1.0 + sqrt(1.0 - a * a))
-    cauchy = m * (1.0 - sqrt(1.0 - a * a))
+    horizon = m * (1.0 + sqrt(1.0 - a**2))
+    cauchy = m * (1.0 - sqrt(1.0 - a**2))
     #  set up the scene
     windowName = 'orbit'
-    scene = display(title=windowName)
-    scene.center = (0.0, 0.0, 0.0)
-    scene.width = scene.height = 1024
-    scene.range = (20.0, 20.0, 20.0)
-    inner = 2.0 * sqrt(cauchy**2 + a**2)
-    ellipsoid(pos = scene.center, length = inner, height = inner, width = 2.0 * cauchy, color = color.blue, opacity = 0.4)  # Inner Horizon
-    outer = 2.0 * sqrt(horizon**2 + a**2)
-    ellipsoid(pos = scene.center, length = outer, height = outer, width = 2.0 * horizon, color = color.blue, opacity = 0.3)  # Outer Horizon
-    ergo = 2.0 * sqrt(4.0 + a**2)
-    ellipsoid(pos = scene.center, length = ergo, height = ergo, width = 2.0 * horizon, color = color.gray(0.7), opacity = 0.2)  # Ergosphere
+    my_scene = display(title=windowName)
+    my_scene.center = centre = (0.0, 0.0, 0.0)
+    my_scene.width = my_scene.height = 1024
+    my_scene.range = (20.0, 20.0, 20.0)
+    # Inner Horizon
+    inner = 2.0 * to_rectangular((cauchy, 0.5 * pi, 0.0), a)[0]
+    ellipsoid(pos=centre, length=inner, height=inner, width=2.0*to_rectangular((cauchy, 0.0, 0.0), a)[2],
+              color=color.blue, opacity=0.6)
+    # Outer Horizon
+    outer = 2.0 * to_rectangular((horizon, 0.5 * pi, 0.0), a)[0]
+    ellipsoid(pos=centre, length=outer, height=outer, width=2.0*to_rectangular((horizon, 0.0, 0.0), a)[2],
+              color=color.blue, opacity=0.4)
+    # Ergosphere
+    ergo = 2.0 * to_rectangular((2.0 * m, 0.5 * pi, 0.0), a)[0]
+    ellipsoid(pos=centre, length=ergo, height=ergo, width=2.0*to_rectangular((horizon, 0.0, 0.0), a)[2],
+              color=color.gray(0.7), opacity=0.2)
+    # Singularity
     if fabs(a) > 0.0:
-        ring(pos=scene.center, axis=(0, 0, 1), radius = a, color = color.white, thickness=0.01)  # Singularity
+        ring(pos=centre, axis=(0, 0, 1), radius=a, color=color.white, thickness=0.01)
     else:
-        sphere(pos=scene.center, radius = 0.05, color = color.white)  # Singularity
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(isco(a, l)**2 + a**2), color = color.magenta, thickness=0.01)  # ISCO
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere1(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # Photon Sphere
-    ring(pos=scene.center, axis=(0, 0, 1), radius = sqrt(pSphere2(a, l)**2 + a**2), color = color.orange, thickness=0.01)  # Photon Sphere
-    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))  # z axis
-    mylabel = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16, color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
+        sphere(pos=centre, radius=0.05, color=color.white)
+    # ISCO
+    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((isco(a, l), 0.5 * pi, 0.0), a)[0],
+         color=color.magenta, thickness=0.01)
+    # Photon Sphere(s)
+    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((pSphere(a, l), 0.5 * pi, 0.0), a)[0],
+         color=color.orange, thickness=0.01)
+    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((pSphere(-a, l), 0.5 * pi, 0.0), a)[0],
+         color=color.orange, thickness=0.01)
+    #photons = 2.0 * to_rectangular((pSphere(a, l), 0.5 * pi, 0.0), a)[0]
+    #ellipsoid(pos=centre, length=photons, height=photons, width=2.0*to_rectangular((pSphere(a, l), 0.0, 0.0), a)[2],
+    #     color=color.white, opacity=0.1)
+    # z axis
+    curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
+    # Data display
+    readout = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16,
+                    color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #sphere(pos=(0,0,0), radius=3.0, opacity=0.2)
@@ -85,28 +120,16 @@ def main():
             ball = sphere(radius = 0.2)  # Particle
             ball.trail = curve(size = 1)  #  trail
         data = loads(dataLine)
-        e = float(data['v4e'])
-        if e < -120.0:
-            ball.color = color.green
-        elif e < -90.0:
-            ball.color = color.cyan
-        elif e < -60.0:
-            ball.color = color.yellow
-        elif e < -30.0:
-            ball.color = color.orange
-        else:
-            ball.color = color.red
+        error_colour(float(data['v4e']), ball)
         r = float(data['r'])
         th = float(data['th'])
         ph = float(data['ph'])
-        ra = sqrt(r**2 + a**2)
-        sth = sin(th)
-        ball.pos = (ra * sth * cos(ph), ra * sth * sin(ph), r * cos(th))
+        ball.pos = to_rectangular((r, th, ph), a)
         ball.trail.append(pos = ball.pos, color = ball.color)
-        if mu is not None and fabs(mu) > 0.0:
-            mylabel.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP']), a, r, th), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        if mu and fabs(mu) > 0.0:
+            readout.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
-            mylabel.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            readout.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         counter += 1
         dataLine = stdin.readline()

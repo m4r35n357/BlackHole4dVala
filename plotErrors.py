@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
 All rights reserved.
 
@@ -12,8 +12,8 @@ Redistribution and use in source and binary forms, with or without modification,
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
-from sys import argv, stdin
+"""
+from sys import argv, stdin, stderr
 from matplotlib import pyplot
 from matplotlib.ticker import MultipleLocator
 from json import loads
@@ -43,21 +43,24 @@ def main():
     line = stdin.readline()
     while line:  # build raw data arrays
         p = loads(line)
-        if (count % interval == 0):
+        if count % interval == 0:
             timeValue = p[timeCoordinate]
             ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
             ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-            ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=2, zorder=9)
-            ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=2, zorder=8)
+            er = float(p['ER'])
+            eth = float(p['ETh'])
+            if er and eth:
+                ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=2, zorder=9)
+                ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=2, zorder=8)
         line = stdin.readline()
         count += 1
     try:
         pyplot.show()
     except AttributeError as e:
-        print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(coordinate) + ': ' + str(e))
+        print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(e))
         exit(-3)
 
 if __name__ == "__main__":
     main()
 else:
-    print >> sys.stderr, __name__ + " module loaded"
+    print >> stderr, __name__ + " module loaded"
