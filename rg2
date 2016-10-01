@@ -1,8 +1,8 @@
 #!/bin/sh
 
 ic=${1:-'initial-conditions.json'}
-timeCoord=${2:-'tau'}
-timeStep=${3:-0.5}
+timeStep=${2:-0.5}
+timeCoord=${3:-'tau'}
 
 C='\033[0;36m'
 NC='\033[0m' # No Color
@@ -11,21 +11,17 @@ NC='\033[0m' # No Color
 jq . $ic
 
 # Run the simulator
-datafile='/tmp/data'
 echo -n ${C}"Simulating with $ic . . . "
-case $(echo $data | jq .integrator) in
-	rk4*)	./KdS <$ic >$datafile;;
-	*)	./KdS <$ic | ./finterp.py $timeCoord $timeStep >$datafile;;
-esac
+$exe <$ic >$data
 echo "Done!"${NC}
 
 # Plot errors
-#./plotErrors.py $timeCoord 1 <$datafile &
-./plotErrors.py $timeCoord $(echo $(jq .IC.duration $ic) / $(jq .IC.step $ic) / $(jq .IC.plotratio $ic) / 2000 | bc) <$datafile &
+#./plotErrors.py $timeCoord 1 <$data &
+./plotErrors.py $timeCoord $(echo $(jq .IC.duration $ic) / $(jq .IC.step $ic) / $(jq .IC.plotratio $ic) / 2000 | bc) <$data &
 
 # Plot potentials
 ./plotPotential.py <$pot &
 
 # Plot 3D graphics
-./plotBH.py <$datafile $(jq .IC.M $ic) $(jq .IC.a $ic) $(jq .IC.L $ic) `jq .IC.mu $ic` &
+./plotBH.py <$data $(jq .IC.M $ic) $(jq .IC.a $ic) $(jq .IC.L $ic) `jq .IC.mu $ic` &
 
