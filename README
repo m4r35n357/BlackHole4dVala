@@ -22,18 +22,18 @@ Sample usage:
 
 ./build-all [fast]
 
-icdata=icgen-data.json
-ic=initial-conditions.json
-data=/tmp/data
-pot=/tmp/potential
+export icdata=icgen-data.json
+export ic=initial-conditions.json
+export data=/tmp/data
+export pot=/tmp/potential
 
 
 2.	Create an initial conditions generator data file
 
-icgen=./icgenParticle
+export icgen=./icgenParticle
 cp icgenParticle-data.example $icdata
 
-icgen=./icgenLight
+export icgen=./icgenLight
 cp icgenLight-data.example $icdata
 
 

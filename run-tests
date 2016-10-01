@@ -5,9 +5,6 @@ exe=${1:-'./KdS'}
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-ic='initial-conditions.json'
-pot='/tmp/potential'
-
 int='./finterp.py'
 
 run_particle () {
