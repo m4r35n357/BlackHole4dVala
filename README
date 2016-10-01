@@ -78,7 +78,7 @@ ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -preset veryslow -qp 0 vpython.
 
 on a PI 1:
 
-su -c "cd /home/pi/projects/Vala/BlackHole4dVala; exec ./geodesic-server" pi &
+su -c "cd /home/pi/projects/Vala/BlackHole4dVala; ./geodesic-server &" pi
 
 on a PI 2 or 3:
 
