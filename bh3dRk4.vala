@@ -143,8 +143,8 @@ namespace Simulations {
          * Write the simulated data to STDOUT
          */
         private void output (double tau) {
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ",
-                            tau, logError(v4Error(Ut, Ur, Uth, Uph)), -180.0, -180.0, -180.0);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"D_th\":%.9e, \"R\":%.9e, \"TH\":%.9e, ",
+                            tau, logError(v4Error(Ut, Ur, Uth, Uph)), D_th, R, TH);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
                             t, r, th, ph, Ut, Ur, Uth, Uph);
         }

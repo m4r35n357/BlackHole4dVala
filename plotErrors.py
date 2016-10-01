@@ -46,12 +46,15 @@ def main():
         if count % interval == 0:
             timeValue = p[timeCoordinate]
             ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
-            ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-            er = float(p['ER'])
-            eth = float(p['ETh'])
-            if er and eth:
+            try:
+                ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
+            except KeyError:
+                pass
+            try:
                 ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=2, zorder=9)
                 ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=2, zorder=8)
+            except KeyError:
+                pass
         line = stdin.readline()
         count += 1
     try:
