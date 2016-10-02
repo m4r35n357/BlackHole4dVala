@@ -55,7 +55,7 @@ namespace Simulations {
             var mino = 0.0;
             var tau = 0.0;
             var tmp = 0;
-            while ((tau <= end) && (r >= horizon) && (D_r >= 0.0)) {
+            while ((tau < end) && (r > horizon) && (D_r > 0.0)) {
                 if ((tau >= start) && (tau >= tmp * tr * h)) {
                     output(mino, tau);
                     tmp += 1;
@@ -79,7 +79,7 @@ namespace Simulations {
             var eTh = logError(modH(Uth, TH));
             var v4e = logError(v4Error(Ut / S, Ur / S, Uth / S, Uph / S));
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, ", mino, tau);                                                    // time variables
-            stdout.printf("\"v4e\":%.1f, \"D_th\":%.9e, \"ER\":%.9e, \"ETh\":%.9e, ", v4e, D_th, eR, eTh);                 // errors
+            stdout.printf("\"v4e\":%.1f, \"D_r\":%.9e, \"ER\":%.9e, \"ETh\":%.9e, ", v4e, D_r, eR, eTh);                 // errors
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", t, r, th, ph);                             // coordinates
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", Ut / S, Ur / S, Uth / S, Uph / S);    // coordinate derivatives
         }

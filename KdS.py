@@ -61,6 +61,10 @@ class KdSBase(object):
         self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * self.X2
         self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * self.X2
 
+    def get_potentials(self, radius, theta):
+        self.refresh(radius, theta)
+        return '{"R":%.9e, "TH":%.9e}'.format(self.R, self.TH)
+
     def v4_error(self, Ut, Ur, Uth, Uph):  # norm squared, xDot means dx/dTau !!!
         SX2 = self.S * self.X2
         return fabs(self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2
@@ -88,6 +92,7 @@ class BhRk4(KdSBase):
             self.updater = self.updater438
         else:
             print >> stderr("Bad integrator type, valid choices are: [ rk4 | rk438 ]")
+        self.max_iterations = round(duration / self.h)
         self.f(self.r, self.th, 0)
 
     def f(self, radius, theta, stage):
@@ -132,16 +137,16 @@ class BhRk4(KdSBase):
     def solve(self):
         tau = 0.0
         count = 0
-        while tau <= self.end_time and self.r >= self.horizon and self.D_r >= 0.0:
+        while count < self.max_iterations and self.r > self.horizon and self.D_r > 0.0:
             if tau >= self.start_time and count % self.tr == 0:
                 self.output(tau)
             self.iterate()
             count += 1
-            tau += self.h
+            tau = count * self.h
         self.output(tau)
 
     def output(self, tau):
-        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.1f, "D_th":%.1f, "S":%.1f,' \
+        print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.9e, "D_th":%.9e, "S":%.9e,' \
                          % (tau, self.log_error(self.v4_error(self.Ut, self.Ur, self.Uth, self.Uph)), self.D_r, self.D_th, self.S),
         print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
                          % (self.t, self.r, self.th, self.ph, self.Ut, self.Ur, self.Uth, self.Uph)  # Log data
