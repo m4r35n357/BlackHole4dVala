@@ -1,8 +1,7 @@
 #!/bin/sh
 
 ic=${1:-'initial-conditions.json'}
-timeStep=${2:-0.5}
-timeCoord=${3:-'tau'}
+timeCoord=${2:-'tau'}
 
 C='\033[0;36m'
 NC='\033[0m' # No Color
@@ -16,8 +15,8 @@ $exe <$ic >$data
 echo "Done!"${NC}
 
 # Plot errors
-#./plotErrors.py $timeCoord 1 <$data &
-./plotErrors.py $timeCoord $(echo $(jq .IC.duration $ic) / $(jq .IC.step $ic) / $(jq .IC.plotratio $ic) / 2000 | bc) <$data &
+set $(wc -l $data)
+./plotErrors.py $timeCoord $(expr $1 / 2000) <$data &
 
 # Plot potentials
 ./plotPotential.py <$pot &
