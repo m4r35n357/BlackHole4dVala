@@ -13,17 +13,16 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from sys import argv, stderr
+from sys import argv, stdin, stderr
 from matplotlib import pyplot
 from json import loads
 
 def main():
-    if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply a data file name, a plotting interval, and a coordinate to plot <<<')
-    dataFile = open(argv[1], 'r')
-    interval = int(argv[2])
-    coordinate = argv[3]
-    line = dataFile.readline()
+    if len(argv) < 2:
+        raise Exception('>>> ERROR! Please supply a plotting interval and a coordinate to plot <<<')
+    interval = int(argv[1])
+    coordinate = argv[2]
+    line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
     ax1.set_xlabel('tau', color='k')
     ax1.set_ylabel(coordinate, color='b')
@@ -35,7 +34,7 @@ def main():
         if n % interval == 0:
             ax1.plot(p['tau'], p[coordinate], 'b.', markersize=2)
             ax2.plot(p['tau'], p[coordinate + 'P'], 'r.', markersize=2)
-        line = dataFile.readline()
+        line = stdin.readline()
         n += 1
 #        pyplot.legend(['t', 'r', 'th', 'ph'], loc='best')
     pyplot.show()
