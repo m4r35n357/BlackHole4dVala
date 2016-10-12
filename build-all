@@ -29,6 +29,9 @@ echo ""
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 
+gcc -o kerr-image-ian kerr-image-ian.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
+echo ""
+
 $valac -q -X -w --pkg json-glib-1.0 --pkg gsl icgenParticle.vala utils.vala
 echo ""
 
@@ -37,9 +40,9 @@ echo ""
 
 # strip symplectics
 case $opt in
-	fast)	strip $symplectics KdS raytrace-commands kerr-image icgenParticle icgenLight;;
+	fast)	strip $symplectics KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight;;
 esac
 
 # admire our work
-ls -lAh --color $symplectics KdS raytrace-commands kerr-image icgenParticle icgenLight
+ls -lAh --color $symplectics KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
 

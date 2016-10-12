@@ -195,7 +195,7 @@ struct blackhole_s {
   double M;   // Black hole mass
   double a;   // Black hole rotation (angular momentum per unit mass)
   double M2;  // M*M
-  double a2, a3, a4, a5, a6;  // Powers of a
+  double a2;  // Powers of a
   double sqrtM2ma2;  // sqrt(M^2-a^2)
 };
 
@@ -207,38 +207,34 @@ init_blackhole (double M, double a, struct blackhole_s *blk)
   blk->a = a;
   blk->M2 = M * M;
   blk->a2 = a * a;
-  blk->a3 = (blk->a2) * a;
-  blk->a4 = (blk->a2) * (blk->a2);
-  blk->a5 = (blk->a3) * (blk->a2);
-  blk->a6 = (blk->a3) * (blk->a3);
   blk->sqrtM2ma2 = sqrt((blk->M2) - (blk->a2));
 }
 
 struct geodesic_s {
   const struct blackhole_s *blk;
   // The first integrals of motion:
-  double masssq;  // Mass square msq (+1 for timelike, 0 for lightlike, -1 for spacelike)
-  double energy;  // Energy E (opposite of dot prod with (d/dt))
-  double angmom;  // Angular momentum L around z axis (dot prod with (d/dphi))
-  double carter;  // Carter's constant K
+  double mu2;  // Mass square msq (+1 for timelike, 0 for lightlike, -1 for spacelike)
+  double E;  // Energy E (opposite of dot prod with (d/dt))
+  double Lz;  // Angular momentum L around z axis (dot prod with (d/dphi))
+  double Q;  // Carter's constant K
   // Two expressions involving these:
   double expr1;   // -K + a^2*(2*E^2-msq) - 2*a*L*E
   double expr2;   // 2*(E^2 - msq)
 };
 
 void
-init_geodesic (const struct blackhole_s *blk, double masssq, double energy,
-	       double angmom, double carter,
+init_geodesic (const struct blackhole_s *blk, double mu2, double E,
+	       double Lz, double Q,
 	       struct geodesic_s *geo)
 // Initialize the structure describing a geodesic.
 {
   geo->blk = blk;
-  geo->masssq = masssq;
-  geo->energy = energy;
-  geo->angmom = angmom;
-  geo->carter = carter;
-  geo->expr1 = -carter + blk->a2*(2*square(energy)-masssq) - 2*blk->a*angmom*energy;
-  geo->expr2 = 2*(square(energy)-masssq);
+  geo->mu2 = mu2;
+  geo->E = E;
+  geo->Lz = Lz;
+  geo->Q = Q;
+  geo->expr1 = -Q + blk->a2 * (2.0 * square(E) - mu2) - 2.0 * blk->a * Lz * E;
+  geo->expr2 = 2.0 * (square(E) - mu2);
 }
 
 struct state_s {
@@ -253,15 +249,8 @@ struct state_s {
       double cth; // cos(theta)
       double rdot;  // dr/ds (we use a second order eqn for r)
       double cthdot; // (d/ds)(cos(theta)) (ditto)
-#if DO_USELESS
-      double l; // l is sqrt(r^2+a^2)*sin(theta)
-#endif
       double t; // time coordinate (depends on value of coords)
       double phi; // phi coordinate (ditto)
-#if DO_USELESS
-      double cphsth; // cos(phi)*sin(theta)
-      double sphsth; // sin(phi)*sin(theta)
-#endif
     } n;
 #define NBVARS ((int)(sizeof(struct variables_s)/sizeof(double)))
     double t[NBVARS];  // The same variables as an array, for use in runge_kutta()
@@ -278,29 +267,21 @@ change_coords (struct state_s *sta, char newcoords)
     return;
   const struct blackhole_s *blk = sta->blk;
   double r = sta->v.n.r;
-  double horlog = log(fabs((r-(blk->M+blk->sqrtM2ma2))/(r-(blk->M-blk->sqrtM2ma2))));
-  double delta = square(r) - 2*blk->M*r + blk->a2;
-  double tcorr = 2*(blk->M2/blk->sqrtM2ma2)*horlog + 2*blk->M*log(fabs(delta));
-  double phicorr = (blk->a/blk->sqrtM2ma2)*horlog;
-  double e = (newcoords==0?0.5:newcoords==1?-0.5:0.)
-    - (oldcoords==0?0.5:oldcoords==1?-0.5:0.);
+  double horlog = log(fabs((r - (blk->M + blk->sqrtM2ma2)) / (r - (blk->M - blk->sqrtM2ma2))));
+  double DELTA = square(r) - 2.0 * blk->M*r + blk->a2;
+  double tcorr = 2.0 * (blk->M2 / blk->sqrtM2ma2) * horlog + 2.0 * blk->M * log(fabs(DELTA));
+  double phicorr = (blk->a / blk->sqrtM2ma2) * horlog;
+  double e = (newcoords == 0 ? 0.5 : newcoords == 1 ? -0.5 : 0.) - (oldcoords == 0 ? 0.5 : oldcoords == 1 ? -0.5 : 0.);
   sta->coords = newcoords;
-  sta->v.n.t += e*tcorr;
-  sta->v.n.phi += e*phicorr;
-#if DO_USELESS
-  double newcphsth = sta->v.n.cphsth*cos(e*phicorr) - sta->v.n.sphsth*sin(e*phicorr);
-  double newsphsth = sta->v.n.sphsth*cos(e*phicorr) + sta->v.n.cphsth*sin(e*phicorr);
-  sta->v.n.cphsth = newcphsth;
-  sta->v.n.sphsth = newsphsth;
-#endif
+  sta->v.n.t += e * tcorr;
+  sta->v.n.phi += e * phicorr;
 }
 
 void
 change_coords_to_best (struct state_s *sta)
 // Change to the best coordinate system for integration.
 {
-  double p = (square(sta->v.n.r)+sta->blk->a2)*sta->geo->energy
-    - sta->blk->a*sta->geo->angmom;
+  double p = (square(sta->v.n.r) + sta->blk->a2) * sta->geo->E - sta->blk->a * sta->geo->Lz;
   char newcoords = (sta->v.n.rdot > 0) ^ (p < 0);
   change_coords (sta, newcoords);
 }
@@ -318,19 +299,20 @@ init_state (const struct geodesic_s *geo, double time, double r, double cth,
   sta->time = time;
   sta->v.n.r = r;
   sta->v.n.cth = cth;
-  double rhosq = square(r) + blk->a2*square(cth);
-  sta->v.n.rdot = sign(rdot_sign)*sqrt((-geo->masssq*square(r)-geo->carter)*(square(r)-2*blk->M*r+blk->a2) + square((square(r)+blk->a2)*geo->energy - blk->a*geo->angmom))/rhosq;
-  sta->v.n.cthdot = sign(cthdot_sign)*sqrt((geo->carter - geo->masssq*blk->a2*square(cth))*(1-square(cth)) - square(blk->a*geo->energy*(1-square(cth)) - geo->angmom))/rhosq;
-#if DO_USELESS
-  sta->v.n.l = sqrt((1-square(cth))*(square(r)+blk->a2));
-#endif
+  double r2 = square(r);
+  double cth2 = square(cth);
+  double SIGMA = r2 + blk->a2 * cth2;
+  // sqrt of R potential
+  sta->v.n.rdot = sign(rdot_sign)
+                * sqrt((-geo->mu2 * r2 - geo->Q) * (r2 - 2.0 * blk->M * r + blk->a2) + square((r2 + blk->a2) * geo->E - blk->a * geo->Lz)) / SIGMA;
+//                * sqrt((-geo->mu2 * r2 - square(geo->Lz - blk->a * geo->E) - geo->Q) * (r2 - 2.0 * blk->M * r + blk->a2) + square((r2 + blk->a2) * geo->E - blk->a * geo->Lz)) / SIGMA;
+  // sqrt of THETA potential
+  sta->v.n.cthdot = sign(cthdot_sign)
+                  * sqrt((geo->Q - geo->mu2 * blk->a2 * cth2) * (1.0 - cth2) - square(blk->a * geo->E * (1.0 - cth2) - geo->Lz)) / SIGMA;
+
   sta->coords = coords;
   sta->v.n.t = t;
   sta->v.n.phi = phi;
-#if DO_USELESS
-  sta->v.n.cphsth = cos(phi)*sqrt(1-square(cth));
-  sta->v.n.sphsth = sin(phi)*sqrt(1-square(cth));
-#endif
   sta->nbsteps = 0;
 }
 
@@ -360,45 +342,43 @@ equation (const struct state_s *sta, const union variables_u *v,
   double cth = v->n.cth;
   double rdot = v->n.rdot;
   double cthdot = v->n.cthdot;
-  double rhosq = square(r) + blk->a2*square(cth);
-  double rhosqdot = 2*(r*rdot + blk->a2*cth*cthdot);
+  double r2 = square(r);
+  double cth2 = square(cth);
+  double SIGMA = r2 + blk->a2 * cth2;
+  double SIGMAdot = 2.0 * (r * rdot + blk->a2 * cth * cthdot);
   vdot->n.r = rdot;
   vdot->n.cth = cthdot;
-  double tmpr = geo->carter*blk->M + geo->expr1*r
-    + 3*blk->M*geo->masssq*square(r) + geo->expr2*square(r)*r;
-  vdot->n.rdot = ((tmpr/rhosq)-rhosqdot*rdot)/rhosq;
-  double tmpw = (geo->expr1 - blk->a2*geo->expr2*square(cth))*cth;
-  vdot->n.cthdot = ((tmpw/rhosq)-rhosqdot*cthdot)/rhosq;
-#if DO_USELESS
-  vdot->n.l = (r*rdot*(1-square(cth)) - (square(r)+blk->a2)*cth*cthdot)/v->n.l;
-#endif
-  double delta = square(r) - 2*blk->M*r + blk->a2;
-  double p = (square(r)+blk->a2)*geo->energy - blk->a*geo->angmom;
+
+  double tmpr = geo->Q * blk->M + geo->expr1 * r + 3.0 * blk->M * geo->mu2 * r2 + geo->expr2 * r2 * r;
+  vdot->n.rdot = ((tmpr / SIGMA) - SIGMAdot * rdot) / SIGMA;
+
+  double tmpw = (geo->expr1 - blk->a2 * geo->expr2 * cth2) * cth;
+  vdot->n.cthdot = ((tmpw / SIGMA) - SIGMAdot * cthdot) / SIGMA;
+
+  double DELTA = r2 - 2.0 * blk->M * r + blk->a2;
+  double P = (r2 + blk->a2) * geo->E - blk->a * geo->Lz;
   assert (sta->coords == 0 || sta->coords == 1);
-  if ( fabs(delta)<1.e-6 && ( sta->coords == ((rdot > 0) ^ (p < 0)) ) )
+  if ( fabs(DELTA) < 1.e-6 && ( sta->coords == ((rdot > 0) ^ (P < 0)) ) )
     {
-      // We are near the horizon, so delta is very small: use an
-      // expansion in delta to avoid numeric loss of precision.
-      double c = (geo->masssq*square(r) + geo->carter) / square(p);
-      vdot->n.t = (blk->a*geo->angmom - blk->a2*geo->energy*(1-square(cth)))/rhosq
-	+ (square(r)+blk->a2)*(c/2 + c*c*delta/8 + c*c*c*delta/16)
-	- sign(sta->coords)*rdot;
-      vdot->n.phi = (geo->angmom/(1-square(cth)) - blk->a*geo->energy)/rhosq
-	+ blk->a*(p/rhosq)*(c/2 + c*c*delta/8 + c*c*c*delta/16);
+      // We are near the horizon, so DELTA is very small: use an
+      // expansion in DELTA to avoid numeric loss of precision.
+      double c = (geo->mu2 * r2 + geo->Q) / square(P);
+
+      vdot->n.t = (blk->a * geo->Lz - blk->a2 * geo->E * (1.0 - cth2)) / SIGMA
+                + (r2 + blk->a2) * (c / 2.0 + c * c * DELTA / 8.0 + c * c * c * DELTA / 16.0) - sign(sta->coords) * rdot;
+
+      vdot->n.phi = (geo->Lz / (1.0 - cth2) - blk->a * geo->E) / SIGMA
+                  + blk->a * (P / SIGMA) * (c / 2.0 + c * c * DELTA / 8.0 + c * c * c * DELTA / 16.0);
     }
   else
     {
       // (Normal path of execution)
-      vdot->n.t = (blk->a*geo->angmom - blk->a2*geo->energy*(1-square(cth)))/rhosq
-	+ (square(r)+blk->a2)*(p/rhosq+sign(sta->coords)*rdot)/delta
-	- sign(sta->coords)*rdot;
-      vdot->n.phi = (geo->angmom/(1-square(cth)) - blk->a*geo->energy)/rhosq
-	+ blk->a*(p/rhosq+sign(sta->coords)*rdot)/delta;
+      // t and phi updates
+      vdot->n.t = (blk->a * geo->Lz - blk->a2 * geo->E * (1.0 - cth2)) / SIGMA
+                + (r2 + blk->a2) * (P / SIGMA + sign(sta->coords) * rdot) / DELTA - sign(sta->coords) * rdot;
+
+      vdot->n.phi = (geo->Lz / (1.0 - cth2) - blk->a * geo->E) / SIGMA + blk->a * (P / SIGMA + sign(sta->coords) * rdot) / DELTA;
     }
-#if DO_USELESS
-  vdot->n.cphsth = -v->n.sphsth * vdot->n.phi - v->n.cphsth*(cth/(1-square(cth)))*cthdot;
-  vdot->n.sphsth = v->n.cphsth * vdot->n.phi - v->n.sphsth*(cth/(1-square(cth)))*cthdot;
-#endif
 }
 
 void
@@ -414,17 +394,17 @@ runge_kutta (const struct state_s *sta0, double step, union variables_u *vnew)
   union variables_u v3;
   union variables_u vdot4;
   equation (sta0, v0, &vdot1);
-  for ( int i=0 ; i<NBVARS ; i++ )
-    v1.t[i] = v0->t[i] + vdot1.t[i]*step/2;
+  for ( int i=0 ; i < NBVARS ; i++ )
+    v1.t[i] = v0->t[i] + vdot1.t[i] * step / 2.0;
   equation (sta0, &v1, &vdot2);
-  for ( int i=0 ; i<NBVARS ; i++ )
-    v2.t[i] = v0->t[i] + vdot2.t[i]*step/2;
+  for ( int i=0 ; i < NBVARS ; i++ )
+    v2.t[i] = v0->t[i] + vdot2.t[i] * step / 2.0;
   equation (sta0, &v2, &vdot3);
-  for ( int i=0 ; i<NBVARS ; i++ )
-    v3.t[i] = v0->t[i] + vdot3.t[i]*step;
+  for ( int i=0 ; i < NBVARS ; i++ )
+    v3.t[i] = v0->t[i] + vdot3.t[i] * step;
   equation (sta0, &v3, &vdot4);
-  for ( int i=0 ; i<NBVARS ; i++ )
-    vnew->t[i] = v0->t[i] + (vdot1.t[i]+vdot2.t[i]*2+vdot3.t[i]*2+vdot4.t[i])/6*step;
+  for ( int i=0 ; i < NBVARS ; i++ )
+    vnew->t[i] = v0->t[i] + (vdot1.t[i] + vdot2.t[i] * 2.0 + vdot3.t[i] * 2.0 + vdot4.t[i]) / 6.0 * step;
 }
 
 void
@@ -444,11 +424,11 @@ compute_metric (const struct blackhole_s *blk, char coords,
 		double r, double cth, double g[4][4])
 // Coordinates are in this oder: [0]:r, [1]:cth=cos(theta), [2]:t, [3]:phi.
 {
-  double rhosq = square(r) + blk->a2*square(cth);
+  double SIGMA = square(r) + blk->a2*square(cth);
   double sth2 = 1-square(cth);
-  double poten = 2*blk->M*r/rhosq;
+  double poten = 2*blk->M*r/SIGMA;
   g[2][2] = -(1-poten);
-  g[1][1] = rhosq/sth2;
+  g[1][1] = SIGMA/sth2;
   g[3][3] = (square(r) + blk->a2 + poten*blk->a2*sth2)*sth2;
   if ( coords == 0 || coords == 1 )
     {
@@ -458,7 +438,7 @@ compute_metric (const struct blackhole_s *blk, char coords,
     }
   else
     {
-      g[0][0] = rhosq/(square(r) - 2*blk->M*r + blk->a2);
+      g[0][0] = SIGMA/(square(r) - 2*blk->M*r + blk->a2);
       g[0][2] = g[2][0] = 0;
       g[0][3] = g[3][0] = 0;
     }
@@ -469,7 +449,7 @@ compute_metric (const struct blackhole_s *blk, char coords,
 }
 
 double
-dotprod (double g[4][4], double u[4], double v[4])
+dotProduct (double g[4][4], double u[4], double v[4])
 // Compute the dot product of two vectors, using the metric g.
 {
   double dot = 0.;
@@ -484,12 +464,12 @@ void
 init_from_v_and_vdot (const struct blackhole_s *blk, char coords,
 		      double r, double cth, double t, double phi,
 		      double rdot, double cthdot, double tdot, double phidot,
-		      char normalize_masssq,
+		      char normalize_mu2,
 		      struct geodesic_s *geo, struct state_s *sta)
 // Initialize the geodisc (conserved quantities) and the current
 // state, simultaneously, from given position and velocity.  coords
 // indicates whether we are using ingoing (0), outgoing (1) or
-// Boyer-Lindquist (2) coordinates, and normalize_masssq should be set
+// Boyer-Lindquist (2) coordinates, and normalize_mu2 should be set
 // to -1, 0 or 1 if the geodesic is known to be spacelike (-1),
 // lightlike (0) or timelike (1), or to 2 to avoid making an
 // assumption or normalizing the given velocity.
@@ -497,25 +477,26 @@ init_from_v_and_vdot (const struct blackhole_s *blk, char coords,
   double g[4][4];
   compute_metric (blk, coords, r, cth, g);
   double vec[4] = { rdot, cthdot, tdot, phidot };
-  double dbydt[4] = { 0, 0, 1, 0 };
-  double dbydphi[4] = { 0, 0, 0, 1 };
-  double masssq = -dotprod(g, vec, vec);
-  if ( normalize_masssq == -1 || normalize_masssq == 1 ) {
+  double dbydt[4] = { 0.0, 0.0, 1.0, 0.0 };
+  double dbydphi[4] = { 0.0, 0.0, 0.0, 1.0 };
+  double mu2 = -dotProduct(g, vec, vec);
+  if ( normalize_mu2 == -1 || normalize_mu2 == 1 ) {
     // Normalize velocity.
-    double t = sqrt(masssq/normalize_masssq);
+    double t = sqrt(mu2 / normalize_mu2);
     rdot /= t;  cthdot /= t;  tdot /= t;  phidot /= t;
     for ( int i=0 ; i<4 ; i++ )
       vec[i] /= t;
-    masssq = normalize_masssq;
-  } else if ( normalize_masssq == 0 ) {
+    mu2 = normalize_mu2;
+  } else if ( normalize_mu2 == 0 ) {
     // Assume lightlike.
-    masssq = 0;  // Not a great idea?
+    mu2 = 0;  // Not a great idea?
   }
-  double energy = -dotprod(g, vec, dbydt);
-  double angmom = dotprod(g, vec, dbydphi);
-  double rhosq = square(r) + blk->a2*square(cth);
-  double carter = (square(rhosq)*square(cthdot) + square(blk->a*energy*(1-square(cth))-angmom))/(1-square(cth)) + masssq*blk->a2*square(cth);
-  init_geodesic (blk, masssq, energy, angmom, carter, geo);
+  double E = -dotProduct(g, vec, dbydt);
+  double Lz = dotProduct(g, vec, dbydphi);
+  double cth2 = square(cth);
+  double SIGMA = square(r) + blk->a2 * cth2;
+  double Q = (square(SIGMA) * square(cthdot) + square(blk->a * E * (1.0 - cth2) - Lz)) / (1.0 - cth2) + mu2 * blk->a2 * cth2;
+  init_geodesic (blk, mu2, E, Lz, Q, geo);
   init_state (geo, 0, r, cth, rdot<0, cthdot<0, coords, t, phi, sta);
   sta->v.n.rdot = rdot;
   sta->v.n.cthdot = cthdot;
@@ -614,19 +595,9 @@ main (int argc, char *argv[])
   scanf (" %d", &coords0);
   scanf (" %lf %lf %lf %lf", &r0, &cth0, &t0, &phi0);
   compute_metric (&blk, coords0, r0, cth0, g);
-#if 0
-  double vecs[4][4] = {
-    { 0, 0, 1, 0 },  // Time-pointing vector of observer
-    { -1, 0, 0, 0 }, // Space forward-pointing vector of observer
-    { 0, 0, 0, 1 },  // Space right-pointing vector of observer
-    { 0, 1, 0, 0 }   // Space up-pointing vector of observer
-  };
-#else
   double vecs[4][4];
   for ( int m=0 ; m<4 ; m++ )
-    scanf (" %lf %lf %lf %lf",
-	   &vecs[m][0], &vecs[m][1], &vecs[m][2], &vecs[m][3]);
-#endif
+    scanf (" %lf %lf %lf %lf", &vecs[m][0], &vecs[m][1], &vecs[m][2], &vecs[m][3]);
   fprintf (stderr, "Position:\n%.8e\t%.8e\t%.8e\t%.8e\n",
 	   r0, cth0, t0, phi0);
   fprintf (stderr, "Before orthonormalization:\n");
@@ -637,22 +608,20 @@ main (int argc, char *argv[])
     {  // Gram-Schmidt orthonormalization
       for ( int mm=0 ; mm<m ; mm++ )
 	{
-	  double s = dotprod(g, vecs[m], vecs[mm]);
+	  double s = dotProduct(g, vecs[m], vecs[mm]);
 	  for ( int i=0 ; i<4 ; i++ )
 	    vecs[m][i] -= sign(mm==0)*s*vecs[mm][i];
 	}
-      double norm = sqrt(sign(m==0)*dotprod(g, vecs[m], vecs[m]));
+      double norm = sqrt(sign(m==0)*dotProduct(g, vecs[m], vecs[m]));
       for ( int i=0 ; i<4 ; i++ )
 	vecs[m][i] /= norm;
     }
   fprintf (stderr, "After orthonormalization:\n");
   for ( int m=0 ; m<4 ; m++ )
-    fprintf (stderr, "%.8e\t%.8e\t%.8e\t%.8e\n",
-	     vecs[m][0], vecs[m][1], vecs[m][2], vecs[m][3]);
+    fprintf (stderr, "%.8e\t%.8e\t%.8e\t%.8e\n", vecs[m][0], vecs[m][1], vecs[m][2], vecs[m][3]);
   int lin_min = argc>=2?atoi(argv[1]):0;
   int lin_max = argc>=3?atoi(argv[2]):NBLINS;
-  fprintf (stderr, "Computing image from line %d to line %d...\n",
-	   lin_min, lin_max);
+  fprintf (stderr, "Computing image from line %d to line %d...\n", lin_min, lin_max);
   if ( lin_min == 0 )
     printf ("P3\n%d %d\n255\n", NBCOLS, NBLINS);
   for ( int lin=lin_min ; lin<lin_max ; lin++ )
@@ -683,8 +652,7 @@ main (int argc, char *argv[])
 	    {
 	      if ( isnan(sta.v.n.r) || isnan(sta.v.n.cth) )
 		{ color = nan_color;  break; }
-	      if ( sta.nbsteps > MAX_NBSTEPS || sta.time > MAX_PROPERTIME
-		   || horizon_crossings >= 4 )
+	      if ( sta.nbsteps > MAX_NBSTEPS || sta.time > MAX_PROPERTIME || horizon_crossings >= 4 )
 		{ color = lost_color;  break; }
 #if 1
 	      // Periodically recontrol rdot and cthdot.
@@ -693,42 +661,37 @@ main (int argc, char *argv[])
 #endif
 	      memcpy (&oldsta, &sta, sizeof(struct state_s));
 	      // A heuristic on step size:
-	      double step = BASIC_STEP * ((1+fabs(oldsta.v.n.r))
-					  / (1+fabs(oldsta.v.n.rdot)));
+	      double step = BASIC_STEP * ((1+fabs(oldsta.v.n.r)) / (1+fabs(oldsta.v.n.rdot)));
 	      if ( oldsta.v.n.cth > 0.95 || oldsta.v.n.cth < -0.95 )
 		step /= 3; // Increase accuracy near the axis.
 	      evolve (step, &sta);
 	      char dir;
-	      if ( check_crossing (&oldsta, &sta, FARSPHERE_RADIUS, 2,
-				   &xsta, NULL) )
+	      if ( check_crossing (&oldsta, &sta, FARSPHERE_RADIUS, 2, &xsta, NULL) )
 		{
 		  // Compute tdot, so we can color spheres slightly
 		  // differently depending on its value:
 		  double r = xsta.v.n.r;
 		  double cth = xsta.v.n.cth;
 		  double rdot = xsta.v.n.rdot;
-		  double rhosq = square(r) + blk.a2*square(cth);
-		  double delta = square(r) - 2*blk.M*r + blk.a2;
-		  double p = (square(r)+blk.a2)*geo.energy - blk.a*geo.angmom;
-		  double tdot = (blk.a*geo.angmom - blk.a2*geo.energy*(1-square(cth)))/rhosq
-		    + (square(r)+blk.a2)*(p/rhosq+sign(xsta.coords)*rdot)/delta
-		    - sign(xsta.coords)*rdot;
+		  double r2 = square(r);
+		  double cth2 = square(cth);
+		  double SIGMA = r2 + blk.a2 * cth2;
+		  double DELTA = r2 - 2.0 * blk.M * r + blk.a2;
+		  double P = (r2 + blk.a2) * geo.E - blk.a * geo.Lz;
+		  double tdot = (blk.a * geo.Lz - blk.a2 * geo.E * (1.0 - cth2)) / SIGMA
+		              + (r2 + blk.a2) * (P / SIGMA + sign(xsta.coords) * rdot) / DELTA
+		              - sign(xsta.coords) * rdot;
 		  if ( checker (xsta.v.n.cth, xsta.v.n.phi) )
-		    color = (tdot>0) ? foreign_sphere_checker
-		      : outer_sphere_checker;
+		    color = (tdot>0) ? foreign_sphere_checker : outer_sphere_checker;
 		  else
-		    color = (tdot>0) ? foreign_sphere_color
-		      : outer_sphere_color;
+		    color = (tdot>0) ? foreign_sphere_color : outer_sphere_color;
 		  memcpy (&sta, &xsta, sizeof(struct state_s));
 		  break;
 		}
-	      if ( check_crossing (&oldsta, &sta, blk.M+blk.sqrtM2ma2, -1, 
-				   &xsta, &dir) )
+	      if ( check_crossing (&oldsta, &sta, blk.M+blk.sqrtM2ma2, -1, &xsta, &dir) )
 		{
 		  // Crossed outer horizon.
-		  if ( checker (xsta.v.n.cth, xsta.v.n.phi
-				- xsta.v.n.t * (blk.a/(2*blk.M*xsta.v.n.r))
-				) )
+		  if ( checker (xsta.v.n.cth, xsta.v.n.phi - xsta.v.n.t * (blk.a / (2.0 * blk.M * xsta.v.n.r))) )
 		    {
 		      if ( dir < 0 && xsta.coords )
 			color = outer_horizon_outgoing_outcrossing_checker;
@@ -745,13 +708,10 @@ main (int argc, char *argv[])
 		    }
 		  horizon_crossings++;
 		}
-	      if ( check_crossing (&oldsta, &sta, blk.M-blk.sqrtM2ma2, -1, 
-				   &xsta, &dir) )
+	      if ( check_crossing (&oldsta, &sta, blk.M-blk.sqrtM2ma2, -1, &xsta, &dir) )
 		{
 		  // Crossed inner horizon.
-		  if ( checker (xsta.v.n.cth, xsta.v.n.phi
-				- xsta.v.n.t * (blk.a/(2*blk.M*xsta.v.n.r))
-				) )
+		  if ( checker (xsta.v.n.cth, xsta.v.n.phi - xsta.v.n.t * (blk.a / (2.0 * blk.M * xsta.v.n.r))) )
 		    {
 		      if ( dir < 0 && xsta.coords )
 			color = inner_horizon_outgoing_outcrossing_checker;
@@ -768,8 +728,7 @@ main (int argc, char *argv[])
 		    }
 		  horizon_crossings++;
 		}
-	      if ( check_crossing (&oldsta, &sta, NEGSPHERE_RADIUS, 2,
-				   &xsta, NULL) )
+	      if ( check_crossing (&oldsta, &sta, NEGSPHERE_RADIUS, 2, &xsta, NULL) )
 		{
 		  if ( checker (xsta.v.n.cth, xsta.v.n.phi) )
 		    color = negative_sphere_checker;
@@ -783,8 +742,7 @@ main (int argc, char *argv[])
 #if 1
 	  if ( rand()%1000 == 0 )
 	    {
-	      fprintf (stderr, "Random point (%d,%d) dump: color is (%d,%d,%d)\n",
-		       col, lin, color.red, color.green, color.blue);
+	      fprintf (stderr, "Random point (%d,%d) dump: color is (%d,%d,%d)\n", col, lin, color.red, color.green, color.blue);
 	      fprintf (stderr, "Number of steps: %d\n", sta.nbsteps);
 	      fprintf (stderr, "Final proper time: %.7f\n", sta.time);
 	      fprintf (stderr, "Final r: %.7f\n", sta.v.n.r);
