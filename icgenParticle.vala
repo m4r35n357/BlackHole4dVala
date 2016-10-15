@@ -132,7 +132,7 @@ namespace Generators {
             stdout.printf("  },\n");
             stdout.printf("  \"IC\" : {\n");
             stdout.printf("    \"M\" : %.1f,\n", 1.0);
-            stdout.printf("    \"a\" : %.1f,\n", p->a);
+            stdout.printf("    \"a\" : %.3f,\n", p->a);
             stdout.printf("    \"lambda\" : %.17g,\n", 0.0);
             stdout.printf("    \"mu\" : %.1f,\n", p->mu2);
             stdout.printf("    \"E\" : %.17g,\n", E);
