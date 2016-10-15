@@ -18,7 +18,8 @@ using Json;
 namespace Sim {
 
     public static int main (string[] args) {
-        var angle = double.parse(args[1]) * PI / 180.0;
+        var twoPi = PI * 2.0;
+        var angle = double.parse(args[1]) * twoPi / 360.0;
         var c = cos(angle);
         var s = sin(angle);
         unowned Json.Object o;
@@ -33,8 +34,10 @@ namespace Sim {
                 return_if_reached();
             }
             stdout.printf("%.9e %.1d ", o.get_double_member("tau"), 2);
-            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("r"), cos(o.get_double_member("th")), o.get_double_member("t"), o.get_double_member("ph"));
-            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("rP"), -sin(o.get_double_member("th")) * o.get_double_member("thP"), o.get_double_member("tP"), o.get_double_member("phP"));
+            var tmp = o.get_double_member("th") % twoPi;
+            var theta = tmp > PI ? twoPi - tmp: tmp;
+            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("r"), cos(theta), o.get_double_member("t"), o.get_double_member("ph"));
+            stdout.printf("%.9e %.9e %.9e %.9e ", o.get_double_member("rP"), -sin(theta) * o.get_double_member("thP"), o.get_double_member("tP"), o.get_double_member("phP"));
             stdout.printf("%.9e %.1d %.1d %.9e %.9e %.1d %.1d %.9e %.1d %.1d %.1d %.1d\n", -c, 0, 0, s, s, 0, 0, c, 0, 1, 0, 0);
             line = stdin.read_line();
         }
