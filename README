@@ -41,8 +41,9 @@ cp icgenLight-data.example $icdata
 3.	Edit the inital conditions data and/or the inital conditions file
 
 vi $icdata; jq . $icdata
-$icgen <$icdata >$ic 2>$pot; jq . $ic
+$icgen <$icdata >$ic; jq . $ic
 vi $ic; jq . $ic
+$icgen <$ic >$pot; jq . $ic
 
 
 4.	Run tests

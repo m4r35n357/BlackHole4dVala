@@ -52,9 +52,10 @@ namespace Generators {
          * R potential
          */
         private static double R (double r, double E, double L, double Q, Params* p) {
-            var a = p->a;
-            var lambda = p->lambda;
-            var mu2 = p->mu2;
+            return R_base(r, E, L, Q, p->a, p->lambda, p->mu2);
+        }
+
+        private static double R_base (double r, double E, double L, double Q, double a, double lambda, double mu2) {
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
@@ -74,9 +75,10 @@ namespace Generators {
          * THETA potential
          */
         private static double THETA (double theta, double E, double L, double Q, Params* p) {
-            var a = p->a;
-            var lambda = p->lambda;
-            var mu2 = p->mu2;
+            return THETA_base(theta, E, L, Q, p->a, p->lambda, p->mu2);
+        }
+
+        private static double THETA_base (double theta, double E, double L, double Q, double a, double lambda, double mu2) {
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
@@ -113,7 +115,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (MultirootFsolver s, size_t iterations) {
+        private void printInitialConditions (MultirootFsolver s, size_t iterations) {
             var p = (Params*) s.function.params;
             var E = s.x.get(X.E);
             var L = s.x.get(X.L) * p->Lfac;
@@ -147,11 +149,6 @@ namespace Generators {
             stdout.printf("    \"integrator\" : \"%s\"\n", p->integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
-            for (var x = 1; x <= 1001; x++) {
-                var xValue = 1.0 * x / 1001;
-                stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * p->rMax * 1.1, R(xValue * p->rMax * 1.1, E, L, Q, p), THETA(xValue * PI, E, L, Q, p));
-            }
         }
 
         private Vector initializeVariables (Json.Object input) {
@@ -177,7 +174,7 @@ namespace Generators {
         /**
          * Externally visible method, sets up and controls the solver
          */
-        public void generate (Json.Object input) {
+        public void generateInitialConditions (Json.Object input) {
             var initialValues = initializeVariables(input);
             var nDim = initialValues.size;
 
@@ -259,11 +256,31 @@ namespace Generators {
             } while (continuing && iterations < maxIterations);
 
             // generate output
-            printOutput(solver, iterations);
+            printInitialConditions(solver, iterations);
+        }
+
+        public void printPotentials (Json.Object input) {
+            var lambda = input.get_double_member("lambda");
+            var a = input.get_double_member("a");
+            var mu2 = input.get_double_member("mu");
+            var E = input.get_double_member("E");
+            var L = input.get_double_member("L");
+            var Q = input.get_double_member("Q");
+            var rMax = input.get_double_member("r0") * 2.0;
+            for (var x = 1; x <= 1001; x++) {
+                var xValue = 1.0 * x / 1001;
+                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
+                    xValue * rMax, R_base(xValue * rMax, E, L, Q, a, lambda, mu2), THETA_base(xValue * PI, E, L, Q, a, lambda, mu2));
+            }
         }
     }
 
     public static void main (string[] args) {
-        new Particle().generate(Simulations.getJson());
+        var json = Simulations.getJson();
+        if (json.has_member("IC")) {
+            new Particle().printPotentials(json.get_object_member("IC"));
+        } else {
+            new Particle().generateInitialConditions(json);
+        }
     }
 }

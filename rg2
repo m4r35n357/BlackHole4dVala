@@ -11,6 +11,7 @@ jq . $ic
 
 # Run the simulator
 echo -n ${C}"Simulating with $ic . . . "
+$icgen <$ic >$pot
 $exe <$ic >$data
 echo "Done!"${NC}
 

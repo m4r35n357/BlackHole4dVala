@@ -23,10 +23,10 @@ def main():
     pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
     ax1.set_xlabel('r, theta', color='0.20')
     ax1.set_ylabel('R(r)', color='b')
-    ax1.set_ylim(-30, 30)
+    #ax1.set_ylim(-30, 30)
     ax2 = ax1.twinx()
     ax2.set_ylabel('THETA(theta)', color='r')
-    ax2.set_ylim(-30, 30)
+    #ax2.set_ylim(-30, 30)
     n = 0
     while line:
         p = loads(line)
