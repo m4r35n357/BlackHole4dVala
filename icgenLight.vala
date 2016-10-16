@@ -72,7 +72,7 @@ namespace Generators {
             stdout.printf("    \"r2\" : %.3f,\n", r2(a));
             stdout.printf("    \"th0\" : %.0f,\n", 0.0);
             stdout.printf("    \"start\" : %.1f,\n", 0.0);
-            stdout.printf("    \"duration\" : %.1f,\n", 5000.0);
+            stdout.printf("    \"end\" : %.1f,\n", 5000.0);
             stdout.printf("    \"step\" : %.3f,\n", 0.001);
             stdout.printf("    \"plotratio\" : %.1d,\n", 50);
             stdout.printf("    \"integrator\" : \"%s\"\n", integrator);

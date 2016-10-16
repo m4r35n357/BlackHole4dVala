@@ -66,7 +66,7 @@ namespace Simulations {
          * Protected constructor, use the static factory in subclass
          */
         protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                            double tau0, double deltaTau, double tStep, int64 tRatio) {
+                            double tau0, double tauN, double tStep, int64 plotRatio) {
             this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
@@ -75,15 +75,15 @@ namespace Simulations {
             this.a2 = a * a;
             this.a2l_3 = a2 * l_3;
             this.a2mu2 = a2 * mu2;
-            this.horizon = 1.0 + sqrt(1.0 - a2);
+            this.horizon = 1.0 - sqrt(1.0 - a2);
             this.aE = a * E;
             this.aL = a * L;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.start = tau0;
-            this.end = tau0 + deltaTau;
+            this.end = tauN;
             this.h = tStep;
-            this.tr = tRatio;
+            this.tr = plotRatio;
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
         }

@@ -143,7 +143,7 @@ namespace Generators {
             stdout.printf("    \"r0\" : %.17g,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("    \"th0\" : %.0f,\n", 0.0);
             stdout.printf("    \"start\" : %.1f,\n", 0.0);
-            stdout.printf("    \"duration\" : %.1f,\n", 5000.0);
+            stdout.printf("    \"end\" : %.1f,\n", 5000.0);
             stdout.printf("    \"step\" : %.3f,\n", 0.001);
             stdout.printf("    \"plotratio\" : %.1d,\n", 500);
             stdout.printf("    \"integrator\" : \"%s\"\n", p->integrator);

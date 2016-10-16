@@ -30,14 +30,13 @@ namespace Simulations {
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
         private double sgnR = -1.0;
         private double sgnTH = -1.0;
-        private int64 maxIterations;
 
         /**
          * Private constructor, use the static factory
          */
         private BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                     double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
-            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
+                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
+            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
             switch (type) {
                 case "rk4":  // fourth order, basic
                     this.evaluator = evaluator4;
@@ -51,7 +50,6 @@ namespace Simulations {
                     stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ]\n");
                     return_if_reached();
             }
-            maxIterations = llrint(deltaTau / h);
             f(r, th, 0);
         }
 
@@ -129,22 +127,24 @@ namespace Simulations {
          */
         public void solve () {
             var tau = 0.0;
-            int64 count = 0;
-            while ((count < maxIterations) && (r > horizon) && (D_r > 0.0)) {
-                if ((tau >= start) && (count % tr == 0)) {
-                    output(tau);
+            int64 iterationCount = 0;
+            int64 plotCount = 0;
+            while (tau < end) {
+                if ((tau >= start) && (iterationCount % tr == 0)) {
+                    plot(tau);
+                    plotCount += 1;
                 }
                 iterate();
-                count += 1;
-                tau = count * h;
+                iterationCount += 1;
+                tau = iterationCount * h;
             }
-            output(tau);
+            plot(tau);
         }
 
         /**
          * Write the simulated data to STDOUT
          */
-        private void output (double tau) {
+        private void plot (double tau) {
             stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"D_r\":%.9e, \"R\":%.9e, \"TH\":%.9e, ",
                             tau, logError(v4Error(Ut, Ur, Uth, Uph)), D_r, R, TH);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
@@ -157,7 +157,7 @@ namespace Simulations {
         public static BhRk4 getInstance (Json.Object o) {
             return new BhRk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
                              o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
-                             o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"),
+                             o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
                              o.get_int_member("plotratio"), o.get_string_member("integrator"));
         }
     }

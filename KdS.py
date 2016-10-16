@@ -19,7 +19,7 @@ from sys import stdin, stderr, stdout
 
 
 class KdSBase(object):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio):
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, endtime, timestep, tratio):
         self.l_3 = Lambda / 3.0
         self.a = spin
         self.mu2 = pMass2
@@ -34,7 +34,7 @@ class KdSBase(object):
         self.X2 = (1.0 + self.a2l_3)**2
         self.K = carter + self.X2 * (self.L - self.aE)**2
         self.start_time = starttime
-        self.end_time = starttime + duration
+        self.end_time = endtime
         self.h = timestep
         self.tr = tratio
         self.sgnR = self.sgnTH = -1.0
@@ -136,16 +136,17 @@ class BhRk4(KdSBase):
 
     def solve(self):
         tau = 0.0
-        count = 0
-        while count < self.max_iterations and self.r > self.horizon and self.D_r > 0.0:
-            if tau >= self.start_time and count % self.tr == 0:
-                self.output(tau)
+        iterationCount = plotCount = 0
+        while tau < self.end_time:
+            if tau >= self.start_time and iterationCount % self.tr == 0:
+                self.plot(tau)
+                plotCount += 1
             self.iterate()
-            count += 1
-            tau = count * self.h
-        self.output(tau)
+            iterationCount += 1
+            tau = iterationCount * self.h
+        self.plot(tau)
 
-    def output(self, tau):
+    def plot(self, tau):
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.9e, "D_th":%.9e, "S":%.9e,' \
                          % (tau, self.log_error(self.v4_error(self.Ut, self.Ur, self.Uth, self.Uph)), self.D_r, self.D_th, self.S),
         print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
@@ -244,10 +245,10 @@ def main():
     ic = loads(stdin.read())['IC']
     if not ic.get("integrator") or "rk4" in ic['integrator']:
         BhRk4(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'],
-                ic['start'], ic['duration'], ic['step'], ic['plotratio'], ic['integrator']).solve()
+                ic['start'], ic['end'], ic['step'], ic['plotratio'], ic['integrator']).solve()
     else:
         BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'],
-                ic['start'], ic['duration'], ic['step'], ic['plotratio'], ic['integrator']).solve()
+                ic['start'], ic['end'], ic['step'], ic['plotratio'], ic['integrator']).solve()
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@
   "r0" : 2.414213562373095,
   "th0" : 1.570796327,
   "start" : 0.0,
-  "duration" : 500.0,
+  "end" : 500.0,
   "step" : 0.001,
   "plotratio": 50,
   "integrator" : "sc4"

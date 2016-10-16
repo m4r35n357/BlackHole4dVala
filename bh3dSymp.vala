@@ -27,8 +27,8 @@ namespace Simulations {
          * Private constructor, use the static factory
          */
         private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                      double tau0, double deltaTau, double tStep, int64 tRatio, string type) {
-            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, deltaTau, tStep, tRatio);
+                      double tau0, double tauN, double tStep, int64 tRatio, string type) {
+            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
             this.integrator = Integrator.getIntegrator(this, type);
             refresh(r, th);
             this.Ur = - sqrt(fabs(R));
@@ -91,7 +91,7 @@ namespace Simulations {
             return new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
                               o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                               o.get_double_member("r0"), o.get_double_member("th0"),
-                              o.get_double_member("start"), o.get_double_member("duration"), o.get_double_member("step"),
+                              o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
                               o.get_int_member("plotratio"), o.get_string_member("integrator"));
         }
     }
