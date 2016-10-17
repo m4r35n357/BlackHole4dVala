@@ -20,6 +20,7 @@ raytrace-commands
 icgenParticle
 icgenLight
 kerr-image
+kerr-image-ian
 !kerr-image.c
 VPythonOutput/
 RaytracingOutput/
