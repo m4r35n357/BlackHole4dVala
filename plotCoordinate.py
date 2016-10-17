@@ -24,6 +24,7 @@ def main():
     coordinate = argv[2]
     line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
+    pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
     ax1.set_xlabel('tau', color='k')
     ax1.set_ylabel(coordinate, color='b')
     ax2 = ax1.twinx()
