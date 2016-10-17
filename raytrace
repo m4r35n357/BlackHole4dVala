@@ -33,10 +33,10 @@ do
     if [ ! -f $filename ]
     then
         trap 'echo ""; echo -n "${CYAN}Finishing $filename . . . ${NC}"; assemble "Done!"; exit' INT
-        fragment 360 480 $tmp4
-        fragment 240 360 $tmp3
-        fragment 120 240 $tmp2
-        fragment   0 120 $tmp1
+        fragment 180 240 $tmp4
+        fragment 120 180 $tmp3
+        fragment  60 120 $tmp2
+        fragment   0  60 $tmp1
         assemble "Written   $filename"
         trap - INT
     else

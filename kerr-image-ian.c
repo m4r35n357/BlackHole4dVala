@@ -131,11 +131,11 @@
 #include <assert.h>
 
 #ifndef NBLINS				// Number of lines in image
-#define NBLINS 480
+#define NBLINS 240
 #endif
 
 #ifndef NBCOLS				// Number of columns in image
-#define NBCOLS 640
+#define NBCOLS 320
 #endif
 
 #ifndef DO_USELESS			// Keep useless variables in integration
