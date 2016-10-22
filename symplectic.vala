@@ -75,10 +75,14 @@ namespace Simulations {
                     return new Base4(model, { 1.0 });
                 case "sc4":  // fourth order, composed
                     var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
-                    return new Base2(model, { 1.0 / (2.0 - CUBE_ROOT_2), - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2), 1.0 / (2.0 - CUBE_ROOT_2) });
+                    return new Base2(model, { 1.0 / (2.0 - CUBE_ROOT_2),
+                                            - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2),
+                                            1.0 / (2.0 - CUBE_ROOT_2) });
                 case "sc6":  // sixth order, composed
                     var FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
-                    return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2), - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2), 1.0 / (2.0 - FIFTH_ROOT_2) });
+                    return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2),
+                                            - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2),
+                                            1.0 / (2.0 - FIFTH_ROOT_2) });
             }
             stderr.printf("Bad integrator type, valid choices are: [ sb2 | sb4 | sc4 | sc6 ]\n");
             return_if_reached();
@@ -133,7 +137,10 @@ namespace Simulations {
         protected Base4 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
             var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
-            this.baseMethodCoefficients = { 0.5 / (2.0 - CUBE_ROOT_2), 1.0 / (2.0 - CUBE_ROOT_2), 0.5 * (1.0 - CUBE_ROOT_2) / (2.0 - CUBE_ROOT_2), - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2) };
+            this.baseMethodCoefficients = { 0.5 / (2.0 - CUBE_ROOT_2),
+                                            1.0 / (2.0 - CUBE_ROOT_2),
+                                            0.5 * (1.0 - CUBE_ROOT_2) / (2.0 - CUBE_ROOT_2),
+                                            - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2) };
         }
 
         /**

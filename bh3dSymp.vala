@@ -54,17 +54,17 @@ namespace Simulations {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
-            var tmp = 0;
-            while ((tau < end) && (r > horizon) && (D_r > 0.0)) {
-                if ((tau >= start) && (tau >= tmp * tr * h)) {
-                    output(mino, tau);
-                    tmp += 1;
+            var plotCount = 0;
+            while (tau < end) {
+                if ((tau >= start) && (tau >= plotCount * tr * h)) {
+                    plot(mino, tau);
+                    plotCount += 1;
                 }
                 integrator.compose();
                 mino += h;
                 tau += h * S;
             }
-            output(mino, tau);
+            plot(mino, tau);
         }
 
         private double modH (double xDot, double X) {
@@ -74,7 +74,7 @@ namespace Simulations {
         /**
          * Write the simulated data to STDOUT
          */
-        public void output (double mino, double tau) {
+        public void plot (double mino, double tau) {
             var eR = logError(modH(Ur, R));
             var eTh = logError(modH(Uth, TH));
             var v4e = logError(v4Error(Ut / S, Ur / S, Uth / S, Uph / S));

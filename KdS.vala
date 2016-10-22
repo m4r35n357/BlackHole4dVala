@@ -37,7 +37,6 @@ namespace Simulations {
         protected double end;
         protected double h;
         protected int64 tr;
-        protected double horizon;
         // Variables
         protected double r2;
         protected double ra2;
@@ -75,7 +74,6 @@ namespace Simulations {
             this.a2 = a * a;
             this.a2l_3 = a2 * l_3;
             this.a2mu2 = a2 * mu2;
-            this.horizon = 1.0 - sqrt(1.0 - a2);
             this.aE = a * E;
             this.aL = a * L;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
