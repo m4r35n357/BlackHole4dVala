@@ -34,7 +34,7 @@ def pSphere (a, l):
         return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
 
 def speed (gamma):
-    return sqrt(1.0 - 1.0 / gamma**2)
+    return sqrt(1.0 - 1.0 / (gamma if gamma > 0.0 else - gamma)**2)
     #return sqrt(gamma * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0 / gamma**2)
 
 def to_rectangular (polar, a):
@@ -113,6 +113,7 @@ def main():
     ball = sphere()  # Particle
     counter = 0
     dataLine = stdin.readline()
+    t_old = ph_old = 0.0
     while dataLine:  # build raw data arrays
         rate(60)
         if counter % 1000 == 0:
@@ -125,13 +126,18 @@ def main():
         th = float(data['th'])
         ph = float(data['ph'])
         ball.pos = to_rectangular((r, th, ph), a)
-        ball.trail.append(pos = ball.pos, color = ball.color)
-        if mu and fabs(mu) > 0.0:
-            readout.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        if float(data['tP']) * t_old < 0 or float(data['tP']) - t_old > 100.0:
+            ball.color = color.white
         else:
-            readout.text = u"\u03bb  %.1f\nt  %.1f\nr  %.1f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            ball.trail.append(pos = ball.pos, color = ball.color)
+        if mu and fabs(mu) > 0.0:
+            readout.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+        else:
+            readout.text = u"\u03bb  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         counter += 1
+        t_old = float(data['tP'])
+        ph_old = float(data['phP'])
         dataLine = stdin.readline()
 
 if __name__ == "__main__":
