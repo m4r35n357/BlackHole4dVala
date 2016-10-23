@@ -91,7 +91,7 @@ class BhRk4(KdSBase):
             self.evaluator = self.evaluator438
             self.updater = self.updater438
         else:
-            print >> stderr("Bad integrator type, valid choices are: [ rk4 | rk438 ]")
+            raise Exception('>>> ERROR! Integrator order must be rk4 or rk438, was {} <<<'.format(integrator))
         self.max_iterations = round(duration / self.h)
         self.f(self.r, self.th, 0)
 
@@ -218,7 +218,7 @@ class Symplectic(object):
             fthrt2 = 2.0**(1.0 / 5.0)
             self.w = [1.0 / (2.0 - fthrt2), - fthrt2 / (2.0 - fthrt2), 1.0 / (2.0 - fthrt2)]
         else:
-            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6 <<<')
+            raise Exception('>>> ERROR! Integrator order must be sb2, sc4, sb4, or sc6, was "{}" <<<'.format(order))
         self.wRange = range(len(self.w))
         self.model = model
 

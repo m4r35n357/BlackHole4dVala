@@ -53,7 +53,7 @@ namespace Simulations {
                     this.updater = updater438;
                     break;
                 default:
-                    stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ]\n");
+                    stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ], found {%s}\n", type);
                     return_if_reached();
             }
             f(r, th, 0);

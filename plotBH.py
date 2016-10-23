@@ -113,7 +113,7 @@ def main():
     ball = sphere()  # Particle
     counter = 0
     dataLine = stdin.readline()
-    t_old = ph_old = 0.0
+    t_old = 0.0
     while dataLine:  # build raw data arrays
         rate(60)
         if counter % 1000 == 0:
@@ -137,7 +137,6 @@ def main():
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         counter += 1
         t_old = float(data['tP'])
-        ph_old = float(data['phP'])
         dataLine = stdin.readline()
 
 if __name__ == "__main__":
