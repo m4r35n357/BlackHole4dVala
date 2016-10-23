@@ -18,6 +18,12 @@ namespace Simulations {
 
     public class BhRk4 : KdSBase {
         /**
+         * For handling different RK4 implementations
+         */
+        delegate double UpdaterType(double[] x);
+        delegate void EvaluatorType();
+
+        /**
          * All fields are private
          */
         // Constants derived from IC file
@@ -54,17 +60,11 @@ namespace Simulations {
         }
 
         /**
-         * For handling different RK4 implementations
-         */
-        delegate double UpdaterType(double[] x);
-        delegate void EvaluatorType();
-
-        /**
          * Calculate potentials & coordinate velocities, and populate RK4 arrays for each stage
          */
         private void f (double radius, double theta, int stage) {  // see maths.wxm in Maxima
             refresh(radius, theta);
-            // Equations of motion; base class uses expressions for Mino time, so divide by Sigma
+            // Equations of motion; the base class gives expressions for Mino time, so divide by Sigma
             Ut /= S;
             Ur = sqrt(R > 0.0 ? R : -R) / S;
             Uth = sqrt(TH > 0.0 ? TH : -TH) / S;

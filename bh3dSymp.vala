@@ -54,6 +54,7 @@ namespace Simulations {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
+            int64 iterationCount = 0;
             var plotCount = 0;
             while (tau < end) {
                 if ((tau >= start) && (tau >= plotCount * tr * h)) {
@@ -61,7 +62,8 @@ namespace Simulations {
                     plotCount += 1;
                 }
                 integrator.compose();
-                mino += h;
+                iterationCount += 1;
+                mino = iterationCount * h;
                 tau += h * S;
             }
             plot(mino, tau);
