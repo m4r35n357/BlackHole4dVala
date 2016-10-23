@@ -28,7 +28,6 @@ class KdSBase(object):
         self.a2 = self.a**2
         self.a2l_3 = self.a2 * self.l_3
         self.a2mu2 = self.a2 * self.mu2
-        self.horizon = 1.0 + sqrt(1.0 - self.a2)
         self.aE = self.a * self.E
         self.aL = self.a * self.L
         self.X2 = (1.0 + self.a2l_3)**2
@@ -179,7 +178,7 @@ class BhSymp(KdSBase):
         self.Uth += c * self.h * (self.cth * self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
                                   + self.cth * self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE))
 
-    def output(self, mino, tau):
+    def plot(self, mino, tau):
         eR = self.log_error(self.modH(self.Ur, self.R))
         eTh = self.log_error(self.modH(self.Uth, self.TH))
         v4e = self.log_error(self.v4_error(self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
@@ -188,15 +187,16 @@ class BhSymp(KdSBase):
 
     def solve(self):
         mino = tau = 0.0
-        tmp = 0
-        while tau <= self.end_time and self.r >= self.horizon and self.D_r >= 0.0:
-            if tau >= self.start_time and tau >= tmp * self.tr * self.h:
-                self.output(mino, tau)
-                tmp += 1
+        iterationCount = plotCount = 0
+        while tau <= self.end_time:
+            if tau >= self.start_time and tau >= plotCount * self.tr * self.h:
+                self.plot(mino, tau)
+                plotCount += 1
             self.integrator.compose()
-            mino += self.h
+            iterationCount += 1
+            mino = iterationCount * self.h
             tau += self.h * self.S  # dTau = sigma * dlambda  - NB lambda is affine parameter here, not the cc !!!
-        self.output(mino, tau)
+        self.plot(mino, tau)
 
 
 class Symplectic(object):
