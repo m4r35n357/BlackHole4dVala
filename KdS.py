@@ -19,7 +19,7 @@ from sys import stdin, stderr, stdout
 
 
 class KdSBase(object):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, endtime, timestep, tratio):
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, start, end, timestep, tratio):
         self.l_3 = Lambda / 3.0
         self.a = spin
         self.mu2 = pMass2
@@ -32,8 +32,8 @@ class KdSBase(object):
         self.aL = self.a * self.L
         self.X2 = (1.0 + self.a2l_3)**2
         self.K = carter + self.X2 * (self.L - self.aE)**2
-        self.start_time = starttime
-        self.end_time = endtime
+        self.start_time = start
+        self.end_time = end
         self.h = timestep
         self.tr = tratio
         self.sgnR = self.sgnTH = -1.0
@@ -59,10 +59,6 @@ class KdSBase(object):
         self.S = self.r2 + self.a2 * self.cth2
         self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * self.X2
         self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * self.X2
-
-    def get_potentials(self, radius, theta):
-        self.refresh(radius, theta)
-        return '{"R":%.9e, "TH":%.9e}'.format(self.R, self.TH)
 
     def v4_error(self, Ut, Ur, Uth, Uph):  # norm squared, xDot means dx/dTau !!!
         SX2 = self.S * self.X2
