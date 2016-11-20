@@ -21,18 +21,16 @@ namespace Simulations {
      * Parse JSON initial conditions data from stdin
      */
     private static Json.Object getJson () {
-        var input = new StringBuilder();
-        var buffer = new char[1024];
-        while (!stdin.eof()) {
-            var chunk = stdin.gets(buffer);
-            if (chunk != null) {
-                input.append(chunk);
-            }
+        var json = new StringBuilder();
+        var line = stdin.read_line();
+        while (line != null) {
+            json.append_printf("%s\n", line);
+            line = stdin.read_line();
         }
         unowned Json.Object obj;
         var p = new Parser();
         try {
-            p.load_from_data(input.str);
+            p.load_from_data(json.str);
             obj = p.get_root().get_object();
         } catch (Error e) {
             stderr.printf("Unable to parse the input data: %s\n", e.message);
