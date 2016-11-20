@@ -7,7 +7,7 @@ int='./finterp.py'
 
 run_particle () {
 	params=$*
-	echo ${C}"./KdS"${NC}
+	echo ${C}"$exe"${NC}
 	echo $params | jq .
 	echo $params | ./icgenParticle >$ic 2>$pot
 	jq . $ic
@@ -16,7 +16,7 @@ run_particle () {
 
 run_light () {
 	params=$*
-	echo ${C}"./KdS"${NC}
+	echo ${C}"$exe"${NC}
 	echo $params | jq .
 	echo $params | ./icgenLight >$ic 2>$pot
 	jq . $ic
