@@ -97,6 +97,7 @@ namespace Generators {
     }
 
     public static void main (string[] args) {
+        stderr.printf("Executable: %s\n", args[0]);
         new Light().generate(Simulations.getJson());
     }
 }

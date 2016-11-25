@@ -15,23 +15,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 """
 from json import loads
 from math import sqrt, sin, pi, fabs, log10, cos
-from sys import stdin, stderr, stdout
+from sys import stdin, stderr, stdout, argv
 
 
 class KdSBase(object):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, start, end, timestep, tratio):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, thetaMin, start, end, timestep, tratio):
         self.l_3 = Lambda / 3.0
-        self.a = spin
-        self.mu2 = pMass2
-        self.E = energy
-        self.L = momentum
-        self.a2 = self.a**2
+        self.a = a
+        self.mu2 = mu2
+        self.E = E
+        self.L = L
+        self.a2 = a**2
         self.a2l_3 = self.a2 * self.l_3
-        self.a2mu2 = self.a2 * self.mu2
-        self.aE = self.a * self.E
-        self.aL = self.a * self.L
+        self.a2mu2 = self.a2 * mu2
+        self.aE = a * E
+        self.aL = a * L
         self.X2 = (1.0 + self.a2l_3)**2
-        self.K = carter + self.X2 * (self.L - self.aE)**2
+        self.K = C + self.X2 * (L - self.aE)**2
         self.start_time = start
         self.end_time = end
         self.h = timestep
@@ -238,7 +238,10 @@ class Symplectic(object):
 
 
 def main():
-    ic = loads(stdin.read())['IC']
+    print >> stderr, "Executable: {}".format(argv[0])
+    input_data = stdin.read()
+    ic = loads(input_data)['IC']
+    print >> stderr, input_data
     if not ic.get("integrator") or "rk4" in ic['integrator']:
         BhRk4(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'],
                 ic['start'], ic['end'], ic['step'], ic['plotratio'], ic['integrator']).solve()

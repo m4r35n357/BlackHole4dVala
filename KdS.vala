@@ -124,6 +124,7 @@ namespace Simulations {
     }
 
     public static int main (string[] args) {
+        stderr.printf("Executable: %s\n", args[0]);
         var ic = getJson().get_object_member("IC");
         if (! ic.has_member("integrator") || ic.get_string_member("integrator").contains("rk4")) {
             BhRk4.getInstance(ic).solve();

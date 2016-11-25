@@ -40,7 +40,8 @@ cp icgenLight-data.example $icdata
 3.	Edit the inital conditions data and/or the inital conditions file
 
 vi $icdata; jq . $icdata
-$icgen <$icdata >$ic; $icgen <$ic >$pot; jq . $ic
+$icgen <$icdata >$ic; $icgen <$ic >$pot
+./icgenLight <$icdata
 vi $ic; jq . $ic
 
 
@@ -55,16 +56,18 @@ vi $ic; jq . $ic
 
 export exe='./KdS'
 export exe='./KdS.py'
+export exe='./minimal'
+export exe='./minimal.py'
 export exe='nc.openbsd pi 1234'
 
-jq . $ic; $exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
+$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; ./KdS <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
+echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
-./icgenParticle <$icdata 2>$pot | ./KdS | ./raytrace-commands 0 2>/dev/null | ./raytrace
+./icgenParticle <$icdata 2>$pot | $exe | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
 7.	Make a video out of the output files:

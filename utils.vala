@@ -25,6 +25,7 @@ namespace Simulations {
         var line = stdin.read_line();
         while (line != null) {
             json.append_printf("%s\n", line);
+            stderr.printf("%s\n", line);
             line = stdin.read_line();
         }
         unowned Json.Object obj;

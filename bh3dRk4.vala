@@ -34,8 +34,8 @@ namespace Simulations {
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
-        private double sgnR = -1.0;
-        private double sgnTH = -1.0;
+        private int sgnR = -1;
+        private int sgnTH = -1;
 
         /**
          * Private constructor, use the static factory
@@ -127,12 +127,10 @@ namespace Simulations {
          */
         public void solve () {
             var tau = 0.0;
-            int64 iterationCount = 0;
-            int64 plotCount = 0;
+            var iterationCount = 0;
             while (tau < end) {
                 if ((tau >= start) && (iterationCount % tr == 0)) {
                     plot(tau);
-                    plotCount += 1;
                 }
                 iterate();
                 iterationCount += 1;

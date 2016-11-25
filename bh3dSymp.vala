@@ -54,7 +54,7 @@ namespace Simulations {
         public void solve () {
             var mino = 0.0;
             var tau = 0.0;
-            int64 iterationCount = 0;
+            var iterationCount = 0;
             var plotCount = 0;
             while (tau < end) {
                 if ((tau >= start) && (tau >= plotCount * tr * h)) {
