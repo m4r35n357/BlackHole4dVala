@@ -276,6 +276,7 @@ namespace Generators {
     }
 
     public static void main (string[] args) {
+        stderr.printf("Executable: %s\n", args[0]);
         var json = Simulations.getJson();
         if (json.has_member("IC")) {
             new Particle().printPotentials(json.get_object_member("IC"));

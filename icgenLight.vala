@@ -78,26 +78,38 @@ namespace Generators {
             stdout.printf("    \"integrator\" : \"%s\"\n", integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
-            for (var x = 1; x <= 1001; x++) {
-                var xValue = 1.0 * x / 1001;
-                stderr.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), THETA(xValue * PI, a, E, L, Q));
-            }
         }
 
         /**
          * Externally visible method, sets up and controls the solver
          */
-        public void generate (Json.Object input) {
+        public void generateInitialConditions (Json.Object input) {
             // generate output
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
                         input.has_member("spin") ? input.get_double_member("spin") : 1.0,
                         input.has_member("integrator") ? input.get_string_member("integrator") : "rk4");
         }
+
+        public void printPotentials (Json.Object input) {
+            var a = input.get_double_member("a");
+            var E = input.get_double_member("E");
+            var L = input.get_double_member("L");
+            var Q = input.get_double_member("Q");
+            for (var x = 1; x <= 1001; x++) {
+                var xValue = 1.0 * x / 1001;
+                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
+                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), THETA(xValue * PI, a, E, L, Q));
+            }
+        }
     }
 
     public static void main (string[] args) {
         stderr.printf("Executable: %s\n", args[0]);
-        new Light().generate(Simulations.getJson());
+        var json = Simulations.getJson();
+        if (json.has_member("IC")) {
+            new Light().printPotentials(json.get_object_member("IC"));
+        } else {
+            new Light().generateInitialConditions(json);
+        }
     }
 }
