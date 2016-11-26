@@ -36,8 +36,8 @@ class KdSBase(object):
         self.end_time = end
         self.h = timestep
         self.tr = tratio
-        self.sgnR = self.sgnTH = -1.0
-        self.t = self.ph = self.v4cum = 0.0
+        self.sgnR = self.sgnTH = -1
+        self.t = self.ph = 0.0
         self.r = r0
         self.th = (90.0 - thetaMin) * pi / 180.0
 
