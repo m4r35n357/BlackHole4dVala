@@ -123,7 +123,7 @@ namespace Simulations {
         }
     }
 
-    public static int main (string[] args) {
+    public static void main (string[] args) {
         stderr.printf("Executable: %s\n", args[0]);
         var ic = getJson().get_object_member("IC");
         if (! ic.has_member("integrator") || ic.get_string_member("integrator").contains("rk4")) {
@@ -131,6 +131,5 @@ namespace Simulations {
         } else {
             BhSymp.getInstance(ic).solve();
         }
-        return 0;
     }
 }

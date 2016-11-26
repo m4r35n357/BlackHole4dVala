@@ -17,7 +17,7 @@ using Json;
 
 namespace Sim {
 
-    public static int main (string[] args) {
+    public static void main (string[] args) {
         var twoPi = PI * 2.0;
         var angle = double.parse(args[1]) * twoPi / 360.0;
         var c = cos(angle);
@@ -41,6 +41,5 @@ namespace Sim {
             stdout.printf("%.9e %.1d %.1d %.9e %.9e %.1d %.1d %.9e %.1d %.1d %.1d %.1d\n", -c, 0, 0, s, s, 0, 0, c, 0, 1, 0, 0);
             line = stdin.read_line();
         }
-        return 0;
     }
 }
