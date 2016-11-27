@@ -269,8 +269,8 @@ namespace Generators {
             var rMax = input.get_double_member("r0") * 2.0;
             for (var x = 1; x < 1000; x++) {
                 var xValue = 1.0 * x / 1001;
-                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                    xValue * rMax, R_base(xValue * rMax, E, L, Q, a, lambda, mu2), THETA_base(xValue * PI, E, L, Q, a, lambda, mu2));
+                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
+                    xValue * rMax, R_base(xValue * rMax, E, L, Q, a, lambda, mu2), xValue * PI, THETA_base(xValue * PI, E, L, Q, a, lambda, mu2));
             }
         }
     }

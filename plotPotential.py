@@ -18,15 +18,28 @@ from matplotlib import pyplot
 from json import loads
 
 def main():
+    if len(argv) == 6:
+        r_range = float(argv[1])
+        r_min = float(argv[2])
+        r_max = float(argv[3])
+        th_min = float(argv[4])
+        th_max = float(argv[5])
+    elif len(argv) == 2:
+        r_range = float(argv[1])
+        r_min = th_min = -30
+        r_max = th_max = 30
+    else:
+        raise Exception('>>> ERROR! Please four or zero parameters <<<')
     line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
     pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
     ax1.set_xlabel('r, theta', color='0.20')
+    ax1.set_xlim(0, r_range)
     ax1.set_ylabel('R(r)', color='b')
-    #ax1.set_ylim(-30, 30)
+    ax1.set_ylim(r_min, r_max)
     ax2 = ax1.twinx()
     ax2.set_ylabel('THETA(theta)', color='r')
-    #ax2.set_ylim(-30, 30)
+    ax2.set_ylim(th_min, th_max)
     n = 0
     while line:
         p = loads(line)

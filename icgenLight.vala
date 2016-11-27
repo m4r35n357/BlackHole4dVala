@@ -97,8 +97,8 @@ namespace Generators {
             var Q = input.get_double_member("Q");
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
-                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"THETA\" : %.6f }\n",
-                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), THETA(xValue * PI, a, E, L, Q));
+                stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
+                                xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), xValue * PI, THETA(xValue * PI, a, E, L, Q));
             }
         }
     }
