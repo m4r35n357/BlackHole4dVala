@@ -40,8 +40,6 @@ namespace Simulations {
         // Variables
         protected double r2;
         protected double ra2;
-        protected double sth;
-        protected double cth;
         protected double sth2;
         protected double cth2;
         protected double D_r;
@@ -97,9 +95,7 @@ namespace Simulations {
             D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
             R = X2 * P * P - D_r * (mu2 * r2 + K);
             // THETA potential
-            sth = sin(theta);
-            cth = cos(theta);
-            sth2 = sth * sth;
+            sth2 = sin(theta) * sin(theta);
             cth2 = 1.0 - sth2;
             T = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
