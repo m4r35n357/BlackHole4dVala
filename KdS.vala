@@ -99,7 +99,7 @@ namespace Simulations {
             cth2 = 1.0 - sth2;
             T = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
-            TH = D_th * (K - a2mu2 * cth2) - X2 / sth2 * T * T;
+            TH = D_th * (K - a2mu2 * cth2) - X2 * T * T / sth2;
             // Equations of motion (Mino time, partial)
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
