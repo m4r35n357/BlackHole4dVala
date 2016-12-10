@@ -27,8 +27,6 @@ $valac --pkg json-glib-1.0 raytrace-commands.vala
 echo ""
 
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
-echo ""
-
 gcc -o kerr-image-ian kerr-image-ian.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 

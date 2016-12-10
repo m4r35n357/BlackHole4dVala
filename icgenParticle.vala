@@ -65,7 +65,6 @@ namespace Generators {
          */
         private static double dRdr (double r, double E, double L, double Q, Params* p) {
             var a = p->a;
-            var lambda = p->lambda;
             var mu2 = p->mu2;
             return 4.0 * r * E * (E * (r * r + a * a) - a * L)
                     - (2.0 * r - 2.0) * (mu2 * r * r + Q + (L - a * E) * (L - a * E)) - 2.0 * mu2 * r * (r * r + a * a - 2.0 * r);

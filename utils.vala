@@ -35,7 +35,7 @@ namespace Simulations {
             obj = p.get_root().get_object();
         } catch (Error e) {
             stderr.printf("Unable to parse the input data: %s\n", e.message);
-            return_if_reached();
+            assert_not_reached();
         }
         return obj;
     }

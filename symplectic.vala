@@ -85,7 +85,7 @@ namespace Simulations {
                                             1.0 / (2.0 - FIFTH_ROOT_2) });
             }
             stderr.printf("Bad integrator type, valid choices are: [ sb2 | sb4 | sc4 | sc6 ], found {%s}\n", type);
-            return_if_reached();
+            assert_not_reached();
         }
 
         /**
