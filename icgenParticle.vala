@@ -25,7 +25,6 @@ namespace Generators {
          */
         private struct Params {
             public double a;
-            public double lambda;
             public double mu2;
             public double Lfac;
             public double rMin;
@@ -52,10 +51,10 @@ namespace Generators {
          * R potential
          */
         private static double R (double r, double E, double L, double Q, Params* p) {
-            return R_base(r, E, L, Q, p->a, p->lambda, p->mu2);
+            return R_base(r, E, L, Q, p->a, p->mu2);
         }
 
-        private static double R_base (double r, double E, double L, double Q, double a, double lambda, double mu2) {
+        private static double R_base (double r, double E, double L, double Q, double a, double mu2) {
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L)
                     - (r * r + a * a - 2.0 * r) * (mu2 * r * r + Q + (L - a * E) * (L - a * E));
         }
@@ -74,10 +73,10 @@ namespace Generators {
          * THETA potential
          */
         private static double THETA (double theta, double E, double L, double Q, Params* p) {
-            return THETA_base(theta, E, L, Q, p->a, p->lambda, p->mu2);
+            return THETA_base(theta, E, L, Q, p->a, p->mu2);
         }
 
-        private static double THETA_base (double theta, double E, double L, double Q, double a, double lambda, double mu2) {
+        private static double THETA_base (double theta, double E, double L, double Q, double a, double mu2) {
             return Q - cos(theta) * cos(theta) * (a * a * (mu2 - E * E) + L * L / (sin(theta) * sin(theta)));
         }
 
@@ -259,7 +258,6 @@ namespace Generators {
         }
 
         public void printPotentials (Json.Object input) {
-            var lambda = input.get_double_member("lambda");
             var a = input.get_double_member("a");
             var mu2 = input.get_double_member("mu");
             var E = input.get_double_member("E");
@@ -269,7 +267,7 @@ namespace Generators {
             for (var x = 1; x < 1000; x++) {
                 var xValue = 1.0 * x / 1001;
                 stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
-                    xValue * rMax, R_base(xValue * rMax, E, L, Q, a, lambda, mu2), xValue * PI, THETA_base(xValue * PI, E, L, Q, a, lambda, mu2));
+                    xValue * rMax, R_base(xValue * rMax, E, L, Q, a, mu2), xValue * PI, THETA_base(xValue * PI, E, L, Q, a, mu2));
             }
         }
     }
