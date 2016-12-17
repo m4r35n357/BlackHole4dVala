@@ -89,8 +89,8 @@ namespace Simulations {
         /**
          * Sole user method
          */
-        public void solve () {
-            int64 count = 0;
+        public int[] solve () {
+            var count = 0;
             var t = 0.0;
             while (t <= end) {
                 errors();
@@ -102,6 +102,7 @@ namespace Simulations {
                 t += ts;
             }
             output(t);
+            return { count };
         }
 
         public void output (double time) {

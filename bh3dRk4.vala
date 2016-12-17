@@ -38,7 +38,7 @@ namespace Simulations {
         private int sgnTH = -1;
 
         /**
-         * Private constructor, use the static factory
+         * Private constructor, use a static factory
          */
         private BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                      double tau0, double tauN, double tStep, int64 tRatio, string type) {
@@ -125,18 +125,21 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public void solve () {
+        public int[] solve () {
             var tau = 0.0;
             var iterationCount = 0;
+            var plotCount = 0;
             while (tau < end) {
                 if ((tau >= start) && (iterationCount % tr == 0)) {
                     plot(tau);
+                    plotCount += 1;
                 }
                 iterate();
                 iterationCount += 1;
                 tau = iterationCount * h;
             }
             plot(tau);
+            return { iterationCount, plotCount };
         }
 
         /**
@@ -147,6 +150,14 @@ namespace Simulations {
                             tau, logError(v4Error(Ut, Ur, Uth, Uph)), D_r, R, TH);
             stdout.printf(" \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
                             t, r, th, ph, Ut, Ur, Uth, Uph);
+        }
+
+        /**
+         * Static factory from constructor arguments
+         */
+        public static BhRk4 getInstanceFromArgs (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
+            return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
         }
 
         /**

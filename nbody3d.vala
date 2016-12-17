@@ -165,23 +165,24 @@ namespace Simulations {
         /**
          * Sole user method
          */
-        public void solve () {
+        public int[] solve () {
             var h0 = h();
-            int64 count = 0;
+            var count = 0;
             var t = 0.0;
-            while (true) {
+            while (t < simulationTime) {
                 var hNow = h();
                 var dbValue = logError(fabs(hNow / h0 - 1.0));
                 if (count % tr == 0) {
                     output(t, hNow, h0, dbValue);
                 }
                 if (fabs(t) > simulationTime || dbValue > errorLimit) {
-                    return;
+                    return { -1 };
                 }
                 integrator.compose();
                 count += 1;
                 t += ts;
             }
+            return { count };
         }
 
         public void output (double time, double hNow, double h0, double dbValue) {

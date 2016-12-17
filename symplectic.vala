@@ -32,7 +32,7 @@ namespace Simulations {
         /**
          * Sole method called by main(), calls ISymplectic.compose() method on the integrator as needed
          */
-        public abstract void solve ();
+        public abstract int[] solve ();
     }
 
     /**

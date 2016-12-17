@@ -140,6 +140,7 @@ class BhRk4(KdSBase):
             iterationCount += 1
             tau = iterationCount * self.h
         self.plot(tau)
+        return iterationCount, plotCount
 
     def plot(self, tau):
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.9e, "D_th":%.9e, "S":%.9e,' \
@@ -185,7 +186,7 @@ class BhSymp(KdSBase):
         mino = tau = 0.0
         iterationCount = plotCount = 0
         while tau <= self.end_time:
-            if tau >= self.start_time and tau >= plotCount * self.tr * self.h:
+            if tau >= self.start_time and tau >= iterationCount * self.h:
                 self.plot(mino, tau)
                 plotCount += 1
             self.integrator.compose()
@@ -193,6 +194,7 @@ class BhSymp(KdSBase):
             mino = iterationCount * self.h
             tau += self.h * self.S  # dTau = sigma * dlambda  - NB lambda is affine parameter here, not the cc !!!
         self.plot(mino, tau)
+        return iterationCount, plotCount
 
 
 class Symplectic(object):
