@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 opt="${1:-fast}"
 
 valac="valac -v --save-temps -X -O$opt -X -lm"
@@ -20,7 +22,10 @@ do
 	echo ""
 done
 
-$valac --pkg json-glib-1.0 KdS.vala bh3dRk4.vala bh3dSymp.vala symplectic.vala utils.vala
+$valac --pkg json-glib-1.0 TestKdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala symplectic.vala utils.vala
+echo ""
+
+$valac --pkg json-glib-1.0 KdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala symplectic.vala utils.vala
 echo ""
 
 $valac --pkg json-glib-1.0 raytrace-commands.vala
@@ -42,5 +47,8 @@ case $opt in
 esac
 
 # admire our work
-ls -lAh --color $symplectics KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
+ls -lAh --color $symplectics TestKdS KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
+
+# test
+./TestKdS >/dev/null && echo OK
 

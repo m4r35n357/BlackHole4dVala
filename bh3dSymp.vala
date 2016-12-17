@@ -24,7 +24,7 @@ namespace Simulations {
         private ISymplectic integrator;
 
         /**
-         * Private constructor, use the static factory
+         * Private constructor, use a static factory
          */
         private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                       double tau0, double tauN, double tStep, int64 tRatio, string type) {
@@ -53,13 +53,13 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public void solve () {
+        public int[] solve () {
             var mino = 0.0;
             var tau = 0.0;
             var iterationCount = 0;
             var plotCount = 0;
             while (tau < end) {
-                if ((tau >= start) && (tau >= plotCount * tr * h)) {
+                if ((tau >= start) && (tau >= iterationCount * h)) {
                     plot(mino, tau);
                     plotCount += 1;
                 }
@@ -69,6 +69,7 @@ namespace Simulations {
                 tau += h * S;
             }
             plot(mino, tau);
+            return { iterationCount, plotCount };
         }
 
         private double modH (double xDot, double X) {
@@ -86,6 +87,14 @@ namespace Simulations {
             stdout.printf(" \"v4e\":%.1f, \"D_r\":%.9e, \"ER\":%.9e, \"ETh\":%.9e,", v4e, D_r, eR, eTh);                  // errors
             stdout.printf(" \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e,", t, r, th, ph);                            // coordinates
             stdout.printf(" \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", Ut / S, Ur / S, Uth / S, Uph / S);  // coordinate derivatives
+        }
+
+        /**
+         * Static factory from constructor arguments
+         */
+        public static BhSymp getInstanceFromArgs (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
+            return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
         }
 
         /**
