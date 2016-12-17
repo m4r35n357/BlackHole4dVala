@@ -42,11 +42,11 @@ namespace Simulations {
         Test.add_func ("/KdS/test_solve_symplectic_start_0", () => {
             var start = 0.0;
             var end = 100;
-            var step = 0.0001;
-            var interval = 1;
+            var step = 0.00005;
+            var interval = 10;
             var counts = BhSymp.getInstanceFromArgs(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve();
-            assert(counts[0] == 42766);
-            assert(counts[1] == 42766);
+            assert(counts[0] == 85532);
+            assert(counts[1] == 8554);
         });
     }
 
@@ -54,17 +54,16 @@ namespace Simulations {
         Test.add_func ("/KdS/test_solve_symplectic_start_non_0", () => {
             var start = 50.0;
             var end = 100;
-            var step = 0.0001;
+            var step = 0.00005;
             var interval = 10;
             var counts = BhSymp.getInstanceFromArgs(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve();
-            assert(counts[0] == 42766);
-            assert(counts[1] == 16073);
+            assert(counts[0] == 85532);
+            assert(counts[1] == 3215);
         });
     }
 
     void main (string[] args) {
         Test.init(ref args);
-        //Test.verbose();
 
         add_test_solve_rk4_start_0();
         add_test_solve_rk4_start_non_0();

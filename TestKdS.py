@@ -47,21 +47,21 @@ class KdSTest(TestCase):
     def test_solve_symp_0(self):
         start = 0.0
         end = 100
-        step = 0.0001
-        interval = 1
+        step = 0.00005
+        interval = 10
         counts = KdS.BhSymp(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve()
-        self.assertEqual(42766, counts[0])
-        self.assertEqual(42766, counts[1])
+        self.assertEqual(85532, counts[0])
+        self.assertEqual(8554, counts[1])
 
     #@skip("temporarily skipped")
     def test_solve_symp_non_0(self):
         start = 50.0
         end = 100
-        step = 0.0001
-        interval = 1
+        step = 0.00005
+        interval = 10
         counts = KdS.BhSymp(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve()
-        self.assertEqual(42766, counts[0])
-        self.assertEqual(16073, counts[1])
+        self.assertEqual(85532, counts[0])
+        self.assertEqual(3215, counts[1])
 
 if __name__ == '__main__':
     main()

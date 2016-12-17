@@ -186,7 +186,7 @@ class BhSymp(KdSBase):
         mino = tau = 0.0
         iterationCount = plotCount = 0
         while tau <= self.end_time:
-            if tau >= self.start_time and tau >= iterationCount * self.h:
+            if tau >= self.start_time and iterationCount % self.tr == 0:
                 self.plot(mino, tau)
                 plotCount += 1
             self.integrator.compose()

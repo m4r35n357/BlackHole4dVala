@@ -59,7 +59,7 @@ namespace Simulations {
             var iterationCount = 0;
             var plotCount = 0;
             while (tau < end) {
-                if ((tau >= start) && (tau >= iterationCount * h)) {
+                if ((tau >= start) && (iterationCount % tr == 0)) {
                     plot(mino, tau);
                     plotCount += 1;
                 }
