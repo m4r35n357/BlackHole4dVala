@@ -14,7 +14,55 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 namespace Simulations {
 
-    void add_test_solve_rk4_start_0 () {
+    void add_test_solve_rk4_polar() {
+        Test.add_func ("/KdS/test_solve_rk4_polar", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.001;
+            var interval = 10;
+            var counts = BhRk4.getInstanceFromArgs(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "rk438").solve();
+            assert(counts[0] == 100000);
+            assert(counts[1] == 10000);
+        });
+    }
+
+    void add_test_solve_symp_polar() {
+        Test.add_func ("/KdS/test_solve_symp_polar", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.00001;
+            var interval = 10;
+            var counts = BhSymp.getInstanceFromArgs(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "sc6").solve();
+            assert(counts[0] == 69174);
+            assert(counts[1] == 6918);
+        });
+    }
+
+    void add_test_solve_rk4_light() {
+        Test.add_func ("/KdS/test_solve_rk4_light", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.001;
+            var interval = 10;
+            var counts = BhRk4.getInstanceFromArgs(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "rk438").solve();
+            assert(counts[0] == 100000);
+            assert(counts[1] == 10000);
+        });
+    }
+
+    void add_test_solve_symp_light() {
+        Test.add_func ("/KdS/test_solve_symp_light", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.0001;
+            var interval = 10;
+            var counts = BhSymp.getInstanceFromArgs(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "sc6").solve();
+            assert(counts[0] == 105951);
+            assert(counts[1] == 10596);
+        });
+    }
+
+    void add_test_solve_rk4_start_0() {
         Test.add_func ("/KdS/test_solve_rk4_start_0", () => {
             var start = 0.0;
             var end = 100;
@@ -26,7 +74,7 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_rk4_start_non_0 () {
+    void add_test_solve_rk4_start_non_0() {
         Test.add_func ("/KdS/test_solve_rk4_start_non_0", () => {
             var start = 50.0;
             var end = 100;
@@ -38,7 +86,7 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_symplectic_start_0 () {
+    void add_test_solve_symplectic_start_0() {
         Test.add_func ("/KdS/test_solve_symplectic_start_0", () => {
             var start = 0.0;
             var end = 100;
@@ -50,7 +98,7 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_symplectic_start_non_0 () {
+    void add_test_solve_symplectic_start_non_0() {
         Test.add_func ("/KdS/test_solve_symplectic_start_non_0", () => {
             var start = 50.0;
             var end = 100;
@@ -64,6 +112,12 @@ namespace Simulations {
 
     void main (string[] args) {
         Test.init(ref args);
+
+        add_test_solve_rk4_polar();
+        add_test_solve_symp_polar();
+
+        add_test_solve_rk4_light();
+        add_test_solve_symp_light();
 
         add_test_solve_rk4_start_0();
         add_test_solve_rk4_start_non_0();

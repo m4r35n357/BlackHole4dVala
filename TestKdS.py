@@ -26,6 +26,42 @@ class KdSTest(TestCase):
         self.assertRaises(Exception, KdS.BhRk4, 0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "xxx")
         self.assertRaises(Exception, KdS.BhSymp, 0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "xxx")
 
+    def test_solve_rk4_polar(self):
+        start = 0.0
+        end = 100.0
+        step = 0.001
+        interval = 10
+        counts = KdS.BhRk4(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "rk438").solve()
+        self.assertEqual(100000, counts[0])
+        self.assertEqual(10000, counts[1])
+
+    def test_solve_symp_polar(self):
+        start = 0.0
+        end = 100.0
+        step = 0.00001
+        interval = 10
+        counts = KdS.BhSymp(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "sc6").solve()
+        self.assertEqual(69174, counts[0])
+        self.assertEqual(6918, counts[1])
+
+    def test_solve_rk4_light(self):
+        start = 0.0
+        end = 100.0
+        step = 0.001
+        interval = 10
+        counts = KdS.BhRk4(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "rk438").solve()
+        self.assertEqual(100000, counts[0])
+        self.assertEqual(10000, counts[1])
+
+    def test_solve_symp_light(self):
+        start = 0.0
+        end = 100.0
+        step = 0.0001
+        interval = 10
+        counts = KdS.BhSymp(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "sc6").solve()
+        self.assertEqual(105951, counts[0])
+        self.assertEqual(10596, counts[1])
+
     def test_solve_rk4_0(self):
         start = 0.0
         end = 100.0
