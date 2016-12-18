@@ -90,7 +90,7 @@ gsdir='/home/pi/projects/Vala/BlackHole4dVala'
 gs='./geodesic-server'
 script1='./KdS'
 script2='./KdS.py'
-script3='./KdS'
+script3='./minimal'
 su -c "cd $gsdir; $gs 1234 $script1 & $gs 1233 $script2 & $gs 1232 $script3 & $gs 1231 &" pi
 
 
