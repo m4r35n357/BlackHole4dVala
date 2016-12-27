@@ -16,11 +16,11 @@ namespace Simulations {
 
     public static void main (string[] args) {
         stderr.printf("Executable: %s\n", args[0]);
-        var ic = getJson().get_object_member("IC");
-        if (! ic.has_member("integrator") || ic.get_string_member("integrator").contains("rk4")) {
-            BhRk4.getInstance(ic).solve();
-        } else {
-            BhSymp.getInstance(ic).solve();
-        }
+        var o = getJson().get_object_member("IC");
+        KdSBase.newInstance(o.get_double_member("lambda"), o.get_double_member("a"),
+                            o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
+                            o.get_double_member("r0"), o.get_double_member("th0"),
+                            o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"),
+                            o.get_string_member("integrator")).solve();
     }
 }

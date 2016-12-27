@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class BhSymp : KdSBase, IModel {
+    protected class BhSymp : KdSBase, IModel, ISolver {
         /**
          * All fields are private
          */
@@ -26,7 +26,7 @@ namespace Simulations {
         /**
          * Private constructor, use a static factory
          */
-        private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+        protected BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                       double tau0, double tauN, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
             this.integrator = Integrator.getIntegrator(this, type);
@@ -87,25 +87,6 @@ namespace Simulations {
             stdout.printf(" \"v4e\":%.1f, \"D_r\":%.9e, \"ER\":%.9e, \"ETh\":%.9e,", v4e, D_r, eR, eTh);                  // errors
             stdout.printf(" \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e,", t, r, th, ph);                            // coordinates
             stdout.printf(" \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", Ut / S, Ur / S, Uth / S, Uph / S);  // coordinate derivatives
-        }
-
-        /**
-         * Static factory from constructor arguments
-         */
-        public static BhSymp getInstanceFromArgs (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
-            return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
-        }
-
-        /**
-         * Static factory from STDIN in JSON format
-         */
-        public static BhSymp getInstance (Json.Object o) {
-            return new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
-                              o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                              o.get_double_member("r0"), o.get_double_member("th0"),
-                              o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
-                              o.get_int_member("plotratio"), o.get_string_member("integrator"));
         }
     }
 }

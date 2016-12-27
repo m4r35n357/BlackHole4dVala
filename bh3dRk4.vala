@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class BhRk4 : KdSBase {
+    protected class BhRk4 : KdSBase, ISolver {
         /**
          * For handling different RK4 implementations
          */
@@ -38,9 +38,9 @@ namespace Simulations {
         private int sgnTH = -1;
 
         /**
-         * Private constructor, use a static factory
+         * Protected constructor, use a static factory
          */
-        private BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+        protected BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                      double tau0, double tauN, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
             switch (type) {
@@ -150,24 +150,6 @@ namespace Simulations {
                             tau, logError(v4Error(Ut, Ur, Uth, Uph)), D_r, R, TH);
             stdout.printf(" \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
                             t, r, th, ph, Ut, Ur, Uth, Uph);
-        }
-
-        /**
-         * Static factory from constructor arguments
-         */
-        public static BhRk4 getInstanceFromArgs (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
-            return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
-        }
-
-        /**
-         * Static factory from STDIN in JSON format
-         */
-        public static BhRk4 getInstance (Json.Object o) {
-            return new BhRk4(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"), o.get_double_member("E"),
-                             o.get_double_member("L"), o.get_double_member("Q"), o.get_double_member("r0"), o.get_double_member("th0"),
-                             o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
-                             o.get_int_member("plotratio"), o.get_string_member("integrator"));
         }
     }
 }

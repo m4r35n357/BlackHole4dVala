@@ -41,7 +41,7 @@ namespace Simulations {
         }
     }
 
-    public class NBody : GLib.Object, IModel {
+    public class NBody : IModel, ISolver, GLib.Object {
 
         private Particle[] bodies;
         private int np;

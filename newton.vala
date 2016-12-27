@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class Newton : GLib.Object, IModel {
+    public class Newton : IModel, ISolver, GLib.Object {
 
         private double E0;
         private double L;

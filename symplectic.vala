@@ -15,8 +15,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 
 namespace Simulations {
+
     /**
-     * Interface for the physical model (client)
+     * Interface for the physical model
+     */
+    public interface ISolver : GLib.Object {
+        /**
+         * Sole method called by main(), calls iterate() on RK4, and ISymplectic.compose() on the Symplectics
+         */
+        public abstract int[] solve ();
+    }
+
+    /**
+     * Interface for the symplectic integrators (client)
      */
     public interface IModel : GLib.Object {
         /**
@@ -28,15 +39,10 @@ namespace Simulations {
          * Momentum updates, called by ISymplectic.compose()
          */
         public abstract void pUp (double c);
-
-        /**
-         * Sole method called by main(), calls ISymplectic.compose() method on the integrator as needed
-         */
-        public abstract int[] solve ();
     }
 
     /**
-     * Interface for the integrators
+     * Interface for the integrators themselves
      */
     public interface ISymplectic : GLib.Object {
         /**
@@ -48,7 +54,7 @@ namespace Simulations {
     /**
      * Integrator superclass, controls composition but leaves integration details to subclass
      */
-    public abstract class Integrator : GLib.Object, ISymplectic {
+    protected abstract class Integrator : ISymplectic, GLib.Object {
 
         private double[] compositionWeights;
         private int wRange;

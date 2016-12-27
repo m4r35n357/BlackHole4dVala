@@ -60,7 +60,7 @@ namespace Simulations {
         protected double Uph;
 
         /**
-         * Protected constructor, use the static factory in subclass
+         * Protected constructor, use the static factory
          */
         protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                             double tau0, double tauN, double tStep, int64 plotRatio) {
@@ -116,6 +116,18 @@ namespace Simulations {
             var U4 = tDot - a * sth2 * phDot;
             var SX2 = S * X2;
             return fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4);
+        }
+
+        /**
+         *  Static factory
+         */
+        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
+                                            double tau0, double tauN, double tStep, int64 tRatio, string type) {
+            if ("rk4" in type) {
+                return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
+            } else {
+                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
+            }
         }
     }
 }

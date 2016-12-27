@@ -44,7 +44,8 @@ namespace Simulations {
      * Used by all models
      */
     private static double logError (double e) {
-        return 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18);
+        var modulus = fabs(e);
+        return 10.0 * log10(modulus > 1.0e-18 ? modulus : 1.0e-18);
     }
 }
 
