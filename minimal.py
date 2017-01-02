@@ -45,21 +45,17 @@ class BhRk4(object):
         P_Dr = P / self.D_r
         T_Dth = T / self.D_th
         self.S = r2 + self.a2 * cth2
-        self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * self.X2 / self.S
-        self.Ur = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
-        self.Uth = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
-        self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * self.X2 / self.S
-        self.kt[stage] = self.time_step * self.Ut
-        self.kr[stage] = self.time_step * self.Ur
-        self.kth[stage] = self.time_step * self.Uth
-        self.kph[stage] = self.time_step * self.Uph
+        self.kt[stage] = self.time_step * (P_Dr * self.ra2 - T_Dth * self.a) * self.X2 / self.S
+        self.kr[stage] = self.time_step * sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
+        self.kth[stage] = self.time_step * sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
+        self.kph[stage] = self.time_step * (P_Dr * self.a - T_Dth / self.sth2) * self.X2 / self.S
 
     def solve(self):
         tau = 0.0
         iteration_count = 0
         while tau < self.end:
             if tau >= self.start and iteration_count % self.plot_ratio == 0:
-                self.plot(tau)
+                self.plot(tau, self.kt[0] / self.time_step, self.kr[0] / self.time_step, self.kth[0] / self.time_step, self.kph[0] / self.time_step)
             self.sign_r = self.sign_r if self.R > 0.0 else -self.sign_r
             self.sign_th = self.sign_th if self.TH > 0.0 else -self.sign_th
             self.evaluate(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
@@ -72,17 +68,17 @@ class BhRk4(object):
             self.evaluate(self.r, self.th, 0)
             iteration_count += 1
             tau = iteration_count * self.time_step
-        self.plot(tau)
+        self.plot(tau, self.kt[0] / self.time_step, self.kr[0] / self.time_step, self.kth[0] / self.time_step, self.kph[0] / self.time_step)
 
-    def plot(self, tau):
+    def plot(self, tau, Ut, Ur, Uth, Uph):
         SX2 = self.S * self.X2
-        e = fabs(self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * self.Ut - self.ra2 * self.Uph)**2
-                    + self.S / self.D_r * self.Ur**2 + self.S / self.D_th * self.Uth**2
-                    - self.D_r / SX2 * (self.Ut - self.a * self.sth2 * self.Uph)**2)
+        e = fabs(self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2
+                    + self.S / self.D_r * Ur**2 + self.S / self.D_th * Uth**2
+                    - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2)
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.9e, "D_th":%.9e, "S":%.9e,' \
                          % (tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.D_r, self.D_th, self.S),
         print >> stdout, '"t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
-                         % (self.t, self.r, self.th, self.ph, self.Ut, self.Ur, self.Uth, self.Uph)
+                         % (self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 if __name__ == "__main__":
     print >> stderr, "Executable: {}".format(argv[0])

@@ -31,10 +31,6 @@ namespace Simulations {
         private double r;
         private double th;
         private double ph = 0.0;
-        private double Ut;
-        private double Ur;
-        private double Uth;
-        private double Uph;
         private double[] kt = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
@@ -78,17 +74,13 @@ namespace Simulations {
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
-            Ut = (P_Dr * ra2 - T_Dth * a) * X2 / S;
-            Ur = sqrt(R > 0.0 ? R : -R) / S;
-            Uth = sqrt(TH > 0.0 ? TH : -TH) / S;
-            Uph = (P_Dr * a - T_Dth / sth2) * X2 / S;
-            kt[stage] = timeStep * Ut;
-            kr[stage] = timeStep * Ur;
-            kth[stage] = timeStep * Uth;
-            kph[stage] = timeStep * Uph;
+            kt[stage] = timeStep * (P_Dr * ra2 - T_Dth * a) * X2 / S;
+            kr[stage] = timeStep * sqrt(R > 0.0 ? R : -R) / S;
+            kth[stage] = timeStep * sqrt(TH > 0.0 ? TH : -TH) / S;
+            kph[stage] = timeStep * (P_Dr * a - T_Dth / sth2) * X2 / S;
         }
 
-        private void plot (double tau) {
+        private void plot (double tau, double Ut, double Ur, double Uth, double Uph) {
             var U1 = a * Ut - ra2 * Uph;
             var U4 = Ut - a * sth2 * Uph;
             var SX2 = S * X2;
@@ -102,7 +94,7 @@ namespace Simulations {
             var iterationCount = 0;
             while (tau < end) {
                 if ((tau >= start) && (iterationCount % plotRatio == 0)) {
-                    plot(tau);
+                    plot(tau, kt[0] / timeStep, kr[0] / timeStep, kth[0] / timeStep, kph[0] / timeStep);
                 }
                 signR = R > 0.0 ? signR : -signR;
                 signTH = TH > 0.0 ? signTH : -signTH;
@@ -117,7 +109,7 @@ namespace Simulations {
                 iterationCount += 1;
                 tau = iterationCount * timeStep;
             }
-            plot(tau);
+            plot(tau, kt[0] / timeStep, kr[0] / timeStep, kth[0] / timeStep, kph[0] / timeStep);
         }
     }
 
