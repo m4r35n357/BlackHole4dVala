@@ -18,8 +18,8 @@ namespace Simulations {
         private double aL;
         private double start;
         private double end;
-        private double timeStep;
-        private int64 plotRatio;
+        private double h;
+        private int64 pr;
         private double ra2;
         private double sth2;
         private double D_r;
@@ -35,8 +35,8 @@ namespace Simulations {
         private double[] kr = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kth = { 0.0, 0.0, 0.0, 0.0 };
         private double[] kph = { 0.0, 0.0, 0.0, 0.0 };
-        private int signR = -1;
-        private int signTH = -1;
+        private int sgnR = -1;
+        private int sgnTH = -1;
 
         public BhRk4 (double l, double a, double mu2, double E, double L, double Q, double r0, double th0, double t0, double tN, double h, int64 pr) {
             this.l_3 = l / 3.0;
@@ -53,14 +53,14 @@ namespace Simulations {
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.start = t0;
             this.end = tN;
-            this.timeStep = h;
-            this.plotRatio = pr;
+            this.h = h;
+            this.pr = pr;
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
-            evaluate(r, th, 0);
+            f(r, th, 0);
         }
 
-        private void evaluate (double radius, double theta, int stage) {
+        private void f (double radius, double theta, int stage) {
             var r2 = radius * radius;
             ra2 = r2 + a2;
             var P = ra2 * E - aL;
@@ -74,10 +74,10 @@ namespace Simulations {
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
-            kt[stage] = timeStep * (P_Dr * ra2 - T_Dth * a) * X2 / S;
-            kr[stage] = timeStep * sqrt(R > 0.0 ? R : -R) / S;
-            kth[stage] = timeStep * sqrt(TH > 0.0 ? TH : -TH) / S;
-            kph[stage] = timeStep * (P_Dr * a - T_Dth / sth2) * X2 / S;
+            kt[stage] = h * (P_Dr * ra2 - T_Dth * a) * X2 / S;
+            kr[stage] = h * sqrt(R > 0.0 ? R : -R) / S;
+            kth[stage] = h * sqrt(TH > 0.0 ? TH : -TH) / S;
+            kph[stage] = h * (P_Dr * a - T_Dth / sth2) * X2 / S;
         }
 
         private void plot (double tau, double Ut, double Ur, double Uth, double Uph) {
@@ -91,25 +91,25 @@ namespace Simulations {
 
         public void solve () {
             var tau = 0.0;
-            var iterationCount = 0;
+            var i = 0;
             while (tau < end) {
-                if ((tau >= start) && (iterationCount % plotRatio == 0)) {
-                    plot(tau, kt[0] / timeStep, kr[0] / timeStep, kth[0] / timeStep, kph[0] / timeStep);
+                if ((tau >= start) && (i % pr == 0)) {
+                    plot(tau, kt[0] / h, kr[0] / h, kth[0] / h, kph[0] / h);
                 }
-                signR = R > 0.0 ? signR : -signR;
-                signTH = TH > 0.0 ? signTH : -signTH;
-                evaluate(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
-                evaluate(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
-                evaluate(r + kr[2], th + kth[2], 3);
+                sgnR = R > 0.0 ? sgnR : -sgnR;
+                sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
+                f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
+                f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
+                f(r + kr[2], th + kth[2], 3);
                 t += (kt[0] + 2.0 * (kt[1] + kt[2]) + kt[3]) / 6.0;
-                r += (kr[0] + 2.0 * (kr[1] + kr[2]) + kr[3]) / 6.0 * signR;
-                th += (kth[0] + 2.0 * (kth[1] + kth[2]) + kth[3]) / 6.0 * signTH;
+                r += (kr[0] + 2.0 * (kr[1] + kr[2]) + kr[3]) / 6.0 * sgnR;
+                th += (kth[0] + 2.0 * (kth[1] + kth[2]) + kth[3]) / 6.0 * sgnTH;
                 ph += (kph[0] + 2.0 * (kph[1] + kph[2]) + kph[3]) / 6.0;
-                evaluate(r, th, 0);
-                iterationCount += 1;
-                tau = iterationCount * timeStep;
+                f(r, th, 0);
+                i += 1;
+                tau = i * h;
             }
-            plot(tau, kt[0] / timeStep, kr[0] / timeStep, kth[0] / timeStep, kph[0] / timeStep);
+            plot(tau, kt[0] / h, kr[0] / h, kth[0] / h, kph[0] / h);
         }
     }
 

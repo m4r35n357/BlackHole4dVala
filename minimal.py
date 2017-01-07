@@ -19,7 +19,7 @@ class BhRk4(object):
         self.K = C + self.X2 * (L - self.aE)**2
         self.start = start
         self.end = end
-        self.time_step = time_step
+        self.h = time_step
         self.plot_ratio = plot_ratio
         self.t = self.ph = 0.0
         self.r = r0
@@ -45,17 +45,17 @@ class BhRk4(object):
         P_Dr = P / self.D_r
         T_Dth = T / self.D_th
         self.S = r2 + self.a2 * cth2
-        self.kt[stage] = self.time_step * (P_Dr * self.ra2 - T_Dth * self.a) * self.X2 / self.S
-        self.kr[stage] = self.time_step * sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
-        self.kth[stage] = self.time_step * sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
-        self.kph[stage] = self.time_step * (P_Dr * self.a - T_Dth / self.sth2) * self.X2 / self.S
+        self.kt[stage] = self.h * (P_Dr * self.ra2 - T_Dth * self.a) * self.X2 / self.S
+        self.kr[stage] = self.h * sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
+        self.kth[stage] = self.h * sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
+        self.kph[stage] = self.h * (P_Dr * self.a - T_Dth / self.sth2) * self.X2 / self.S
 
     def solve(self):
         tau = 0.0
         iteration_count = 0
         while tau < self.end:
             if tau >= self.start and iteration_count % self.plot_ratio == 0:
-                self.plot(tau, self.kt[0] / self.time_step, self.kr[0] / self.time_step, self.kth[0] / self.time_step, self.kph[0] / self.time_step)
+                self.plot(tau, self.kt[0] / self.h, self.kr[0] / self.h, self.kth[0] / self.h, self.kph[0] / self.h)
             self.sign_r = self.sign_r if self.R > 0.0 else -self.sign_r
             self.sign_th = self.sign_th if self.TH > 0.0 else -self.sign_th
             self.evaluate(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
@@ -67,8 +67,8 @@ class BhRk4(object):
             self.ph += (self.kph[0] + 2.0 * (self.kph[1] + self.kph[2]) + self.kph[3]) / 6.0
             self.evaluate(self.r, self.th, 0)
             iteration_count += 1
-            tau = iteration_count * self.time_step
-        self.plot(tau, self.kt[0] / self.time_step, self.kr[0] / self.time_step, self.kth[0] / self.time_step, self.kph[0] / self.time_step)
+            tau = iteration_count * self.h
+        self.plot(tau, self.kt[0] / self.h, self.kr[0] / self.h, self.kth[0] / self.h, self.kph[0] / self.h)
 
     def plot(self, tau, Ut, Ur, Uth, Uph):
         SX2 = self.S * self.X2

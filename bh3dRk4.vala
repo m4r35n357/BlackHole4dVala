@@ -112,8 +112,8 @@ namespace Simulations {
          * RK4 common code including turning point handling
          */
         private void iterate () {
-            sgnR = R > 0.0 ? sgnR : -sgnR;
-            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;
+            sgnR = R > 0.0 ? sgnR : -sgnR;  // establish direction of R motion
+            sgnTH = TH > 0.0 ? sgnTH : -sgnTH;  // establish direction of TH motion
             evaluator();
             t += updater(kt);
             r += updater(kr) * sgnR;

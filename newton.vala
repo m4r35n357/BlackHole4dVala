@@ -26,7 +26,7 @@ namespace Simulations {
         private double phDot;
         private double start;
         private double end;
-        private double ts;
+        private double h;
         private int64 tr;
         private double L2;
         private double rP;
@@ -43,7 +43,7 @@ namespace Simulations {
             this.r = r0;
             this.start = starttime;
             this.end = starttime + duration;
-            this.ts = timestep;
+            this.h = timestep;
             this.tr = tRatio;
             this.integrator = Integrator.getIntegrator(this, type);
             this.E0 = V(r);
@@ -77,13 +77,13 @@ namespace Simulations {
 
         public void qUp (double d) {
             rDot = rP;
-            r += d * ts * rDot;
+            r += d * h * rDot;
             phDot = L / (r * r);
-            ph += d * ts * phDot;
+            ph += d * h * phDot;
         }
 
         public void pUp (double c) {
-            rP -= c * ts * (1.0 / (r * r) - L2 / (r * r * r));
+            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**
@@ -99,7 +99,7 @@ namespace Simulations {
                 }
                 integrator.compose();
                 count += 1;
-                t += ts;
+                t += h;
             }
             output(t);
             return { count };
