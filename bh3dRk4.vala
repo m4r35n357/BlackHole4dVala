@@ -43,18 +43,12 @@ namespace Simulations {
         protected BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                      double tau0, double tauN, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
-            switch (type) {
-                case "rk4":  // fourth order, basic
-                    this.evaluator = evaluator4;
-                    this.updater = updater4;
-                    break;
-                case "rk438":  // fourth order, 3/8 method
-                    this.evaluator = evaluator438;
-                    this.updater = updater438;
-                    break;
-                default:
-                    stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 ], found {%s}\n", type);
-                    assert_not_reached();
+            if ("rk4" == type) {
+                this.evaluator = evaluator4;
+                this.updater = updater4;
+            } else if ("rk438" == type){
+                this.evaluator = evaluator438;
+                this.updater = updater438;
             }
             f(r, th, 0);
         }
@@ -103,8 +97,8 @@ namespace Simulations {
          * evaluator - (most of) the RK4 algorithm (3/8 method)
          */
         private void evaluator438 () {
-            f(r + 1.0 / 3.0 * kr[0], th + 1.0 / 3.0 * kth[0], 1);
-            f(r - 1.0 / 3.0 * kr[0] + kr[1], th - 1.0 / 3.0 * kth[0] + kth[1], 2);
+            f(r + kr[0] / 3.0, th + kth[0] / 3.0, 1);
+            f(r - kr[0] / 3.0 + kr[1], th - kth[0] / 3.0 + kth[1], 2);
             f(r + kr[0] - kr[1] + kr[2], th + kth[0] - kth[1] + kth[2], 3);
         }
 
@@ -139,7 +133,7 @@ namespace Simulations {
                 tau = iterationCount * h;
             }
             plot(tau);
-            return { iterationCount, plotCount };
+            return { iterationCount, plotCount };  // for testing
         }
 
         /**

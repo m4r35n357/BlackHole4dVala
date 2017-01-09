@@ -69,7 +69,7 @@ namespace Simulations {
                 tau += h * S;
             }
             plot(mino, tau);
-            return { iterationCount, plotCount };
+            return { iterationCount, plotCount };  // for testing
         }
 
         private double modH (double xDot, double X) {
@@ -79,7 +79,7 @@ namespace Simulations {
         /**
          * Write the simulated data to STDOUT
          */
-        public void plot (double mino, double tau) {
+        private void plot (double mino, double tau) {
             var eR = logError(modH(Ur, R));
             var eTh = logError(modH(Uth, TH));
             var v4e = logError(v4Error(Ut / S, Ur / S, Uth / S, Uph / S));
@@ -90,4 +90,3 @@ namespace Simulations {
         }
     }
 }
-

@@ -48,4 +48,3 @@ namespace Simulations {
         return 10.0 * log10(modulus > 1.0e-18 ? modulus : 1.0e-18);
     }
 }
-
