@@ -152,13 +152,13 @@ namespace Simulations {
          * Weighted 4th order integration step
          */
         protected override void integrate (double compositionWeight) {
-            model.pUp(baseMethodCoefficients[0] * compositionWeight);
-            model.qUp(baseMethodCoefficients[1] * compositionWeight);
-            model.pUp(baseMethodCoefficients[2] * compositionWeight);
-            model.qUp(baseMethodCoefficients[3] * compositionWeight);
-            model.pUp(baseMethodCoefficients[2] * compositionWeight);
-            model.qUp(baseMethodCoefficients[1] * compositionWeight);
-            model.pUp(baseMethodCoefficients[0] * compositionWeight);
+            model.qUp(baseMethodCoefficients[0] * compositionWeight);
+            model.pUp(baseMethodCoefficients[1] * compositionWeight);
+            model.qUp(baseMethodCoefficients[2] * compositionWeight);
+            model.pUp(baseMethodCoefficients[3] * compositionWeight);
+            model.qUp(baseMethodCoefficients[2] * compositionWeight);
+            model.pUp(baseMethodCoefficients[1] * compositionWeight);
+            model.qUp(baseMethodCoefficients[0] * compositionWeight);
         }
     }
 }

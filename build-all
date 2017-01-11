@@ -47,8 +47,11 @@ esac
 $valac --pkg json-glib-1.0 minimal.vala && strip minimal
 echo ""
 
+$valac --pkg json-glib-1.0 minimal-symp.vala && strip minimal-symp
+echo ""
+
 # admire our work
-ls -lAh --color $symplectics TestKdS KdS minimal raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
+ls -lAh --color $symplectics TestKdS KdS minimal minimal-symp raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
 
 # test
 ./TestKdS >/dev/null && echo OK
