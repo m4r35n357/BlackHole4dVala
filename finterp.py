@@ -18,16 +18,15 @@ from math import fabs
 from json import loads
 
 def main():
-    if len(argv) > 3:
+    if len(argv) != 3:
         raise Exception('>>> Please supply a time variable name (string) and a precision (float) <<<')
     timeVariable = argv[1]
     precision = float(argv[2])
-    dataFile = stdin
     counter = 0
-    previous = dataFile.readline()
+    previous = stdin.readline()
     previousJson = loads(previous)
     previousTime = float(previousJson[timeVariable])
-    latest = dataFile.readline()
+    latest = stdin.readline()
     while latest:
         latestJson = loads(latest)
         latestTime = float(latestJson[timeVariable])
@@ -40,7 +39,7 @@ def main():
                 print previous,
         previous = latest
         previousTime = latestTime
-        latest = dataFile.readline()
+        latest = stdin.readline()
 
 if __name__ == "__main__":
     main()
