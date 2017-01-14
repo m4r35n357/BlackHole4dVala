@@ -57,6 +57,8 @@ export exe='./KdS'
 export exe='./KdS.py'
 export exe='./minimal'
 export exe='./minimal.py'
+export exe='./minimal-symp'
+export exe='./minimal-symp.py'
 export exe='nc.openbsd pi 1234'
 
 export finterp='./finterp'
