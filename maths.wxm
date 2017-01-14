@@ -22,8 +22,9 @@ P: (r^2 + a^2) * E - a * L;
 %Delta[r] = Dr: (1 - %Lambda / 3 * r^2) * (r^2 + a^2) - 2 * M * r;
 R = potentialR: X^2 * P^2 - Dr * (%mu^2 * r^2 + cc);
 rCheck = potentialR - (X^2 * P * P - Dr * (%mu^2 * r^2 + cc));
-'diff(R, r) = diff(potentialR, r);
-drCheck = trigsimp(diff(potentialR, r) - 2 * (2 * r * E * P * X^2 - (r * (1 - %Lambda / 3 * r^2) - 1 - %Lambda / 3 * r * (r^2 + a^2)) * (cc + %mu^2 * r^2) - %mu^2 * r * Dr));
+'diff(R, r) = rCalculated: diff(potentialR, r);
+simplified = rSimp: 2 * (2 * r * E * P * X^2 - (r * (1 - %Lambda / 3 * r^2) - 1 - %Lambda / 3 * r * (r^2 + a^2)) * (cc + %mu^2 * r^2) - %mu^2 * r * Dr)$
+drCheck = trigsimp(rCalculated - rSimp);
 
 (" *** Potential THETA *** ");
 T: a * E * sin(%theta)^2 - L;
@@ -31,8 +32,9 @@ T: a * E * sin(%theta)^2 - L;
 %Theta = potentialTHETA: Dth * (cc - %mu^2 * a^2 * cos(%theta)^2) - X^2 / sin(%theta)^2 * T^2;
 thCheck = potentialTHETA - (Dth * (cc - a^2 * %mu^2 * cos(%theta)^2) - X^2 * T * T / sin(%theta)^2);
 DiffToWilkins = trigsimp((potentialTHETA) - (Q - cos(%theta)^2 * (a^2 * (%mu^2 - E^2) + L^2 / sin(%theta)^2)))$
-'diff(%Theta, %theta) = diff(potentialTHETA, %theta);
-dthCheck = trigsimp(diff(potentialTHETA, %theta) - 2 * (cos(%theta) * sin(%theta) * a^2 * (%mu^2 * Dth - %Lambda / 3 * (cc - a^2 * %mu^2 * cos(%theta)^2)) + cos(%theta) * X^2 * T / sin(%theta) * (T / sin(%theta)^2 - 2 * a * E)));
+'diff(%Theta, %theta) = thCalculated: diff(potentialTHETA, %theta);
+simplified = thSimp: 2 * (cos(%theta) * sin(%theta) * a^2 * (%mu^2 * Dth - %Lambda / 3 * (cc - a^2 * %mu^2 * cos(%theta)^2)) + cos(%theta) * X^2 * T / sin(%theta) * (T / sin(%theta)^2 - 2 * a * E))$
+dthCheck = trigsimp(thCalculated - thSimp);
 
 (" *** Equations of Motion *** ");
 'diff(t, tau) = (P * (r^2 + a^2) / Dr - T * a / Dth) * X^2 / S;
