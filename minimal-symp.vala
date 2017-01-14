@@ -19,7 +19,6 @@ namespace Simulations {
         private double start;
         private double end;
         private double h;
-        private int64 tr;
         private double r2;
         private double ra2;
         private double sth2;
@@ -41,8 +40,7 @@ namespace Simulations {
         private double Uph;
         private double[] y;
 
-        public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                            double tau0, double tauN, double tStep, int64 plotRatio) {
+        public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double t0, double tN, double h) {
             this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;
@@ -55,10 +53,9 @@ namespace Simulations {
             this.aL = a * L;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
             this.K = Q + X2 * (L - aE) * (L - aE);
-            this.start = tau0;
-            this.end = tauN;
-            this.h = tStep;
-            this.tr = plotRatio;
+            this.start = t0;
+            this.end = tN;
+            this.h = h;
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
             var CBRT2 = pow(2.0, (1.0 / 3.0));
@@ -105,11 +102,9 @@ namespace Simulations {
             var mino = 0.0;
             var tau = 0.0;
             var i = 0;
-            var plotCount = 0;
             while (tau < end) {
-                if ((tau >= start) && (i % tr == 0)) {
+                if (tau >= start) {
                     plot(mino, tau);
-                    plotCount += 1;
                 }
                 qUp(y[0]); pUp(y[1]); qUp(y[2]); pUp(y[3]); qUp(y[2]); pUp(y[1]); qUp(y[0]);
                 i += 1;
@@ -148,6 +143,6 @@ namespace Simulations {
         var ic = parser.get_root().get_object().get_object_member("IC");
         new BhSymp(ic.get_double_member("lambda"), ic.get_double_member("a"), ic.get_double_member("mu"), ic.get_double_member("E"),
                 ic.get_double_member("L"), ic.get_double_member("Q"), ic.get_double_member("r0"), ic.get_double_member("th0"),
-                ic.get_double_member("start"), ic.get_double_member("end"), ic.get_double_member("step"), ic.get_int_member("plotratio")).solve();
+                ic.get_double_member("start"), ic.get_double_member("end"), ic.get_double_member("step")).solve();
     }
 }
