@@ -80,15 +80,6 @@ namespace Simulations {
             kph[stage] = h * (P_Dr * a - T_Dth / sth2) * X2 / S;
         }
 
-        private void plot (double tau, double Ut, double Ur, double Uth, double Uph) {
-            var U1 = a * Ut - ra2 * Uph;
-            var U4 = Ut - a * sth2 * Uph;
-            var SX2 = S * X2;
-            var e = fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4);
-            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"D_r\":%.9e, \"R\":%.9e, \"TH\":%.9e, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
-                            tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), D_r, R, TH, t, r, th, ph, Ut, Ur, Uth, Uph);
-        }
-
         public void solve () {
             var tau = 0.0;
             var i = 0;
@@ -110,6 +101,15 @@ namespace Simulations {
                 tau = i * h;
             }
             plot(tau, kt[0] / h, kr[0] / h, kth[0] / h, kph[0] / h);
+        }
+
+        private void plot (double tau, double Ut, double Ur, double Uth, double Uph) {
+            var U1 = a * Ut - ra2 * Uph;
+            var U4 = Ut - a * sth2 * Uph;
+            var SX2 = S * X2;
+            var e = fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, \"D_r\":%.9e, \"R\":%.9e, \"TH\":%.9e, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
+                            tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), D_r, R, TH, t, r, th, ph, Ut, Ur, Uth, Uph);
         }
     }
 

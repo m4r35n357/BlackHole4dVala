@@ -122,8 +122,8 @@ namespace Simulations {
         private void plot (double mino, double tau) {
             var U1 = a * Ut - ra2 * Uph;
             var U4 = Ut - a * sth2 * Uph;
-            var SX2 = S * X2;
-            var e = fabs(mu2 + (sth2 * D_th / SX2 * U1 * U1 + S / D_r * Ur * Ur + S / D_th * Uth * Uth - D_r / SX2 * U4 * U4) / (S * S));
+            var S3X2 = S * S * S * X2;
+            var e = fabs(mu2 + (sth2 * D_th / S3X2 * U1 * U1 + Ur * Ur / (S * D_r) + Uth * Uth / (S * D_th) - D_r / S3X2 * U4 * U4));
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"D_r\":%.9e, \"R\":%.9e, \"TH\":%.9e, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
                         mino, tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), D_r, R, TH, t, r, th, ph, Ut / S, Ur / S, Uth / S, Uph / S);
         }
