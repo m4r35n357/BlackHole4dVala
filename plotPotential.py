@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
+Copyright (c) 2014, 2015, 2016, 2017, Ian Smith (m4r35n357)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@ def main():
         r_min = th_min = -30
         r_max = th_max = 30
     else:
-        raise Exception('>>> ERROR! Please four or zero parameters <<<')
+        raise Exception('>>> ERROR! Please enter either one or five parameters <<<')
     line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
     pyplot.grid(b=True, which='major', color='0.25', linestyle='-')

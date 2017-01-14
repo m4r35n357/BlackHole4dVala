@@ -11,8 +11,8 @@ jq . $ic
 
 # Run the simulator
 echo -n ${C}"Simulating with $ic . . . "
-$icgen <$ic >$pot
-$exe <$ic >$data
+$icgen <$ic >$pot 2>/dev/null
+$exe <$ic >$data 2>/dev/null
 echo "Done!"${NC}
 
 # Plot errors

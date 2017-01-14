@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
+Copyright (c) 2014, 2015, 2016, 2017 Ian Smith (m4r35n357)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -17,24 +17,34 @@ using GLib.Math;
 
 namespace Simulations {
 
+    public static Json.Object jsonParseString (Parser p, string s) {
+        unowned Json.Object obj;
+        try {
+            p.load_from_data(s);
+            obj = p.get_root().get_object();
+        } catch (Error e) {
+            stderr.printf("Unable to parse the input data: %s\n", e.message);
+            assert_not_reached();
+        }
+        return obj;
+    }
+
     public static void main (string[] args) {
         stderr.printf("Executable: %s\n", args[0]);
         if (args.length != 3) {
             stderr.printf(">>> Please supply a time variable name (string) and a precision (float) <<<");
             assert_not_reached();
         }
-        string timeVariable = args[1];
-        double precision = double.parse(args[2]);
+        var timeVariable = args[1];
+        var precision = double.parse(args[2]);
         int counter = 0;
         var p = new Parser();
-        string previous = stdin.read_line();
-        p.load_from_data(previous);
-        Json.Object previousJson = p.get_root().get_object();
+        var previous = stdin.read_line();
+        var previousJson = jsonParseString(p, previous);
         var previousTime = previousJson.get_double_member(timeVariable);
         var latest = stdin.read_line();
         while (latest != null) {
-            p.load_from_data(latest);
-            Json.Object latestJson = p.get_root().get_object();
+            var latestJson = jsonParseString(p, latest);
             var latestTime = latestJson.get_double_member(timeVariable);
             var target = counter * precision;
             if ((latestTime - target) > 0.0) {
@@ -50,29 +60,5 @@ namespace Simulations {
             latest = stdin.read_line();
         }
     }
-    /*
-    if len(argv) > 3:
-        raise Exception('>>> Please supply a time variable name (string) and a precision (float) <<<')
-    timeVariable = argv[1]
-    precision = float(argv[2])
-    counter = 0
-    previous = stdin.readline()
-    previousJson = loads(previous)
-    previousTime = float(previousJson[timeVariable])
-    latest = stdin.readline()
-    while latest:
-        latestJson = loads(latest)
-        latestTime = float(latestJson[timeVariable])
-        target = counter * precision
-        if (latestTime - target) > 0.0:
-            counter += 1
-            if fabs(latestTime - target) <= fabs(previousTime - target):
-                print latest,  # trailing comma suppresses newline
-            else:
-                print previous,
-        previous = latest
-        previousTime = latestTime
-        latest = stdin.readline()
-    */
 }
 
