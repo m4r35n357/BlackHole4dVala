@@ -17,7 +17,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public static Json.Object jsonParseString (Parser p, string s) {
+    public static Json.Object parse (Parser p, string s) {
         unowned Json.Object obj;
         try {
             p.load_from_data(s);
@@ -40,11 +40,11 @@ namespace Simulations {
         int counter = 0;
         var p = new Parser();
         var previous = stdin.read_line();
-        var previousJson = jsonParseString(p, previous);
+        var previousJson = parse(p, previous);
         var previousTime = previousJson.get_double_member(timeVariable);
         var latest = stdin.read_line();
         while (latest != null) {
-            var latestJson = jsonParseString(p, latest);
+            var latestJson = parse(p, latest);
             var latestTime = latestJson.get_double_member(timeVariable);
             var target = counter * precision;
             if ((latestTime - target) > 0.0) {

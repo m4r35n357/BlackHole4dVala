@@ -55,6 +55,7 @@ def error_colour (e, ball):
         ball.color = color.red
 
 def main():
+    print >> stderr, "Executable: {}".format(argv[0])
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0], spin [0.0 - 1.0] and angular momentum <<<')
     m = float(argv[1])

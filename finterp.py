@@ -18,6 +18,7 @@ from math import fabs
 from json import loads
 
 def main():
+    print >> stderr, "Executable: {}".format(argv[0])
     if len(argv) != 3:
         raise Exception('>>> Please supply a time variable name (string) and a precision (float) <<<')
     timeVariable = argv[1]

@@ -221,18 +221,18 @@ class Symplectic(object):
         self.model = model
 
     def base2(self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
-        self.model.pUp(w * 0.5)  # c1 = 0.5
-        self.model.qUp(w)        # d1 = 1.0
-        self.model.pUp(w * 0.5)  # c2 = 0.5
+        self.model.qUp(w * 0.5)  # c1 = 0.5
+        self.model.pUp(w)        # d1 = 1.0
+        self.model.qUp(w * 0.5)  # c2 = 0.5
 
     def base4(self, w):  # Compose higher orders from this fourth-order symplectic base (d4 = 0.0)
-        self.model.pUp(w * self.coefficients[0])  # w * c1
-        self.model.qUp(w * self.coefficients[1])  # w * d1
-        self.model.pUp(w * self.coefficients[2])  # w * c2
-        self.model.qUp(w * self.coefficients[3])  # w * d2
-        self.model.pUp(w * self.coefficients[2])  # w * c3
-        self.model.qUp(w * self.coefficients[1])  # w * d3
-        self.model.pUp(w * self.coefficients[0])  # w * c4
+        self.model.qUp(w * self.coefficients[0])  # w * c1
+        self.model.pUp(w * self.coefficients[1])  # w * d1
+        self.model.qUp(w * self.coefficients[2])  # w * c2
+        self.model.pUp(w * self.coefficients[3])  # w * d2
+        self.model.qUp(w * self.coefficients[2])  # w * c3
+        self.model.pUp(w * self.coefficients[1])  # w * d3
+        self.model.qUp(w * self.coefficients[0])  # w * c4
 
     def compose(self):
         for i in self.wRange:  # Composition happens in this loop

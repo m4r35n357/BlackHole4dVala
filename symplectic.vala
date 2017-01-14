@@ -125,9 +125,9 @@ namespace Simulations {
          * Weighted 2nd order integration step
          */
         protected override void integrate (double compositionWeight) {
-            model.pUp(baseMethodCoefficients[0] * compositionWeight);
-            model.qUp(baseMethodCoefficients[1] * compositionWeight);
-            model.pUp(baseMethodCoefficients[0] * compositionWeight);
+            model.qUp(baseMethodCoefficients[0] * compositionWeight);
+            model.pUp(baseMethodCoefficients[1] * compositionWeight);
+            model.qUp(baseMethodCoefficients[0] * compositionWeight);
         }
     }
 

@@ -18,6 +18,7 @@ from matplotlib import pyplot
 from json import loads
 
 def main():
+    print >> stderr, "Executable: {}".format(argv[0])
     if len(argv) < 2:
         raise Exception('>>> ERROR! Please supply a plotting interval and a coordinate to plot <<<')
     interval = int(argv[1])

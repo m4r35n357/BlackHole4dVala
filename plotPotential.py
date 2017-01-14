@@ -18,6 +18,7 @@ from matplotlib import pyplot
 from json import loads
 
 def main():
+    print >> stderr, "Executable: {}".format(argv[0])
     if len(argv) == 6:
         r_range = float(argv[1])
         r_min = float(argv[2])
