@@ -30,7 +30,7 @@ namespace Simulations {
     }
 
     public static void main (string[] args) {
-        stderr.printf("Executable: %s\n", args[0]);
+        stderr.printf("Interpolator: %s\n", args[0]);
         if (args.length != 3) {
             stderr.printf(">>> Please supply a time variable name (string) and a precision (float) <<<");
             assert_not_reached();

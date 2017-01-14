@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 namespace Simulations {
 
     public static void main (string[] args) {
-        stderr.printf("Executable: %s\n", args[0]);
+        stderr.printf("Simulator: %s\n", args[0]);
         var o = getJson().get_object_member("IC");
         KdSBase.newInstance(o.get_double_member("lambda"), o.get_double_member("a"),
                             o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),

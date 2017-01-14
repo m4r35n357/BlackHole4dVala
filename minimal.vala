@@ -114,7 +114,7 @@ namespace Simulations {
     }
 
     public static void main (string[] args) {
-        stderr.printf("Executable: %s\n", args[0]);
+        stderr.printf("Simulator: %s\n", args[0]);
         var json = new StringBuilder();
         var line = stdin.read_line();
         while (line != null) {

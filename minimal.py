@@ -81,7 +81,7 @@ class BhRk4(object):
                          % (self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 if __name__ == "__main__":
-    print >> stderr, "Executable: {}".format(argv[0])
+    print >> stderr, "Simulator: {}".format(argv[0])
     input_data = stdin.read()
     ic = loads(input_data)['IC']
     print >> stderr, input_data
