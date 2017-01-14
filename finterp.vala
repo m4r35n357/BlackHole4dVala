@@ -23,7 +23,7 @@ namespace Simulations {
             p.load_from_data(s);
             obj = p.get_root().get_object();
         } catch (Error e) {
-            stderr.printf("Unable to parse the input data: %s\n", e.message);
+            stderr.printf("Interpolator: Unable to parse the input data: %s\n", e.message);
             assert_not_reached();
         }
         return obj;

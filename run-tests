@@ -3,7 +3,8 @@
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-int='./finterp.py'
+exe='./KdS'
+int='./finterp'
 
 run_particle () {
 	params=$*

@@ -27,9 +27,7 @@ namespace Simulations {
         private double D_th;
         private double S;
         private double P;
-        private double R;
         private double T;
-        private double TH;
         private double t = 0.0;
         private double r;
         private double th;
@@ -60,22 +58,20 @@ namespace Simulations {
             this.th = (90.0 - th0) * PI / 180.0;
             var CBRT2 = pow(2.0, (1.0 / 3.0));
             this.y = { 0.5 / (2.0 - CBRT2), 1.0 / (2.0 - CBRT2), 0.5 * (1.0 - CBRT2) / (2.0 - CBRT2), - CBRT2 / (2.0 - CBRT2) };
-            refresh(r, th);
-            this.Ur = - sqrt(fabs(R));
-            this.Uth = - sqrt(fabs(TH));
+            refresh();
+            this.Ur = - sqrt(fabs(X2 * P * P - D_r * (mu2 * r2 + K)));
+            this.Uth = - sqrt(fabs(D_th * (K - a2mu2 * cth2) - X2 * T * T / sth2));
         }
 
-        private void refresh (double radius, double theta) {
-            r2 = radius * radius;
+        private void refresh () {
+            r2 = r * r;
             ra2 = r2 + a2;
             P = ra2 * E - aL;
-            D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * radius;
-            R = X2 * P * P - D_r * (mu2 * r2 + K);
-            sth2 = sin(theta) * sin(theta);
+            D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * r;
+            sth2 = sin(th) * sin(th);
             cth2 = 1.0 - sth2;
             T = aE * sth2 - L;
             D_th = 1.0 + a2l_3 * cth2;
-            TH = D_th * (K - a2mu2 * cth2) - X2 * T * T / sth2;
             var P_Dr = P / D_r;
             var T_Dth = T / D_th;
             S = r2 + a2 * cth2;
@@ -88,14 +84,13 @@ namespace Simulations {
             r += c * h * Ur;
             th += c * h * Uth;
             ph += c * h * Uph;
-            refresh(r, th);
+            refresh();
         }
 
         private void pUp (double d) {
-            Ur += d * h * (2.0 * r * E * P * X2 - (r * (1.0 - l_3 * r2) - 1.0 - l_3 * r * ra2) * (K + mu2 * r2) - mu2 * r * D_r);
+            Ur += d * h * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * r2) - l_3 * r * ra2 - 1.0) * (K + mu2 * r2));
             var sth = sin(th);
-            var cth = cos(th);
-            Uth += d * h * (cth * sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + cth * X2 * T / sth * (T / sth2 - 2.0 * aE));
+            Uth += d * h * cos(th) * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
         }
 
         public void solve () {
@@ -119,8 +114,7 @@ namespace Simulations {
             var U4 = Ut - a * sth2 * Uph;
             var S3X2 = S * S * S * X2;
             var e = fabs(mu2 + (sth2 * D_th / S3X2 * U1 * U1 + Ur * Ur / (S * D_r) + Uth * Uth / (S * D_th) - D_r / S3X2 * U4 * U4));
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"D_r\":%.9e, \"R\":%.9e, \"TH\":%.9e, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n",
-                        mino, tau, 10.0 * log10(e > 1.0e-18 ? e : 1.0e-18), D_r, R, TH, t, r, th, ph, Ut / S, Ur / S, Uth / S, Uph / S);
+            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", mino, tau, 10.0*log10(e>1.0e-18?e:1.0e-18), t,r,th,ph, Ut/S,Ur/S,Uth/S,Uph/S);
         }
     }
 
@@ -141,8 +135,6 @@ namespace Simulations {
             return_if_reached();
         }
         var ic = parser.get_root().get_object().get_object_member("IC");
-        new BhSymp(ic.get_double_member("lambda"), ic.get_double_member("a"), ic.get_double_member("mu"), ic.get_double_member("E"),
-                ic.get_double_member("L"), ic.get_double_member("Q"), ic.get_double_member("r0"), ic.get_double_member("th0"),
-                ic.get_double_member("start"), ic.get_double_member("end"), ic.get_double_member("step")).solve();
+        new BhSymp(ic.get_double_member("lambda"), ic.get_double_member("a"), ic.get_double_member("mu"), ic.get_double_member("E"), ic.get_double_member("L"), ic.get_double_member("Q"), ic.get_double_member("r0"), ic.get_double_member("th0"), ic.get_double_member("start"), ic.get_double_member("end"), ic.get_double_member("step")).solve();
     }
 }
