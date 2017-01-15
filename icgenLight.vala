@@ -46,7 +46,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, string integrator) {
+        private void printOutput (double r, double a, double start, double end, double step, string integrator) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -71,9 +71,9 @@ namespace Generators {
             stdout.printf("    \"r1\" : %.3f,\n", r1(a));
             stdout.printf("    \"r2\" : %.3f,\n", r2(a));
             stdout.printf("    \"th0\" : %.0f,\n", 0.0);
-            stdout.printf("    \"start\" : %.1f,\n", 0.0);
-            stdout.printf("    \"end\" : %.1f,\n", 5000.0);
-            stdout.printf("    \"step\" : %.3f,\n", 0.001);
+            stdout.printf("    \"start\" : %.1f,\n", start);
+            stdout.printf("    \"end\" : %.1f,\n", end);
+            stdout.printf("    \"step\" : %.3f,\n", step);
             stdout.printf("    \"plotratio\" : %.1d,\n", 50);
             stdout.printf("    \"integrator\" : \"%s\"\n", integrator);
             stdout.printf("  }\n");
@@ -87,6 +87,9 @@ namespace Generators {
             // generate output
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
                         input.has_member("spin") ? input.get_double_member("spin") : 1.0,
+                        input.has_member("start") ? input.get_double_member("start") : 0.0,
+                        input.has_member("end") ? input.get_double_member("end") : 5000.0,
+                        input.has_member("step") ? input.get_double_member("step") : 0.001,
                         input.has_member("integrator") ? input.get_string_member("integrator") : "rk4");
         }
 
