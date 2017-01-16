@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    protected class KdSBase : GLib.Object {
+    protected abstract class KdSBase : GLib.Object {
         /**
          * All fields are protected
          */

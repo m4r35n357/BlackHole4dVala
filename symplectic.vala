@@ -17,41 +17,6 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Interface for the physical model
-     */
-    public interface ISolver : GLib.Object {
-        /**
-         * Sole method called by main(), calls iterate() on RK4, and ISymplectic.compose() on the Symplectics
-         */
-        public abstract int[] solve ();
-    }
-
-    /**
-     * Interface for the symplectic integrators (client)
-     */
-    public interface IModel : GLib.Object {
-        /**
-         * Coordinate updates, called by ISymplectic.compose()
-         */
-        public abstract void qUp (double d);
-
-        /**
-         * Momentum updates, called by ISymplectic.compose()
-         */
-        public abstract void pUp (double c);
-    }
-
-    /**
-     * Interface for the integrators themselves
-     */
-    public interface ISymplectic : GLib.Object {
-        /**
-         * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
-         */
-        public abstract void compose ();
-    }
-
-    /**
      * Integrator superclass, controls composition but leaves integration details to subclass
      */
     protected abstract class Integrator : ISymplectic, GLib.Object {
