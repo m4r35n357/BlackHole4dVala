@@ -29,7 +29,7 @@ namespace Simulations {
         protected BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                       double tau0, double tauN, double tStep, int64 tRatio, string type) {
             base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
-            this.integrator = Integrator.getIntegrator(this, type);
+            this.integrator = Symplectic.getIntegrator(this, type);
             refresh(r, th);
             this.Ur = - sqrt(fabs(R));
             this.Uth = - sqrt(fabs(TH));

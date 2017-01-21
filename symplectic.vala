@@ -17,21 +17,19 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Integrator superclass, controls composition but leaves integration details to subclass
+     * Symplectic integrator abstract superclass, controls composition but leaves integration details to subclass
      */
-    protected abstract class Integrator : ISymplectic, GLib.Object {
+    protected abstract class Symplectic : ISymplectic, GLib.Object {
 
         private double[] compositionWeights;
-        private int wRange;
         protected IModel model;
-        protected double[] baseMethodCoefficients;
+        protected double[] baseCoefficients;
 
         /**
          * Protected constructor, use the static factory
          */
-        protected Integrator (IModel model, double[] compositionWeights) {
+        protected Symplectic (IModel model, double[] compositionWeights) {
             this.compositionWeights = compositionWeights;
-            this.wRange = compositionWeights.length;
             this.model = model;
         }
 
@@ -45,15 +43,11 @@ namespace Simulations {
                 case "sb4":  // fourth order, basic
                     return new Base4(model, { 1.0 });
                 case "sc4":  // fourth order, composed from second order
-                    var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
-                    return new Base2(model, { 1.0 / (2.0 - CUBE_ROOT_2),
-                                            - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2),
-                                            1.0 / (2.0 - CUBE_ROOT_2) });
+                    var CBRT2 = pow(2.0, (1.0 / 3.0));
+                    return new Base2(model, { 1.0/(2.0-CBRT2), -CBRT2/(2.0-CBRT2), 1.0/(2.0-CBRT2) });
                 case "sc6":  // sixth order, composed from fourth order
-                    var FIFTH_ROOT_2 = pow(2.0, (1.0 / 5.0));
-                    return new Base4(model, { 1.0 / (2.0 - FIFTH_ROOT_2),
-                                            - FIFTH_ROOT_2 / (2.0 - FIFTH_ROOT_2),
-                                            1.0 / (2.0 - FIFTH_ROOT_2) });
+                    var FIFTHRT2 = pow(2.0, (1.0 / 5.0));
+                    return new Base4(model, { 1.0/(2.0-FIFTHRT2), -FIFTHRT2/(2.0-FIFTHRT2), 1.0/(2.0-FIFTHRT2) });
             }
             assert_not_reached();
         }
@@ -67,63 +61,60 @@ namespace Simulations {
          * Perform a composition of weighted integration steps
          */
         public void compose () {
-            for (int i = 0; i < wRange; i++) {
+            for (int i = 0; i < compositionWeights.length; i += 1) {
                 integrate(compositionWeights[i]);
             }
         }
     }
 
     /**
-     * Second-order symplectic integrator subclass
+     * Second-order symplectic integrator concrete subclass
      */
-    public class Base2 : Integrator {
+    public class Base2 : Symplectic {
 
         /**
          * Protected constructor, use the static factory in superclass
          */
         protected Base2 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            this.baseMethodCoefficients = { 0.5, 1.0 };
+            this.baseCoefficients = { 0.5, 1.0 };
         }
 
         /**
          * Weighted 2nd order integration step
          */
-        protected override void integrate (double compositionWeight) {
-            model.qUp(baseMethodCoefficients[0] * compositionWeight);
-            model.pUp(baseMethodCoefficients[1] * compositionWeight);
-            model.qUp(baseMethodCoefficients[0] * compositionWeight);
+        protected override void integrate (double weight) {
+            model.qUp(baseCoefficients[0] * weight);
+            model.pUp(baseCoefficients[1] * weight);
+            model.qUp(baseCoefficients[0] * weight);
         }
     }
 
     /**
-     * Fourth-order symplectic integrator subclass
+     * Fourth-order symplectic integrator concrete subclass
      */
-    public class Base4 : Integrator {
+    public class Base4 : Symplectic {
 
         /**
          * Protected constructor, use the static factory in superclass
          */
         protected Base4 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            var CUBE_ROOT_2 = pow(2.0, (1.0 / 3.0));
-            this.baseMethodCoefficients = { 0.5 / (2.0 - CUBE_ROOT_2),
-                                            1.0 / (2.0 - CUBE_ROOT_2),
-                                            0.5 * (1.0 - CUBE_ROOT_2) / (2.0 - CUBE_ROOT_2),
-                                            - CUBE_ROOT_2 / (2.0 - CUBE_ROOT_2) };
+            var CBRT2 = pow(2.0, (1.0 / 3.0));
+            this.baseCoefficients = { 0.5/(2.0-CBRT2), 1.0/(2.0-CBRT2), 0.5*(1.0-CBRT2)/(2.0-CBRT2), -CBRT2/(2.0-CBRT2) };
         }
 
         /**
          * Weighted 4th order integration step
          */
-        protected override void integrate (double compositionWeight) {
-            model.qUp(baseMethodCoefficients[0] * compositionWeight);
-            model.pUp(baseMethodCoefficients[1] * compositionWeight);
-            model.qUp(baseMethodCoefficients[2] * compositionWeight);
-            model.pUp(baseMethodCoefficients[3] * compositionWeight);
-            model.qUp(baseMethodCoefficients[2] * compositionWeight);
-            model.pUp(baseMethodCoefficients[1] * compositionWeight);
-            model.qUp(baseMethodCoefficients[0] * compositionWeight);
+        protected override void integrate (double weight) {
+            model.qUp(baseCoefficients[0] * weight);
+            model.pUp(baseCoefficients[1] * weight);
+            model.qUp(baseCoefficients[2] * weight);
+            model.pUp(baseCoefficients[3] * weight);
+            model.qUp(baseCoefficients[2] * weight);
+            model.pUp(baseCoefficients[1] * weight);
+            model.qUp(baseCoefficients[0] * weight);
         }
     }
 }

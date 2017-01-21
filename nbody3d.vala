@@ -63,7 +63,7 @@ namespace Simulations {
             this.tr = tRatio;
             this.errorLimit = errorLimit;
             this.simulationTime = simulationTime;
-            this.integrator = Integrator.getIntegrator(this, type);
+            this.integrator = Symplectic.getIntegrator(this, type);
         }
 
         /**

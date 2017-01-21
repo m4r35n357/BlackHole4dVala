@@ -45,7 +45,7 @@ namespace Simulations {
             this.end = starttime + duration;
             this.h = timestep;
             this.tr = tRatio;
-            this.integrator = Integrator.getIntegrator(this, type);
+            this.integrator = Symplectic.getIntegrator(this, type);
             this.E0 = V(r);
             this.L = lFac * L;
             this.L2 = L * L;
