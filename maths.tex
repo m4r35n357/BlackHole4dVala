@@ -13,11 +13,13 @@
 \maketitle
 
 \abstract
-A simple and accurate numerical approach is presented for efficiently generating 4D geodesics for particles and photons in the Kerr spacetime.
-This is achieved by working with the constants of motion for the Kerr spacetime rather than solving the geodesic equations directly.
-Particular attention is paid to techniques for generating a wide variety of useful initial conditions for the simulator.
-There are two simulation methods described here; one using a Runge-Kutta (RK4) integrator, and one using symplectic integration.
+Here is a simple and accurate numerical approach for efficiently generating 4D geodesics for particles and photons in the Kerr-deSitter spacetime.
+Simplicity is achieved by working with the constants of motion for the Kerr spacetime rather than solving the geodesic equations directly, so that the equations of motion are first-order differential equations rather than second-order.
+Particular attention is paid to techniques for generating a wide variety of useful initial conditions for the simulator, both for particles and light pulses.
+There are two integration methods within the simulator; one using Runge-Kutta (RK4) integrators, and one using symplectic integration.
+Both integrators use a fixed time-step.
 The parameter generation and simulation core is written in Vala, whilst graphical output and processing, including error plots, are provided by Python modules and shell scripts.
+There is also a wxMaxima file for generating and checking the equations used in this article.
 The source code for the suite of programs is publicly available under a BSD licence.
 
 \section{Bound Orbits in the Kerr Spacetime}
@@ -86,7 +88,7 @@ Rather than using Euler or RK4, the $t$ and $\phi$ equations are actually proces
 
 \section{Finding initial conditions}
 
-Another practical difficulty in generating orbits is the problem of generating suitable initial conditions. Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical, and also because of extreme sensitivity to some parameters (particularly $E$).
+Another practical difficulty in generating orbits is the problem of generating suitable sets of initial conditions. Finding an interesting set by trial and error is hard, partly because many combinations of the constants of motion are unphysical, and also because of extreme sensitivity to some parameters (particularly $E$).
 In the case of light there already exist closed form expressions for $L$ and $Q$ ($E$ is generally taken to be 1) in terms of $r$ and $a$ in \cite{teo}
 
 Here I present a straightforward way of generating two types of bound orbits for particles in three spatial dimensions.
