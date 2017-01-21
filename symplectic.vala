@@ -48,7 +48,7 @@ namespace Simulations {
                 case "sc6":  // sixth order, composed from fourth order
                     var FIFTHRT2 = pow(2.0, (1.0 / 5.0));
                     return new Base4(model, { 1.0/(2.0-FIFTHRT2), -FIFTHRT2/(2.0-FIFTHRT2), 1.0/(2.0-FIFTHRT2) });
-                case "sh6":  // second order, basic
+                case "sh6":  // sixth order, composed from second order
                     return new Base2(model, {
                                                 0.78451361047755726381949763,
                                                 0.23557321335935813368479318,
@@ -58,7 +58,7 @@ namespace Simulations {
                                                 0.23557321335935813368479318,
                                                 0.78451361047755726381949763
                                             });
-                case "sh8":  // fourth order, basic
+                case "sh8":  // eigthth order, composed from second order
                     return new Base2(model, {
                                                 0.74167036435061295344822780,
                                                 -0.40910082580003159399730010,
@@ -76,7 +76,7 @@ namespace Simulations {
                                                 -0.40910082580003159399730010,
                                                 0.74167036435061295344822780
                                             });
-                case "sh10":  // fourth order, basic
+                case "sh10":  // tenth order, composed from second order
                     return new Base2(model, {
                                                 0.09040619368607278492161150,
                                                 0.53591815953030120213784983,
