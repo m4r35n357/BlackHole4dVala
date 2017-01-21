@@ -17,7 +17,8 @@ echo "Done!"${NC}
 
 # Plot errors
 set $(wc -l $data)
-./plotErrors.py $timeCoord $(expr $1 / 2000) <$data &
+#./plotErrors.py $timeCoord $(expr $1 / 2000) <$data &
+./plotErrors.py $timeCoord 1 <$data &
 
 # Plot potentials
 ./plotPotential.py <$pot &
