@@ -49,6 +49,8 @@ namespace Simulations {
             } else if ("rk438" == type){
                 this.evaluator = evaluator438;
                 this.updater = updater438;
+            } else {
+                assert_not_reached();
             }
             f(r, th, 0);
         }

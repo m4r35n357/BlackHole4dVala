@@ -114,7 +114,7 @@ namespace Generators {
         }
 
         /**
-         * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
+         * Write the initial conditions file to STDOUT
          */
         private void printInitialConditions (MultirootFsolver s, size_t iterations) {
             var p = (Params*) s.function.params;
@@ -269,6 +269,9 @@ namespace Generators {
             printInitialConditions(solver, iterations);
         }
 
+        /**
+         * Write the potential data to STDOUT for plotting
+         */
         public void printPotentials (Json.Object input) {
             var a = input.get_double_member("a");
             var mu2 = input.get_double_member("mu");
