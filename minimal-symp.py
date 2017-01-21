@@ -26,7 +26,7 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - thetaMin) * pi / 180.0
         self.cbrt2 = 2.0**(1.0 / 3.0)
-        self.y = [0.5 * 1.0 / (2.0 - self.cbrt2), 1.0 / (2.0 - self.cbrt2), 0.5 * (1.0 - self.cbrt2) * 1.0 / (2.0 - self.cbrt2), - self.cbrt2 * 1.0 / (2.0 - self.cbrt2)]
+        self.y = [0.5/(2.0-self.cbrt2), 1.0/(2.0-self.cbrt2), 0.5*(1.0-self.cbrt2)/(2.0-self.cbrt2), -self.cbrt2/(2.0-self.cbrt2)]
         self.refresh()
         self.Ur = - sqrt(fabs(self.X2 * self.P**2 - self.D_r * (self.mu2 * self.r2 + self.K)))
         self.Uth = - sqrt(fabs(self.D_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2))
@@ -66,7 +66,7 @@ class BhSymp(object):
                     + self.Ur**2 / (self.S * self.D_r)  + self.Uth**2 / (self.S * self.D_th)
                     - self.D_r / S3X2 * (self.Ut - self.a * self.sth2 * self.Uph)**2)
         print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
-                % (mino, tau, 10.0 * log10(e if e > 1.0e-18 else 1.0e-18), self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
+                % (mino,tau, 10.0*log10(e if e>1.0e-18 else 1.0e-18), self.t,self.r,self.th,self.ph, self.Ut/self.S,self.Ur/self.S,self.Uth/self.S,self.Uph/self.S)
 
     def solve(self):
         mino = tau = 0.0

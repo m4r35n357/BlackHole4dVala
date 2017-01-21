@@ -115,8 +115,8 @@ class BhRk4(KdSBase):
         self.f(self.r + self.kr[2], self.th + self.kth[2], 3)
 
     def evaluator438(self):
-        self.f(self.r + 1.0 / 3.0 * self.kr[0], self.th + 1.0 / 3.0 * self.kth[0], 1)
-        self.f(self.r - 1.0 / 3.0 * self.kr[0] + self.kr[1], self.th - 1.0 / 3.0 * self.kth[0] + self.kth[1], 2)
+        self.f(self.r + self.kr[0] / 3.0, self.th + self.kth[0] / 3.0, 1)
+        self.f(self.r - self.kr[0] / 3.0 + self.kr[1], self.th - self.kth[0] / 3.0 + self.kth[1], 2)
         self.f(self.r + self.kr[0] - self.kr[1] + self.kr[2], self.th + self.kth[0] - self.kth[1] + self.kth[2], 3)
 
     def iterate(self):
@@ -169,11 +169,10 @@ class BhSymp(KdSBase):
         self.refresh(self.r, self.th)
 
     def pUp(self, c):
-        self.Ur += c * self.h * (2.0 * self.r * self.E * self.P * self.X2
-                                 - (self.r * (1.0 - self.l_3 * self.r2) - 1.0 - self.l_3 * self.r * self.ra2) * (self.K + self.mu2 * self.r2)
-                                 - self.mu2 * self.r * self.D_r)
-        self.Uth += c * self.h * (self.cth * self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
-                                  + self.cth * self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE))
+        self.Ur += c * self.h * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
+                                        - (self.r * (1.0 - self.l_3 * self.r2) - self.l_3 * self.r * self.ra2 - 1.0) * (self.K + self.mu2 * self.r2))
+        self.Uth += c * self.h * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
+                                  + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
     def plot(self, mino, tau):
         eR = self.log_error(self.modH(self.Ur, self.R))
