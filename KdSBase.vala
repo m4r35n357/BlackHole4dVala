@@ -125,10 +125,10 @@ namespace Simulations {
                                             double tau0, double tauN, double tStep, int64 tRatio, string type) {
             if (("rk4" == type) || ("rk438" == type)) {
                 return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
-            } else if (("sb2" == type) || ("sb4" == type) || ("sc4" == type) || ("sc6" == type)) {
+            } else if (("sb2" == type) || ("sb4" == type) || ("sc4" == type) || ("sc6" == type)|| ("sh6" == type) || ("sh8" == type) || ("sh10" == type)) {
                 return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, type);
             } else {
-                stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 |  sb2 | sb4 |  sc4 | sc6 ], found {%s}\n", type);
+                stderr.printf("Bad integrator type, valid choices are: [ rk4 | rk438 |  sb2 | sb4 |  sc4 | sc6 | sh6 |  sh8 | sh10 ], found {%s}\n", type);
                 assert_not_reached();
             }
         }
