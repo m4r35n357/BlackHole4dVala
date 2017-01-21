@@ -55,18 +55,11 @@ vi $ic; jq . $ic
 
 export exe='./KdS'
 export exe='./KdS.py'
-export exe='./minimal'
-export exe='./minimal.py'
-export exe='./minimal-symp'
-export exe='./minimal-symp.py'
 export exe='nc.openbsd pi 1234'
-
-export finterp='./finterp'
-export finterp='./finterp.py'
 
 $exe <$ic | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
 
-$exe <$ic | $finterp tau 0.5 | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
+$exe <$ic | finterp.py tau 0.5 | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 

@@ -9,7 +9,7 @@ which valac
 symplectics='nbody3d newton'
 
 # cleanup
-rm -f $outfile $symplectics TestKdS KdS finterp bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight
+rm -f $outfile $symplectics TestKdS KdS bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight
 echo ""
 
 # compile vala files
@@ -44,11 +44,8 @@ case $opt in
 	fast)	strip $symplectics KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight;;
 esac
 
-#$valac --pkg json-glib-1.0 finterp.vala && strip finterp
-#echo ""
-
 # admire our work
-ls -lAh --color $symplectics TestKdS KdS finterp raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
+ls -lAh --color $symplectics TestKdS KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
 
 # test
 ./TestKdS >/dev/null && echo OK
