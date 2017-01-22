@@ -58,7 +58,7 @@ namespace Simulations {
                                                 0.23557321335935813368479318,
                                                 0.78451361047755726381949763
                                             });
-                case "sh8":  // eigthth order, composed from second order
+                case "sh8":  // eighth order, composed from second order
                     return new Base2(model, {
                                                 0.74167036435061295344822780,
                                                 -0.40910082580003159399730010,

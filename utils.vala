@@ -18,7 +18,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Interface for the physical model
+     * External user interface for the physical model
      */
     public interface ISolver : GLib.Object {
         /**
@@ -28,7 +28,7 @@ namespace Simulations {
     }
 
     /**
-     * Interface for the symplectic integrators (client)
+     * Interface for the symplectic integrator to access and update the model
      */
     public interface IModel : GLib.Object {
         /**
@@ -43,7 +43,7 @@ namespace Simulations {
     }
 
     /**
-     * Interface for the integrators themselves
+     * Interface for a model to drive the symplectic integrator
      */
     public interface ISymplectic : GLib.Object {
         /**
