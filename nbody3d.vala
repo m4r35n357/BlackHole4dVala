@@ -75,46 +75,33 @@ namespace Simulations {
             foreach (var node in ic.get_array_member("bodies").get_elements()) {
                 var body = node.get_object();
                 if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                    bodies += new Particle(body.get_double_member("qX"),
-                                           body.get_double_member("qY"),
-                                           body.get_double_member("qZ"),
-                                           body.get_double_member("pX"),
-                                           body.get_double_member("pY"),
-                                           body.get_double_member("pZ"),
+                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                           body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"),
                                            body.get_double_member("mass"));
                 } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                    var mass = body.get_double_member("mass");
-                    bodies += new Particle(body.get_double_member("qX"),
-                                           body.get_double_member("qY"),
-                                           body.get_double_member("qZ"),
-                                           body.get_double_member("vX") * mass,
-                                           body.get_double_member("vY") * mass,
-                                           body.get_double_member("vZ") * mass,
-                                           mass);
+                    var m = body.get_double_member("mass");
+                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                           body.get_double_member("vX") * m, body.get_double_member("vY") * m, body.get_double_member("vZ") * m,
+                                           m);
                 } else {
                     stderr.printf("Mixed use of momenta and velocity\n");
                 }
             }
-            return new NBody(bodies,
-                              ic.get_double_member("g"),
-                              ic.get_double_member("timeStep"),
-                              ic.get_double_member("errorLimit"),
-                              ic.get_double_member("simulationTime"),
-                              ic.get_int_member("plotratio"),
-                              ic.get_string_member("integratorOrder"));
+            return new NBody(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"),
+                              ic.get_double_member("simulationTime"), ic.get_int_member("plotratio"), ic.get_string_member("integratorOrder"));
         }
 
         /**
          * Euclidean distance between points A and B
          */
-        double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
+        private double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
             return sqrt(pow(xB - xA, 2) + pow(yB - yA, 2) + pow(zB - zA, 2));
         }
 
        /**
          * Total (kinetic + potential) energy of the system
          */
-        public double h () {
+        private double h () {
             var energy = 0.0;
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
@@ -185,7 +172,7 @@ namespace Simulations {
             return { count };
         }
 
-        public void output (double time, double hNow, double h0, double dbValue) {
+        private void output (double time, double hNow, double h0, double dbValue) {
             string[] data = {};
             foreach (var particle in bodies) {
                 data += particle.toString();

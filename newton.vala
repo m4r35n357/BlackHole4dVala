@@ -71,7 +71,7 @@ namespace Simulations {
             return 0.5 * rP * rP + V(r);
         }
 
-        public void errors () {
+        private void errors () {
             eR = logError(fabs(H() - H0));
         }
 
@@ -105,7 +105,7 @@ namespace Simulations {
             return { count };
         }
 
-        public void output (double time) {
+        private void output (double time) {
             stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", time, time, eR, H() - H0, eR, -180.0);
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", time, r, PI_2, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
