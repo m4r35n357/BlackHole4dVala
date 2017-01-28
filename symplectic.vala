@@ -39,16 +39,21 @@ namespace Simulations {
         public static ISymplectic getIntegrator (IModel model, string type) {
             switch (type) {
                 case "sb2":  // second order, basic
+                    stderr.printf("2nd Order Symplectic Integrator\n");
                     return new Base2(model, { 1.0 });
                 case "sb4":  // fourth order, basic
+                    stderr.printf("4th Order Symplectic Integrator\n");
                     return new Base4(model, { 1.0 });
                 case "sc4":  // fourth order, composed from second order
+                    stderr.printf("4th Order Symplectic Integrator (Composed from 2nd order)\n");
                     var CBRT2 = pow(2.0, (1.0 / 3.0));
                     return new Base2(model, { 1.0/(2.0-CBRT2), -CBRT2/(2.0-CBRT2), 1.0/(2.0-CBRT2) });
                 case "sc6":  // sixth order, composed from fourth order
+                    stderr.printf("6th Order Symplectic Integrator (Composed from 4th order)\n");
                     var FIFTHRT2 = pow(2.0, (1.0 / 5.0));
                     return new Base4(model, { 1.0/(2.0-FIFTHRT2), -FIFTHRT2/(2.0-FIFTHRT2), 1.0/(2.0-FIFTHRT2) });
                 case "sh6":  // sixth order, composed from second order
+                    stderr.printf("6th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.78451361047755726381949763,
                                                 0.23557321335935813368479318,
@@ -59,6 +64,7 @@ namespace Simulations {
                                                 0.78451361047755726381949763
                                             });
                 case "sh8":  // eighth order, composed from second order
+                    stderr.printf("8th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.74167036435061295344822780,
                                                 -0.40910082580003159399730010,
@@ -77,6 +83,7 @@ namespace Simulations {
                                                 0.74167036435061295344822780
                                             });
                 case "sh10":  // tenth order, composed from second order
+                    stderr.printf("10th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.09040619368607278492161150,
                                                 0.53591815953030120213784983,
@@ -113,6 +120,7 @@ namespace Simulations {
                                                 0.09040619368607278492161150
                                             });
             }
+            stderr.printf("Integrator not recognized: %s\n", type);
             assert_not_reached();
         }
 

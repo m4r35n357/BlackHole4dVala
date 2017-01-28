@@ -1,58 +1,56 @@
 #!/bin/sh
-
+#set -x
 C='\033[0;36m'
 NC='\033[0m' # No Color
 
-exe='./KdS'
+exe='./Simulate'
 int='./finterp.py'
 
 run_particle () {
 	params=$*
 	echo ${C}"$exe"${NC}
 	echo $params | jq .
-	echo $params | ./icgenParticle >$ic 2>$pot
+	echo $params | ./GenParticle >$ic 2>$pot
 	jq . $ic
-	$exe <$ic | $int tau 1.0 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 }
 
 run_light () {
 	params=$*
 	echo ${C}"$exe"${NC}
 	echo $params | jq .
-	echo $params | ./icgenLight >$ic 2>$pot
+	echo $params | ./GenLight >$ic 2>$pot
 	jq . $ic
-	$exe <$ic | $int tau 0.2 | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 }
 
 run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk4" }'
 run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk438" }'
-run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
-run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6" }'
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4", "plotratio": 20 }'
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6", "plotratio": 20 }'
 
 run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk4" }'
 run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "rk438" }'
-run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
-run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6" }'
+run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4", "plotratio": 10 }'
+run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc6", "plotratio": 10 }'
 
-run_light '{ "r": 3, "spin": 1.0, "integrator": "rk4" }'
-run_light '{ "r": 3, "spin": 1.0, "integrator": "rk438" }'
+run_light '{ "r": 3, "spin": 1.0, "integrator": "rk4", "plotratio": 500 }'
+run_light '{ "r": 3, "spin": 1.0, "integrator": "rk438", "plotratio": 500 }'
 run_light '{ "r": 3, "spin": 1.0, "integrator": "sc4" }'
 run_light '{ "r": 3, "spin": 1.0, "integrator": "sc6" }'
 
-run_light '{ "r": 2, "spin": 1.0, "integrator": "rk4" }'
-run_light '{ "r": 2, "spin": 1.0, "integrator": "rk438" }'
+run_light '{ "r": 2, "spin": 1.0, "integrator": "rk4", "plotratio": 200 }'
+run_light '{ "r": 2, "spin": 1.0, "integrator": "rk438", "plotratio": 200 }'
 run_light '{ "r": 2, "spin": 1.0, "integrator": "sc4" }'
 run_light '{ "r": 2, "spin": 1.0, "integrator": "sc6" }'
 
 echo ${C}"./nbody3d"${NC}
 ssic='ic/SolarSystem'
 jq . $ssic
-./nbody3d <$ssic 2>/tmp/progress | ./plotNBody.py
+$exe <$ssic 2>/tmp/progress | ./plotNBody.py
 
-params='{ "method": "dnewton", "r": 12.0, "elevation": 0.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sc4" }'
+params='{ "IC": {"method": "dnewton", "r0": 12.0, "Lfac": 0.8, "start": 0.0, "end": 5000.0, "step": 0.01, "integrator": "sc4", "plotratio": 100 } }'
 echo ${C}"./newton"${NC}
 echo $params | jq .
-echo $params | ./icgenParticle >$ic 2>$pot
-jq . $ic
-./newton <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic`
+echo $params | $exe | ./plotBH.py 1.0 `echo $params | jq .IC.Lfac` 0.0
 

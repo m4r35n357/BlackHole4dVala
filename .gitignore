@@ -13,13 +13,10 @@
 *.s
 *.pyc
 .valencia
-KdS
 TestKdS
-newton
-nbody3d
 raytrace-commands
-icgenParticle
-icgenLight
+Simulate
+Gen*
 kerr-image
 kerr-image-ian
 !kerr-image.c
@@ -30,3 +27,4 @@ images/
 
 .idea
 
+test*

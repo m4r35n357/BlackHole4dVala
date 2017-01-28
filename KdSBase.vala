@@ -64,6 +64,7 @@ namespace Simulations {
          */
         protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
                             double tau0, double tauN, double tStep, int64 plotRatio) {
+            stderr.printf("Kerr-deSitter Geodesic\n");
             this.l_3 = lambda / 3.0;
             this.a = a;
             this.mu2 = mu2;

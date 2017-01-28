@@ -18,7 +18,7 @@ using Gsl;
 
 namespace Generators {
 
-    public class Particle : GLib.Object {
+    public class Particle : Simulations.IGenerator, GLib.Object {
 
         /**
          * Fixed parameters and constraints
@@ -33,6 +33,7 @@ namespace Generators {
             public double start;
             public double end;
             public double step;
+            public int64 plotratio;
             public string integrator;
         }
 
@@ -146,7 +147,7 @@ namespace Generators {
             stdout.printf("    \"start\" : %.1f,\n", p->start);
             stdout.printf("    \"end\" : %.1f,\n", p->end);
             stdout.printf("    \"step\" : %.3f,\n", p->step);
-            stdout.printf("    \"plotratio\" : %.1d,\n", 500);
+            stdout.printf("    \"plotratio\" : %.1d,\n", (int)p->plotratio);
             stdout.printf("    \"integrator\" : \"%s\"\n", p->integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
@@ -177,13 +178,11 @@ namespace Generators {
                 start = input.has_member("start") ? input.get_double_member("start") : 0.0,
                 end = input.has_member("end") ? input.get_double_member("end") : 5000.0,
                 step = input.has_member("step") ? input.get_double_member("step") : 0.001,
+                plotratio = input.has_member("plotratio") ? input.get_int_member("plotratio") : 500,
                 integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "rk4"
             };
         }
 
-        /**
-         * Externally visible method, sets up and controls the solver
-         */
         public void generateInitialConditions (Json.Object input) {
             var initialValues = initializeVariables(input);
             var nDim = initialValues.size;
@@ -269,9 +268,6 @@ namespace Generators {
             printInitialConditions(solver, iterations);
         }
 
-        /**
-         * Write the potential data to STDOUT for plotting
-         */
         public void printPotentials (Json.Object input) {
             var a = input.get_double_member("a");
             var mu2 = input.get_double_member("mu");
@@ -284,16 +280,6 @@ namespace Generators {
                 stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
                     xValue * rMax, R_base(xValue * rMax, E, L, Q, a, mu2), xValue * PI, THETA_base(xValue * PI, E, L, Q, a, mu2));
             }
-        }
-    }
-
-    public static void main (string[] args) {
-        stderr.printf("Executable: %s\n", args[0]);
-        var json = Simulations.getJson();
-        if (json.has_member("IC")) {
-            new Particle().printPotentials(json.get_object_member("IC"));
-        } else {
-            new Particle().generateInitialConditions(json);
         }
     }
 }

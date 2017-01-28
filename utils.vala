@@ -18,6 +18,21 @@ using GLib.Math;
 namespace Simulations {
 
     /**
+     * Interface for the parameter generators
+     */
+    public interface IGenerator : GLib.Object {
+        /**
+         * Sets up and runs the solver
+         */
+        public abstract void generateInitialConditions (Json.Object input);
+
+        /**
+         * Writes the potential data to STDOUT for plotting
+         */
+        public abstract void printPotentials (Json.Object input);
+    }
+
+    /**
      * External user interface for the physical model
      */
     public interface ISolver : GLib.Object {
@@ -82,4 +97,5 @@ namespace Simulations {
         var modulus = fabs(e);
         return 10.0 * log10(modulus > 1.0e-18 ? modulus : 1.0e-18);
     }
+
 }

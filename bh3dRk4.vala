@@ -46,13 +46,17 @@ namespace Simulations {
             if ("rk4" == type) {
                 this.evaluator = evaluator4;
                 this.updater = updater4;
+                stderr.printf("RK4 Integrator\n");
             } else if ("rk438" == type){
                 this.evaluator = evaluator438;
                 this.updater = updater438;
+                stderr.printf("RK4 (3/8) Integrator\n");
             } else {
+                stderr.printf("Integrator not recognized: %s\n", type);
                 assert_not_reached();
             }
             f(r, th, 0);
+
         }
 
         /**

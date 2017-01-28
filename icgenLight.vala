@@ -17,7 +17,7 @@ using Json;
 
 namespace Generators {
 
-    public class Light : GLib.Object {
+    public class Light : Simulations.IGenerator, GLib.Object {
 
         private static double R (double r, double a, double E, double L, double Q) {
             return (E * (r * r + a * a) - a * L) * (E * (r * r + a * a) - a * L) - (r * r + a * a - 2.0 * r) * (Q + (L - a * E) * (L - a * E));
@@ -46,7 +46,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, double start, double end, double step, string integrator) {
+        private void printOutput (double r, double a, double start, double end, double step, int64 plotratio, string integrator) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -74,15 +74,12 @@ namespace Generators {
             stdout.printf("    \"start\" : %.1f,\n", start);
             stdout.printf("    \"end\" : %.1f,\n", end);
             stdout.printf("    \"step\" : %.3f,\n", step);
-            stdout.printf("    \"plotratio\" : %.1d,\n", 50);
+            stdout.printf("    \"plotratio\" : %.1d,\n", (int)plotratio);
             stdout.printf("    \"integrator\" : \"%s\"\n", integrator);
             stdout.printf("  }\n");
             stdout.printf("}\n");
         }
 
-        /**
-         * Externally visible method, sets up and controls the solver
-         */
         public void generateInitialConditions (Json.Object input) {
             // generate output
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
@@ -90,6 +87,7 @@ namespace Generators {
                         input.has_member("start") ? input.get_double_member("start") : 0.0,
                         input.has_member("end") ? input.get_double_member("end") : 5000.0,
                         input.has_member("step") ? input.get_double_member("step") : 0.001,
+                        input.has_member("plotratio") ? input.get_int_member("plotratio") : 50,
                         input.has_member("integrator") ? input.get_string_member("integrator") : "rk4");
         }
 
@@ -103,16 +101,6 @@ namespace Generators {
                 stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
                                 xValue * r2(a) * 1.1, R(xValue * r2(a) * 1.1, a, E, L, Q), xValue * PI, THETA(xValue * PI, a, E, L, Q));
             }
-        }
-    }
-
-    public static void main (string[] args) {
-        stderr.printf("Executable: %s\n", args[0]);
-        var json = Simulations.getJson();
-        if (json.has_member("IC")) {
-            new Light().printPotentials(json.get_object_member("IC"));
-        } else {
-            new Light().generateInitialConditions(json);
         }
     }
 }

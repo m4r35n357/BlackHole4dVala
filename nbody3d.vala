@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
+Copyright (c) 2014, 2015, 2016, 2017 Ian Smith (m4r35n357)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -16,7 +16,7 @@ using GLib.Math;
 
 namespace Simulations {
 
-    public class Particle : GLib.Object {
+    public class Body : GLib.Object {
 
         public double qX;
         public double qY;
@@ -26,7 +26,7 @@ namespace Simulations {
         public double pZ;
         public double mass;
 
-        public Particle (double qX, double qY, double qZ, double pX, double pY, double pZ, double mass) {
+        public Body (double qX, double qY, double qZ, double pX, double pY, double pZ, double mass) {
             this.qX = qX;
             this.qY = qY;
             this.qZ = qZ;
@@ -43,7 +43,7 @@ namespace Simulations {
 
     public class NBody : IModel, ISolver, GLib.Object {
 
-        private Particle[] bodies;
+        private Body[] bodies;
         private int np;
         private double g;
         private double ts;
@@ -52,10 +52,8 @@ namespace Simulations {
         private double simulationTime;
         private ISymplectic integrator;
 
-        /**
-         * Private constructor, use the static factory
-         */
-        private NBody (Particle[] bodies, double g, double timeStep, double errorLimit, double simulationTime, int64 tRatio, string type) {
+        public NBody (Body[] bodies, double g, double timeStep, double errorLimit, double simulationTime, int64 tRatio, string type) {
+            stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
@@ -64,31 +62,6 @@ namespace Simulations {
             this.errorLimit = errorLimit;
             this.simulationTime = simulationTime;
             this.integrator = Symplectic.getIntegrator(this, type);
-        }
-
-        /**
-         * Static factory
-         */
-        public static NBody fromJson () {
-            Particle[] bodies = {};
-            var ic = getJson();
-            foreach (var node in ic.get_array_member("bodies").get_elements()) {
-                var body = node.get_object();
-                if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                                           body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"),
-                                           body.get_double_member("mass"));
-                } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                    var m = body.get_double_member("mass");
-                    bodies += new Particle(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                                           body.get_double_member("vX") * m, body.get_double_member("vY") * m, body.get_double_member("vZ") * m,
-                                           m);
-                } else {
-                    stderr.printf("Mixed use of momenta and velocity\n");
-                }
-            }
-            return new NBody(bodies, ic.get_double_member("g"), ic.get_double_member("timeStep"), ic.get_double_member("errorLimit"),
-                              ic.get_double_member("simulationTime"), ic.get_int_member("plotratio"), ic.get_string_member("integratorOrder"));
         }
 
         /**
@@ -114,9 +87,6 @@ namespace Simulations {
             return energy;
         }
 
-        /**
-         * Position update implements dH/dp, which in this case is a function of p only
-         */
         public void qUp (double d) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
@@ -127,9 +97,6 @@ namespace Simulations {
             }
         }
 
-        /**
-         * Momentum update implements -dH/dq, which in this case is a function of q only
-         */
         public void pUp (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
@@ -150,7 +117,7 @@ namespace Simulations {
         }
 
         /**
-         * Sole user method
+         * Externally visible method, sets up and controls the simulation
          */
         public int[] solve () {
             var h0 = h();
@@ -172,6 +139,9 @@ namespace Simulations {
             return { count };
         }
 
+        /**
+         * Write the simulated data to STDOUT
+         */
         private void output (double time, double hNow, double h0, double dbValue) {
             string[] data = {};
             foreach (var particle in bodies) {
@@ -180,10 +150,5 @@ namespace Simulations {
             stdout.printf("[".concat(string.joinv(",", data), "]\n"));
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);
         }
-    }
-
-    public static int main (string[] args) {
-        NBody.fromJson().solve();
-        return 0;
     }
 }

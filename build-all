@@ -6,47 +6,47 @@ valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
-symplectics='nbody3d newton'
+# cleanup executables
+rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands kerr-image \
+	Simulate GenParticle GenLight
+echo ""
 
-# cleanup
-rm -f $outfile $symplectics TestKdS KdS bh3dRk4 raytrace-commands kerr-image icgenParticle icgenLight
+# compile vala test files
+$valac --pkg json-glib-1.0 \
+	TestKdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala \
+	symplectic.vala utils.vala
 echo ""
 
 # compile vala files
-for executable in $symplectics
-do
-	rm -f ${executable}.c
-	$valac --pkg json-glib-1.0 $executable.vala symplectic.vala utils.vala
-	echo ""
-done
-
-$valac --pkg json-glib-1.0 TestKdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala symplectic.vala utils.vala
+$valac --pkg json-glib-1.0 --pkg gsl \
+	KdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala \
+	nbody3d.vala newton.vala symplectic.vala \
+	icgenParticle.vala icgenLight.vala utils.vala
 echo ""
-
-$valac --pkg json-glib-1.0 KdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala symplectic.vala utils.vala
-echo ""
-
 $valac --pkg json-glib-1.0 raytrace-commands.vala
 echo ""
 
+# compile raytracer
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 gcc -o kerr-image-ian kerr-image-ian.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 
-$valac -q -X -w --pkg json-glib-1.0 --pkg gsl icgenParticle.vala utils.vala
-echo ""
-
-$valac -q -X -w --pkg json-glib-1.0 icgenLight.vala utils.vala
-echo ""
-
-# strip symplectics
+# strip executables
 case $opt in
-	fast)	strip $symplectics KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight;;
+	fast)	strip KdS raytrace-commands kerr-image kerr-image-ian;;
 esac
 
+ln KdS Simulate
+ln KdS GenParticle
+ln KdS GenLight
+rm -f KdS
+
 # admire our work
-ls -lAh --color $symplectics TestKdS KdS raytrace-commands kerr-image kerr-image-ian icgenParticle icgenLight
+ls -lAh --color TestKdS Simulate GenParticle GenLight \
+		raytrace-commands kerr-image kerr-image-ian
+echo ""
 
 # test
+echo "Running Tests . . ."
 ./TestKdS >/dev/null && echo OK
 

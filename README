@@ -30,10 +30,10 @@ export pot=/tmp/potential
 
 2.	Create an initial conditions generator data file
 
-export icgen=./icgenParticle
+export icgen=./GenParticle
 cp icgenParticle-data.example $icdata
 
-export icgen=./icgenLight
+export icgen=./GenLight
 cp icgenLight-data.example $icdata
 
 
@@ -53,7 +53,7 @@ vi $ic; jq . $ic
 
 ./rg2 2>/dev/null
 
-export exe='./KdS'
+export exe='./Simulate'
 export exe='./KdS.py'
 export exe='nc.openbsd pi 1234'
 
