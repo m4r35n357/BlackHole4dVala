@@ -18,7 +18,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Common entry point
+     * Common entry point for all simulators
      */
     public static void main (string[] args) {
         var executable = args[0];
@@ -52,7 +52,8 @@ namespace Simulations {
                     }
                 }
                 new NBody(bodies, o.get_double_member("g"), o.get_double_member("timeStep"), o.get_double_member("errorLimit"),
-                                  o.get_double_member("simulationTime"), o.get_int_member("plotratio"), o.get_string_member("integratorOrder")).solve();
+                                  o.get_double_member("start"), o.get_double_member("end"), o.get_int_member("plotratio"),
+                                  o.get_string_member("integratorOrder")).solve();
             }
         } else if ("GenParticle" in executable) {
             var json = getJson();

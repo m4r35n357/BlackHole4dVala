@@ -23,7 +23,7 @@ namespace Simulations {
 
         private double[] compositionWeights;
         protected IModel model;
-        protected double[] baseCoefficients;
+        protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory
@@ -38,21 +38,21 @@ namespace Simulations {
          */
         public static ISymplectic getIntegrator (IModel model, string type) {
             switch (type) {
-                case "sb2":  // second order, basic
+                case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
                     return new Base2(model, { 1.0 });
-                case "sb4":  // fourth order, basic
+                case "sb4":
                     stderr.printf("4th Order Symplectic Integrator\n");
                     return new Base4(model, { 1.0 });
-                case "sc4":  // fourth order, composed from second order
+                case "sc4":
                     stderr.printf("4th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    var CBRT2 = pow(2.0, (1.0 / 3.0));
-                    return new Base2(model, { 1.0/(2.0-CBRT2), -CBRT2/(2.0-CBRT2), 1.0/(2.0-CBRT2) });
-                case "sc6":  // sixth order, composed from fourth order
+                    var CUBRT2 = pow(2.0, 1.0/3.0);
+                    return new Base2(model, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
+                case "sc6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 4th order)\n");
-                    var FIFTHRT2 = pow(2.0, (1.0 / 5.0));
-                    return new Base4(model, { 1.0/(2.0-FIFTHRT2), -FIFTHRT2/(2.0-FIFTHRT2), 1.0/(2.0-FIFTHRT2) });
-                case "sh6":  // sixth order, composed from second order
+                    var FTHRT2 = pow(2.0, 1.0/5.0);
+                    return new Base4(model, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
+                case "sh6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.78451361047755726381949763,
@@ -63,7 +63,7 @@ namespace Simulations {
                                                 0.23557321335935813368479318,
                                                 0.78451361047755726381949763
                                             });
-                case "sh8":  // eighth order, composed from second order
+                case "sh8":
                     stderr.printf("8th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.74167036435061295344822780,
@@ -82,7 +82,7 @@ namespace Simulations {
                                                 -0.40910082580003159399730010,
                                                 0.74167036435061295344822780
                                             });
-                case "sh10":  // tenth order, composed from second order
+                case "sh10":
                     stderr.printf("10th Order Symplectic Integrator (Composed from 2nd order)\n");
                     return new Base2(model, {
                                                 0.09040619368607278492161150,
@@ -149,16 +149,16 @@ namespace Simulations {
          */
         protected Base2 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            this.baseCoefficients = { 0.5, 1.0 };
+            this.coefficients = { 0.5, 1.0 };
         }
 
         /**
          * Weighted 2nd order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(baseCoefficients[0] * weight);
-            model.pUp(baseCoefficients[1] * weight);
-            model.qUp(baseCoefficients[0] * weight);
+            model.qUp(coefficients[0] * weight);
+            model.pUp(coefficients[1] * weight);
+            model.qUp(coefficients[0] * weight);
         }
     }
 
@@ -172,21 +172,21 @@ namespace Simulations {
          */
         protected Base4 (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            var CBRT2 = pow(2.0, (1.0 / 3.0));
-            this.baseCoefficients = { 0.5/(2.0-CBRT2), 1.0/(2.0-CBRT2), 0.5*(1.0-CBRT2)/(2.0-CBRT2), -CBRT2/(2.0-CBRT2) };
+            var CUBRT2 = pow(2.0, (1.0 / 3.0));
+            this.coefficients = { 0.5/(2.0-CUBRT2), 1.0/(2.0-CUBRT2), 0.5*(1.0-CUBRT2)/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2) };
         }
 
         /**
          * Weighted 4th order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(baseCoefficients[0] * weight);
-            model.pUp(baseCoefficients[1] * weight);
-            model.qUp(baseCoefficients[2] * weight);
-            model.pUp(baseCoefficients[3] * weight);
-            model.qUp(baseCoefficients[2] * weight);
-            model.pUp(baseCoefficients[1] * weight);
-            model.qUp(baseCoefficients[0] * weight);
+            model.qUp(coefficients[0] * weight);
+            model.pUp(coefficients[1] * weight);
+            model.qUp(coefficients[2] * weight);
+            model.pUp(coefficients[3] * weight);
+            model.qUp(coefficients[2] * weight);
+            model.pUp(coefficients[1] * weight);
+            model.qUp(coefficients[0] * weight);
         }
     }
 }

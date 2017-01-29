@@ -29,9 +29,7 @@ namespace Simulations {
         private double h;
         private int64 tr;
         private double L2;
-        private double rP;
         private double H0;
-        private double eR;
         private ISymplectic integrator;
 
         public Newton (double lFac, double r0, double starttime, double end, double timestep, int64 tRatio, string type) {
@@ -47,7 +45,7 @@ namespace Simulations {
             this.E0 = V(r);
             this.L = lFac * L;
             this.L2 = L * L;
-            this.rP = - sqrt(2.0 * fabs(E0 - V(r)));
+            this.rDot = - sqrt(2.0 * fabs(E0 - V(r)));
             this.H0 = H();
         }
 
@@ -56,25 +54,20 @@ namespace Simulations {
         }
 
        /**
-         * Total (kinetic + potential) energy of the system
+         * Total (kinetic + potential) energy of the system, the Hamiltonian
          */
         private double H () {
-            return 0.5 * rP * rP + V(r);
-        }
-
-        private void errors () {
-            eR = logError(fabs(H() - H0));
+            return 0.5 * rDot * rDot + V(r);
         }
 
         public void qUp (double d) {
-            rDot = rP;
             r += d * h * rDot;
             phDot = L / (r * r);
             ph += d * h * phDot;
         }
 
         public void pUp (double c) {
-            rP -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
+            rDot -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**
@@ -89,7 +82,7 @@ namespace Simulations {
                 }
                 integrator.compose();
                 count += 1;
-                t += h;
+                t = count * h;
             }
             output(t);
             return { count };
@@ -99,8 +92,7 @@ namespace Simulations {
          * Write the simulated data to STDOUT
          */
         private void output (double time) {
-            errors();
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e, \"v4e\":%.1f, \"v4c\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, ", time, time, eR, H() - H0, eR, -180.0);
+            stdout.printf("{\"tau\":%.9e, \"v4e\":%.1f, ", time, logError(fabs(H() - H0)));
             stdout.printf("\"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e, ", time, r, PI_2, ph);
             stdout.printf("\"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }

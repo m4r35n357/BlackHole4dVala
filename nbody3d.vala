@@ -49,10 +49,11 @@ namespace Simulations {
         private double ts;
         private int64 tr;
         private double errorLimit;
-        private double simulationTime;
+        private double start;
+        private double end;
         private ISymplectic integrator;
 
-        public NBody (Body[] bodies, double g, double timeStep, double errorLimit, double simulationTime, int64 tRatio, string type) {
+        public NBody (Body[] bodies, double g, double timeStep, double errorLimit, double start, double end, int64 tRatio, string type) {
             stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
             this.np = bodies.length;
@@ -60,7 +61,8 @@ namespace Simulations {
             this.ts = timeStep;
             this.tr = tRatio;
             this.errorLimit = errorLimit;
-            this.simulationTime = simulationTime;
+            this.start = start;
+            this.end = end;
             this.integrator = Symplectic.getIntegrator(this, type);
         }
 
@@ -72,7 +74,7 @@ namespace Simulations {
         }
 
        /**
-         * Total (kinetic + potential) energy of the system
+         * Total (kinetic + potential) energy of the system, the Hamiltonian
          */
         private double h () {
             var energy = 0.0;
@@ -123,18 +125,16 @@ namespace Simulations {
             var h0 = h();
             var count = 0;
             var t = 0.0;
-            while (t < simulationTime) {
+            var dbValue = -180.0;
+            while ((t < end) && (dbValue < errorLimit)) {
                 var hNow = h();
-                var dbValue = logError(fabs(hNow / h0 - 1.0));
-                if (count % tr == 0) {
+                dbValue = logError(fabs(hNow / h0 - 1.0));
+                if ((t > start) && (count % tr == 0)) {
                     output(t, hNow, h0, dbValue);
-                }
-                if (fabs(t) > simulationTime || dbValue > errorLimit) {
-                    return { -1 };
                 }
                 integrator.compose();
                 count += 1;
-                t += ts;
+                t = count * ts;
             }
             return { count };
         }
