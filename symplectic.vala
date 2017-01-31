@@ -140,7 +140,7 @@ namespace Simulations {
     }
 
     /**
-     * Second-order symplectic integrator concrete subclass
+     * Second-order symplectic integrator (position Verlet) concrete subclass
      */
     public class Base2 : Symplectic {
 
@@ -163,7 +163,7 @@ namespace Simulations {
     }
 
     /**
-     * Fourth-order symplectic integrator concrete subclass
+     * Fourth-order symplectic integrator (position Forest-Ruth) concrete subclass
      */
     public class Base4 : Symplectic {
 

@@ -70,7 +70,7 @@ namespace Simulations {
          * Euclidean distance between points A and B
          */
         private double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
-            return sqrt(pow(xB - xA, 2) + pow(yB - yA, 2) + pow(zB - zA, 2));
+            return sqrt((xB - xA) * (xB - xA) + (yB - yA) * (yB - yA) + (zB - zA) * (zB - zA));
         }
 
        /**
@@ -104,7 +104,8 @@ namespace Simulations {
                 var a = bodies[i];
                 for (var j = i + 1; j < np; j++) {
                     var b = bodies[j];
-                    var tmp = - c * ts * g * a.mass * b.mass / pow(distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ), 3);
+                    var d = distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
+                    var tmp = - c * ts * g * a.mass * b.mass / (d * d * d);
                     var dPx = (b.qX - a.qX) * tmp;
                     var dPy = (b.qY - a.qY) * tmp;
                     var dPz = (b.qZ - a.qZ) * tmp;
@@ -144,8 +145,8 @@ namespace Simulations {
          */
         private void output (double time, double hNow, double h0, double dbValue) {
             string[] data = {};
-            foreach (var particle in bodies) {
-                data += particle.toString();
+            foreach (var body in bodies) {
+                data += body.toString();
             }
             stdout.printf("[".concat(string.joinv(",", data), "]\n"));
             stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);

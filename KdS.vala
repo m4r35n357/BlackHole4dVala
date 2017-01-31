@@ -33,8 +33,8 @@ namespace Simulations {
                 KdSBase.newInstance(o.get_double_member("lambda"), o.get_double_member("a"),
                                     o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
                                     o.get_double_member("r0"), o.get_double_member("th0"),
-                                    o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"),
-                                    o.get_string_member("integrator")).solve();
+                                    o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
+                                    o.get_int_member("plotratio"), o.get_string_member("integrator")).solve();
             } else if (o.has_member("bodies")) {
                 Body[] bodies = {};
                 foreach (var node in o.get_array_member("bodies").get_elements()) {

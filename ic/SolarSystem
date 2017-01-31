@@ -2,7 +2,7 @@
   "IC": {
     "errorLimit": -60,
     "g": 6.67384e-20,
-    "integratorOrder": "sc4",
+    "integratorOrder": "sh10",
     "start": 0,
     "end": 10000000000,
     "timeStep": 100000,

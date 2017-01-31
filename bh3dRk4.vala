@@ -56,7 +56,6 @@ namespace Simulations {
                 assert_not_reached();
             }
             f(r, th, 0);
-
         }
 
         /**
