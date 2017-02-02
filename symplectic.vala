@@ -127,14 +127,14 @@ namespace Simulations {
         /**
          * Subclasses should perform one integration step with the current compositional weight
          */
-        protected abstract void integrate (double compositionWeight);
+        protected abstract void integrate (double compositionWeight, double h);
 
         /**
          * Perform a composition of weighted integration steps
          */
-        public void compose () {
+        public void compose (double h) {
             for (int i = 0; i < compositionWeights.length; i += 1) {
-                integrate(compositionWeights[i]);
+                integrate(compositionWeights[i], h);
             }
         }
     }
@@ -155,10 +155,10 @@ namespace Simulations {
         /**
          * Weighted 2nd order integration step
          */
-        protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[0] * weight);
+        protected override void integrate (double weight, double h) {
+            model.qUp(coefficients[0] * weight, h);
+            model.pUp(coefficients[1] * weight, h);
+            model.qUp(coefficients[0] * weight, h);
         }
     }
 
@@ -179,14 +179,14 @@ namespace Simulations {
         /**
          * Weighted 4th order integration step
          */
-        protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[2] * weight);
-            model.pUp(coefficients[3] * weight);
-            model.qUp(coefficients[2] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[0] * weight);
+        protected override void integrate (double weight, double h) {
+            model.qUp(coefficients[0] * weight, h);
+            model.pUp(coefficients[1] * weight, h);
+            model.qUp(coefficients[2] * weight, h);
+            model.pUp(coefficients[3] * weight, h);
+            model.qUp(coefficients[2] * weight, h);
+            model.pUp(coefficients[1] * weight, h);
+            model.qUp(coefficients[0] * weight, h);
         }
     }
 }

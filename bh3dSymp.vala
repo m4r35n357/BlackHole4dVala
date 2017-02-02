@@ -26,16 +26,12 @@ namespace Simulations {
         /**
          * Private constructor, use a static factory
          */
-        protected BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                      double tau0, double tauN, double tStep, int64 tRatio, string type) {
-            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
+        protected BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string type) {
+            base(lambda, a, mu2, E, L, Q, r0, th0);
             this.integrator = Symplectic.getIntegrator(this, type);
-            refresh(r, th);
-            this.Ur = - sqrt(fabs(R));
-            this.Uth = - sqrt(fabs(TH));
         }
 
-        public void qUp (double c) {  // dx/dTau = dH/dxP
+        public void qUp (double c, double h) {  // dx/dTau = dH/dxP
             t += c * h * Ut;
             r += c * h * Ur;
             th += c * h * Uth;
@@ -43,7 +39,7 @@ namespace Simulations {
             refresh(r, th);
         }
 
-        public void pUp (double d) {  // dxP/dTau = - dH/dx (dR/dr & dTheta/dtheta), see Maxima file maths.wxm, "Kerr-deSitter"
+        public void pUp (double d, double h) {  // dxP/dTau = - dH/dx (dR/dr & dTheta/dtheta), see Maxima file maths.wxm, "Kerr-deSitter"
             Ur += d * h * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * r2) - l_3 * r * ra2 - 1.0) * (K + mu2 * r2));
             var sth = sin(th);
             Uth += d * h * cos(th) * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
@@ -52,17 +48,20 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve () {
+        public int[] solve (double start, double end, double h, int64 tr) {
             var mino = 0.0;
             var tau = 0.0;
             var iterationCount = 0;
             var plotCount = 0;
+            refresh(r, th);
+            this.Ur = - sqrt(fabs(R));
+            this.Uth = - sqrt(fabs(TH));
             while (tau < end) {
                 if ((tau >= start) && (iterationCount % tr == 0)) {
                     plot(mino, tau);
                     plotCount += 1;
                 }
-                integrator.compose();
+                integrator.compose(h);
                 iterationCount += 1;
                 mino = iterationCount * h;
                 tau += h * S;

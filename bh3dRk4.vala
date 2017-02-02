@@ -21,7 +21,7 @@ namespace Simulations {
          * For handling different RK4 implementations
          */
         delegate double UpdaterType(double[] x);
-        delegate void EvaluatorType();
+        delegate void EvaluatorType(double h);
 
         /**
          * All fields are private
@@ -40,9 +40,8 @@ namespace Simulations {
         /**
          * Protected constructor, use a static factory
          */
-        protected BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                     double tau0, double tauN, double tStep, int64 tRatio, string type) {
-            base(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio);
+        protected BhRk4 (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string type) {
+            base(lambda, a, mu2, E, L, Q, r0, th0);
             if ("rk4" == type) {
                 this.evaluator = evaluator4;
                 this.updater = updater4;
@@ -55,13 +54,12 @@ namespace Simulations {
                 stderr.printf("Integrator not recognized: %s\n", type);
                 assert_not_reached();
             }
-            f(r, th, 0);
         }
 
         /**
          * Calculate potentials & coordinate velocities, and populate RK4 arrays for each stage
          */
-        private void f (double radius, double theta, int stage) {  // see maths.wxm in Maxima
+        private void f (double radius, double theta, double h, int stage) {  // see maths.wxm in Maxima
             refresh(radius, theta);
             // Equations of motion; the base class gives expressions for Mino time, so divide by Sigma
             Ut /= S;
@@ -92,48 +90,49 @@ namespace Simulations {
         /**
          * evaluator - (most of) the RK4 algorithm
          */
-        private void evaluator4 () {
-            f(r + 0.5 * kr[0], th + 0.5 * kth[0], 1);
-            f(r + 0.5 * kr[1], th + 0.5 * kth[1], 2);
-            f(r + kr[2], th + kth[2], 3);
+        private void evaluator4 (double h) {
+            f(r + 0.5 * kr[0], th + 0.5 * kth[0], h, 1);
+            f(r + 0.5 * kr[1], th + 0.5 * kth[1], h, 2);
+            f(r + kr[2], th + kth[2], h, 3);
         }
 
         /**
          * evaluator - (most of) the RK4 algorithm (3/8 method)
          */
-        private void evaluator438 () {
-            f(r + kr[0] / 3.0, th + kth[0] / 3.0, 1);
-            f(r - kr[0] / 3.0 + kr[1], th - kth[0] / 3.0 + kth[1], 2);
-            f(r + kr[0] - kr[1] + kr[2], th + kth[0] - kth[1] + kth[2], 3);
+        private void evaluator438 (double h) {
+            f(r + kr[0] / 3.0, th + kth[0] / 3.0, h, 1);
+            f(r - kr[0] / 3.0 + kr[1], th - kth[0] / 3.0 + kth[1], h, 2);
+            f(r + kr[0] - kr[1] + kr[2], th + kth[0] - kth[1] + kth[2], h, 3);
         }
 
         /**
          * RK4 common code including turning point handling
          */
-        private void iterate () {
+        private void iterate (double h) {
             sgnR = R > 0.0 ? sgnR : -sgnR;  // establish direction of R motion
             sgnTH = TH > 0.0 ? sgnTH : -sgnTH;  // establish direction of TH motion
-            evaluator();
+            evaluator(h);
             t += updater(kt);
             r += updater(kr) * sgnR;
             th += updater(kth) * sgnTH;
             ph += updater(kph);
-            f(r, th, 0);
+            f(r, th, h, 0);
         }
 
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve () {
+        public int[] solve (double start, double end, double h, int64 tr) {
             var tau = 0.0;
             var iterationCount = 0;
             var plotCount = 0;
+            f(r, th, h, 0);
             while (tau < end) {
                 if ((tau >= start) && (iterationCount % tr == 0)) {
                     plot(tau);
                     plotCount += 1;
                 }
-                iterate();
+                iterate(h);
                 iterationCount += 1;
                 tau = iterationCount * h;
             }

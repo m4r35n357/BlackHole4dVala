@@ -46,23 +46,15 @@ namespace Simulations {
         private Body[] bodies;
         private int np;
         private double g;
-        private double ts;
-        private int64 tr;
         private double errorLimit;
-        private double start;
-        private double end;
         private ISymplectic integrator;
 
-        public NBody (Body[] bodies, double g, double timeStep, double errorLimit, double start, double end, int64 tRatio, string type) {
+        public NBody (Body[] bodies, double g, double errorLimit, string type) {
             stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
-            this.ts = timeStep;
-            this.tr = tRatio;
             this.errorLimit = errorLimit;
-            this.start = start;
-            this.end = end;
             this.integrator = Symplectic.getIntegrator(this, type);
         }
 
@@ -89,23 +81,23 @@ namespace Simulations {
             return energy;
         }
 
-        public void qUp (double d) {
+        public void qUp (double d, double h) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                var tmp = d * ts / a.mass;
+                var tmp = d * h / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
             }
         }
 
-        public void pUp (double c) {
+        public void pUp (double c, double h) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 for (var j = i + 1; j < np; j++) {
                     var b = bodies[j];
                     var d = distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
-                    var tmp = - c * ts * g * a.mass * b.mass / (d * d * d);
+                    var tmp = - c * h * g * a.mass * b.mass / (d * d * d);
                     var dPx = (b.qX - a.qX) * tmp;
                     var dPy = (b.qY - a.qY) * tmp;
                     var dPz = (b.qZ - a.qZ) * tmp;
@@ -122,7 +114,7 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve () {
+        public int[] solve (double start, double end, double ts, int64 tr) {
             var h0 = h();
             var count = 0;
             var t = 0.0;
@@ -133,7 +125,7 @@ namespace Simulations {
                 if ((t > start) && (count % tr == 0)) {
                     output(t, hNow, h0, dbValue);
                 }
-                integrator.compose();
+                integrator.compose(ts);
                 count += 1;
                 t = count * ts;
             }

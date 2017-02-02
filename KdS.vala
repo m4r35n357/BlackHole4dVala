@@ -26,15 +26,11 @@ namespace Simulations {
         if ("Simulate" in executable) {
             var o = getJson().get_object_member("IC");
             if (o.has_member("Lfac")) {
-                new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"),
-                           o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"),
-                           o.get_string_member("integrator")).solve();
+                new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"), o.get_string_member("integrator")).solve(o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"));
             } else if (o.has_member("a")) {
-                KdSBase.newInstance(o.get_double_member("lambda"), o.get_double_member("a"),
-                                    o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                                    o.get_double_member("r0"), o.get_double_member("th0"),
-                                    o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"),
-                                    o.get_int_member("plotratio"), o.get_string_member("integrator")).solve();
+                KdSBase.newInstance(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"),
+                                    o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
+                                    o.get_double_member("r0"), o.get_double_member("th0"), o.get_string_member("integrator")).solve(o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"));
             } else if (o.has_member("bodies")) {
                 Body[] bodies = {};
                 foreach (var node in o.get_array_member("bodies").get_elements()) {
@@ -51,9 +47,7 @@ namespace Simulations {
                         stderr.printf("Mixed use of momenta and velocity\n");
                     }
                 }
-                new NBody(bodies, o.get_double_member("g"), o.get_double_member("timeStep"), o.get_double_member("errorLimit"),
-                                  o.get_double_member("start"), o.get_double_member("end"), o.get_int_member("plotratio"),
-                                  o.get_string_member("integratorOrder")).solve();
+                new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"), o.get_string_member("integratorOrder")).solve(o.get_double_member("start"), o.get_double_member("end"), o.get_double_member("step"), o.get_int_member("plotratio"));
             }
         } else if ("GenParticle" in executable) {
             var json = getJson();

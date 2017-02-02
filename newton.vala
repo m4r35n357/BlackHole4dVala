@@ -24,23 +24,15 @@ namespace Simulations {
         private double ph;
         private double rDot;
         private double phDot;
-        private double start;
-        private double end;
-        private double h;
-        private int64 tr;
         private double L2;
         private double H0;
         private ISymplectic integrator;
 
-        public Newton (double lFac, double r0, double starttime, double end, double timestep, int64 tRatio, string type) {
+        public Newton (double lFac, double r0, string type) {
             stderr.printf("Newtonian Orbit\n");
             this.L = sqrt(r0);
             this.L2 = L * L;
             this.r = r0;
-            this.start = starttime;
-            this.end = end;
-            this.h = timestep;
-            this.tr = tRatio;
             this.integrator = Symplectic.getIntegrator(this, type);
             this.E0 = V(r);
             this.L = lFac * L;
@@ -60,27 +52,27 @@ namespace Simulations {
             return 0.5 * rDot * rDot + V(r);
         }
 
-        public void qUp (double d) {
+        public void qUp (double d, double h) {
             r += d * h * rDot;
             phDot = L / (r * r);
             ph += d * h * phDot;
         }
 
-        public void pUp (double c) {
+        public void pUp (double c, double h) {
             rDot -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve () {
+        public int[] solve (double start, double end, double h, int64 tr) {
             var count = 0;
             var t = 0.0;
             while (t < end) {
                 if ((t > start) && (count % tr == 0)) {
                     output(t);
                 }
-                integrator.compose();
+                integrator.compose(h);
                 count += 1;
                 t = count * h;
             }

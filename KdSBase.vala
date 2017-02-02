@@ -33,10 +33,6 @@ namespace Simulations {
         protected double K;
         protected double aE;
         protected double aL;
-        protected double start;
-        protected double end;
-        protected double h;
-        protected int64 tr;
         // Variables
         protected double r2;
         protected double ra2;
@@ -62,8 +58,7 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory
          */
-        protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                            double tau0, double tauN, double tStep, int64 plotRatio) {
+        protected KdSBase (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             this.l_3 = lambda / 3.0;
             this.a = a;
@@ -77,10 +72,6 @@ namespace Simulations {
             this.aL = a * L;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
             this.K = Q + X2 * (L - aE) * (L - aE);
-            this.start = tau0;
-            this.end = tauN;
-            this.h = tStep;
-            this.tr = plotRatio;
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
         }
@@ -122,12 +113,11 @@ namespace Simulations {
         /**
          *  Static factory
          */
-        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0,
-                                            double tau0, double tauN, double tStep, int64 tRatio, string t) {
+        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string t) {
             if (("rk4" == t) || ("rk438" == t)) {
-                return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, t);
+                return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, t);
             } else if (("sb2" == t) || ("sb4" == t) || ("sc4" == t) || ("sc6" == t) || ("sh6" == t) || ("sh8" == t) || ("sh10" == t)) {
-                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, tau0, tauN, tStep, tRatio, t);
+                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, t);
             } else {
                 stderr.printf("Bad integrator; should be [ rk4 | rk438 | sb2 | sb4 | sc4 | sc6 | sh6 | sh8 | sh10 ], found {%s}\n", t);
                 assert_not_reached();
