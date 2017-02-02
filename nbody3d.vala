@@ -81,23 +81,23 @@ namespace Simulations {
             return energy;
         }
 
-        public void qUp (double d, double h) {
+        public void qUp (double d) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
-                var tmp = d * h / a.mass;
+                var tmp = d / a.mass;
                 a.qX += a.pX * tmp;
                 a.qY += a.pY * tmp;
                 a.qZ += a.pZ * tmp;
             }
         }
 
-        public void pUp (double c, double h) {
+        public void pUp (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 for (var j = i + 1; j < np; j++) {
                     var b = bodies[j];
                     var d = distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
-                    var tmp = - c * h * g * a.mass * b.mass / (d * d * d);
+                    var tmp = - c * g * a.mass * b.mass / (d * d * d);
                     var dPx = (b.qX - a.qX) * tmp;
                     var dPy = (b.qY - a.qY) * tmp;
                     var dPz = (b.qZ - a.qZ) * tmp;

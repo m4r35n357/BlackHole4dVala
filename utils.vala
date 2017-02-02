@@ -49,12 +49,12 @@ namespace Simulations {
         /**
          * Coordinate updates, called by ISymplectic.compose()
          */
-        public abstract void qUp (double d, double h);
+        public abstract void qUp (double d);
 
         /**
          * Momentum updates, called by ISymplectic.compose()
          */
-        public abstract void pUp (double c, double h);
+        public abstract void pUp (double c);
     }
 
     /**

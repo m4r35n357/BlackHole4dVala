@@ -52,14 +52,14 @@ namespace Simulations {
             return 0.5 * rDot * rDot + V(r);
         }
 
-        public void qUp (double d, double h) {
-            r += d * h * rDot;
+        public void qUp (double d) {
+            r += d * rDot;
             phDot = L / (r * r);
-            ph += d * h * phDot;
+            ph += d * phDot;
         }
 
-        public void pUp (double c, double h) {
-            rDot -= c * h * (1.0 / (r * r) - L2 / (r * r * r));
+        public void pUp (double c) {
+            rDot -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**

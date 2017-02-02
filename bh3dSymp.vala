@@ -31,18 +31,18 @@ namespace Simulations {
             this.integrator = Symplectic.getIntegrator(this, type);
         }
 
-        public void qUp (double c, double h) {  // dx/dTau = dH/dxP
-            t += c * h * Ut;
-            r += c * h * Ur;
-            th += c * h * Uth;
-            ph += c * h * Uph;
+        public void qUp (double c) {  // dx/dTau = dH/dxP
+            t += c * Ut;
+            r += c * Ur;
+            th += c * Uth;
+            ph += c * Uph;
             refresh(r, th);
         }
 
-        public void pUp (double d, double h) {  // dxP/dTau = - dH/dx (dR/dr & dTheta/dtheta), see Maxima file maths.wxm, "Kerr-deSitter"
-            Ur += d * h * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * r2) - l_3 * r * ra2 - 1.0) * (K + mu2 * r2));
+        public void pUp (double d) {  // dxP/dTau = - dH/dx (dR/dr & dTheta/dtheta), see Maxima file maths.wxm, "Kerr-deSitter"
+            Ur += d * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * r2) - l_3 * r * ra2 - 1.0) * (K + mu2 * r2));
             var sth = sin(th);
-            Uth += d * h * cos(th) * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
+            Uth += d * cos(th) * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
         }
 
         /**
