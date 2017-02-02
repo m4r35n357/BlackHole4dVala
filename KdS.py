@@ -19,7 +19,7 @@ from sys import stdin, stderr, stdout, argv
 
 
 class KdSBase(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, thetaMin, start, end, timestep, tratio):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, thetaMin):
         self.l_3 = Lambda / 3.0
         self.a = a
         self.mu2 = mu2
@@ -32,10 +32,6 @@ class KdSBase(object):
         self.aL = a * L
         self.X2 = (1.0 + self.a2l_3)**2
         self.K = C + self.X2 * (L - self.aE)**2
-        self.start_time = start
-        self.end_time = end
-        self.h = timestep
-        self.tr = tratio
         self.sgnR = self.sgnTH = -1
         self.t = self.ph = 0.0
         self.r = r0
@@ -72,8 +68,8 @@ class KdSBase(object):
 
 
 class BhRk4(KdSBase):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio, integrator):
-        super(BhRk4, self).__init__(Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio)
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, integrator):
+        super(BhRk4, self).__init__(Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin)
         self.kt = [0.0, 0.0, 0.0, 0.0]
         self.kr = [0.0, 0.0, 0.0, 0.0]
         self.kth = [0.0, 0.0, 0.0, 0.0]
@@ -87,19 +83,17 @@ class BhRk4(KdSBase):
             self.updater = self.updater438
         else:
             raise Exception('>>> ERROR! Integrator order must be rk4 or rk438, was {} <<<'.format(integrator))
-        self.max_iterations = round(duration / self.h)
-        self.f(self.r, self.th, 0)
 
-    def f(self, radius, theta, stage):
+    def f(self, radius, theta, h, stage):
         self.refresh(radius, theta)
         self.Ut /= self.S
         self.Ur = sqrt(self.R if self.R >= 0.0 else -self.R) / self.S
         self.Uth = sqrt(self.TH if self.TH >= 0.0 else -self.TH) / self.S
         self.Uph /= self.S
-        self.kt[stage] = self.h * self.Ut
-        self.kr[stage] = self.h * self.Ur
-        self.kth[stage] = self.h * self.Uth
-        self.kph[stage] = self.h * self.Uph
+        self.kt[stage] = h * self.Ut
+        self.kr[stage] = h * self.Ur
+        self.kth[stage] = h * self.Uth
+        self.kph[stage] = h * self.Uph
 
     @staticmethod
     def updater4(kx):
@@ -109,38 +103,39 @@ class BhRk4(KdSBase):
     def updater438(kx):
         return (kx[0] + 3.0 * (kx[1] + kx[2]) + kx[3]) / 8.0
 
-    def evaluator4(self):
-        self.f(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], 1)
-        self.f(self.r + 0.5 * self.kr[1], self.th + 0.5 * self.kth[1], 2)
-        self.f(self.r + self.kr[2], self.th + self.kth[2], 3)
+    def evaluator4(self, h):
+        self.f(self.r + 0.5 * self.kr[0], self.th + 0.5 * self.kth[0], h, 1)
+        self.f(self.r + 0.5 * self.kr[1], self.th + 0.5 * self.kth[1], h, 2)
+        self.f(self.r + self.kr[2], self.th + self.kth[2], h, 3)
 
-    def evaluator438(self):
-        self.f(self.r + self.kr[0] / 3.0, self.th + self.kth[0] / 3.0, 1)
-        self.f(self.r - self.kr[0] / 3.0 + self.kr[1], self.th - self.kth[0] / 3.0 + self.kth[1], 2)
-        self.f(self.r + self.kr[0] - self.kr[1] + self.kr[2], self.th + self.kth[0] - self.kth[1] + self.kth[2], 3)
+    def evaluator438(self, h):
+        self.f(self.r + self.kr[0] / 3.0, self.th + self.kth[0] / 3.0, h, 1)
+        self.f(self.r - self.kr[0] / 3.0 + self.kr[1], self.th - self.kth[0] / 3.0 + self.kth[1], h, 2)
+        self.f(self.r + self.kr[0] - self.kr[1] + self.kr[2], self.th + self.kth[0] - self.kth[1] + self.kth[2], h, 3)
 
-    def iterate(self):
+    def iterate(self, h):
         self.sgnR = self.sgnR if self.R > 0.0 else - self.sgnR
         self.sgnTH = self.sgnTH if self.TH > 0.0 else - self.sgnTH
-        self.evaluator()
+        self.evaluator(h)
         self.t += self.updater(self.kt)
         self.r += self.updater(self.kr) * self.sgnR
         self.th += self.updater(self.kth) * self.sgnTH
         self.ph += self.updater(self.kph)
-        self.f(self.r, self.th, 0)
+        self.f(self.r, self.th, h, 0)
 
-    def solve(self):
+    def solve(self, start, end, h, tr):
         tau = 0.0
-        iterationCount = plotCount = 0
-        while tau < self.end_time:
-            if tau >= self.start_time and iterationCount % self.tr == 0:
+        i = plotCount = 0
+        self.f(self.r, self.th, h, 0)
+        while tau < end:
+            if tau >= start and i % tr == 0:
                 self.plot(tau)
                 plotCount += 1
-            self.iterate()
-            iterationCount += 1
-            tau = iterationCount * self.h
+            self.iterate(h)
+            i += 1
+            tau = i * h
         self.plot(tau)
-        return iterationCount, plotCount
+        return i, plotCount
 
     def plot(self, tau):
         print >> stdout, '{"tau":%.9e, "v4e":%.1f, "D_r":%.9e, "D_th":%.9e, "S":%.9e,' \
@@ -150,29 +145,26 @@ class BhRk4(KdSBase):
 
 
 class BhSymp(KdSBase):
-    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio, integrator):
-        super(BhSymp, self).__init__(Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, starttime, duration, timestep, tratio)
+    def __init__(self, Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin, integrator):
+        super(BhSymp, self).__init__(Lambda, spin, pMass2, energy, momentum, carter, r0, thetaMin)
         self.integrator = Symplectic(self, integrator)
-        self.refresh(self.r, self.th)
-        self.Ur = - sqrt(fabs(self.R))
-        self.Uth = - sqrt(fabs(self.TH))
 
     @staticmethod
     def modH(xdot, x):
         return 0.5 * fabs(xdot**2 - x)
 
-    def qUp(self, d):
-        self.t += d * self.h * self.Ut
-        self.r += d * self.h * self.Ur
-        self.th += d * self.h * self.Uth
-        self.ph += d * self.h * self.Uph
+    def qUp(self, h):
+        self.t += h * self.Ut
+        self.r += h * self.Ur
+        self.th += h * self.Uth
+        self.ph += h * self.Uph
         self.refresh(self.r, self.th)
 
-    def pUp(self, c):
-        self.Ur += c * self.h * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
-                                        - (self.r * (1.0 - self.l_3 * self.r2) - self.l_3 * self.r * self.ra2 - 1.0) * (self.K + self.mu2 * self.r2))
-        self.Uth += c * self.h * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
-                                  + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
+    def pUp(self, h):
+        self.Ur += h * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
+                        - (self.r * (1.0 - self.l_3 * self.r2) - self.l_3 * self.r * self.ra2 - 1.0) * (self.K + self.mu2 * self.r2))
+        self.Uth += h * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
+                        + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
     def plot(self, mino, tau):
         eR = self.log_error(self.modH(self.Ur, self.R))
@@ -181,19 +173,22 @@ class BhSymp(KdSBase):
         print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
                 % (mino, tau, v4e, -180.0, eR, eTh, self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
 
-    def solve(self):
+    def solve(self, start, end, h, tr):
         mino = tau = 0.0
-        iterationCount = plotCount = 0
-        while tau <= self.end_time:
-            if tau >= self.start_time and iterationCount % self.tr == 0:
+        i = plotCount = 0
+        self.refresh(self.r, self.th)
+        self.Ur = - sqrt(fabs(self.R))
+        self.Uth = - sqrt(fabs(self.TH))
+        while tau <= end:
+            if tau >= start and i % tr == 0:
                 self.plot(mino, tau)
                 plotCount += 1
-            self.integrator.compose()
-            iterationCount += 1
-            mino = iterationCount * self.h
-            tau += self.h * self.S  # dTau = sigma * dlambda  - NB lambda is affine parameter here, not the cc !!!
+            self.integrator.compose(h)
+            i += 1
+            mino = i * h
+            tau += h * self.S  # dTau = sigma * dlambda  - NB lambda is affine parameter here, not the cc !!!
         self.plot(mino, tau)
-        return iterationCount, plotCount
+        return i, plotCount
 
 
 class Symplectic(object):
@@ -300,9 +295,9 @@ class Symplectic(object):
         self.model.pUp(w * self.coefficients[1])  # w * d3
         self.model.qUp(w * self.coefficients[0])  # w * c4
 
-    def compose(self):
+    def compose(self, h):
         for i in self.wRange:  # Composition happens in this loop
-            self.base(self.w[i])
+            self.base(self.w[i] * h)
 
 
 def main():
@@ -312,10 +307,10 @@ def main():
     print >> stderr, input_data
     if not ic.get("integrator") or "rk4" in ic['integrator']:
         BhRk4(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'],
-                ic['start'], ic['end'], ic['step'], ic['plotratio'], ic['integrator']).solve()
+                ic['integrator']).solve(ic['start'], ic['end'], ic['step'], ic['plotratio'])
     else:
         BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'],
-                ic['start'], ic['end'], ic['step'], ic['plotratio'], ic['integrator']).solve()
+                ic['integrator']).solve(ic['start'], ic['end'], ic['step'], ic['plotratio'], )
 
 if __name__ == "__main__":
     main()
