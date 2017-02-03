@@ -38,6 +38,9 @@ namespace Simulations {
          */
         public static ISymplectic getIntegrator (IModel model, string type) {
             switch (type) {
+                case "sb1":
+                    stderr.printf("1st Order Symplectic Integrator\n");
+                    return new Base1(model, { 1.0 });
                 case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
                     return new Base2(model, { 1.0 });
@@ -136,6 +139,28 @@ namespace Simulations {
             for (int i = 0; i < compositionWeights.length; i += 1) {
                 integrate(compositionWeights[i] * h);
             }
+        }
+    }
+
+    /**
+     * First-order symplectic integrator (Euler-Cromer) concrete subclass
+     */
+    public class Base1 : Symplectic {
+
+        /**
+         * Protected constructor, use the static factory in superclass
+         */
+        protected Base1 (IModel model, double[] compositionWeights) {
+            base(model, compositionWeights);
+            this.coefficients = { 1.0, 1.0 };
+        }
+
+        /**
+         * Weighted 1st order integration step
+         */
+        protected override void integrate (double weight) {
+            model.qUp(coefficients[0] * weight);
+            model.pUp(coefficients[1] * weight);
         }
     }
 

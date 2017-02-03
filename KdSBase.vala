@@ -116,7 +116,7 @@ namespace Simulations {
         public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string t) {
             if (("rk4" == t) || ("rk438" == t)) {
                 return new BhRk4(lambda, a, mu2, E, L, Q, r0, th0, t);
-            } else if (("sb2" == t) || ("sb4" == t) || ("sc4" == t) || ("sc6" == t) || ("sh6" == t) || ("sh8" == t) || ("sh10" == t)) {
+            } else if (("sb1" == t) || ("sb2" == t) || ("sb4" == t) || ("sc4" == t) || ("sc6" == t) || ("sh6" == t) || ("sh8" == t) || ("sh10" == t)) {
                 return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, t);
             } else {
                 stderr.printf("Bad integrator; should be [ rk4 | rk438 | sb2 | sb4 | sc4 | sc6 | sh6 | sh8 | sh10 ], found {%s}\n", t);
