@@ -21,45 +21,27 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
 
 def main():
-    if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply a time variable, the number of points to plot, and a coordinate to plot <<<')
-    timeCoordinate = str(argv[1])
-    nPoints = int(argv[2])
-    coordinate = argv[3]
-    tau = array('d')
-    c = array('d')
-    cDot = array('d')
-    tauMax = 0.0
+    print >> stderr, "Executable: {}".format(argv[0])
+    if len(argv) < 2:
+        raise Exception('>>> ERROR! Please supply a plotting interval and a coordinate to plot <<<')
+    interval = int(argv[1])
+    coordinate = argv[2]
     line = stdin.readline()
-    while line:  # build raw data arrays
-        p = loads(line)
-        tauValue = p[timeCoordinate]
-        tauMax = tauValue if tauValue > tauMax else tauMax
-        tau.append(tauValue)
-        c.append(p[coordinate])
-        cDot.append(p[coordinate + 'P'])
-        line = stdin.readline()
-    try:  # interpolate here
-        cI = InterpolatedUnivariateSpline(tau, c, k = 1)
-        cDotI = InterpolatedUnivariateSpline(tau, cDot, k = 1)
-    except ValueError as e:
-        print('DATA ERROR: ' + str(argv[0]) + ': ' + str(e))
-        exit(-2)
     ax1 = pyplot.figure().add_subplot(111)
     pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
-    ax1.set_ylabel(coordinate + 'Dot', color='b')
-    ax1.set_xlabel(coordinate, color='b')
-    tauI = np.linspace(0, tauMax, num = nPoints)
-    for i in range(len(tauI)):
-        ax1.plot(cI(tauI[i]), cDotI(tauI[i]), color='magenta', marker='.', markersize=1)
-    try:
-        pyplot.show()
-    except AttributeError as e:
-        print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(coordinate) + ': ' + str(e))
-        exit(-3)
+    ax1.set_xlabel(coordinate, color='k')
+    ax1.set_ylabel(coordinate + 'Dot', color='k')
+    n = 0
+    while line:
+        p = loads(line)
+        if n % interval == 0:
+            ax1.plot(p[coordinate], p[coordinate + 'P'], 'b.', markersize=2)
+        line = stdin.readline()
+        n += 1
+#        pyplot.legend(['t', 'r', 'th', 'ph'], loc='best')
+    pyplot.show()
 
 if __name__ == "__main__":
     main()
 else:
     print >> stderr, __name__ + " module loaded"
-
