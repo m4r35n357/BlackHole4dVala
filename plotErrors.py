@@ -39,27 +39,24 @@ def main():
     ax2.yaxis.set_minor_locator(minorLocator)
     ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
     ax2.set_ylim(-150.0, 0.0)
-    pyplot.axhspan(-30.0, 0.0 + .2, facecolor='red', alpha=0.5)
-    pyplot.axhspan(-60.0, -30.0 + .2, facecolor='orange', alpha=0.5)
-    pyplot.axhspan(-90.0, -60.0 + .2, facecolor='yellow', alpha=0.5)
-    pyplot.axhspan(-120.0, -90.0 + .2, facecolor='cyan', alpha=0.5)
-    pyplot.axhspan(-150.0, -120.0 + .2, facecolor='green', alpha=0.5)
+    pyplot.axhspan(-30.0, 0.0 + .2, facecolor='red', alpha=0.4)
+    pyplot.axhspan(-60.0, -30.0 + .2, facecolor='orange', alpha=0.4)
+    pyplot.axhspan(-90.0, -60.0 + .2, facecolor='yellow', alpha=0.4)
+    pyplot.axhspan(-120.0, -90.0 + .2, facecolor='cyan', alpha=0.4)
+    pyplot.axhspan(-150.0, -120.0 + .2, facecolor='green', alpha=0.4)
     count = 0
     line = stdin.readline()
     while line:  # build raw data arrays
         p = loads(line)
         if count % interval == 0:
             timeValue = p[timeCoordinate]
-            ax1.plot(timeValue, float(p['v4e']), color='#006000', linestyle='-', marker='.', markersize=2, zorder=11)
-            try:
-                ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
-            except KeyError:
-                pass
-            try:
+            ax1.plot(timeValue, float(p['v4e']), color='#001000', linestyle='-', marker='.', markersize=3, zorder=11)
+            # if 'v4c' in p:
+            #     ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
+            if 'ER' in p:
                 ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker=',', markersize=2, zorder=9)
+            if 'ETh' in p:
                 ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker=',', markersize=2, zorder=8)
-            except KeyError:
-                pass
         line = stdin.readline()
         count += 1
     try:
