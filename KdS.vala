@@ -33,7 +33,7 @@ namespace Simulations {
                                                                     o.get_double_member("step"),
                                                                     o.get_int_member("plotratio"));
             } else if (o.has_member("a")) {
-                KdSBase.newInstance(o.get_double_member("lambda"),
+                BhSymp.newInstance(o.get_double_member("lambda"),
                                     o.get_double_member("a"),
                                     o.get_double_member("mu"),
                                     o.get_double_member("E"),

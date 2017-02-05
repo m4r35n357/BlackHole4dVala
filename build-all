@@ -13,13 +13,13 @@ echo ""
 
 # compile vala test files
 $valac --pkg json-glib-1.0 \
-	TestKdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala \
+	TestKdS.vala bh3dSymp.vala \
 	symplectic.vala utils.vala
 echo ""
 
 # compile vala files
 $valac --pkg json-glib-1.0 --pkg gsl \
-	KdS.vala KdSBase.vala bh3dRk4.vala bh3dSymp.vala \
+	KdS.vala bh3dSymp.vala \
 	nbody3d.vala newton.vala symplectic.vala \
 	icgenParticle.vala icgenLight.vala utils.vala
 echo ""
