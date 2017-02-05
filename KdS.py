@@ -196,7 +196,10 @@ class Symplectic(object):
         self.cbrt2 = 2.0**(1.0 / 3.0)
         self.f2 = 1.0 / (2.0 - self.cbrt2)
         self.coefficients = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
-        if order == 'sb2':  # Second order base
+        if order == 'sb1':  # Second order base
+            self.base = self.base1
+            self.w = [1.0]
+        elif order == 'sb2':  # Second order base
             self.base = self.base2
             self.w = [1.0]
         elif order == 'sc4':  # Fourth order, composed from Second order
@@ -280,6 +283,10 @@ class Symplectic(object):
             raise Exception('>>> Integrator must be sb2, sc4, sb4, sc6, sh6, sh8, or sh10, was "{}" <<<'.format(order))
         self.wRange = range(len(self.w))
         self.model = model
+
+    def base1(self, w):  # Symplectic Euler
+        self.model.qUp(w)
+        self.model.pUp(w)
 
     def base2(self, w):  # Compose higher orders from this second-order symplectic base (d2 = 0.0)
         self.model.qUp(w * 0.5)  # c1 = 0.5
