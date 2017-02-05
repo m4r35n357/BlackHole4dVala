@@ -23,7 +23,6 @@ namespace Simulations {
 
         private double[] compositionWeights;
         protected IModel model;
-        protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory
@@ -40,24 +39,24 @@ namespace Simulations {
             switch (type) {
                 case "sb1":
                     stderr.printf("1st Order Symplectic Integrator\n");
-                    return new Base1(model, { 1.0 });
+                    return new EulerCromer(model, { 1.0 });
                 case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
-                    return new Base2(model, { 1.0 });
+                    return new StormerVerlet(model, { 1.0 });
                 case "sb4":
                     stderr.printf("4th Order Symplectic Integrator\n");
-                    return new Base4(model, { 1.0 });
+                    return new ForestRuth(model, { 1.0 });
                 case "sc4":
                     stderr.printf("4th Order Symplectic Integrator (Composed from 2nd order)\n");
                     var CUBRT2 = pow(2.0, 1.0/3.0);
-                    return new Base2(model, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
+                    return new StormerVerlet(model, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
                 case "sc6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 4th order)\n");
                     var FTHRT2 = pow(2.0, 1.0/5.0);
-                    return new Base4(model, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
+                    return new ForestRuth(model, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
                 case "sh6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new Base2(model, {
+                    return new StormerVerlet(model, {
                                                 0.78451361047755726381949763,
                                                 0.23557321335935813368479318,
                                                 -1.17767998417887100694641568,
@@ -68,7 +67,7 @@ namespace Simulations {
                                             });
                 case "sh8":
                     stderr.printf("8th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new Base2(model, {
+                    return new StormerVerlet(model, {
                                                 0.74167036435061295344822780,
                                                 -0.40910082580003159399730010,
                                                 0.19075471029623837995387626,
@@ -87,7 +86,7 @@ namespace Simulations {
                                             });
                 case "sh10":
                     stderr.printf("10th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new Base2(model, {
+                    return new StormerVerlet(model, {
                                                 0.09040619368607278492161150,
                                                 0.53591815953030120213784983,
                                                 0.35123257547493978187517736,
@@ -143,59 +142,59 @@ namespace Simulations {
     }
 
     /**
-     * First-order symplectic integrator (Euler-Cromer) concrete subclass
+     * First-order symplectic integrator concrete subclass
      */
-    public class Base1 : Symplectic {
+    public class EulerCromer : Symplectic {
 
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected Base1 (IModel model, double[] compositionWeights) {
+        protected EulerCromer (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            this.coefficients = { 1.0, 1.0 };
         }
 
         /**
          * Weighted 1st order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
+            model.qUp(weight);
+            model.pUp(weight);
         }
     }
 
     /**
-     * Second-order symplectic integrator (position Verlet) concrete subclass
+     * Second-order symplectic integrator concrete subclass
      */
-    public class Base2 : Symplectic {
+    public class StormerVerlet : Symplectic {
 
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected Base2 (IModel model, double[] compositionWeights) {
+        protected StormerVerlet (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
-            this.coefficients = { 0.5, 1.0 };
         }
 
         /**
          * Weighted 2nd order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[0] * weight);
+            model.qUp(weight * 0.5);
+            model.pUp(weight);
+            model.qUp(weight * 0.5);
         }
     }
 
     /**
-     * Fourth-order symplectic integrator (position Forest-Ruth) concrete subclass
+     * Fourth-order symplectic integrator concrete subclass
      */
-    public class Base4 : Symplectic {
+    public class ForestRuth : Symplectic {
+
+        protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected Base4 (IModel model, double[] compositionWeights) {
+        protected ForestRuth (IModel model, double[] compositionWeights) {
             base(model, compositionWeights);
             var CUBRT2 = pow(2.0, (1.0 / 3.0));
             this.coefficients = { 0.5/(2.0-CUBRT2), 1.0/(2.0-CUBRT2), 0.5*(1.0-CUBRT2)/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2) };
