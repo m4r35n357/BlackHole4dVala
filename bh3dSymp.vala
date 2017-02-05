@@ -50,23 +50,23 @@ namespace Simulations {
         public int[] solve (double start, double end, double h, int64 tr) {
             var mino = 0.0;
             var tau = 0.0;
-            var iterationCount = 0;
+            var i = 0;
             var plotCount = 0;
             refresh(r, th);
             this.Ur = - sqrt(fabs(R));
             this.Uth = - sqrt(fabs(TH));
             while (tau < end) {
-                if ((tau >= start) && (iterationCount % tr == 0)) {
+                if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau);
                     plotCount += 1;
                 }
                 integrator.compose(h);
-                iterationCount += 1;
-                mino = iterationCount * h;
+                i += 1;
+                mino = h * i;
                 tau += h * S;
             }
             plot(mino, tau);
-            return { iterationCount, plotCount };  // for testing
+            return { i, plotCount };  // for testing
         }
 
         private double modH (double xDot, double X) {
