@@ -30,7 +30,7 @@ class Symplectic(object):
             self.coefficients = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
-            raise Exception('>>> Integrator must be sb2 or sb4, was "{}" <<<'.format(order))
+            raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
         self.model = model
 
     def symplectic_euler(self, w):
@@ -90,7 +90,7 @@ class BhSymp(object):
         self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * self.X2
         self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * self.X2
 
-    def v4_error(self, Ut, Ur, Uth, Uph):  # norm squared, xDot means dx/dTau !!!
+    def v4_error(self, Ut, Ur, Uth, Uph):
         SX2 = self.S * self.X2
         return fabs(self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2
                     + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2)
@@ -129,14 +129,14 @@ class BhSymp(object):
         self.refresh()
         self.Ur = - sqrt(fabs(self.R))
         self.Uth = - sqrt(fabs(self.TH))
-        while tau <= end:
+        while tau < end:
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau)
                 plotCount += 1
             self.integrator.step(h)
             i += 1
             mino = h * i
-            tau += h * self.S  # dTau = sigma * dlambda  - NB lambda is affine parameter here, not the cc !!!
+            tau += h * self.S
         self.plot(mino, tau)
         return i, plotCount
 
