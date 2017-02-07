@@ -23,16 +23,14 @@ namespace Simulations {
 
         protected IModel model;
         private double h;
-        private double[] compositionWeights;
         protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory
          */
-        protected Symplectic (IModel model, double h, double[] compositionWeights) {
+        protected Symplectic (IModel model, double h) {
             this.model = model;
             this.h = h;
-            this.compositionWeights = compositionWeights;
         }
 
         /**
@@ -42,88 +40,13 @@ namespace Simulations {
             switch (type) {
                 case "sb1":
                     stderr.printf("1st Order Symplectic Integrator\n");
-                    return new EulerCromer(model, h, { 1.0 });
+                    return new EulerCromer(model, h);
                 case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
-                    return new StormerVerlet(model, h, { 1.0 });
+                    return new StormerVerlet(model, h);
                 case "sb4":
                     stderr.printf("4th Order Symplectic Integrator\n");
-                    return new ForestRuth(model, h, { 1.0 });
-                case "sc4":
-                    stderr.printf("4th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    var CUBRT2 = pow(2.0, 1.0/3.0);
-                    return new StormerVerlet(model, h, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
-                case "sc6":
-                    stderr.printf("6th Order Symplectic Integrator (Composed from 4th order)\n");
-                    var FTHRT2 = pow(2.0, 1.0/5.0);
-                    return new ForestRuth(model, h, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
-                case "sh6":
-                    stderr.printf("6th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, h, {
-                                                0.78451361047755726381949763,
-                                                0.23557321335935813368479318,
-                                                -1.17767998417887100694641568,
-                                                1.31518632068391121888424973,
-                                                -1.17767998417887100694641568,
-                                                0.23557321335935813368479318,
-                                                0.78451361047755726381949763
-                                            });
-                case "sh8":
-                    stderr.printf("8th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, h, {
-                                                0.74167036435061295344822780,
-                                                -0.40910082580003159399730010,
-                                                0.19075471029623837995387626,
-                                                -0.57386247111608226665638773,
-                                                0.29906418130365592384446354,
-                                                0.33462491824529818378495798,
-                                                0.31529309239676659663205666,
-                                                -0.79688793935291635401978884,
-                                                0.31529309239676659663205666,
-                                                0.33462491824529818378495798,
-                                                0.29906418130365592384446354,
-                                                -0.57386247111608226665638773,
-                                                0.19075471029623837995387626,
-                                                -0.40910082580003159399730010,
-                                                0.74167036435061295344822780
-                                            });
-                case "sh10":
-                    stderr.printf("10th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, h, {
-                                                0.09040619368607278492161150,
-                                                0.53591815953030120213784983,
-                                                0.35123257547493978187517736,
-                                                -0.31116802097815835426086544,
-                                                -0.52556314194263510431065549,
-                                                0.14447909410225247647345695,
-                                                0.02983588609748235818064083,
-                                                0.17786179923739805133592238,
-                                                0.09826906939341637652532377,
-                                                0.46179986210411860873242126,
-                                                -0.33377845599881851314531820,
-                                                0.07095684836524793621031152,
-                                                0.23666960070126868771909819,
-                                                -0.49725977950660985445028388,
-                                                -0.30399616617237257346546356,
-                                                0.05246957188100069574521612,
-                                                0.44373380805019087955111365,
-                                                0.05246957188100069574521612,
-                                                -0.30399616617237257346546356,
-                                                -0.49725977950660985445028388,
-                                                0.23666960070126868771909819,
-                                                0.07095684836524793621031152,
-                                                -0.33377845599881851314531820,
-                                                0.46179986210411860873242126,
-                                                0.09826906939341637652532377,
-                                                0.17786179923739805133592238,
-                                                0.02983588609748235818064083,
-                                                0.14447909410225247647345695,
-                                                -0.52556314194263510431065549,
-                                                -0.31116802097815835426086544,
-                                                0.35123257547493978187517736,
-                                                0.53591815953030120213784983,
-                                                0.09040619368607278492161150
-                                            });
+                    return new ForestRuth(model, h);
             }
             stderr.printf("Integrator not recognized: %s\n", type);
             assert_not_reached();
@@ -132,16 +55,7 @@ namespace Simulations {
         /**
          * Subclasses should perform one integration step with the current compositional weight
          */
-        protected abstract void integrate (double compositionWeight);
-
-        /**
-         * Perform a composition of weighted integration steps
-         */
-        public void compose () {
-            for (int i = 0; i < compositionWeights.length; i += 1) {
-                integrate(compositionWeights[i]);
-            }
-        }
+        protected abstract void integrate ();
     }
 
     /**
@@ -152,17 +66,17 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected EulerCromer (IModel model, double h, double[] compositionWeights) {
-            base(model, h, compositionWeights);
+        protected EulerCromer (IModel model, double h) {
+            base(model, h);
             this.coefficients = { h };
         }
 
         /**
          * Weighted 1st order integration step
          */
-        protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[0] * weight);
+        protected override void integrate () {
+            model.qUp(coefficients[0]);
+            model.pUp(coefficients[0]);
         }
     }
 
@@ -174,18 +88,18 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected StormerVerlet (IModel model, double h, double[] compositionWeights) {
-            base(model, h, compositionWeights);
+        protected StormerVerlet (IModel model, double h) {
+            base(model, h);
             this.coefficients = { 0.5 * h, h };
         }
 
         /**
          * Weighted 2nd order integration step
          */
-        protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[0] * weight);
+        protected override void integrate () {
+            model.qUp(coefficients[0]);
+            model.pUp(coefficients[1]);
+            model.qUp(coefficients[0]);
         }
     }
 
@@ -197,8 +111,8 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected ForestRuth (IModel model, double h, double[] compositionWeights) {
-            base(model, h, compositionWeights);
+        protected ForestRuth (IModel model, double h) {
+            base(model, h);
             var CUBRT2 = pow(2.0, (1.0 / 3.0));
             this.coefficients = { 0.5*h/(2.0-CUBRT2), h/(2.0-CUBRT2), 0.5*h*(1.0-CUBRT2)/(2.0-CUBRT2), -h*CUBRT2/(2.0-CUBRT2) };
         }
@@ -206,14 +120,14 @@ namespace Simulations {
         /**
          * Weighted 4th order integration step
          */
-        protected override void integrate (double weight) {
-            model.qUp(coefficients[0] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[2] * weight);
-            model.pUp(coefficients[3] * weight);
-            model.qUp(coefficients[2] * weight);
-            model.pUp(coefficients[1] * weight);
-            model.qUp(coefficients[0] * weight);
+        protected override void integrate () {
+            model.qUp(coefficients[0]);
+            model.pUp(coefficients[1]);
+            model.qUp(coefficients[2]);
+            model.pUp(coefficients[3]);
+            model.qUp(coefficients[2]);
+            model.pUp(coefficients[1]);
+            model.qUp(coefficients[0]);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Simulations {
         /**
          * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
          */
-        public abstract void compose ();
+        public abstract void integrate ();
     }
 
     /**

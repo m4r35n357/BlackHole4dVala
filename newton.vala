@@ -73,7 +73,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.compose();
+                integrator.integrate();
                 i += 1;
                 t = i * h;
             }

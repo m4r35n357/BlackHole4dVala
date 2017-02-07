@@ -127,7 +127,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t, hNow, h0, dbValue);
                 }
-                integrator.compose();
+                integrator.integrate();
                 i += 1;
                 t = i * ts;
             }
