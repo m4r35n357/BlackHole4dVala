@@ -19,41 +19,43 @@ from sys import stdin, stderr, stdout, argv
 
 
 class Symplectic(object):
-    def __init__(self, model, order):
+    def __init__(self, model, h, order):
         if order == 'sb1':
+            self.coefficients = [h]
             self.step = self.symplectic_euler
         elif order == 'sb2':
+            self.coefficients = [0.5 * h, h]
             self.step = self.stormer_verlet
         elif order == 'sb4':
             self.cbrt2 = 2.0 ** (1.0 / 3.0)
-            self.f2 = 1.0 / (2.0 - self.cbrt2)
+            self.f2 = h / (2.0 - self.cbrt2)
             self.coefficients = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
         self.model = model
 
-    def symplectic_euler(self, w):
-        self.model.qUp(w)
-        self.model.pUp(w)
+    def symplectic_euler(self):
+        self.model.qUp(self.coefficients[0])
+        self.model.pUp(self.coefficients[0])
 
-    def stormer_verlet(self, w):
-        self.model.qUp(w * 0.5)
-        self.model.pUp(w)
-        self.model.qUp(w * 0.5)
+    def stormer_verlet(self):
+        self.model.qUp(self.coefficients[0])
+        self.model.pUp(self.coefficients[1])
+        self.model.qUp(self.coefficients[0])
 
-    def forest_ruth(self, w):
-        self.model.qUp(w * self.coefficients[0])
-        self.model.pUp(w * self.coefficients[1])
-        self.model.qUp(w * self.coefficients[2])
-        self.model.pUp(w * self.coefficients[3])
-        self.model.qUp(w * self.coefficients[2])
-        self.model.pUp(w * self.coefficients[1])
-        self.model.qUp(w * self.coefficients[0])
+    def forest_ruth(self):
+        self.model.qUp(self.coefficients[0])
+        self.model.pUp(self.coefficients[1])
+        self.model.qUp(self.coefficients[2])
+        self.model.qUp(self.coefficients[3])
+        self.model.pUp(self.coefficients[2])
+        self.model.qUp(self.coefficients[1])
+        self.model.qUp(self.coefficients[0])
 
 
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, order):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, h, order):
         self.l_3 = Lambda / 3.0
         self.a = a
         self.mu2 = mu2
@@ -70,7 +72,8 @@ class BhSymp(object):
         self.t = self.ph = 0.0
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
-        self.integrator = Symplectic(self, order)
+        self.h = h
+        self.integrator = Symplectic(self, h, order)
 
     def refresh(self):
         self.r2 = self.r**2
@@ -123,7 +126,7 @@ class BhSymp(object):
         print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
                 % (mino, tau, v4e, -180.0, eR, eTh, self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
 
-    def solve(self, start, end, h, tr):
+    def solve(self, start, end, tr):
         mino = tau = 0.0
         i = plotCount = 0
         self.refresh()
@@ -133,10 +136,10 @@ class BhSymp(object):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau)
                 plotCount += 1
-            self.integrator.step(h)
+            self.integrator.step()
             i += 1
-            mino = h * i
-            tau += h * self.S
+            mino = self.h * i
+            tau += self.h * self.S
         self.plot(mino, tau)
         return i, plotCount
 
@@ -145,5 +148,5 @@ print >> stderr, "Executable: {}".format(argv[0])
 input_data = stdin.read()
 ic = loads(input_data)['IC']
 print >> stderr, input_data
-BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['integrator']).solve(
-    ic['start'], ic['end'], ic['step'], ic['plotratio'])
+BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['step'], ic['integrator']).solve(
+    ic['start'], ic['end'], ic['plotratio'])

@@ -47,15 +47,17 @@ namespace Simulations {
         private int np;
         private double g;
         private double errorLimit;
+        private double ts;
         private ISymplectic integrator;
 
-        public NBody (Body[] bodies, double g, double errorLimit, string type) {
+        public NBody (Body[] bodies, double g, double errorLimit, double h, string type) {
             stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
             this.np = bodies.length;
             this.g = g;
             this.errorLimit = errorLimit;
-            this.integrator = Symplectic.getIntegrator(this, type);
+            this.ts = h;
+            this.integrator = Symplectic.getIntegrator(this, h, type);
         }
 
         /**
@@ -114,22 +116,22 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (double start, double end, double ts, int64 tr) {
+        public int[] solve (double start, double end, int64 tr) {
             var h0 = h();
-            var count = 0;
+            var i = 0;
             var t = 0.0;
             var dbValue = -180.0;
             while ((t < end) && (dbValue < errorLimit)) {
                 var hNow = h();
                 dbValue = logError(fabs(hNow / h0 - 1.0));
-                if ((t > start) && (count % tr == 0)) {
+                if ((t > start) && (i % tr == 0)) {
                     output(t, hNow, h0, dbValue);
                 }
-                integrator.compose(ts);
-                count += 1;
-                t = count * ts;
+                integrator.compose();
+                i += 1;
+                t = i * ts;
             }
-            return { count };
+            return { i };
         }
 
         /**

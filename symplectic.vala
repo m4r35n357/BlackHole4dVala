@@ -21,42 +21,45 @@ namespace Simulations {
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
-        private double[] compositionWeights;
         protected IModel model;
+        private double h;
+        private double[] compositionWeights;
+        protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory
          */
-        protected Symplectic (IModel model, double[] compositionWeights) {
-            this.compositionWeights = compositionWeights;
+        protected Symplectic (IModel model, double h, double[] compositionWeights) {
             this.model = model;
+            this.h = h;
+            this.compositionWeights = compositionWeights;
         }
 
         /**
          * Static factory
          */
-        public static ISymplectic getIntegrator (IModel model, string type) {
+        public static ISymplectic getIntegrator (IModel model, double h, string type) {
             switch (type) {
                 case "sb1":
                     stderr.printf("1st Order Symplectic Integrator\n");
-                    return new EulerCromer(model, { 1.0 });
+                    return new EulerCromer(model, h, { 1.0 });
                 case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
-                    return new StormerVerlet(model, { 1.0 });
+                    return new StormerVerlet(model, h, { 1.0 });
                 case "sb4":
                     stderr.printf("4th Order Symplectic Integrator\n");
-                    return new ForestRuth(model, { 1.0 });
+                    return new ForestRuth(model, h, { 1.0 });
                 case "sc4":
                     stderr.printf("4th Order Symplectic Integrator (Composed from 2nd order)\n");
                     var CUBRT2 = pow(2.0, 1.0/3.0);
-                    return new StormerVerlet(model, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
+                    return new StormerVerlet(model, h, { 1.0/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2), 1.0/(2.0-CUBRT2) });
                 case "sc6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 4th order)\n");
                     var FTHRT2 = pow(2.0, 1.0/5.0);
-                    return new ForestRuth(model, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
+                    return new ForestRuth(model, h, { 1.0/(2.0-FTHRT2), -FTHRT2/(2.0-FTHRT2), 1.0/(2.0-FTHRT2) });
                 case "sh6":
                     stderr.printf("6th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, {
+                    return new StormerVerlet(model, h, {
                                                 0.78451361047755726381949763,
                                                 0.23557321335935813368479318,
                                                 -1.17767998417887100694641568,
@@ -67,7 +70,7 @@ namespace Simulations {
                                             });
                 case "sh8":
                     stderr.printf("8th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, {
+                    return new StormerVerlet(model, h, {
                                                 0.74167036435061295344822780,
                                                 -0.40910082580003159399730010,
                                                 0.19075471029623837995387626,
@@ -86,7 +89,7 @@ namespace Simulations {
                                             });
                 case "sh10":
                     stderr.printf("10th Order Symplectic Integrator (Composed from 2nd order)\n");
-                    return new StormerVerlet(model, {
+                    return new StormerVerlet(model, h, {
                                                 0.09040619368607278492161150,
                                                 0.53591815953030120213784983,
                                                 0.35123257547493978187517736,
@@ -134,9 +137,9 @@ namespace Simulations {
         /**
          * Perform a composition of weighted integration steps
          */
-        public void compose (double h) {
+        public void compose () {
             for (int i = 0; i < compositionWeights.length; i += 1) {
-                integrate(compositionWeights[i] * h);
+                integrate(compositionWeights[i]);
             }
         }
     }
@@ -149,16 +152,17 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected EulerCromer (IModel model, double[] compositionWeights) {
-            base(model, compositionWeights);
+        protected EulerCromer (IModel model, double h, double[] compositionWeights) {
+            base(model, h, compositionWeights);
+            this.coefficients = { h };
         }
 
         /**
          * Weighted 1st order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(weight);
-            model.pUp(weight);
+            model.qUp(coefficients[0] * weight);
+            model.pUp(coefficients[0] * weight);
         }
     }
 
@@ -170,17 +174,18 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected StormerVerlet (IModel model, double[] compositionWeights) {
-            base(model, compositionWeights);
+        protected StormerVerlet (IModel model, double h, double[] compositionWeights) {
+            base(model, h, compositionWeights);
+            this.coefficients = { 0.5 * h, h };
         }
 
         /**
          * Weighted 2nd order integration step
          */
         protected override void integrate (double weight) {
-            model.qUp(weight * 0.5);
-            model.pUp(weight);
-            model.qUp(weight * 0.5);
+            model.qUp(coefficients[0] * weight);
+            model.pUp(coefficients[1] * weight);
+            model.qUp(coefficients[0] * weight);
         }
     }
 
@@ -189,15 +194,13 @@ namespace Simulations {
      */
     public class ForestRuth : Symplectic {
 
-        protected double[] coefficients;
-
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected ForestRuth (IModel model, double[] compositionWeights) {
-            base(model, compositionWeights);
+        protected ForestRuth (IModel model, double h, double[] compositionWeights) {
+            base(model, h, compositionWeights);
             var CUBRT2 = pow(2.0, (1.0 / 3.0));
-            this.coefficients = { 0.5/(2.0-CUBRT2), 1.0/(2.0-CUBRT2), 0.5*(1.0-CUBRT2)/(2.0-CUBRT2), -CUBRT2/(2.0-CUBRT2) };
+            this.coefficients = { 0.5*h/(2.0-CUBRT2), h/(2.0-CUBRT2), 0.5*h*(1.0-CUBRT2)/(2.0-CUBRT2), -h*CUBRT2/(2.0-CUBRT2) };
         }
 
         /**

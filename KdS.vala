@@ -28,9 +28,9 @@ namespace Simulations {
             if (o.has_member("Lfac")) {
                 new Newton(o.get_double_member("Lfac"),
                            o.get_double_member("r0"),
+                           o.get_double_member("step"),
                            o.get_string_member("integrator")).solve(o.get_double_member("start"),
                                                                     o.get_double_member("end"),
-                                                                    o.get_double_member("step"),
                                                                     o.get_int_member("plotratio"));
             } else if (o.has_member("a")) {
                 BhSymp.newInstance(o.get_double_member("lambda"),
@@ -41,9 +41,9 @@ namespace Simulations {
                                     o.get_double_member("Q"),
                                     o.get_double_member("r0"),
                                     o.get_double_member("th0"),
+                                    o.get_double_member("step"),
                                     o.get_string_member("integrator")).solve(o.get_double_member("start"),
                                                                              o.get_double_member("end"),
-                                                                             o.get_double_member("step"),
                                                                              o.get_int_member("plotratio"));
             } else if (o.has_member("bodies")) {
                 Body[] bodies = {};
@@ -72,9 +72,9 @@ namespace Simulations {
                 }
                 new NBody(bodies, o.get_double_member("g"),
                                   o.get_double_member("errorLimit"),
+                                  o.get_double_member("step"),
                                   o.get_string_member("integratorOrder")).solve(o.get_double_member("start"),
                                                                                 o.get_double_member("end"),
-                                                                                o.get_double_member("step"),
                                                                                 o.get_int_member("plotratio"));
             }
         } else if ("GenParticle" in executable) {

@@ -57,12 +57,13 @@ namespace Simulations {
         protected double Uph;
 
         // Constants from IC file
+        protected double h;
         private ISymplectic integrator;
 
         /**
          * Private constructor, use a static factory
          */
-        private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string type) {
+        private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double h, string type) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             this.l_3 = lambda / 3.0;
             this.a = a;
@@ -78,7 +79,8 @@ namespace Simulations {
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
-            this.integrator = Symplectic.getIntegrator(this, type);
+            this.h = h;
+            this.integrator = Symplectic.getIntegrator(this, h, type);
         }
 
         /**
@@ -122,7 +124,7 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (double start, double end, double h, int64 tr) {
+        public int[] solve (double start, double end, int64 tr) {
             var mino = 0.0;
             var tau = 0.0;
             var i = 0;
@@ -135,7 +137,7 @@ namespace Simulations {
                     plot(mino, tau);
                     plotCount += 1;
                 }
-                integrator.compose(h);
+                integrator.compose();
                 i += 1;
                 mino = h * i;
                 tau += h * S;
@@ -174,9 +176,9 @@ namespace Simulations {
         /**
          *  Static factory
          */
-        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, string t) {
+        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double h , string t) {
             if (("sb1" == t) || ("sb2" == t) || ("sb4" == t) || ("sc4" == t) || ("sc6" == t) || ("sh6" == t) || ("sh8" == t) || ("sh10" == t)) {
-                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, t);
+                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, h, t);
             } else {
                 stderr.printf("Bad integrator; should be [ sb2 | sb4 | sc4 | sc6 | sh6 | sh8 | sh10 ], found {%s}\n", t);
                 assert_not_reached();

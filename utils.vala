@@ -39,7 +39,7 @@ namespace Simulations {
         /**
          * Sole method called by main(), calls iterate() on RK4, and ISymplectic.compose() on the Symplectics
          */
-        public abstract int[] solve (double start, double end, double h, int64 tr);
+        public abstract int[] solve (double start, double end, int64 tr);
     }
 
     /**
@@ -64,7 +64,7 @@ namespace Simulations {
         /**
          * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
          */
-        public abstract void compose (double h);
+        public abstract void compose ();
     }
 
     /**

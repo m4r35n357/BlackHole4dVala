@@ -18,7 +18,6 @@ namespace Simulations {
 
     public class Newton : IModel, ISolver, GLib.Object {
 
-        private double E0;
         private double L;
         private double r;
         private double ph;
@@ -26,19 +25,21 @@ namespace Simulations {
         private double phDot;
         private double L2;
         private double H0;
+        private double h;
         private ISymplectic integrator;
 
-        public Newton (double lFac, double r0, string type) {
+        public Newton (double lFac, double r0, double h, string type) {
             stderr.printf("Newtonian Orbit\n");
             this.L = sqrt(r0);
             this.L2 = L * L;
             this.r = r0;
-            this.integrator = Symplectic.getIntegrator(this, type);
-            this.E0 = V(r);
+            var E0 = V(r);
             this.L = lFac * L;
             this.L2 = L * L;
             this.rDot = - sqrt(2.0 * fabs(E0 - V(r)));
             this.H0 = H();
+            this.h = h;
+            this.integrator = Symplectic.getIntegrator(this, h, type);
         }
 
         private double V (double r) {
@@ -65,19 +66,19 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (double start, double end, double h, int64 tr) {
-            var count = 0;
+        public int[] solve (double start, double end, int64 tr) {
+            var i = 0;
             var t = 0.0;
             while (t < end) {
-                if ((t > start) && (count % tr == 0)) {
+                if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.compose(h);
-                count += 1;
-                t = count * h;
+                integrator.compose();
+                i += 1;
+                t = i * h;
             }
             output(t);
-            return { count };
+            return { i };
         }
 
         /**
