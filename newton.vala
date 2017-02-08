@@ -20,7 +20,7 @@ namespace Simulations {
 
         private double L;
         private double r;
-        private double ph;
+        private double ph = 0.0;
         private double rDot;
         private double phDot;
         private double L2;

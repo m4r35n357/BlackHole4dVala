@@ -177,10 +177,10 @@ namespace Simulations {
          *  Static factory
          */
         public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double h , string t) {
-            if (("sb1" == t) || ("sb2" == t) || ("sb4" == t) || ("sc4" == t) || ("sc6" == t) || ("sh6" == t) || ("sh8" == t) || ("sh10" == t)) {
+            if (("sb1" == t) || ("sb2" == t) || ("sb4" == t)) {
                 return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, h, t);
             } else {
-                stderr.printf("Bad integrator; should be [ sb2 | sb4 | sc4 | sc6 | sh6 | sh8 | sh10 ], found {%s}\n", t);
+                stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 ], found {%s}\n", t);
                 assert_not_reached();
             }
         }
