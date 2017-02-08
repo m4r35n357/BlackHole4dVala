@@ -48,9 +48,9 @@ class Symplectic(object):
         self.model.qUp(self.coefficients[0])
         self.model.pUp(self.coefficients[1])
         self.model.qUp(self.coefficients[2])
-        self.model.qUp(self.coefficients[3])
-        self.model.pUp(self.coefficients[2])
-        self.model.qUp(self.coefficients[1])
+        self.model.pUp(self.coefficients[3])
+        self.model.qUp(self.coefficients[2])
+        self.model.pUp(self.coefficients[1])
         self.model.qUp(self.coefficients[0])
 
 
