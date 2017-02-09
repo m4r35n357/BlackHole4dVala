@@ -19,23 +19,20 @@ from json import loads
 
 def main():
     print >> stderr, "Executable: {}".format(argv[0])
-    if len(argv) == 6:
-        r_range = float(argv[1])
-        r_min = float(argv[2])
-        r_max = float(argv[3])
-        th_min = float(argv[4])
-        th_max = float(argv[5])
-    elif len(argv) == 2:
-        r_range = float(argv[1])
+    if len(argv) == 5:
+        r_min = float(argv[1])
+        r_max = float(argv[2])
+        th_min = float(argv[3])
+        th_max = float(argv[4])
+    elif len(argv) == 1:
         r_min = th_min = -30
         r_max = th_max = 30
     else:
-        raise Exception('>>> ERROR! Please enter either one or five parameters <<<')
+        raise Exception('>>> ERROR! Please enter either zero or four parameters <<<')
     line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
     pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
     ax1.set_xlabel('r, theta', color='0.20')
-    ax1.set_xlim(0, r_range)
     ax1.set_ylabel('R(r)', color='b')
     ax1.set_ylim(r_min, r_max)
     ax2 = ax1.twinx()

@@ -26,7 +26,7 @@ set $(wc -l $data)
 #./plotPhase.py 1 th <$data &
 
 # Plot potentials
-#./plotPotential.py <$pot &
+./plotPotential.py <$pot &
 
 # Plot 3D graphics
 ./plotBH.py <$data $(jq .IC.M $ic) $(jq .IC.a $ic) $(jq .IC.L $ic) `jq .IC.mu $ic` &
