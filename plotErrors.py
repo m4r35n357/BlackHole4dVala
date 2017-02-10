@@ -19,6 +19,7 @@ from matplotlib.ticker import MultipleLocator
 from json import loads
 
 def main():
+    print >> stderr, "Executable: {}".format(argv[0])
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply a time variable name and a plotting interval <<<')
     timeCoordinate = str(argv[1])
@@ -53,9 +54,9 @@ def main():
             # if 'v4c' in p:
             #     ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
             if 'ER' in p:
-                ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker='.', markersize=2)
+                ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker='.', markersize=1)
             if 'ETh' in p:
-                ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker='.', markersize=2)
+                ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
             ax1.plot(timeValue, float(p['v4e']), color='#000f00', linestyle='-', marker='.', markersize=3)
         line = stdin.readline()
         count += 1
