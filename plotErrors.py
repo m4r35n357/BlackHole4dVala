@@ -13,13 +13,18 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+from math import log10, fabs
 from sys import argv, stdin, stderr
 from matplotlib import pyplot
 from matplotlib.ticker import MultipleLocator
 from json import loads
 
+def log_error(e):
+    return 10.0 * log10(e) if e > 1.0e-18 else -180.0
+
+
 def main():
-    print >> stderr, "Executable: {}".format(argv[0])
+    print "Error Plotter: {}".format(argv)
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply a time variable name and a plotting interval <<<')
     timeCoordinate = str(argv[1])
@@ -40,31 +45,35 @@ def main():
     ax2.yaxis.set_minor_locator(minorLocator)
     ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
     ax2.set_ylim(-150.0, 0.0)
-    pyplot.axhspan(-30.0, 0.0 + .2, facecolor='red', alpha=0.3)
-    pyplot.axhspan(-60.0, -30.0 + .2, facecolor='orange', alpha=0.3)
-    pyplot.axhspan(-90.0, -60.0 + .2, facecolor='yellow', alpha=0.3)
-    pyplot.axhspan(-120.0, -90.0 + .2, facecolor='cyan', alpha=0.3)
-    pyplot.axhspan(-150.0, -120.0 + .2, facecolor='green', alpha=0.3)
+    pyplot.axhspan(-30.0, 0.0, facecolor='red', alpha=0.3)
+    pyplot.axhspan(-60.0, -30.0, facecolor='orange', alpha=0.3)
+    pyplot.axhspan(-90.0, -60.0, facecolor='yellow', alpha=0.3)
+    pyplot.axhspan(-120.0, -90.0, facecolor='cyan', alpha=0.3)
+    pyplot.axhspan(-150.0, -120.0, facecolor='green', alpha=0.3)
     count = 0
+    eCum = 0.0
     line = stdin.readline()
     while line:  # build raw data arrays
         p = loads(line)
+        error = float(p['v4e'])
+        e = error if error >= 0.0 else -error
+        count += 1
         if count % interval == 0:
             timeValue = p[timeCoordinate]
-            # if 'v4c' in p:
-            #     ax1.plot(timeValue, float(p['v4c']), color='#606060', linestyle='-', marker='.', markersize=2, zorder=10)
             if 'ER' in p:
-                ax2.plot(timeValue, float(p['ER']), color='blue', linestyle='-', marker='.', markersize=1)
+                ax2.plot(timeValue, float(log_error(p['ER'])), color='blue', linestyle='-', marker='.', markersize=1)
             if 'ETh' in p:
-                ax2.plot(timeValue, float(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
-            ax1.plot(timeValue, float(p['v4e']), color='#000f00', linestyle='-', marker='.', markersize=3)
+                ax2.plot(timeValue, float(log_error(p['ETh'])), color='red', linestyle='-', marker='.', markersize=1)
+            ax1.plot(timeValue, float(log_error(eCum / count)), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
+            ax1.plot(timeValue, float(log_error(e)), color='#000f00', linestyle='-', marker='.', markersize=3)
         line = stdin.readline()
-        count += 1
+        eCum += e
     try:
         pyplot.show()
     except AttributeError as e:
         print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(e))
         exit(-3)
+    print argv[0] + " Average error: " + str(10.0 * log10(eCum / count))
 
 if __name__ == "__main__":
     main()

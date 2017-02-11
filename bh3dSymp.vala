@@ -146,21 +146,14 @@ namespace Simulations {
             return { i, plotCount };  // for testing
         }
 
-        private double modH (double xDot, double X) {
-            return 0.5 * fabs(xDot * xDot - X);
-        }
-
         /**
          * Write the simulated data to STDOUT
          */
         private void plot (double mino, double tau) {
-            var eR = logError(modH(Ur, R));
-            var eTh = logError(modH(Uth, TH));
-            var v4e = logError(v4Error(Ut / S, Ur / S, Uth / S, Uph / S));
-            stdout.printf("{\"mino\":%.9e, \"tau\":%.9e,", mino, tau);                                            // time variables
-            stdout.printf(" \"v4e\":%.1f, \"ER\":%.1f, \"ETh\":%.1f, \"D_r\":%.9e,", v4e, eR, eTh, D_r);          // errors
-            stdout.printf(" \"t\":%.9e, \"r\":%.9e, \"th\":%.9e, \"ph\":%.9e,", t, r, th, ph);                    // coordinates
-            stdout.printf(" \"tP\":%.9e, \"rP\":%.9e, \"thP\":%.9e, \"phP\":%.9e}\n", Ut/S, Ur/S, Uth/S, Uph/S);  // coordinate derivatives
+            var eR = 0.5 * (Ur * Ur - R);
+            var eTh = 0.5 * (Uth * Uth - TH);
+            var v4e = v4Error(Ut / S, Ur / S, Uth / S, Uph / S);
+            stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"D_r\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino,tau, v4e,eR,eTh,D_r, t,r,th,ph, Ut/S,Ur/S,Uth/S,Uph/S);
         }
 
         /**
@@ -170,7 +163,7 @@ namespace Simulations {
             var U1 = a * tDot - ra2 * phDot;
             var U4 = tDot - a * sth2 * phDot;
             var SX2 = S * X2;
-            return fabs(mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4);
+            return mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4;
         }
 
         /**

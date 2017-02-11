@@ -95,16 +95,8 @@ class BhSymp(object):
 
     def v4_error(self, Ut, Ur, Uth, Uph):
         SX2 = self.S * self.X2
-        return fabs(self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2
-                    + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2)
-
-    @staticmethod
-    def log_error(e):
-        return 10.0 * log10(e if e > 1.0e-18 else 1.0e-18)
-
-    @staticmethod
-    def modH(xdot, x):
-        return 0.5 * fabs(xdot**2 - x)
+        return self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2 \
+               + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2
 
     def qUp(self, h):
         self.t += h * self.Ut
@@ -120,11 +112,11 @@ class BhSymp(object):
                         + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
     def plot(self, mino, tau):
-        eR = self.log_error(self.modH(self.Ur, self.R))
-        eTh = self.log_error(self.modH(self.Uth, self.TH))
-        v4e = self.log_error(self.v4_error(self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S))  # d/dTau = 1/sigma * d/dLambda !!!
-        print >> stdout, '{"mino":%.9e, "tau":%.9e, "v4e":%.1f, "v4c":%.1f, "ER":%.1f, "ETh":%.1f, "t":%.9e, "r":%.9e, "th":%.9e, "ph":%.9e, "tP":%.9e, "rP":%.9e, "thP":%.9e, "phP":%.9e}' \
-                % (mino, tau, v4e, -180.0, eR, eTh, self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+        eR = 0.5 * (self.Ur**2 - self.R)
+        eTh = 0.5 * (self.Uth**2 - self.TH)
+        v4e =self.v4_error(self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
+        print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' \
+                % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
 
     def solve(self, start, end, tr):
         mino = tau = 0.0
@@ -144,7 +136,7 @@ class BhSymp(object):
         return i, plotCount
 
 
-print >> stderr, "Executable: {}".format(argv[0])
+print >> stderr, "Simulator: {}".format(argv[0])
 input_data = stdin.read()
 ic = loads(input_data)['IC']
 print >> stderr, input_data

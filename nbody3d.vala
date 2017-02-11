@@ -37,7 +37,7 @@ namespace Simulations {
         }
 
         public string toString () {
-            return("{\"qX\":%.6e,\"qY\":%.6e,\"qZ\":%.6e,\"pX\":%.6e,\"pY\":%.6e,\"pZ\":%.6e,\"mass\":%.3e}".printf(qX, qY, qZ, pX, pY, pZ, mass));
+            return("{\"qX\":%.9e,\"qY\":%.9e,\"qZ\":%.9e,\"pX\":%.9e,\"pY\":%.9e,\"pZ\":%.9e,\"mass\":%.9e}".printf(qX, qY, qZ, pX, pY, pZ, mass));
         }
     }
 
@@ -120,12 +120,12 @@ namespace Simulations {
             var h0 = h();
             var i = 0;
             var t = 0.0;
-            var dbValue = -180.0;
-            while ((t < end) && (dbValue < errorLimit)) {
+            var error = 0.0;
+            while ((t < end) && (error < errorLimit)) {
                 var hNow = h();
-                dbValue = logError(fabs(hNow / h0 - 1.0));
+                error = hNow / h0 - 1.0;
                 if ((t > start) && (i % tr == 0)) {
-                    output(t, hNow, h0, dbValue);
+                    output(t, hNow, h0, error);
                 }
                 integrator.integrate();
                 i += 1;
@@ -137,13 +137,13 @@ namespace Simulations {
         /**
          * Write the simulated data to STDOUT
          */
-        private void output (double time, double hNow, double h0, double dbValue) {
+        private void output (double time, double hNow, double h0, double error) {
             string[] data = {};
             foreach (var body in bodies) {
                 data += body.toString();
             }
-            stdout.printf("[".concat(string.joinv(",", data), "]\n"));
-            stderr.printf("{\"t\":%.2f, \"H\":%.9e, \"H0\":%.9e, \"ER\":%.1f}\n", time, hNow, h0, dbValue);
+            stdout.printf("[".concat(string.joinv(",", data),"]\n"));
+            stderr.printf("{\"t\":%.2f,\"H\":%.9e,\"H0\":%.9e,\"ER\":%.9e}\n", time, hNow, h0, error);
         }
     }
 }

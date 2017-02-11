@@ -14,7 +14,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 from json import loads
-from math import sqrt, sin, cos, fabs, pi, atan2, acos
+from math import sqrt, sin, cos, fabs, pi, atan2, acos, log10
 from sys import argv, stderr, stdin
 from visual import display, sphere, curve, rate, ellipsoid, ring, color, label
 
@@ -45,20 +45,20 @@ def to_rectangular (polar, a):
     sth = sin(polar[1])
     return ra * sth * cos(polar[2]), ra * sth * sin(polar[2]), polar[0] * cos(polar[1])
 
-def error_colour (e, ball):
-    if e < -120.0:
-        ball.color = color.green
-    elif e < -90.0:
-        ball.color = color.cyan
-    elif e < -60.0:
-        ball.color = color.yellow
-    elif e < -30.0:
-        ball.color = color.orange
+def error_colour (error):
+    if error < 1.0e-12:
+        return color.green
+    elif error < 1.0e-9:
+        return color.cyan
+    elif error < 1.0e-6:
+        return color.yellow
+    elif error < 1.0e-3:
+        return color.orange
     else:
-        ball.color = color.red
+        return color.red
 
 def main():
-    print >> stderr, "Plotter: {}".format(argv[0])
+    print "Geodesic Plotter: {}".format(argv)
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0], spin [0.0 - 1.0] and angular momentum <<<')
     m = float(argv[1])
@@ -107,7 +107,7 @@ def main():
     # z axis
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
     # Data display
-    readout = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16,
+    hud = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16,
                     color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
     #cone(pos=(0,0,12), axis=(0,0,-12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
     #cone(pos=(0,0,-12), axis=(0,0,12), radius=12.0 * tan(0.15 * pi), opacity=0.2)
@@ -118,6 +118,7 @@ def main():
     counter = 0
     dataLine = stdin.readline()
     t_old = 0.0
+    eCum = 0.0
     while dataLine:  # build raw data arrays
         rate(60)
         if counter % 1000 == 0:
@@ -125,7 +126,10 @@ def main():
             ball = sphere(radius = 0.2)  # Particle
             ball.trail = curve(size = 1)  #  trail
         data = loads(dataLine)
-        error_colour(float(data['v4e']), ball)
+        error = float(data['v4e'])
+        e = error if error >= 0.0 else -error
+        counter += 1
+        ball.color = error_colour(eCum / counter)
         r = float(data['r'])
         th = float(data['th'])
         ph = float(data['ph'])
@@ -133,15 +137,16 @@ def main():
         if float(data['tP']) * t_old < 0 or float(data['tP']) - t_old > 100.0:
             ball.color = color.white
         else:
-            ball.trail.append(pos = ball.pos, color = ball.color)
+            ball.trail.append(pos = ball.pos, color = error_colour(e))
         if mu and fabs(mu) > 0.0:
-            readout.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
-            readout.text = u"\u03bb  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            hud.text = u"\u03bb  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
-        counter += 1
         t_old = float(data['tP'])
+        eCum += e
         dataLine = stdin.readline()
+    print argv[0] + " Average error: " + str(10.0 * log10(eCum / counter))
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ from matplotlib import pyplot
 from json import loads
 
 def main():
-    print >> stderr, "Executable: {}".format(argv[0])
+    print "X-Y Plotter: {}".format(argv)
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply a plotting interval and two quantities to plot <<<')
     interval = int(argv[1])

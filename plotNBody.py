@@ -20,6 +20,7 @@ from json import loads
 from os import popen
 
 def main():
+    print "N-Body Plotter: {}".format(argv)
     # scene basics
     scene.center = (0,0,0)
     scene.width = scene.height = 1024

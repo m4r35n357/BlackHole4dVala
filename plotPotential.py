@@ -18,7 +18,7 @@ from matplotlib import pyplot
 from json import loads
 
 def main():
-    print >> stderr, "Executable: {}".format(argv[0])
+    print "Potential Plotter: {}".format(argv)
     if len(argv) == 5:
         r_min = float(argv[1])
         r_max = float(argv[2])
