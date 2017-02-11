@@ -34,7 +34,10 @@ def pSphere (a, l):
         return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
 
 def speed (gamma):
-    return sqrt(1.0 - 1.0 / (gamma if gamma > 0.0 else - gamma)**2)
+    if gamma > 1.0 or -gamma > 1.0:
+        return sqrt(1.0 - 1.0 / gamma**2)
+    else:
+        return 0.0
     #return sqrt(gamma * (1.0 - 2.0 * r / (r**2 + a**2 * cos(theta)**2)) - 1.0 / gamma**2)
 
 def to_rectangular (polar, a):
