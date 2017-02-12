@@ -23,7 +23,7 @@ P: (r^2 + a^2) * E - a * L;
 R = potentialR: X^2 * P^2 - Dr * (%mu^2 * r^2 + cc);
 rCheck = potentialR - (X^2 * P * P - Dr * (%mu^2 * r^2 + cc));
 'diff(R, r) = rCalculated: diff(potentialR, r);
-simplified = rSimp: r * (2 * E * P * X^2 - %mu^2 * Dr) - (r * (1 - %Lambda / 3 * r^2) - %Lambda / 3 * r * (r^2 + a^2) - 1) * (cc + %mu^2 * r^2)$
+simplified = rSimp: r * (2 * E * P * X^2 - %mu^2 * Dr) - (r * (1 - %Lambda / 3 * (2 * r^2 + a^2)) - 1) * (cc + %mu^2 * r^2)$
 drCheck = trigsimp(rCalculated - 2 * rSimp);
 
 (" *** Potential THETA *** ");

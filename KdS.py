@@ -68,7 +68,6 @@ class BhSymp(object):
         self.aL = a * L
         self.X2 = (1.0 + self.a2l_3)**2
         self.K = C + self.X2 * (L - self.aE)**2
-        self.sgnR = self.sgnTH = -1
         self.t = self.ph = 0.0
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
@@ -107,7 +106,7 @@ class BhSymp(object):
 
     def pUp(self, h):
         self.Ur += h * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
-                        - (self.r * (1.0 - self.l_3 * self.r2) - self.l_3 * self.r * self.ra2 - 1.0) * (self.K + self.mu2 * self.r2))
+                        - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
         self.Uth += h * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
                         + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
