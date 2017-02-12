@@ -28,12 +28,11 @@ echo ""
 
 # compile raytracer
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
-gcc -o kerr-image-ian kerr-image-ian.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 
 # strip executables
 case $opt in
-	fast)	strip KdS raytrace-commands kerr-image kerr-image-ian;;
+	fast)	strip KdS raytrace-commands kerr-image;;
 esac
 
 ln KdS Simulate
@@ -43,7 +42,7 @@ rm -f KdS
 
 # admire our work
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
-		raytrace-commands kerr-image kerr-image-ian
+		raytrace-commands kerr-image
 echo ""
 
 # test

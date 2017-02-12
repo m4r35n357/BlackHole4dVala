@@ -130,8 +130,8 @@ namespace Simulations {
             var i = 0;
             var plotCount = 0;
             refresh();
-            this.Ur = - sqrt(fabs(R));
-            this.Uth = - sqrt(fabs(TH));
+            this.Ur = - sqrt(R >= 0.0 ? R : -R);
+            this.Uth = - sqrt(TH >= 0.0 ? TH : -TH);
             while (tau < end) {
                 if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau);

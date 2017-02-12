@@ -122,8 +122,8 @@ class BhSymp(object):
         mino = tau = 0.0
         i = plotCount = 0
         self.refresh()
-        self.Ur = - sqrt(fabs(self.R))
-        self.Uth = - sqrt(fabs(self.TH))
+        self.Ur = - sqrt(self.R if self.R >= 0.0 else -self.R)
+        self.Uth = - sqrt(self.TH if self.TH >= 0.0 else -self.TH)
         while tau < end:
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau)

@@ -29,9 +29,9 @@ def isco (a, l):
 
 def pSphere (a, l):
     if a * l >= 0.0:
-        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(-fabs(a))))
+        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(-a if a >= 0.0 else a)))
     else:
-        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(fabs(a))))
+        return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(a if a >= 0.0 else -a)))
 
 def speed (gamma):
     if gamma > 1.0 or -gamma > 1.0:
@@ -126,24 +126,26 @@ def main():
             ball = sphere(radius = 0.2)  # Particle
             ball.trail = curve(size = 1)  #  trail
         data = loads(dataLine)
-        error = float(data['v4e'])
+        error = data['v4e']
         e = error if error >= 0.0 else -error
         counter += 1
         ball.color = error_colour(eCum / counter)
-        r = float(data['r'])
-        th = float(data['th'])
-        ph = float(data['ph'])
+        r = data['r']
+        th = data['th']
+        ph = data['ph']
         ball.pos = to_rectangular((r, th, ph), a)
-        if float(data['tP']) * t_old < 0 or float(data['tP']) - t_old > 100.0:
+        if data['tP'] * t_old < 0 or data['tP'] - t_old > 100.0:
             ball.color = color.white
         else:
             ball.trail.append(pos = ball.pos, color = error_colour(e))
         if mu and fabs(mu) > 0.0:
-            hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(float(data['tP'])), float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(data['tP']), data['tau'], data['t'],
+                                                                                                 r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
-            hud.text = u"\u03bb  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (float(data['tau']), float(data['t']), r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
+            hud.text = u"\u03bb  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (data['tau'], data['t'],
+                                                                                        r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
-        t_old = float(data['tP'])
+        t_old = data['tP']
         eCum += e
         dataLine = stdin.readline()
     print argv[0] + " Average error: " + str(10.0 * log10(eCum / counter))
