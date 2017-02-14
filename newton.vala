@@ -75,7 +75,7 @@ namespace Simulations {
                 }
                 integrator.integrate();
                 i += 1;
-                t += h * r * r;
+                t = i * h;
             }
             output(t);
             return { i };
