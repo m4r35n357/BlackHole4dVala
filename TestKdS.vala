@@ -14,8 +14,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 namespace Simulations {
 
-    void add_test_solve_symp_polar() {
-        Test.add_func ("/KdS/test_solve_symp_polar", () => {
+    void add_test_solve_symp_polar_sb1() {
+        Test.add_func ("/KdS/test_solve_symp_polar_sb1", () => {
             var start = 0.0;
             var end = 100;
             var step = 0.00001;
@@ -26,8 +26,44 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_symp_light() {
-        Test.add_func ("/KdS/test_solve_symp_light", () => {
+    void add_test_solve_symp_polar_sb2() {
+        Test.add_func ("/KdS/test_solve_symp_polar_sb2", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.00001;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, step, "sb2").solve(start, end, interval);
+            assert(counts[0] == 69174);
+            assert(counts[1] == 6918);
+        });
+    }
+
+    void add_test_solve_symp_polar_sb4() {
+        Test.add_func ("/KdS/test_solve_symp_polar_sb4", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.00001;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, step, "sb4").solve(start, end, interval);
+            assert(counts[0] == 69174);
+            assert(counts[1] == 6918);
+        });
+    }
+
+    void add_test_solve_symp_light_sb1() {
+        Test.add_func ("/KdS/test_solve_symp_light_sb1", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.0001;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, step, "sb1").solve(start, end, interval);
+            assert(counts[0] == 105951);
+            assert(counts[1] == 10596);
+        });
+    }
+
+    void add_test_solve_symp_light_sb2() {
+        Test.add_func ("/KdS/test_solve_symp_light_sb2", () => {
             var start = 0.0;
             var end = 100;
             var step = 0.0001;
@@ -38,8 +74,44 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_symplectic_start_0() {
-        Test.add_func ("/KdS/test_solve_symplectic_start_0", () => {
+    void add_test_solve_symp_light_sb4() {
+        Test.add_func ("/KdS/test_solve_symp_light_sb4", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.0001;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, step, "sb4").solve(start, end, interval);
+            assert(counts[0] == 105951);
+            assert(counts[1] == 10596);
+        });
+    }
+
+    void add_test_solve_symplectic_start_0_sb1() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_0_sb1", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.00005;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, step, "sb1").solve(start, end, interval);
+            assert(counts[0] == 85862);
+            assert(counts[1] == 8587);
+        });
+    }
+
+    void add_test_solve_symplectic_start_0_sb2() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_0_sb2", () => {
+            var start = 0.0;
+            var end = 100;
+            var step = 0.00005;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, step, "sb2").solve(start, end, interval);
+            assert(counts[0] == 85532);
+            assert(counts[1] == 8554);
+        });
+    }
+
+    void add_test_solve_symplectic_start_0_sb4() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_0_sb4", () => {
             var start = 0.0;
             var end = 100;
             var step = 0.00005;
@@ -50,8 +122,32 @@ namespace Simulations {
         });
     }
 
-    void add_test_solve_symplectic_start_non_0() {
-        Test.add_func ("/KdS/test_solve_symplectic_start_non_0", () => {
+    void add_test_solve_symplectic_start_non_0_sb1() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb1", () => {
+            var start = 50.0;
+            var end = 100;
+            var step = 0.00005;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, step, "sb1").solve(start, end, interval);
+            assert(counts[0] == 85862);
+            assert(counts[1] == 3242);
+        });
+    }
+
+    void add_test_solve_symplectic_start_non_0_sb2() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb2", () => {
+            var start = 50.0;
+            var end = 100;
+            var step = 0.00005;
+            var interval = 10;
+            var counts = BhSymp.newInstance(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, step, "sb2").solve(start, end, interval);
+            assert(counts[0] == 85532);
+            assert(counts[1] == 3215);
+        });
+    }
+
+    void add_test_solve_symplectic_start_non_0_sb4() {
+        Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb4", () => {
             var start = 50.0;
             var end = 100;
             var step = 0.00005;
@@ -65,12 +161,21 @@ namespace Simulations {
     void main (string[] args) {
         Test.init(ref args);
 
-        add_test_solve_symp_polar();
+        add_test_solve_symp_polar_sb1();
+        add_test_solve_symp_polar_sb2();
+        add_test_solve_symp_polar_sb4();
 
-        add_test_solve_symp_light();
+        add_test_solve_symp_light_sb1();
+        add_test_solve_symp_light_sb2();
+        add_test_solve_symp_light_sb4();
 
-        add_test_solve_symplectic_start_0();
-        add_test_solve_symplectic_start_non_0();
+        add_test_solve_symplectic_start_0_sb1();
+        add_test_solve_symplectic_start_0_sb2();
+        add_test_solve_symplectic_start_0_sb4();
+
+        add_test_solve_symplectic_start_non_0_sb1();
+        add_test_solve_symplectic_start_non_0_sb2();
+        add_test_solve_symplectic_start_non_0_sb4();
 
         Test.run();
     }
