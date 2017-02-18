@@ -110,12 +110,12 @@ class BhSymp(object):
         self.Uth += h * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
                         + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
-    def plot(self, mino, tau):
-        eR = 0.5 * (self.Ur**2 - self.R)
-        eTh = 0.5 * (self.Uth**2 - self.TH)
-        v4e =self.v4_error(self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
-        print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' \
-                % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)  # Log data,  d/dTau = 1/sigma * d/dLambda !!!
+    def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
+        eR = 0.5 * (Ur**2 - self.R / self.S**2)
+        eTh = 0.5 * (Uth**2 - self.TH / self.S**2)
+        v4e =self.v4_error(Ut, Ur, Uth, Uph)
+        print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
+
 
     def solve(self, start, end, tr):
         mino = tau = 0.0
@@ -125,13 +125,13 @@ class BhSymp(object):
         self.Uth = - sqrt(self.TH if self.TH >= 0.0 else -self.TH)
         while tau < end:
             if tau >= start and i % tr == 0:
-                self.plot(mino, tau)
+                self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
             self.integrator.step()
             i += 1
             mino = self.h * i
             tau += self.h * self.S
-        self.plot(mino, tau)
+        self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
         return i, plotCount
 
 

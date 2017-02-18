@@ -134,7 +134,7 @@ namespace Simulations {
             this.Uth = - sqrt(TH >= 0.0 ? TH : -TH);
             while (tau < end) {
                 if ((tau >= start) && (i % tr == 0)) {
-                    plot(mino, tau);
+                    plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;
                 }
                 integrator.integrate();
@@ -142,17 +142,18 @@ namespace Simulations {
                 mino = h * i;
                 tau += h * S;
             }
-            plot(mino, tau);
+            plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
             return { i, plotCount };  // for testing
         }
 
         /**
          * Write the simulated data to STDOUT
          */
-        private void plot (double mino, double tau) {
-            var eR = 0.5 * (Ur * Ur - R);
-            var eTh = 0.5 * (Uth * Uth - TH);
-            var v4e = v4Error(Ut / S, Ur / S, Uth / S, Uph / S);
+        private void plot (double mino, double tau, double Ut, double Ur, double Uth, double Uph) {
+            var S2 = S * S;
+            var eR = 0.5 * (Ur * Ur - R / S2);
+            var eTh = 0.5 * (Uth * Uth - TH / S2);
+            var v4e = v4Error(Ut, Ur, Uth, Uph);
             stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"D_r\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino,tau, v4e,eR,eTh,D_r, t,r,th,ph, Ut/S,Ur/S,Uth/S,Uph/S);
         }
 
