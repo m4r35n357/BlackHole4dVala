@@ -25,57 +25,63 @@ namespace Simulations {
         stderr.printf("Executable: %s\n", executable);
         if ("Simulate" in executable) {
             var o = getJson().get_object_member("IC");
-            if (o.has_member("Lfac")) {
-                new Newton(o.get_double_member("Lfac"),
-                           o.get_double_member("r0"),
-                           o.get_double_member("step"),
-                           o.get_string_member("integrator")).solve(o.get_double_member("start"),
-                                                                    o.get_double_member("end"),
-                                                                    o.get_int_member("plotratio"));
-            } else if (o.has_member("a")) {
-                BhSymp.newInstance(o.get_double_member("lambda"),
-                                    o.get_double_member("a"),
-                                    o.get_double_member("mu"),
-                                    o.get_double_member("E"),
-                                    o.get_double_member("L"),
-                                    o.get_double_member("Q"),
-                                    o.get_double_member("r0"),
-                                    o.get_double_member("th0"),
-                                    o.get_double_member("step"),
-                                    o.get_string_member("integrator")).solve(o.get_double_member("start"),
-                                                                             o.get_double_member("end"),
-                                                                             o.get_int_member("plotratio"));
-            } else if (o.has_member("bodies")) {
-                Body[] bodies = {};
-                foreach (var node in o.get_array_member("bodies").get_elements()) {
-                    var body = node.get_object();
-                    if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                        bodies += new Body(body.get_double_member("qX"),
-                                           body.get_double_member("qY"),
-                                           body.get_double_member("qZ"),
-                                           body.get_double_member("pX"),
-                                           body.get_double_member("pY"),
-                                           body.get_double_member("pZ"),
-                                           body.get_double_member("mass"));
-                    } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                        var m = body.get_double_member("mass");
-                        bodies += new Body(body.get_double_member("qX"),
-                                           body.get_double_member("qY"),
-                                           body.get_double_member("qZ"),
-                                           body.get_double_member("vX") * m,
-                                           body.get_double_member("vY") * m,
-                                           body.get_double_member("vZ") * m,
-                                           m);
-                    } else {
-                        stderr.printf("Mixed use of momenta and velocity\n");
+            var type = o.get_string_member("integrator");
+            if (("sb1" == type) || ("sb2" == type) || ("sb4" == type)) {
+                if (o.has_member("Lfac")) {
+                    new Newton(o.get_double_member("Lfac"),
+                               o.get_double_member("r0")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                                                                o.get_double_member("step"),
+                                                                o.get_double_member("start"),
+                                                                o.get_double_member("end"),
+                                                                o.get_int_member("plotratio"));
+                } else if (o.has_member("a")) {
+                    new BhSymp(o.get_double_member("lambda"),
+                                o.get_double_member("a"),
+                                o.get_double_member("mu"),
+                                o.get_double_member("E"),
+                                o.get_double_member("L"),
+                                o.get_double_member("Q"),
+                                o.get_double_member("r0"),
+                                o.get_double_member("th0")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                                                                  o.get_double_member("step"),
+                                                                  o.get_double_member("start"),
+                                                                  o.get_double_member("end"),
+                                                                  o.get_int_member("plotratio"));
+                } else if (o.has_member("bodies")) {
+                    Body[] bodies = {};
+                    foreach (var node in o.get_array_member("bodies").get_elements()) {
+                        var body = node.get_object();
+                        if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
+                            bodies += new Body(body.get_double_member("qX"),
+                                               body.get_double_member("qY"),
+                                               body.get_double_member("qZ"),
+                                               body.get_double_member("pX"),
+                                               body.get_double_member("pY"),
+                                               body.get_double_member("pZ"),
+                                               body.get_double_member("mass"));
+                        } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
+                            var m = body.get_double_member("mass");
+                            bodies += new Body(body.get_double_member("qX"),
+                                               body.get_double_member("qY"),
+                                               body.get_double_member("qZ"),
+                                               body.get_double_member("vX") * m,
+                                               body.get_double_member("vY") * m,
+                                               body.get_double_member("vZ") * m,
+                                               m);
+                        } else {
+                            stderr.printf("Mixed use of momenta and velocity\n");
+                        }
                     }
+                    new NBody(bodies, o.get_double_member("g"),
+                                      o.get_double_member("errorLimit")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                                                                               o.get_double_member("step"),
+                                                                               o.get_double_member("start"),
+                                                                               o.get_double_member("end"),
+                                                                               o.get_int_member("plotratio"));
                 }
-                new NBody(bodies, o.get_double_member("g"),
-                                  o.get_double_member("errorLimit"),
-                                  o.get_double_member("step"),
-                                  o.get_string_member("integratorOrder")).solve(o.get_double_member("start"),
-                                                                                o.get_double_member("end"),
-                                                                                o.get_int_member("plotratio"));
+            } else {
+                stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 ], found {%s}\n", type);
+                assert_not_reached();
             }
         } else if ("GenParticle" in executable) {
             var json = getJson();

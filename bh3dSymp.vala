@@ -56,14 +56,7 @@ namespace Simulations {
         protected double Uth;
         protected double Uph;
 
-        // Constants from IC file
-        protected double h;
-        private ISymplectic integrator;
-
-        /**
-         * Private constructor, use a static factory
-         */
-        private BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double h, string type) {
+        public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             this.l_3 = lambda / 3.0;
             this.a = a;
@@ -79,8 +72,6 @@ namespace Simulations {
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
-            this.h = h;
-            this.integrator = Symplectic.getIntegrator(this, h, type);
         }
 
         /**
@@ -124,7 +115,7 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (double start, double end, int64 tr) {
+        public int[] solve (ISymplectic integrator, double h, double start, double end, int64 tr) {
             var mino = 0.0;
             var tau = 0.0;
             var i = 0;
@@ -137,7 +128,7 @@ namespace Simulations {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;
                 }
-                integrator.integrate();
+                integrator.integrate(this);
                 i += 1;
                 mino = h * i;
                 tau += h * S;
@@ -165,18 +156,6 @@ namespace Simulations {
             var U4 = tDot - a * sth2 * phDot;
             var SX2 = S * X2;
             return mu2 + sth2 * D_th / SX2 * U1 * U1 + S / D_r * rDot * rDot + S / D_th * thDot * thDot - D_r / SX2 * U4 * U4;
-        }
-
-        /**
-         *  Static factory
-         */
-        public static ISolver newInstance(double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0, double h , string t) {
-            if (("sb1" == t) || ("sb2" == t) || ("sb4" == t)) {
-                return new BhSymp(lambda, a, mu2, E, L, Q, r0, th0, h, t);
-            } else {
-                stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 ], found {%s}\n", t);
-                assert_not_reached();
-            }
         }
     }
 }

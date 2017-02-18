@@ -14,12 +14,12 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 from json import loads
-from math import sqrt, sin, pi, fabs, log10, cos
+from math import sqrt, sin, pi, cos
 from sys import stdin, stderr, stdout, argv
 
 
 class Symplectic(object):
-    def __init__(self, model, h, order):
+    def __init__(self, h, order):
         if order == 'sb1':
             self.coefficients = [h]
             self.step = self.symplectic_euler
@@ -33,29 +33,28 @@ class Symplectic(object):
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
-        self.model = model
 
-    def symplectic_euler(self):
-        self.model.qUp(self.coefficients[0])
-        self.model.pUp(self.coefficients[0])
+    def symplectic_euler(self, model):
+        model.qUp(self.coefficients[0])
+        model.pUp(self.coefficients[0])
 
-    def stormer_verlet(self):
-        self.model.qUp(self.coefficients[0])
-        self.model.pUp(self.coefficients[1])
-        self.model.qUp(self.coefficients[0])
+    def stormer_verlet(self, model):
+        model.qUp(self.coefficients[0])
+        model.pUp(self.coefficients[1])
+        model.qUp(self.coefficients[0])
 
-    def forest_ruth(self):
-        self.model.qUp(self.coefficients[0])
-        self.model.pUp(self.coefficients[1])
-        self.model.qUp(self.coefficients[2])
-        self.model.pUp(self.coefficients[3])
-        self.model.qUp(self.coefficients[2])
-        self.model.pUp(self.coefficients[1])
-        self.model.qUp(self.coefficients[0])
+    def forest_ruth(self, model):
+        model.qUp(self.coefficients[0])
+        model.pUp(self.coefficients[1])
+        model.qUp(self.coefficients[2])
+        model.pUp(self.coefficients[3])
+        model.qUp(self.coefficients[2])
+        model.pUp(self.coefficients[1])
+        model.qUp(self.coefficients[0])
 
 
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, h, order):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0):
         self.l_3 = Lambda / 3.0
         self.a = a
         self.mu2 = mu2
@@ -71,8 +70,6 @@ class BhSymp(object):
         self.t = self.ph = 0.0
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
-        self.h = h
-        self.integrator = Symplectic(self, h, order)
 
     def refresh(self):
         self.r2 = self.r**2
@@ -97,17 +94,17 @@ class BhSymp(object):
         return self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2 \
                + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2
 
-    def qUp(self, h):
-        self.t += h * self.Ut
-        self.r += h * self.Ur
-        self.th += h * self.Uth
-        self.ph += h * self.Uph
+    def qUp(self, c):
+        self.t += c * self.Ut
+        self.r += c * self.Ur
+        self.th += c * self.Uth
+        self.ph += c * self.Uph
         self.refresh()
 
-    def pUp(self, h):
-        self.Ur += h * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
+    def pUp(self, d):
+        self.Ur += d * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
                         - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
-        self.Uth += h * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
+        self.Uth += d * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
                         + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
@@ -117,7 +114,7 @@ class BhSymp(object):
         print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 
-    def solve(self, start, end, tr):
+    def solve(self, integrator, h, start, end, tr):
         mino = tau = 0.0
         i = plotCount = 0
         self.refresh()
@@ -127,10 +124,10 @@ class BhSymp(object):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
-            self.integrator.step()
+            integrator.step(self)
             i += 1
-            mino = self.h * i
-            tau += self.h * self.S
+            mino = h * i
+            tau += h * self.S
         self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
         return i, plotCount
 
@@ -139,5 +136,4 @@ print >> stderr, "Simulator: {}".format(argv[0])
 input_data = stdin.read()
 ic = loads(input_data)['IC']
 print >> stderr, input_data
-BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['step'], ic['integrator']).solve(
-    ic['start'], ic['end'], ic['plotratio'])
+BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(Symplectic(ic['step'], ic['integrator']), ic['step'], ic['start'], ic['end'], ic['plotratio'])

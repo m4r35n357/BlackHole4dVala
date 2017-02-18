@@ -21,32 +21,30 @@ namespace Simulations {
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
-        protected IModel model;
         private double h;
         protected double[] coefficients;
 
         /**
          * Protected constructor, use the static factory
          */
-        protected Symplectic (IModel model, double h) {
-            this.model = model;
+        protected Symplectic (double h) {
             this.h = h;
         }
 
         /**
          * Static factory
          */
-        public static ISymplectic getIntegrator (IModel model, double h, string type) {
+        public static ISymplectic getIntegrator (double h, string type) {
             switch (type) {
                 case "sb1":
                     stderr.printf("1st Order Symplectic Integrator\n");
-                    return new EulerCromer(model, h);
+                    return new EulerCromer(h);
                 case "sb2":
                     stderr.printf("2nd Order Symplectic Integrator\n");
-                    return new StormerVerlet(model, h);
+                    return new StormerVerlet(h);
                 case "sb4":
                     stderr.printf("4th Order Symplectic Integrator\n");
-                    return new ForestRuth(model, h);
+                    return new ForestRuth(h);
             }
             stderr.printf("Integrator not recognized: %s\n", type);
             assert_not_reached();
@@ -55,7 +53,7 @@ namespace Simulations {
         /**
          * Subclasses should perform one integration step with the current compositional weight
          */
-        protected abstract void integrate ();
+        protected abstract void integrate (IModel model);
     }
 
     /**
@@ -66,15 +64,15 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected EulerCromer (IModel model, double h) {
-            base(model, h);
+        protected EulerCromer (double h) {
+            base(h);
             this.coefficients = { h };
         }
 
         /**
          * Weighted 1st order integration step
          */
-        protected override void integrate () {
+        protected override void integrate (IModel model) {
             model.qUp(coefficients[0]);
             model.pUp(coefficients[0]);
         }
@@ -88,15 +86,15 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected StormerVerlet (IModel model, double h) {
-            base(model, h);
+        protected StormerVerlet (double h) {
+            base(h);
             this.coefficients = { 0.5 * h, h };
         }
 
         /**
          * Weighted 2nd order integration step
          */
-        protected override void integrate () {
+        protected override void integrate (IModel model) {
             model.qUp(coefficients[0]);
             model.pUp(coefficients[1]);
             model.qUp(coefficients[0]);
@@ -111,8 +109,8 @@ namespace Simulations {
         /**
          * Protected constructor, use the static factory in superclass
          */
-        protected ForestRuth (IModel model, double h) {
-            base(model, h);
+        protected ForestRuth (double h) {
+            base(h);
             var CUBRT2 = pow(2.0, (1.0 / 3.0));
             this.coefficients = { 0.5*h/(2.0-CUBRT2), h/(2.0-CUBRT2), 0.5*h*(1.0-CUBRT2)/(2.0-CUBRT2), -h*CUBRT2/(2.0-CUBRT2) };
         }
@@ -120,7 +118,7 @@ namespace Simulations {
         /**
          * Weighted 4th order integration step
          */
-        protected override void integrate () {
+        protected override void integrate (IModel model) {
             model.qUp(coefficients[0]);
             model.pUp(coefficients[1]);
             model.qUp(coefficients[2]);
