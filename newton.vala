@@ -81,7 +81,7 @@ namespace Simulations {
          * Write the simulated data to STDOUT
          */
         private void output (double time) {
-            stdout.printf("{\"tau\":%.9e,\"v4e\":%.1f,", time, H() - H0);
+            stdout.printf("{\"tau\":%.9e,\"v4e\":%.9e,", time, H() - H0);
             stdout.printf("\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,", time, r, PI_2, ph);
             stdout.printf("\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", 1.0, rDot, 0.0, phDot);
         }
