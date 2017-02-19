@@ -46,13 +46,13 @@ namespace Simulations {
             return 0.5 * (rDot * rDot + L2 / (r * r)) - 1.0 / r;
         }
 
-        public void qUp (double d) {
+        public void qUpdate (double d) {
             r += d * rDot;
             phDot = L / (r * r);
             ph += d * phDot;
         }
 
-        public void pUp (double c) {
+        public void pUpdate (double c) {
             rDot -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
@@ -66,7 +66,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.integrate(this);
+                integrator.step(this);
                 i += 1;
                 t = i * h;
             }

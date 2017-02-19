@@ -79,7 +79,7 @@ namespace Simulations {
             return energy;
         }
 
-        public void qUp (double d) {
+        public void qUpdate (double d) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 var tmp = d / a.mass;
@@ -89,7 +89,7 @@ namespace Simulations {
             }
         }
 
-        public void pUp (double c) {
+        public void pUpdate (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 for (var j = i + 1; j < np; j++) {
@@ -123,7 +123,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t, hNow, h0, error);
                 }
-                integrator.integrate(this);
+                integrator.step(this);
                 i += 1;
                 t = i * ts;
             }

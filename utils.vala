@@ -37,7 +37,7 @@ namespace Simulations {
      */
     public interface ISolver : GLib.Object {
         /**
-         * Sole method called by main(), calls iterate() on RK4, and ISymplectic.compose() on the Symplectics
+         * Sole method called by main(), calls ISymplectic.step() once per iteration
          */
         public abstract int[] solve (ISymplectic integrator, double h, double start, double end, int64 tr);
     }
@@ -47,14 +47,14 @@ namespace Simulations {
      */
     public interface IModel : GLib.Object {
         /**
-         * Coordinate updates, called by ISymplectic.compose()
+         * Coordinate updates, called by ISymplectic.step()
          */
-        public abstract void qUp (double d);
+        public abstract void qUpdate (double d);
 
         /**
-         * Momentum updates, called by ISymplectic.compose()
+         * Momentum updates, called by ISymplectic.step()
          */
-        public abstract void pUp (double c);
+        public abstract void pUpdate (double c);
     }
 
     /**
@@ -64,7 +64,7 @@ namespace Simulations {
         /**
          * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
          */
-        public abstract void integrate (IModel model);
+        public abstract void step (IModel model);
     }
 
     /**

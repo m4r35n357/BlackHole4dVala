@@ -21,8 +21,8 @@ namespace Simulations {
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
-        private double h;
-        protected double[] coefficients;
+        private double h;  // the time step
+        protected double[] c_d;  // the update coefficients
 
         /**
          * Protected constructor, use the static factory
@@ -51,9 +51,9 @@ namespace Simulations {
         }
 
         /**
-         * Subclasses should perform one integration step with the current compositional weight
+         * Subclasses should perform one integration step
          */
-        protected abstract void integrate (IModel model);
+        protected abstract void step (IModel model);
     }
 
     /**
@@ -66,15 +66,15 @@ namespace Simulations {
          */
         protected EulerCromer (double h) {
             base(h);
-            this.coefficients = { h };
+            this.c_d = { h };
         }
 
         /**
          * Weighted 1st order integration step
          */
-        protected override void integrate (IModel model) {
-            model.qUp(coefficients[0]);
-            model.pUp(coefficients[0]);
+        protected override void step (IModel model) {
+            model.qUpdate(c_d[0]);
+            model.pUpdate(c_d[0]);
         }
     }
 
@@ -88,16 +88,16 @@ namespace Simulations {
          */
         protected StormerVerlet (double h) {
             base(h);
-            this.coefficients = { 0.5 * h, h };
+            this.c_d = { 0.5 * h, h };
         }
 
         /**
          * Weighted 2nd order integration step
          */
-        protected override void integrate (IModel model) {
-            model.qUp(coefficients[0]);
-            model.pUp(coefficients[1]);
-            model.qUp(coefficients[0]);
+        protected override void step (IModel model) {
+            model.qUpdate(c_d[0]);
+            model.pUpdate(c_d[1]);
+            model.qUpdate(c_d[0]);
         }
     }
 
@@ -111,21 +111,21 @@ namespace Simulations {
          */
         protected ForestRuth (double h) {
             base(h);
-            var CUBRT2 = pow(2.0, (1.0 / 3.0));
-            this.coefficients = { 0.5*h/(2.0-CUBRT2), h/(2.0-CUBRT2), 0.5*h*(1.0-CUBRT2)/(2.0-CUBRT2), -h*CUBRT2/(2.0-CUBRT2) };
+            var CBRT2 = pow(2.0, (1.0 / 3.0));
+            this.c_d = { 0.5*h/(2.0-CBRT2), h/(2.0-CBRT2), 0.5*h*(1.0-CBRT2)/(2.0-CBRT2), -h*CBRT2/(2.0-CBRT2) };
         }
 
         /**
          * Weighted 4th order integration step
          */
-        protected override void integrate (IModel model) {
-            model.qUp(coefficients[0]);
-            model.pUp(coefficients[1]);
-            model.qUp(coefficients[2]);
-            model.pUp(coefficients[3]);
-            model.qUp(coefficients[2]);
-            model.pUp(coefficients[1]);
-            model.qUp(coefficients[0]);
+        protected override void step (IModel model) {
+            model.qUpdate(c_d[0]);
+            model.pUpdate(c_d[1]);
+            model.qUpdate(c_d[2]);
+            model.pUpdate(c_d[3]);
+            model.qUpdate(c_d[2]);
+            model.pUpdate(c_d[1]);
+            model.qUpdate(c_d[0]);
         }
     }
 }

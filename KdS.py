@@ -21,36 +21,36 @@ from sys import stdin, stderr, stdout, argv
 class Symplectic(object):
     def __init__(self, h, order):
         if order == 'sb1':
-            self.coefficients = [h]
+            self.c_d = [h]
             self.step = self.symplectic_euler
         elif order == 'sb2':
-            self.coefficients = [0.5 * h, h]
+            self.c_d = [0.5 * h, h]
             self.step = self.stormer_verlet
         elif order == 'sb4':
             self.cbrt2 = 2.0 ** (1.0 / 3.0)
             self.f2 = h / (2.0 - self.cbrt2)
-            self.coefficients = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
+            self.c_d = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
 
     def symplectic_euler(self, model):
-        model.qUp(self.coefficients[0])
-        model.pUp(self.coefficients[0])
+        model.qUpdate(self.c_d[0])
+        model.pUpdate(self.c_d[0])
 
     def stormer_verlet(self, model):
-        model.qUp(self.coefficients[0])
-        model.pUp(self.coefficients[1])
-        model.qUp(self.coefficients[0])
+        model.qUpdate(self.c_d[0])
+        model.pUpdate(self.c_d[1])
+        model.qUpdate(self.c_d[0])
 
     def forest_ruth(self, model):
-        model.qUp(self.coefficients[0])
-        model.pUp(self.coefficients[1])
-        model.qUp(self.coefficients[2])
-        model.pUp(self.coefficients[3])
-        model.qUp(self.coefficients[2])
-        model.pUp(self.coefficients[1])
-        model.qUp(self.coefficients[0])
+        model.qUpdate(self.c_d[0])
+        model.pUpdate(self.c_d[1])
+        model.qUpdate(self.c_d[2])
+        model.pUpdate(self.c_d[3])
+        model.qUpdate(self.c_d[2])
+        model.pUpdate(self.c_d[1])
+        model.qUpdate(self.c_d[0])
 
 
 class BhSymp(object):
@@ -94,18 +94,16 @@ class BhSymp(object):
         return self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2 \
                + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2
 
-    def qUp(self, c):
+    def qUpdate(self, c):
         self.t += c * self.Ut
         self.r += c * self.Ur
         self.th += c * self.Uth
         self.ph += c * self.Uph
         self.refresh()
 
-    def pUp(self, d):
-        self.Ur += d * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r)
-                        - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2))
-                        + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
+    def pUpdate(self, d):
+        self.Ur += d * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
+        self.Uth += d * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
         eR = 0.5 * (Ur**2 - self.R / self.S**2)
