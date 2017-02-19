@@ -63,6 +63,8 @@ $exe <$ic | finterp.py tau 0.5 | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 
+params='{ "IC": { "r0": 12.0, "Lfac": 0.8, "start": 0.0, "end": 5000.0, "step": 0.1, "integrator": "sb2", "plotratio": 10 } }'; echo $params | jq .; echo $params | $exe >$data; ./plotErrors.py tau 1 <$data 2>/dev/null & echo $params | $exe | ./plotBH.py 1.0 `echo $params | jq .IC.Lfac` 0.0 2>/dev/null &
+
 
 6.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 

@@ -28,25 +28,22 @@ namespace Simulations {
 
         public Newton (double lFac, double r0) {
             stderr.printf("Newtonian Orbit\n");
+            this.r = r0;
             this.L = sqrt(r0);
             this.L2 = L * L;
-            this.r = r0;
-            var E0 = V(r);
+            var E0 = 0.5 * L2 / (r * r) - 1.0 / r;
             this.L = lFac * L;
             this.L2 = L * L;
-            this.rDot = - sqrt(2.0 * fabs(E0 - V(r)));
+            var V = 0.5 * L2 / (r * r) - 1.0 / r;
+            this.rDot = - sqrt(2.0 * (E0 > V ? E0 - V : V - E0));
             this.H0 = H();
-        }
-
-        private double V (double r) {
-            return 0.5 * L2 / (r * r) - 1.0 / r;
         }
 
        /**
          * Total (kinetic + potential) energy of the system, the Hamiltonian
          */
         private double H () {
-            return 0.5 * rDot * rDot + V(r);
+            return 0.5 * (rDot * rDot + L2 / (r * r)) - 1.0 / r;
         }
 
         public void qUp (double d) {
