@@ -17,6 +17,8 @@ from json import loads
 from math import sqrt, sin, pi, cos
 from sys import stdin, stderr, stdout, argv
 
+from decimal import Decimal
+
 
 class Symplectic(object):
     def __init__(self, h, order):
@@ -24,12 +26,12 @@ class Symplectic(object):
             self.c_d = [h]
             self.step = self.symplectic_euler
         elif order == 'sb2':
-            self.c_d = [0.5 * h, h]
+            self.c_d = [Decimal('0.5') * h, h]
             self.step = self.stormer_verlet
         elif order == 'sb4':
-            self.cbrt2 = 2.0 ** (1.0 / 3.0)
-            self.f2 = h / (2.0 - self.cbrt2)
-            self.c_d = [0.5 * self.f2, self.f2, 0.5 * (1.0 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
+            self.cbrt2 = Decimal('2.0') ** (Decimal('1.0') / Decimal('3.0'))
+            self.f2 = h / (Decimal('2.0') - self.cbrt2)
+            self.c_d = [Decimal('0.5') * self.f2, self.f2, Decimal('0.5') * (Decimal('1.0') - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
@@ -55,7 +57,7 @@ class Symplectic(object):
 
 class BhSymp(object):
     def __init__(self, Lambda, a, mu2, E, L, C, r0, th0):
-        self.l_3 = Lambda / 3.0
+        self.l_3 = Lambda / Decimal('3.0')
         self.a = a
         self.mu2 = mu2
         self.E = E
@@ -65,23 +67,23 @@ class BhSymp(object):
         self.a2mu2 = self.a2 * mu2
         self.aE = a * E
         self.aL = a * L
-        self.X2 = (1.0 + self.a2l_3)**2
+        self.X2 = (Decimal('1.0') + self.a2l_3)**2
         self.K = C + self.X2 * (L - self.aE)**2
-        self.t = self.ph = 0.0
+        self.t = self.ph = Decimal('0.0')
         self.r = r0
-        self.th = (90.0 - th0) * pi / 180.0
+        self.th = (Decimal('90.0') - th0) * Decimal(str(pi)) / Decimal('180.0')
 
     def refresh(self):
         self.r2 = self.r**2
-        self.sth = sin(self.th)
+        self.sth = Decimal(str(sin(self.th)))
         self.sth2 = self.sth**2
-        self.cth2 = 1.0 - self.sth2
+        self.cth2 = Decimal('1.0') - self.sth2
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
-        self.D_r = (1.0 - self.l_3 * self.r2) * self.ra2 - 2.0 * self.r
+        self.D_r = (Decimal('1.0') - self.l_3 * self.r2) * self.ra2 - Decimal('2.0') * self.r
         self.R = self.X2 * self.P**2 - self.D_r * (self.mu2 * self.r2 + self.K)
         self.T = self.aE * self.sth2 - self.L
-        self.D_th = 1.0 + self.a2l_3 * self.cth2
+        self.D_th = Decimal('1.0') + self.a2l_3 * self.cth2
         self.TH = self.D_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
         P_Dr = self.P / self.D_r
         T_Dth = self.T / self.D_th
@@ -102,22 +104,22 @@ class BhSymp(object):
         self.refresh()
 
     def pUpdate(self, d):
-        self.Ur += d * (self.r * (2.0 * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (cos(self.th) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - 2.0 * self.aE)))
+        self.Ur += d * (self.r * (Decimal('2.0') * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (Decimal('1.0') - self.l_3 * (self.r2 + self.ra2)) - Decimal('1.0')) * (self.K + self.mu2 * self.r2))
+        self.Uth += d * (Decimal(str(cos(self.th))) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - Decimal('2.0') * self.aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
-        eR = 0.5 * (Ur**2 - self.R / self.S**2)
-        eTh = 0.5 * (Uth**2 - self.TH / self.S**2)
+        eR = Decimal('0.5') * (Ur**2 - self.R / self.S**2)
+        eTh = Decimal('0.5') * (Uth**2 - self.TH / self.S**2)
         v4e =self.v4_error(Ut, Ur, Uth, Uph)
         print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 
     def solve(self, integrator, h, start, end, tr):
-        mino = tau = 0.0
+        mino = tau = Decimal('0.0')
         i = plotCount = 0
         self.refresh()
-        self.Ur = - sqrt(self.R if self.R >= 0.0 else -self.R)
-        self.Uth = - sqrt(self.TH if self.TH >= 0.0 else -self.TH)
+        self.Ur = - Decimal.sqrt(self.R if self.R >= 0.0 else -self.R)
+        self.Uth = - Decimal.sqrt(self.TH if self.TH >= 0.0 else -self.TH)
         while tau < end:
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
@@ -132,6 +134,6 @@ class BhSymp(object):
 
 print >> stderr, "Simulator: {}".format(argv[0])
 input_data = stdin.read()
-ic = loads(input_data)['IC']
+ic = loads(input_data, parse_float=Decimal)['IC']
 print >> stderr, input_data
 BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(Symplectic(ic['step'], ic['integrator']), ic['step'], ic['start'], ic['end'], ic['plotratio'])
