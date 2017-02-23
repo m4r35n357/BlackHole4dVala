@@ -19,6 +19,11 @@ from sys import stdin, stderr, stdout, argv
 
 from decimal import Decimal
 
+D0 = Decimal('0.0')
+D1 = Decimal('1.0')
+D2 = Decimal('2.0')
+D3 = Decimal('3.0')
+D05 = Decimal('0.5')
 
 class Symplectic(object):
     def __init__(self, h, order):
@@ -26,12 +31,12 @@ class Symplectic(object):
             self.c_d = [h]
             self.step = self.symplectic_euler
         elif order == 'sb2':
-            self.c_d = [Decimal('0.5') * h, h]
+            self.c_d = [D05 * h, h]
             self.step = self.stormer_verlet
         elif order == 'sb4':
-            self.cbrt2 = Decimal('2.0') ** (Decimal('1.0') / Decimal('3.0'))
-            self.f2 = h / (Decimal('2.0') - self.cbrt2)
-            self.c_d = [Decimal('0.5') * self.f2, self.f2, Decimal('0.5') * (Decimal('1.0') - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
+            self.cbrt2 = D2 ** (D1 / D3)
+            self.f2 = h / (D2 - self.cbrt2)
+            self.c_d = [D05 * self.f2, self.f2, D05 * (Decimal('1.0') - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
@@ -71,19 +76,19 @@ class BhSymp(object):
         self.K = C + self.X2 * (L - self.aE)**2
         self.t = self.ph = Decimal('0.0')
         self.r = r0
-        self.th = (Decimal('90.0') - th0) * Decimal(str(pi)) / Decimal('180.0')
+        self.th = (Decimal('90.0') - th0) * Decimal(pi) / Decimal('180.0')
 
     def refresh(self):
         self.r2 = self.r**2
-        self.sth = Decimal(str(sin(self.th)))
+        self.sth = Decimal(sin(self.th))
         self.sth2 = self.sth**2
-        self.cth2 = Decimal('1.0') - self.sth2
+        self.cth2 = D1 - self.sth2
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
-        self.D_r = (Decimal('1.0') - self.l_3 * self.r2) * self.ra2 - Decimal('2.0') * self.r
+        self.D_r = (D1 - self.l_3 * self.r2) * self.ra2 - D2 * self.r
         self.R = self.X2 * self.P**2 - self.D_r * (self.mu2 * self.r2 + self.K)
         self.T = self.aE * self.sth2 - self.L
-        self.D_th = Decimal('1.0') + self.a2l_3 * self.cth2
+        self.D_th = D1 + self.a2l_3 * self.cth2
         self.TH = self.D_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
         P_Dr = self.P / self.D_r
         T_Dth = self.T / self.D_th
@@ -104,18 +109,18 @@ class BhSymp(object):
         self.refresh()
 
     def pUpdate(self, d):
-        self.Ur += d * (self.r * (Decimal('2.0') * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (Decimal('1.0') - self.l_3 * (self.r2 + self.ra2)) - Decimal('1.0')) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (Decimal(str(cos(self.th))) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - Decimal('2.0') * self.aE)))
+        self.Ur += d * (self.r * (D2 * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (D1 - self.l_3 * (self.r2 + self.ra2)) - D1) * (self.K + self.mu2 * self.r2))
+        self.Uth += d * (Decimal(cos(self.th)) * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - D2 * self.aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
-        eR = Decimal('0.5') * (Ur**2 - self.R / self.S**2)
-        eTh = Decimal('0.5') * (Uth**2 - self.TH / self.S**2)
+        eR = D05 * (Ur**2 - self.R / self.S**2)
+        eTh = D05 * (Uth**2 - self.TH / self.S**2)
         v4e =self.v4_error(Ut, Ur, Uth, Uph)
         print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 
     def solve(self, integrator, h, start, end, tr):
-        mino = tau = Decimal('0.0')
+        mino = tau = D0
         i = plotCount = 0
         self.refresh()
         self.Ur = - Decimal.sqrt(self.R if self.R >= 0.0 else -self.R)
