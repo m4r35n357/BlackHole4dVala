@@ -13,11 +13,10 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from json import loads
-from math import sqrt, sin, pi, cos
-from sys import stdin, stderr, stdout, argv
-
 from decimal import Decimal
+from json import loads
+from math import sin, pi, cos
+from sys import stdin, stderr, stdout, argv
 
 D0 = Decimal('0.0')
 D1 = Decimal('1.0')
@@ -36,7 +35,7 @@ class Symplectic(object):
         elif order == 'sb4':
             self.cbrt2 = D2 ** (D1 / D3)
             self.f2 = h / (D2 - self.cbrt2)
-            self.c_d = [D05 * self.f2, self.f2, D05 * (Decimal('1.0') - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
+            self.c_d = [D05 * self.f2, self.f2, D05 * (D1 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
@@ -62,7 +61,7 @@ class Symplectic(object):
 
 class BhSymp(object):
     def __init__(self, Lambda, a, mu2, E, L, C, r0, th0):
-        self.l_3 = Lambda / Decimal('3.0')
+        self.l_3 = Lambda / D3
         self.a = a
         self.mu2 = mu2
         self.E = E
@@ -72,9 +71,9 @@ class BhSymp(object):
         self.a2mu2 = self.a2 * mu2
         self.aE = a * E
         self.aL = a * L
-        self.X2 = (Decimal('1.0') + self.a2l_3)**2
+        self.X2 = (D1 + self.a2l_3)**2
         self.K = C + self.X2 * (L - self.aE)**2
-        self.t = self.ph = Decimal('0.0')
+        self.t = self.ph = D0
         self.r = r0
         self.th = (Decimal('90.0') - th0) * Decimal(pi) / Decimal('180.0')
 
