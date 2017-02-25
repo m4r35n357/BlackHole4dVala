@@ -136,8 +136,12 @@ class BhSymp(object):
         return i, plotCount
 
 
-print >> stderr, "Simulator: {}".format(argv[0])
-input_data = stdin.read()
-ic = loads(input_data, parse_float=Decimal)['IC']
-print >> stderr, input_data
-BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(Symplectic(ic['step'], ic['integrator']), ic['step'], ic['start'], ic['end'], ic['plotratio'])
+if __name__ == "__main__":
+    print >> stderr, "Simulator: {}".format(argv[0])
+    input_data = stdin.read()
+    ic = loads(input_data, parse_float=Decimal)['IC']
+    print >> stderr, input_data
+    BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(
+        Symplectic(ic['step'], ic['integrator']), ic['step'], ic['start'], ic['end'], ic['plotratio'])
+else:
+    print >> stderr, __name__ + " module loaded"
