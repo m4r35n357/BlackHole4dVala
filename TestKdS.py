@@ -1,103 +1,94 @@
+from decimal import Decimal
 from unittest import TestCase, skip, main
 
 import KdS
 
 class KdSTest(TestCase):
 
-    kds_rk4 = KdS.BhRk4(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "rk4")
-    kds_rk438 = KdS.BhRk4(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "rk438")
-    kds_sym_b2 = KdS.BhSymp(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "sb2")
-    kds_sym_b4 = KdS.BhSymp(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "sb4")
-    kds_sym_c4 = KdS.BhSymp(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "sc4")
-    kds_sym_c6 = KdS.BhSymp(0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "sc6")
+    kds_sym_b1 = KdS.Symplectic(Decimal('1.0'), 'sb1')
+    kds_sym_b2 = KdS.Symplectic(Decimal('1.0'), 'sb2')
+    kds_sym_b4 = KdS.Symplectic(Decimal('1.0'), 'sb4')
 
     def setUp(self):
         pass
 
+    # @skip("temporarily skipped")
     def test_good_integrator_types(self):
-        self.assertIsInstance(self.kds_rk4, KdS.BhRk4)
-        self.assertIsInstance(self.kds_rk438, KdS.BhRk4)
-        self.assertIsInstance(self.kds_sym_b2, KdS.BhSymp)
-        self.assertIsInstance(self.kds_sym_b4, KdS.BhSymp)
-        self.assertIsInstance(self.kds_sym_c4, KdS.BhSymp)
-        self.assertIsInstance(self.kds_sym_c6, KdS.BhSymp)
+        self.assertIsInstance(self.kds_sym_b1, KdS.Symplectic)
+        self.assertIsInstance(self.kds_sym_b2, KdS.Symplectic)
+        self.assertIsInstance(self.kds_sym_b4, KdS.Symplectic)
 
+    @skip("temporarily skipped")
     def test_bad_integrator_types(self):
-        self.assertRaises(Exception, KdS.BhRk4, 0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "xxx")
-        self.assertRaises(Exception, KdS.BhSymp, 0.0, 0.9, 1.0, 1.0, 4.0, 0.0, 4.0, 0.0, 0.0, 100.0, 0.001, 500, "xxx")
+        self.assertRaises(Exception, KdS.Symplectic(Decimal('1.0'), 'xxx'))
 
-    def test_solve_rk4_polar(self):
-        start = 0.0
-        end = 100.0
-        step = 0.001
-        interval = 10
-        counts = KdS.BhRk4(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "rk438").solve()
-        self.assertEqual(100000, counts[0])
-        self.assertEqual(10000, counts[1])
-
+    # @skip("temporarily skipped")
     def test_solve_symp_polar(self):
-        start = 0.0
-        end = 100.0
-        step = 0.00001
-        interval = 10
-        counts = KdS.BhSymp(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, start, end, step, interval, "sc6").solve()
-        self.assertEqual(69174, counts[0])
-        self.assertEqual(6918, counts[1])
+        start = Decimal('0.0')
+        end = Decimal('10.0')
+        step = Decimal('0.0001')
+        interval = 1
+        counts = KdS.BhSymp(Decimal('0.0'),
+                            Decimal('1.0'),
+                            Decimal('1.0'),
+                            Decimal('0.96210432940242041'),
+                            Decimal('5.6843449527674236e-13'),
+                            Decimal('15.914691393798241'),
+                            Decimal('12.0'),
+                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb2'), step, start, end, interval)
+        self.assertEqual(695, counts[0])
+        self.assertEqual(695, counts[1])
 
-    def test_solve_rk4_light(self):
-        start = 0.0
-        end = 100.0
-        step = 0.001
-        interval = 10
-        counts = KdS.BhRk4(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "rk438").solve()
-        self.assertEqual(100000, counts[0])
-        self.assertEqual(10000, counts[1])
-
+    # @skip("temporarily skipped")
     def test_solve_symp_light(self):
-        start = 0.0
-        end = 100.0
-        step = 0.0001
-        interval = 10
-        counts = KdS.BhSymp(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, start, end, step, interval, "sc6").solve()
-        self.assertEqual(105951, counts[0])
-        self.assertEqual(10596, counts[1])
+        start = Decimal('0.0')
+        end = Decimal('10.0')
+        step = Decimal('0.001')
+        interval = 1
+        counts = KdS.BhSymp(Decimal('0.0'),
+                            Decimal('1.0'),
+                            Decimal('0.0'),
+                            Decimal('1.0'),
+                            Decimal('-2.0'),
+                            Decimal('27.0'),
+                            Decimal('3.0'),
+                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb1'), step, start, end, interval)
+        self.assertEqual(1058, counts[0])
+        self.assertEqual(1058, counts[1])
 
-    def test_solve_rk4_0(self):
-        start = 0.0
-        end = 100.0
-        step = 0.001
-        interval = 10
-        counts = KdS.BhRk4(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "rk4").solve()
-        self.assertEqual(100000, counts[0])
-        self.assertEqual(10000, counts[1])
-
-    def test_solve_rk4_non_0(self):
-        start = 50.0
-        end = 100.0
-        step = 0.001
-        interval = 10
-        counts = KdS.BhRk4(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "rk4").solve()
-        self.assertEqual(100000, counts[0])
-        self.assertEqual(5000, counts[1])
-
+    # @skip("temporarily skipped")
     def test_solve_symp_0(self):
-        start = 0.0
-        end = 100
-        step = 0.00005
-        interval = 10
-        counts = KdS.BhSymp(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve()
-        self.assertEqual(85532, counts[0])
-        self.assertEqual(8554, counts[1])
+        start = Decimal('0.0')
+        end = Decimal('10.0')
+        step = Decimal('0.001')
+        interval = 1
+        counts = KdS.BhSymp(Decimal('0.0'),
+                            Decimal('0.8'),
+                            Decimal('1.0'),
+                            Decimal('0.94550509567490792'),
+                            Decimal('1.4343745095317371'),
+                            Decimal('7.9787599589278697'),
+                            Decimal('7.5'),
+                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb2'), step, start, end, interval)
+        self.assertEqual(220, counts[0])
+        self.assertEqual(220, counts[1])
 
-    #@skip("temporarily skipped")
+    # @skip("temporarily skipped")
     def test_solve_symp_non_0(self):
-        start = 50.0
-        end = 100
-        step = 0.00005
-        interval = 10
-        counts = KdS.BhSymp(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, start, end, step, interval, "sb4").solve()
-        self.assertEqual(85532, counts[0])
-        self.assertEqual(3215, counts[1])
+        start = Decimal('5.0')
+        end = Decimal('10.0')
+        step = Decimal('0.001')
+        interval = 1
+        counts = KdS.BhSymp(Decimal('0.0'),
+                            Decimal('0.8'),
+                            Decimal('1.0'),
+                            Decimal('0.94550509567490792'),
+                            Decimal('1.4343745095317371'),
+                            Decimal('7.9787599589278697'),
+                            Decimal('7.5'),
+                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb4'), step, start, end, interval)
+        self.assertEqual(220, counts[0])
+        self.assertEqual(121, counts[1])
 
 if __name__ == '__main__':
     main()
