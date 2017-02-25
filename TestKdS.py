@@ -5,12 +5,10 @@ import KdS
 
 class KdSTest(TestCase):
 
-    kds_sym_b1 = KdS.Symplectic(Decimal('1.0'), 'sb1')
-    kds_sym_b2 = KdS.Symplectic(Decimal('1.0'), 'sb2')
-    kds_sym_b4 = KdS.Symplectic(Decimal('1.0'), 'sb4')
-
     def setUp(self):
-        pass
+        self.kds_sym_b1 = KdS.Symplectic(Decimal('1.0'), 'sb1')
+        self.kds_sym_b2 = KdS.Symplectic(Decimal('1.0'), 'sb2')
+        self.kds_sym_b4 = KdS.Symplectic(Decimal('1.0'), 'sb4')
 
     # @skip("temporarily skipped")
     def test_good_integrator_types(self):
