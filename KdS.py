@@ -115,7 +115,8 @@ class BhSymp(object):
         eR = D05 * (Ur**2 - self.R / self.S**2)
         eTh = D05 * (Uth**2 - self.TH / self.S**2)
         v4e =self.v4_error(Ut, Ur, Uth, Uph)
-        print >> stdout, '{"mino":%.9e,"tau":%.9e,"v4e":%.9e,"ER":%.9e,"ETh":%.9e,"t":%.9e,"r":%.9e,"th":%.9e,"ph":%.9e,"tP":%.9e,"rP":%.9e,"thP":%.9e,"phP":%.9e}' % (mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
+        print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
+            mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 
     def solve(self, integrator, h, start, end, tr):
