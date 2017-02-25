@@ -33,6 +33,7 @@ namespace Simulations {
         private double r2;  // Variables
         private double ra2;
         private double sth;
+        private double cth;
         private double sth2;
         private double cth2;
         private double D_r;
@@ -78,7 +79,7 @@ namespace Simulations {
             P = ra2 * E - aL;
             D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * r;
             R = X2 * P * P - D_r * (mu2 * r2 + K);
-            sth = sin(th);  // THETA potential
+            sincos(th, out sth, out cth);  // THETA potential
             sth2 = sth * sth;
             cth2 = 1.0 - sth2;
             T = aE * sth2 - L;
@@ -101,7 +102,7 @@ namespace Simulations {
 
         public void pUpdate (double d) {  // dp/dTau = - dV/dq (for dR/dr & dTheta/dtheta, see Maxima file maths.wxm, "Kerr-deSitter")
             Ur += d * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
-            Uth += d * cos(th) * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
+            Uth += d * cth * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
         }
 
         /**

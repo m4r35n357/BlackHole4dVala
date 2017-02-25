@@ -20,7 +20,8 @@ from matplotlib.ticker import MultipleLocator
 from sys import argv, stdin, stderr
 
 
-def log_error(error):
+def log_error(e):
+    error = e if e >= 0.0 else -e
     return 10.0 * log10(error) if error > 1.0e-18 else -180.0
 
 
@@ -57,7 +58,6 @@ def main():
     while line:  # build raw data arrays
         p = loads(line)
         e = p['v4e']
-        e = e if e >= 0.0 else -e
         count += 1
         if count % interval == 0:
             timeValue = p[timeCoordinate]
@@ -68,7 +68,7 @@ def main():
             ax1.plot(timeValue, log_error(eCum / count), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
             ax1.plot(timeValue, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=3)
         line = stdin.readline()
-        eCum += e
+        eCum += e if e >= 0.0 else -e
         ePk = ePk if ePk > e else e
     print argv[0] + " - Average: " + str(log_error(eCum / count)) + ", Peak: " + str(log_error(ePk))
     try:
