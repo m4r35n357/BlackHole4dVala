@@ -58,6 +58,7 @@ def main():
     while line:  # build raw data arrays
         p = loads(line)
         e = p['v4e']
+        e = e if e >= 0.0 else -e
         count += 1
         if count % interval == 0:
             timeValue = p[timeCoordinate]
@@ -66,9 +67,9 @@ def main():
             if 'ETh' in p:
                 ax2.plot(timeValue, log_error(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
             ax1.plot(timeValue, log_error(eCum / count), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
-            ax1.plot(timeValue, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=3)
+            ax1.plot(timeValue, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=2)
         line = stdin.readline()
-        eCum += e if e >= 0.0 else -e
+        eCum += e
         ePk = ePk if ePk > e else e
     print argv[0] + " - Average: " + str(log_error(eCum / count)) + ", Peak: " + str(log_error(ePk))
     try:
