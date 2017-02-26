@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from decimal import Decimal
 from json import loads
 from math import sin, pi, cos
-from sys import stdin, stderr, stdout, argv
+from sys import stdin, stderr, argv
 
 D0 = Decimal('0.0')
 D1 = Decimal('1.0')
@@ -71,6 +71,8 @@ class BhSymp(object):
         self.a2mu2 = self.a2 * mu2
         self.aE = a * E
         self.aL = a * L
+        self.TWO_E = D2 * E
+        self.TWO_aE = D2 * a * E
         self.X2 = (D1 + self.a2l_3)**2
         self.K = C + self.X2 * (L - self.aE)**2
         self.t = self.ph = D0
@@ -109,8 +111,8 @@ class BhSymp(object):
         self.refresh()
 
     def pUpdate(self, d):
-        self.Ur += d * (self.r * (D2 * self.E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (D1 - self.l_3 * (self.r2 + self.ra2)) - D1) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - D2 * self.aE)))
+        self.Ur += d * (self.r * (self.TWO_E * self.P * self.X2 - self.mu2 * self.D_r) - (self.r * (D1 - self.l_3 * (self.r2 + self.ra2)) - D1) * (self.K + self.mu2 * self.r2))
+        self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.TWO_aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
         eR = D05 * (Ur**2 - self.R / self.S**2)
