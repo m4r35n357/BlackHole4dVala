@@ -29,6 +29,8 @@ namespace Simulations {
         private double L;
         private double K;
         private double aE;
+        private double TWO_E;
+        private double TWO_aE;
         private double aL;
         private double r2;  // Variables
         private double ra2;
@@ -64,6 +66,8 @@ namespace Simulations {
             this.a2mu2 = a2 * mu2;
             this.aE = a * E;
             this.aL = a * L;
+            this.TWO_E = 2.0 * E;
+            this.TWO_aE = 2.0 * aE;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.r = r0;
@@ -101,8 +105,8 @@ namespace Simulations {
         }
 
         public void pUpdate (double d) {  // dp/dTau = - dV/dq (for dR/dr & dTheta/dtheta, see Maxima file maths.wxm, "Kerr-deSitter")
-            Ur += d * (r * (2.0 * E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
-            Uth += d * cth * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - 2.0 * aE));
+            Ur += d * (r * (TWO_E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
+            Uth += d * cth * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - TWO_aE));
         }
 
         /**
