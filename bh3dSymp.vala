@@ -152,7 +152,7 @@ namespace Simulations {
             var eR = 0.5 * (Ur * Ur - R / S2);
             var eTh = 0.5 * (Uth * Uth - TH / S2);
             var v4e = v4Error(Ut, Ur, Uth, Uph);
-            stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino,tau, v4e,eR,eTh, t,r,th,ph, Ut/S,Ur/S,Uth/S,Uph/S);
+            stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino,tau, v4e,eR,eTh, t,r,th,ph, Ut,Ur,Uth,Uph);
         }
     }
 }
