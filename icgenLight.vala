@@ -85,10 +85,10 @@ namespace Generators {
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
                         input.has_member("spin") ? input.get_double_member("spin") : 1.0,
                         input.has_member("start") ? input.get_double_member("start") : 0.0,
-                        input.has_member("end") ? input.get_double_member("end") : 5000.0,
+                        input.has_member("end") ? input.get_double_member("end") : 1000.0,
                         input.has_member("step") ? input.get_double_member("step") : 0.001,
                         input.has_member("plotratio") ? input.get_int_member("plotratio") : 50,
-                        input.has_member("integrator") ? input.get_string_member("integrator") : "rk4");
+                        input.has_member("integrator") ? input.get_string_member("integrator") : "sb2");
         }
 
         public void printPotentials (Json.Object input) {
