@@ -111,8 +111,8 @@ namespace Simulations {
          */
         protected ForestRuth (double h) {
             base(h);
-            var CBRT2 = pow(2.0, (1.0 / 3.0));
-            this.c_d = { 0.5*h/(2.0-CBRT2), h/(2.0-CBRT2), 0.5*h*(1.0-CBRT2)/(2.0-CBRT2), -h*CBRT2/(2.0-CBRT2) };
+            var theta = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)));
+            this.c_d = { 0.5 * h * theta, h * theta, 0.5 * h * (1.0 - theta), h * (1.0 - 2.0 * theta) };
         }
 
         /**
