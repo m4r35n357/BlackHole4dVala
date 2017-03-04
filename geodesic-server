@@ -1,7 +1,7 @@
 #!/bin/sh
 
 port="${1:-1234}"
-script="${2:-./KdS}"
+script="${2:-./Simulate}"
 
 while :
 do
