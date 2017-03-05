@@ -16,6 +16,9 @@ using GLib.Math;
 
 namespace Simulations {
 
+    /**
+     * Description of a single body using its coordinates, momenta and mass
+     */
     public class Body : GLib.Object {
 
         public double qX;
@@ -41,6 +44,9 @@ namespace Simulations {
         }
     }
 
+    /**
+     * Hamiltonian model for Newtonian N body orbits
+     */
     public class NBody : IModel, ISolver, GLib.Object {
 
         private Body[] bodies;
@@ -79,6 +85,9 @@ namespace Simulations {
             return energy;
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void qUpdate (double d) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
@@ -89,6 +98,9 @@ namespace Simulations {
             }
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void pUpdate (double c) {
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];

@@ -16,6 +16,9 @@ using GLib.Math;
 
 namespace Simulations {
 
+    /**
+     * A model for generating geodesics in the Kerr-deSitter spacetime
+     */
     public class BhSymp : IModel, ISolver, GLib.Object {
 
         private double l_3;  // Constants
@@ -54,6 +57,9 @@ namespace Simulations {
         private double Uth;
         private double Uph;
 
+        /**
+         * Public constructor
+         */
         public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             this.l_3 = lambda / 3.0;
@@ -96,6 +102,9 @@ namespace Simulations {
             S = r2 + a2 * cth2;  // Sigma
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void qUpdate (double c) {  // dq/dTau = dT/dp
             t += c * Ut;
             r += c * Ur;
@@ -104,6 +113,9 @@ namespace Simulations {
             refresh();
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void pUpdate (double d) {  // dp/dTau = - dV/dq (for dR/dr & dTheta/dtheta, see Maxima file maths.wxm, "Kerr-deSitter")
             Ur += d * (r * (two_E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
             Uth += d * cth * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - two_aE));

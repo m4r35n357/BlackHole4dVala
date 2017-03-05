@@ -26,6 +26,7 @@ namespace Simulations {
 
         /**
          * Protected constructor, use the static factory
+         * Subclass constructors should populate a c_d coefficient array, premultiplied by the step size
          */
         protected Symplectic (double h) {
             this.h = h;
@@ -51,7 +52,8 @@ namespace Simulations {
         }
 
         /**
-         * Subclasses should perform one integration step
+         * Subclasses should perform one integration step by executing alternating qUpdate() and pUpdate()
+         * methods with the c_d array elements as parameters
          */
         protected abstract void step (IModel model);
     }
@@ -70,7 +72,7 @@ namespace Simulations {
         }
 
         /**
-         * Weighted 1st order integration step
+         * 1st order integration step
          */
         protected override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -92,7 +94,7 @@ namespace Simulations {
         }
 
         /**
-         * Weighted 2nd order integration step
+         * 2nd order integration step
          */
         protected override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -116,7 +118,7 @@ namespace Simulations {
         }
 
         /**
-         * Weighted 4th order integration step
+         * 4th order integration step
          */
         protected override void step (IModel model) {
             model.qUpdate(c_d[0]);

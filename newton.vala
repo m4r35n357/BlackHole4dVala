@@ -16,6 +16,9 @@ using GLib.Math;
 
 namespace Simulations {
 
+    /**
+     * Hamiltonian model for Newtonian central body orbit
+     */
     public class Newton : IModel, ISolver, GLib.Object {
 
         private double L;
@@ -46,12 +49,18 @@ namespace Simulations {
             return 0.5 * (rDot * rDot + L2 / (r * r)) - 1.0 / r;
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void qUpdate (double d) {
             r += d * rDot;
             phDot = L / (r * r);
             ph += d * phDot;
         }
 
+        /**
+         * Implementation of IModel interface method
+         */
         public void pUpdate (double c) {
             rDot -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
