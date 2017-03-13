@@ -32,7 +32,7 @@ namespace Simulations {
         private double L;
         private double K;
         private double aE;
-        private double two_E;
+        private double two_EX2;
         private double two_aE;
         private double aL;
         private double r2;  // Variables
@@ -72,9 +72,9 @@ namespace Simulations {
             this.a2mu2 = a2 * mu2;
             this.aE = a * E;
             this.aL = a * L;
-            this.two_E = 2.0 * E;
-            this.two_aE = 2.0 * aE;
             this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
+            this.two_EX2 = 2.0 * E * X2;
+            this.two_aE = 2.0 * aE;
             this.K = Q + X2 * (L - aE) * (L - aE);
             this.r = r0;
             this.th = (90.0 - th0) * PI / 180.0;
@@ -117,7 +117,7 @@ namespace Simulations {
          * Implementation of IModel interface method
          */
         public void pUpdate (double d) {  // dp/dTau = - dV/dq (for dR/dr & dTheta/dtheta, see Maxima file maths.wxm, "Kerr-deSitter")
-            Ur += d * (r * (two_E * P * X2 - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
+            Ur += d * (r * (two_EX2 * P - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
             Uth += d * cth * (sth * a2 * (mu2 * D_th - l_3 * (K - a2mu2 * cth2)) + X2 * T / sth * (T / sth2 - two_aE));
         }
 
