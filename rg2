@@ -15,7 +15,7 @@ echo $exe
 # Run the simulator
 echo -n ${C}"Simulating with $ic . . . "
 $icgen <$ic >$pot 2>/dev/null
-$exe <$ic >$data 2>/dev/null
+$exe <$ic >$data
 echo "Done!"${NC}
 
 # Plot errors
