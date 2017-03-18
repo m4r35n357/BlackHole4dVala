@@ -29,6 +29,12 @@ namespace Simulations {
         private double L2;
         private double H0;
 
+        /**
+         * Public constructor
+         *
+         * @param lFac fraction of azimuthal angular momentum requred for circular orbit at a radius of r0
+         * @param r0 initial r coordinate
+         */
         public Newton (double lFac, double r0) {
             stderr.printf("Newtonian Orbit\n");
             this.r = r0;
@@ -43,14 +49,18 @@ namespace Simulations {
         }
 
        /**
-         * Total (kinetic + potential) energy of the system, the Hamiltonian
-         */
+        *
+        * Total (kinetic + potential) energy of the system, T + V
+        *
+        * @return the Hamiltonian
+        */
         private double H () {
             return 0.5 * (rDot * rDot + L2 / (r * r)) - 1.0 / r;
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.qUpdate
          */
         public void qUpdate (double d) {
             r += d * rDot;
@@ -59,14 +69,16 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.pUpdate
          */
         public void pUpdate (double c) {
             rDot -= c * (1.0 / (r * r) - L2 / (r * r * r));
         }
 
         /**
-         * Externally visible method, sets up and controls the simulation
+         * {@inheritDoc}
+         * @see ISolver.solve
          */
         public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
             var h = integrator.getH();
@@ -85,7 +97,9 @@ namespace Simulations {
         }
 
         /**
-         * Write the simulated data to STDOUT
+         * Write the simulated data to STDOUT as a JSON string
+         *
+         * @param time absolute Newtonian time
          */
         private void output (double time) {
             stdout.printf("{\"tau\":%.9e,\"v4e\":%.9e,", time, H() - H0);

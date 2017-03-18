@@ -15,8 +15,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 using Json;
 
+/**
+ * Generators of initial conditions for simulating geodesics in the Kerr spacetime, and also of potential data
+ */
 namespace Generators {
 
+    /**
+     * Generates initial conditions and potentials for light
+     */
     public class Light : Simulations.IGenerator, GLib.Object {
 
         private static double R (double r, double a, double E, double L, double Q) {
@@ -80,6 +86,10 @@ namespace Generators {
             stdout.printf("}\n");
         }
 
+        /**
+         * {@inheritDoc}
+         * @see Simulations.IGenerator.generateInitialConditions
+         */
         public void generateInitialConditions (Json.Object input) {
             // generate output
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
@@ -91,6 +101,10 @@ namespace Generators {
                         input.has_member("integrator") ? input.get_string_member("integrator") : "sb2");
         }
 
+        /**
+         * {@inheritDoc}
+         * @see Simulations.IGenerator.printPotentials
+         */
         public void printPotentials (Json.Object input) {
             var a = input.get_double_member("a");
             var E = input.get_double_member("E");

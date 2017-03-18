@@ -18,7 +18,16 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Common entry point for all simulators
+     * Common entry point for all simulators based on symplectic integration, reads in JSON data from stdin and executes a program according to the following table:
+     *
+     * || ''program name'' || ''key JSON variable'' || ''class(es))'' || ''simulation'' ||
+     * || Simulate || "Lfac" || {@link Newton} || Newtonian central body problem ||
+     * || Simulate || "a" || {@link BhSymp} || Kerr-deSitter geodesics ||
+     * || Simulate || "bodies" || {@link NBody} {@link Body} || Newtonian N body problem ||
+     * || GenParticle || none || {@link Generators.Particle} || Generate initial conditions for Kerr-deSitter particle geodesics ||
+     * || GenLight || none || {@link Generators.Light} || Generate initial conditions for Kerr-deSitter light geodesics ||
+     *
+     * @param args the program is hard linked, so args[0] is used as the program name
      */
     public static void main (string[] args) {
         var executable = args[0];

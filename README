@@ -4,6 +4,7 @@ DEPENDENCIES:
 
 Build:
 valac
+valadoc
 libjson-glib-dev
 libgsl0-dev
 
@@ -106,6 +107,7 @@ Black Hole model
 http://www.icra.it/Publications/Scientific/files/LenseThirring/pdf/b_Wilkins.pdf
 http://arxiv.org/abs/gr-qc/0405095
 
+
 Particle trajectories
 
 http://staff.science.nus.edu.sg/~phylyk/downloads/reports/sp2172_report.pdf
@@ -115,4 +117,9 @@ Light trajectories
 
 http://www.physics.nus.edu.sg/~phyteoe/kerr/
 http://www.physics.nus.edu.sg/~phyteoe/kerr/paper.pdf
+
+
+API Documentation (Valadoc)
+
+http://m4r35n357.github.io/BlackHole4dVala/doc/doc/index.htm
 

@@ -24,6 +24,7 @@ VPythonOutput/
 RaytracingOutput/
 tmp/
 images/
+doc/
 
 .idea
 

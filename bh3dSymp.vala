@@ -59,6 +59,15 @@ namespace Simulations {
 
         /**
          * Public constructor
+         *
+         * @param lambda the cosmological constant
+         * @param a black hole spin parameter
+         * @param mu2 particle mass (0 or 1)
+         * @param E constant of motion - energy
+         * @param L constant of motion - azimuthal angular momentum
+         * @param Q constant of motion - Carter's constant
+         * @param r0 initial r coordinate
+         * @param th0 initial theta coordinate
          */
         public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0) {
             stderr.printf("Kerr-deSitter Geodesic\n");
@@ -103,7 +112,8 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.qUpdate
          */
         public void qUpdate (double c) {  // dq/dTau = dT/dp
             t += c * Ut;
@@ -114,7 +124,8 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.pUpdate
          */
         public void pUpdate (double d) {  // dp/dTau = - dV/dq (for dR/dr & dTheta/dtheta, see Maxima file maths.wxm, "Kerr-deSitter")
             Ur += d * (r * (two_EX2 * P - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (K + mu2 * r2));
@@ -122,7 +133,8 @@ namespace Simulations {
         }
 
         /**
-         * Externally visible method, sets up and controls the simulation
+         * {@inheritDoc}
+         * @see ISolver.solve
          */
         public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
             var h = integrator.getH();
@@ -149,6 +161,13 @@ namespace Simulations {
 
         /**
          * 4 velocity norm error (Hamiltonian - mass)
+         *
+         * @param Ut the time component of the four-velocity
+         * @param Ur the radial component of the four-velocity
+         * @param Uth the elevation component of the four-velocity
+         * @param Uph the azimuth component of the four-velocity
+         *
+         * @return difference between the mass and the hamiltonian
          */
         private double v4Error (double Ut, double Ur, double Uth, double Uph) {
             var U1 = a * Ut - ra2 * Uph;
@@ -158,7 +177,14 @@ namespace Simulations {
         }
 
         /**
-         * Write the simulated data to STDOUT
+         * Write the simulated data to STDOUT as a JSON string
+         *
+         * @param mino the particle's mino time
+         * @param tau the particle's proper time
+         * @param Ut the time component of the four-velocity
+         * @param Ur the radial component of the four-velocity
+         * @param Uth the elevation component of the four-velocity
+         * @param Uph the azimuth component of the four-velocity
          */
         private void plot (double mino, double tau, double Ut, double Ur, double Uth, double Uph) {
             var S2 = S * S;

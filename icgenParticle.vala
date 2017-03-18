@@ -16,12 +16,21 @@ using GLib.Math;
 using Json;
 using Gsl;
 
+/**
+ * Generators of initial conditions for simulating geodesics in the Kerr spacetime, and also of potential data
+ */
 namespace Generators {
 
+    /**
+    * Turns fixed parameters and other constraints into initial conditions data
+    * suitable as input to {@link Simulations.BhSymp}
+    * (passing some items directly through to the output data),
+    * alternatively takes the data and creates potential plots from it.
+     */
     public class Particle : Simulations.IGenerator, GLib.Object {
 
         /**
-         * Fixed parameters and constraints
+         * The fixed parameters
          */
         private struct Params {
             public double a;
@@ -38,14 +47,14 @@ namespace Generators {
         }
 
         /**
-         * Array indices for variables
+         * Array indices for the variables
          */
         private enum X {
             E = 0, L = 1, Q = 2;
         }
 
         /**
-         * Array indices for objective functions
+         * Array indices for the objective functions
          */
         private enum F {
             R1 = 0, R2 = 1, TH = 2;
@@ -183,6 +192,10 @@ namespace Generators {
             };
         }
 
+        /**
+         * {@inheritDoc}
+         * @see Simulations.IGenerator.generateInitialConditions
+         */
         public void generateInitialConditions (Json.Object input) {
             var initialValues = initializeVariables(input);
             var nDim = initialValues.size;
@@ -268,6 +281,10 @@ namespace Generators {
             printInitialConditions(solver, iterations);
         }
 
+        /**
+         * {@inheritDoc}
+         * @see Simulations.IGenerator.printPotentials
+         */
         public void printPotentials (Json.Object input) {
             var a = input.get_double_member("a");
             var mu2 = input.get_double_member("mu");

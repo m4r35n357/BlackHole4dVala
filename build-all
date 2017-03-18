@@ -2,35 +2,42 @@
 
 opt="${1:-fast}"
 
+C='\033[0;36m'
+NC='\033[0m' # No Color
+
 valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
 # cleanup executables
+echo $C"Cleaning Up . . ."$NC
 rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands kerr-image \
 	Simulate GenParticle GenLight
 echo ""
 
 # compile vala test files
+echo $C"Compiling Vala Tests . . ."$NC
 $valac --pkg json-glib-1.0 \
 	TestKdS.vala bh3dSymp.vala \
 	symplectic.vala utils.vala
 echo ""
 
 # compile vala files
+echo $C"Compiling Vala . . ."$NC
 $valac --pkg json-glib-1.0 --pkg gsl \
 	KdS.vala bh3dSymp.vala \
 	nbody3d.vala newton.vala symplectic.vala \
 	icgenParticle.vala icgenLight.vala utils.vala
 echo ""
-$valac --pkg json-glib-1.0 raytrace-commands.vala
-echo ""
 
 # compile raytracer
+echo $C"Compiling Raytracer . . ."$NC
+$valac --pkg json-glib-1.0 raytrace-commands.vala
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 
 # strip executables
+echo $C"Stripping Executables . . ."$NC
 case $opt in
 	fast)	strip KdS raytrace-commands kerr-image;;
 esac
@@ -45,7 +52,14 @@ ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image
 echo ""
 
+# generate documentation
+echo $C"Generating Documentation . . ."$NC
+rm -rf doc
+valadoc -o doc --pkg json-glib-1.0 --pkg gsl icgenParticle.vala icgenLight.vala KdS.vala symplectic.vala bh3dSymp.vala nbody3d.vala newton.vala utils.vala
+echo ""
+
 # test
-echo "Running Tests . . ."
-./TestKdS >/dev/null && echo OK
+echo $C"Running Tests . . ."$NC
+./TestKdS >/dev/null && echo ${C}OK${NC}
+echo ""
 

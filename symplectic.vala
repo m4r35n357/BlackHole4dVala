@@ -17,7 +17,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Symplectic integrator abstract superclass, controls composition but leaves integration details to subclass
+     * Symplectic integrator abstract superclass, leaves integration details to subclasses
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
@@ -25,15 +25,28 @@ namespace Simulations {
         protected double[] c_d;  // the update coefficients
 
         /**
-         * Protected constructor, use the static factory
-         * Subclass constructors should populate a c_d coefficient array, premultiplied by the step size
+         * Protected constructor, use the static factory {@link getIntegrator}.
+         *
+         * Subclass constructors should populate a {@link c_d} coefficient array, premultiplied by the step size
+         *
+         * @param h the time step
          */
         protected Symplectic (double h) {
             this.h = h;
         }
 
         /**
-         * Static factory
+         * Static factory for producing subclass instances from its type argument according to the following table:
+         *
+         * || ''type'' || ''subclass'' ||
+         * || "sb1" || {@link EulerCromer} ||
+         * || "sb2" || {@link StormerVerlet} ||
+         * || "sb4" || {@link ForestRuth} ||
+         *
+         * @param h the time step
+         * @param type the selected implementation
+         *
+         * @return concrete implementation of a symplectic integrator
          */
         public static ISymplectic getIntegrator (double h, string type) {
             switch (type) {
@@ -52,14 +65,18 @@ namespace Simulations {
         }
 
         /**
-         * ISymplectic interface method
-         * Subclasses should perform one integration step by executing alternating qUpdate() and pUpdate()
-         * methods with the c_d array elements as parameters
+         * {@inheritDoc}
+         *
+         * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
+         * methods with the combined {@link h} and {@link c_d} array elements as parameters
+         *
+         * @see ISymplectic.step
          */
         protected abstract void step (IModel model);
 
         /**
-         * Implementation of ISymplectic interface method
+         * {@inheritDoc}
+         * @see ISymplectic.getH
          */
         public double getH () {
             return h;
@@ -67,12 +84,13 @@ namespace Simulations {
     }
 
     /**
-     * First-order symplectic integrator concrete subclass
+     * First-order symplectic integrator concrete subclass.  This integrator is NOT time symmetrical
      */
     public class EulerCromer : Symplectic {
 
         /**
-         * Protected constructor, use the static factory in superclass
+         * {@inheritDoc}
+         * @see Symplectic
          */
         protected EulerCromer (double h) {
             base(h);
@@ -80,8 +98,16 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of ISymplectic interface method
-         * 1st order integration step
+         * {@inheritDoc}
+         *
+         * 1st order integration step.  Performs the following calls on {@link IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h)
+         * pUpdate(h)
+         * }}}
+         *
+         * @see ISymplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -90,12 +116,13 @@ namespace Simulations {
     }
 
     /**
-     * Second-order symplectic integrator concrete subclass
+     * Second-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
      */
     public class StormerVerlet : Symplectic {
 
         /**
-         * Protected constructor, use the static factory in superclass
+         * {@inheritDoc}
+         * @see Symplectic
          */
         protected StormerVerlet (double h) {
             base(h);
@@ -103,8 +130,17 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of ISymplectic interface method
-         * 2nd order integration step
+         * {@inheritDoc}
+         *
+         * 2nd order integration step  Performs the following calls on {@link IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h/2)
+         * pUpdate(h)
+         * qUpdate(h/2)
+         * }}}
+         *
+         * @see ISymplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -114,12 +150,13 @@ namespace Simulations {
     }
 
     /**
-     * Fourth-order symplectic integrator concrete subclass
+     * Fourth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
      */
     public class ForestRuth : Symplectic {
 
         /**
-         * Protected constructor, use the static factory in superclass
+         * {@inheritDoc}
+         * @see Symplectic
          */
         protected ForestRuth (double h) {
             base(h);
@@ -128,8 +165,23 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of ISymplectic interface method
-         * 4th order integration step
+         * {@inheritDoc}
+         *
+         * 4th order integration step Performs the following calls on {@link IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h*c_d[0])
+         * pUpdate(h*c_d[1])
+         * qUpdate(h*c_d[2])
+         * pUpdate(h*c_d[3])
+         * qUpdate(h*c_d[2])
+         * pUpdate(h*c_d[1])
+         * qUpdate(h*c_d[0])
+         * }}}
+         *
+         * where {@link Symplectic.c_d} is a private coefficient array calculated internally.
+         *
+         * @see ISymplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);

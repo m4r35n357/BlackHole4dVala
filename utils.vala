@@ -15,19 +15,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using Json;
 using GLib.Math;
 
+/**
+ * Various simulations based on symplectic integration of separable Hamiltonian problems
+ */
 namespace Simulations {
 
     /**
-     * Interface for the parameter generators
+     * Internal interface for the parameter generators
      */
     public interface IGenerator : GLib.Object {
         /**
          * Sets up and runs the solver
+         *
+         * @param input the JSON IC generation data
          */
         public abstract void generateInitialConditions (Json.Object input);
 
         /**
          * Writes the potential data to STDOUT for plotting
+         *
+         * @param input the generated JSON simulation data
          */
         public abstract void printPotentials (Json.Object input);
     }
@@ -37,43 +44,63 @@ namespace Simulations {
      */
     public interface ISolver : GLib.Object {
         /**
-         * Sole method called by main(), calls ISymplectic.step() once per iteration
+         * Externally visible method. It sets up, controls and terminates the simulation,
+         * writing its data to stdout.
+         *
+         * Sole method called by main(), calls {@link ISymplectic.step} on the selected integrator once per iteration
+         *
+         * @param integrator the selected implementation
+         * @param start start time
+         * @param end finish time
+         * @param tr plot ratio i.e. only plot every tr-th point
+         *
+         * @return an array of iteration counters
          */
         public abstract int[] solve (ISymplectic integrator, double start, double end, int64 tr);
     }
 
     /**
-     * Interface for the symplectic integrator to access and update the model
+     * Internal interface for the symplectic integrator to access and update the model
      */
     public interface IModel : GLib.Object {
         /**
-         * Coordinate updates, called by ISymplectic.step()
+         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link ISymplectic.step}
+         *
+         * @param d scaled time step
          */
         public abstract void qUpdate (double d);
 
         /**
-         * Momentum updates, called by ISymplectic.step()
+         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link ISymplectic.step}
+         *
+         * @param c scaled time step
          */
         public abstract void pUpdate (double c);
     }
 
     /**
-     * Interface for a model to drive the symplectic integrator
+     * Internal interface for a model to drive the symplectic integrator
      */
     public interface ISymplectic : GLib.Object {
         /**
-         * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
+         * Should be called by {@link ISolver.solve} as needed, in turn calls {@link IModel.qUpdate} and {@link IModel.pUpdate}
+         *
+         * @param model class providing equations of motion for a separable hamiltonian problem
          */
         public abstract void step (IModel model);
 
         /**
-         * The baked-in time step
+         * Getter method for the time step.
+         *
+         * @return the baked-in time step
          */
         public abstract double getH ();
     }
 
     /**
      * Parse JSON initial conditions data from stdin
+     *
+     * @return an object containing the parsed data
      */
     private static Json.Object getJson () {
         var json = new StringBuilder();

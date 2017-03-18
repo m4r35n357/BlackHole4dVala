@@ -17,7 +17,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Description of a single body using its coordinates, momenta and mass
+     * Description of a single Newtonian body using its coordinates, momenta and mass
      */
     public class Body : GLib.Object {
 
@@ -29,6 +29,17 @@ namespace Simulations {
         public double pZ;
         public double mass;
 
+        /**
+         * Public constructor
+         *
+         * @param qX X coordinate
+         * @param qY Y coordinate
+         * @param qZ Z coordinate
+         * @param pX X momentum
+         * @param pY Y momentum
+         * @param pZ Z momentum
+         * @param mass particle mass
+         */
         public Body (double qX, double qY, double qZ, double pX, double pY, double pZ, double mass) {
             this.qX = qX;
             this.qY = qY;
@@ -54,6 +65,13 @@ namespace Simulations {
         private double g;
         private double errorLimit;
 
+        /**
+         * Public constructor
+         *
+         * @param bodies array of {@link Body} instances
+         * @param g Newton's gravitational constant
+         * @param errorLimit termination condition
+         */
         public NBody (Body[] bodies, double g, double errorLimit) {
             stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
@@ -69,8 +87,11 @@ namespace Simulations {
             return sqrt((xB - xA) * (xB - xA) + (yB - yA) * (yB - yA) + (zB - zA) * (zB - zA));
         }
 
-       /**
-         * Total (kinetic + potential) energy of the system, the Hamiltonian
+        /**
+         *
+         * Total (kinetic + potential) energy of the system, T + V
+         *
+         * @return the Hamiltonian
          */
         private double h () {
             var energy = 0.0;
@@ -86,7 +107,8 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.qUpdate
          */
         public void qUpdate (double d) {
             for (var i = 0; i < np; i++) {
@@ -99,7 +121,8 @@ namespace Simulations {
         }
 
         /**
-         * Implementation of IModel interface method
+         * {@inheritDoc}
+         * @see IModel.pUpdate
          */
         public void pUpdate (double c) {
             for (var i = 0; i < np; i++) {
@@ -122,7 +145,8 @@ namespace Simulations {
         }
 
         /**
-         * Externally visible method, sets up and controls the simulation
+         * {@inheritDoc}
+         * @see ISolver.solve
          */
         public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
             var ts = integrator.getH();
@@ -144,7 +168,12 @@ namespace Simulations {
         }
 
         /**
-         * Write the simulated data to STDOUT
+         * Write the simulated data to STDOUT as a JSON string
+         *
+         * @param time absolute Newtonian time
+         * @param hNow current Hamiltonian
+         * @param h0 original Hamiltonian
+         * @param error based on the difference
          */
         private void output (double time, double hNow, double h0, double error) {
             string[] data = {};
