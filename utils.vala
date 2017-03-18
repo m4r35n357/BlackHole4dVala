@@ -39,7 +39,7 @@ namespace Simulations {
         /**
          * Sole method called by main(), calls ISymplectic.step() once per iteration
          */
-        public abstract int[] solve (ISymplectic integrator, double h, double start, double end, int64 tr);
+        public abstract int[] solve (ISymplectic integrator, double start, double end, int64 tr);
     }
 
     /**
@@ -65,6 +65,11 @@ namespace Simulations {
          * Should be called by IModel.solve() as needed, calls IModel.pUp() and IModel.qUp()
          */
         public abstract void step (IModel model);
+
+        /**
+         * The baked-in time step
+         */
+        public abstract double getH ();
     }
 
     /**

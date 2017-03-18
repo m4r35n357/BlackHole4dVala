@@ -52,10 +52,18 @@ namespace Simulations {
         }
 
         /**
+         * ISymplectic interface method
          * Subclasses should perform one integration step by executing alternating qUpdate() and pUpdate()
          * methods with the c_d array elements as parameters
          */
         protected abstract void step (IModel model);
+
+        /**
+         * Implementation of ISymplectic interface method
+         */
+        public double getH () {
+            return h;
+        }
     }
 
     /**
@@ -72,9 +80,10 @@ namespace Simulations {
         }
 
         /**
+         * Implementation of ISymplectic interface method
          * 1st order integration step
          */
-        protected override void step (IModel model) {
+        public override void step (IModel model) {
             model.qUpdate(c_d[0]);
             model.pUpdate(c_d[0]);
         }
@@ -94,9 +103,10 @@ namespace Simulations {
         }
 
         /**
+         * Implementation of ISymplectic interface method
          * 2nd order integration step
          */
-        protected override void step (IModel model) {
+        public override void step (IModel model) {
             model.qUpdate(c_d[0]);
             model.pUpdate(c_d[1]);
             model.qUpdate(c_d[0]);
@@ -118,9 +128,10 @@ namespace Simulations {
         }
 
         /**
+         * Implementation of ISymplectic interface method
          * 4th order integration step
          */
-        protected override void step (IModel model) {
+        public override void step (IModel model) {
             model.qUpdate(c_d[0]);
             model.pUpdate(c_d[1]);
             model.qUpdate(c_d[2]);

@@ -68,7 +68,8 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
+            var h = integrator.getH();
             var i = 0;
             var t = 0.0;
             while (t < end) {

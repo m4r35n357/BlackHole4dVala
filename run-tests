@@ -24,7 +24,7 @@ run_light () {
 	$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 }
 
-run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sb2", "step": 0.001, "plotratio": 10 }'
+run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 0.8, "Lfac": 1.0, "integrator": "sb2", "step": 0.001, "plotratio": 10 }'
 
 run_particle '{ "method": "dnewton", "r": 12.0, "elevation": 90.0, "spin": 1.0, "Lfac": 1.0, "integrator": "sb2", "step": 0.001, "plotratio": 10 }'
 

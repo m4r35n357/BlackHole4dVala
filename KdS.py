@@ -26,6 +26,7 @@ D05 = Decimal('0.5')
 
 class Symplectic(object):
     def __init__(self, h, order):
+        self.h = h
         if order == 'sb1':
             self.c_d = [h]
             self.step = self.symplectic_euler
@@ -122,7 +123,8 @@ class BhSymp(object):
             mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
 
 
-    def solve(self, integrator, h, start, end, tr):
+    def solve(self, integrator, start, end, tr):
+        h = integrator.h
         mino = tau = D0
         i = plotCount = 0
         self.refresh()
@@ -146,6 +148,6 @@ if __name__ == "__main__":
     ic = loads(input_data, parse_float=Decimal)['IC']
     print >> stderr, input_data
     BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(
-        Symplectic(ic['step'], ic['integrator']), ic['step'], ic['start'], ic['end'], ic['plotratio'])
+        Symplectic(ic['step'], ic['integrator']), ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"

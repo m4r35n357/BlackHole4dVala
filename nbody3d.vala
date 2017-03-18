@@ -124,7 +124,8 @@ namespace Simulations {
         /**
          * Externally visible method, sets up and controls the simulation
          */
-        public int[] solve (ISymplectic integrator, double ts, double start, double end, int64 tr) {
+        public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
+            var ts = integrator.getH();
             var h0 = h();
             var i = 0;
             var t = 0.0;
