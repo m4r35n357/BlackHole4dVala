@@ -16,9 +16,9 @@ class KdSTest(TestCase):
         self.assertIsInstance(self.kds_sym_b2, KdS.Symplectic)
         self.assertIsInstance(self.kds_sym_b4, KdS.Symplectic)
 
-    @skip("temporarily skipped")
+    # @skip("temporarily skipped")
     def test_bad_integrator_types(self):
-        self.assertRaises(Exception, KdS.Symplectic(Decimal('1.0'), 'xxx'))
+        self.assertRaises(Exception, KdS.Symplectic, Decimal('1.0'), 'xxx')
 
     # @skip("temporarily skipped")
     def test_solve_symp_polar(self):
