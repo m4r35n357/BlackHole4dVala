@@ -94,7 +94,7 @@ namespace Simulations {
          * @return the Hamiltonian
          */
         private double h () {
-            var energy = 0.0;
+            double energy = 0.0;
             for (var i = 0; i < np; i++) {
                 var a = bodies[i];
                 energy += 0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ) / a.mass;
@@ -148,12 +148,12 @@ namespace Simulations {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
+        public int64[] solve (ISymplectic integrator, double start, double end, int64 tr) {
             var ts = integrator.getH();
             var h0 = h();
-            var i = 0;
-            var t = 0.0;
-            var error = 0.0;
+            int64 i = 0;
+            double t = 0.0;
+            double error = 0.0;
             while ((t < end) && (error < errorLimit)) {
                 var hNow = h();
                 error = hNow / h0 - 1.0;

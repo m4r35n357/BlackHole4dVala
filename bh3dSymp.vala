@@ -136,12 +136,12 @@ namespace Simulations {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int[] solve (ISymplectic integrator, double start, double end, int64 tr) {
+        public int64[] solve (ISymplectic integrator, double start, double end, int64 tr) {
             var h = integrator.getH();
-            var mino = 0.0;
-            var tau = 0.0;
-            var i = 0;
-            var plotCount = 0;
+            double mino = 0.0;
+            double tau = 0.0;
+            int64 i = 0;
+            int64 plotCount = 0;
             refresh();
             Ur = - sqrt(R >= 0.0 ? R : -R);
             Uth = - sqrt(TH >= 0.0 ? TH : -TH);

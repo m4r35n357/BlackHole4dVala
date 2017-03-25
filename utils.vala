@@ -56,7 +56,7 @@ namespace Simulations {
          *
          * @return an array of iteration counters
          */
-        public abstract int[] solve (ISymplectic integrator, double start, double end, int64 tr);
+        public abstract int64[] solve (ISymplectic integrator, double start, double end, int64 tr);
     }
 
     /**
