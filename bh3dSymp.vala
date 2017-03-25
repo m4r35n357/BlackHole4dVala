@@ -61,32 +61,32 @@ namespace Simulations {
          * Public constructor
          *
          * @param lambda the cosmological constant
-         * @param a black hole spin parameter
-         * @param mu2 particle mass (0 or 1)
-         * @param E constant of motion - energy
-         * @param L constant of motion - azimuthal angular momentum
-         * @param Q constant of motion - Carter's constant
-         * @param r0 initial r coordinate
+         * @param spin black hole spin parameter = J / M
+         * @param pMass2 squared particle mass (0 or 1) = mu2
+         * @param energy constant of motion = E / mu
+         * @param angMom constant of motion (azimuthal angular momentum) = L / (mu M)
+         * @param Q constant of motion - Carter's constant = C / (mu2 M2)
+         * @param r0 initial r coordinate = r / M
          * @param th0 initial theta coordinate
          */
-        public BhSymp (double lambda, double a, double mu2, double E, double L, double Q, double r0, double th0) {
+        public BhSymp (double lambda, double spin, double pMass2, double energy, double angMom, double Q, double r0, double th0) {
             stderr.printf("Kerr-deSitter Geodesic\n");
-            this.l_3 = lambda / 3.0;
-            this.a = a;
-            this.mu2 = mu2;
-            this.E = E;
-            this.L = L;
-            this.a2 = a * a;
-            this.a2l_3 = a2 * l_3;
-            this.a2mu2 = a2 * mu2;
-            this.aE = a * E;
-            this.aL = a * L;
-            this.X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
-            this.two_EX2 = 2.0 * E * X2;
-            this.two_aE = 2.0 * aE;
-            this.K = Q + X2 * (L - aE) * (L - aE);
-            this.r = r0;
-            this.th = (90.0 - th0) * PI / 180.0;
+            l_3 = lambda / 3.0;
+            a = spin;
+            mu2 = pMass2;
+            E = energy;
+            L = angMom;
+            a2 = a * a;
+            a2l_3 = a2 * l_3;
+            a2mu2 = a2 * mu2;
+            aE = a * E;
+            aL = a * L;
+            X2 = (1.0 + a2l_3) * (1.0 + a2l_3);
+            two_EX2 = 2.0 * E * X2;
+            two_aE = 2.0 * aE;
+            K = Q + X2 * (L - aE) * (L - aE);
+            r = r0;
+            th = (90.0 - th0) * PI / 180.0;
         }
 
         /**
@@ -143,8 +143,8 @@ namespace Simulations {
             var i = 0;
             var plotCount = 0;
             refresh();
-            this.Ur = - sqrt(R >= 0.0 ? R : -R);
-            this.Uth = - sqrt(TH >= 0.0 ? TH : -TH);
+            Ur = - sqrt(R >= 0.0 ? R : -R);
+            Uth = - sqrt(TH >= 0.0 ? TH : -TH);
             while (tau < end) {
                 if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);

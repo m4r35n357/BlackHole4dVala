@@ -61,5 +61,4 @@ echo ""
 # test
 echo $C"Running Tests . . ."$NC
 ./TestKdS >/dev/null && echo ${C}OK${NC}
-echo ""
 
