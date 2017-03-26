@@ -65,7 +65,7 @@ namespace Simulations {
          * @param pMass2 squared particle mass (0 or 1) = mu2
          * @param energy constant of motion = E / mu
          * @param angMom constant of motion (azimuthal angular momentum) = L / (mu M)
-         * @param Q constant of motion - Carter's constant = C / (mu2 M2)
+         * @param Q constant of motion (Carter's constant) = C / (mu2 M2)
          * @param r0 initial r coordinate = r / M
          * @param th0 initial theta coordinate
          */

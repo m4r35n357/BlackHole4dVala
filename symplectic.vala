@@ -38,10 +38,10 @@ namespace Simulations {
         /**
          * Static factory for producing subclass instances from its type argument according to the following table:
          *
-         * || ''type'' || ''subclass'' ||
-         * || "sb1" || {@link EulerCromer} ||
-         * || "sb2" || {@link StormerVerlet} ||
-         * || "sb4" || {@link ForestRuth} ||
+         * || ''type'' || ''Subclass'' ||  ''Description'' ||
+         * || "sb1" || {@link EulerCromer} || 1st Order, Symplectic ||
+         * || "sb2" || {@link StormerVerlet} || 2nd Order, Symplectic, Reversible ||
+         * || "sb4" || {@link ForestRuth} || 4th Order, Symplectic, Reversible ||
          *
          * @param h the time step
          * @param type the selected implementation
@@ -90,7 +90,7 @@ namespace Simulations {
 
         /**
          * {@inheritDoc}
-         * @see Symplectic
+         * @see Symplectic.Symplectic
          */
         protected EulerCromer (double h) {
             base(h);
@@ -122,7 +122,7 @@ namespace Simulations {
 
         /**
          * {@inheritDoc}
-         * @see Symplectic
+         * @see Symplectic.Symplectic
          */
         protected StormerVerlet (double h) {
             base(h);
@@ -156,7 +156,7 @@ namespace Simulations {
 
         /**
          * {@inheritDoc}
-         * @see Symplectic
+         * @see Symplectic.Symplectic
          */
         protected ForestRuth (double h) {
             base(h);
