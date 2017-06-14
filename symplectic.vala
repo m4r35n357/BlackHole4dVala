@@ -36,35 +36,6 @@ namespace Simulations {
         }
 
         /**
-         * Static factory for producing subclass instances from its type argument according to the following table:
-         *
-         * || ''type'' || ''Subclass'' ||  ''Description'' ||
-         * || "sb1" || {@link EulerCromer} || 1st Order, Symplectic ||
-         * || "sb2" || {@link StormerVerlet} || 2nd Order, Symplectic, Reversible ||
-         * || "sb4" || {@link ForestRuth} || 4th Order, Symplectic, Reversible ||
-         *
-         * @param h the time step
-         * @param type the selected implementation
-         *
-         * @return concrete implementation of a symplectic integrator
-         */
-        public static ISymplectic getIntegrator (double h, string type) {
-            switch (type) {
-                case "sb1":
-                    stderr.printf("1st Order Symplectic Integrator\n");
-                    return new EulerCromer(h);
-                case "sb2":
-                    stderr.printf("2nd Order Symplectic Integrator\n");
-                    return new StormerVerlet(h);
-                case "sb4":
-                    stderr.printf("4th Order Symplectic Integrator\n");
-                    return new ForestRuth(h);
-            }
-            stderr.printf("Integrator not recognized: %s\n", type);
-            assert_not_reached();
-        }
-
-        /**
          * {@inheritDoc}
          *
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
@@ -92,7 +63,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        protected EulerCromer (double h) {
+        public EulerCromer (double h) {
             base(h);
             this.c_d = { h };
         }
@@ -124,7 +95,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        protected StormerVerlet (double h) {
+        public StormerVerlet (double h) {
             base(h);
             this.c_d = { 0.5 * h, h };
         }
@@ -158,7 +129,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        protected ForestRuth (double h) {
+        public ForestRuth (double h) {
             base(h);
             var theta = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)));
             this.c_d = { 0.5 * h * theta, h * theta, 0.5 * h * (1.0 - theta), h * (1.0 - 2.0 * theta) };
@@ -192,5 +163,34 @@ namespace Simulations {
             model.pUpdate(c_d[1]);
             model.qUpdate(c_d[0]);
         }
+    }
+
+    /**
+     * Static factory for producing subclass instances from its type argument according to the following table:
+     *
+     * || ''type'' || ''Subclass'' ||  ''Description'' ||
+     * || "sb1" || {@link EulerCromer} || 1st Order, Symplectic ||
+     * || "sb2" || {@link StormerVerlet} || 2nd Order, Symplectic, Reversible ||
+     * || "sb4" || {@link ForestRuth} || 4th Order, Symplectic, Reversible ||
+     *
+     * @param h the time step
+     * @param type the selected implementation
+     *
+     * @return concrete implementation of a symplectic integrator
+     */
+    public static ISymplectic getIntegrator (double h, string type) {
+        switch (type) {
+            case "sb1":
+                stderr.printf("1st Order Symplectic Integrator\n");
+                return new EulerCromer(h);
+            case "sb2":
+                stderr.printf("2nd Order Symplectic Integrator\n");
+                return new StormerVerlet(h);
+            case "sb4":
+                stderr.printf("4th Order Symplectic Integrator\n");
+                return new ForestRuth(h);
+        }
+        stderr.printf("Integrator not recognized: %s\n", type);
+        assert_not_reached();
     }
 }

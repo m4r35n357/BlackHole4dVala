@@ -38,7 +38,7 @@ namespace Simulations {
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type)) {
                 if (o.has_member("Lfac")) {
                     new Newton(o.get_double_member("Lfac"),
-                               o.get_double_member("r0")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                               o.get_double_member("r0")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
                                                                 o.get_double_member("start"),
                                                                 o.get_double_member("end"),
                                                                 o.get_int_member("plotratio"));
@@ -50,7 +50,7 @@ namespace Simulations {
                                 o.get_double_member("L"),
                                 o.get_double_member("Q"),
                                 o.get_double_member("r0"),
-                                o.get_double_member("th0")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                                o.get_double_member("th0")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
                                                                   o.get_double_member("start"),
                                                                   o.get_double_member("end"),
                                                                   o.get_int_member("plotratio"));
@@ -80,7 +80,7 @@ namespace Simulations {
                         }
                     }
                     new NBody(bodies, o.get_double_member("g"),
-                                      o.get_double_member("errorLimit")).solve(Symplectic.getIntegrator(o.get_double_member("step"), type),
+                                      o.get_double_member("errorLimit")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
                                                                                o.get_double_member("start"),
                                                                                o.get_double_member("end"),
                                                                                o.get_int_member("plotratio"));
