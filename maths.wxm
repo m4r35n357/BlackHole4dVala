@@ -45,6 +45,12 @@ dthCheck = trigsimp(thCalculated - 2 * thSimp);
 'diff(theta, tau) = sqrt(potentialTHETA) / S;
 (" *** phi *** ");
 'diff(phi, tau) = (P * a / Dr - T / (Dth * sin(%theta)^2)) * X^2 / S;
+
+(" *** Metric *** ");
+ds^2 = metric: expandwrt(%Sigma / %Delta * dr^2 + %Sigma * dth^2 + sin(%theta)^2 / %Sigma * (a * dt - (r^2 + a^2) * dph)^2 - %Delta / %Sigma * (dt - a * sin(%theta)^2 * dph)^2, dt, dr, dth, dph);
+simplified = metricSimp: %Sigma / %Delta * dr^2 + %Sigma * dth^2 + (sin(%theta)^2 * a^2 - %Delta) / %Sigma * dt^2 + 2 * sin(%theta)^2 * a * (%Delta - (r^2 + a^2)) / %Sigma * dt * dph + sin(%theta)^2 * ((r^2 + a^2)^2 - a^2 * sin(%theta)^2 * %Delta) / %Sigma * dph^2;
+metricCheck = trigsimp(metric - metricSimp);
+
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
@@ -76,7 +82,6 @@ collectterms(y, r);
 (" ****** END ******")$
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: hide output   ] */
 /* [wxMaxima: input   start ] */
 kill(all)$
 (" Potential THETA: ");
