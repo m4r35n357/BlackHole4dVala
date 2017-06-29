@@ -21,13 +21,20 @@ namespace Simulations {
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
-        private double h;  // the time step
-        protected double[] c_d;  // the update coefficients
+        /**
+         * Simulation time step, defined at subclass construction
+         */
+        private double h;
 
         /**
-         * Protected constructor, use the static factory {@link getIntegrator}.
+         * Symplectic coefficients (time-step multipliers) for a concrete subclass
+         */
+        protected double[] c_d;
+
+        /**
+         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
          *
-         * Subclass constructors should populate a {@link c_d} coefficient array, premultiplied by the step size
+         * Subclass constructors should populate a {@link c_d} coefficient array, premultiplied by the supplied step size
          *
          * @param h the time step
          */
@@ -36,10 +43,8 @@ namespace Simulations {
         }
 
         /**
-         * {@inheritDoc}
-         *
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
-         * methods with the combined {@link h} and {@link c_d} array elements as parameters
+         * methods with the combined {@link h} and {@link c_d} array elements as parameters.
          *
          * @see ISymplectic.step
          */
@@ -55,7 +60,7 @@ namespace Simulations {
     }
 
     /**
-     * First-order symplectic integrator concrete subclass.  This integrator is NOT time symmetrical
+     * First-order symplectic integrator concrete subclass.  This integrator is NOT time symmetrical.
      */
     public class EulerCromer : Symplectic {
 
@@ -69,8 +74,6 @@ namespace Simulations {
         }
 
         /**
-         * {@inheritDoc}
-         *
          * 1st order integration step.  Performs the following calls on {@link IModel} per iteration:
          *
          * {{{
@@ -78,7 +81,9 @@ namespace Simulations {
          * pUpdate(h)
          * }}}
          *
-         * @see ISymplectic.step
+         * where h is the time step.
+         *
+         * @see Symplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -101,8 +106,6 @@ namespace Simulations {
         }
 
         /**
-         * {@inheritDoc}
-         *
          * 2nd order integration step  Performs the following calls on {@link IModel} per iteration:
          *
          * {{{
@@ -111,7 +114,9 @@ namespace Simulations {
          * qUpdate(h/2)
          * }}}
          *
-         * @see ISymplectic.step
+         * where h is the time step.
+         *
+         * @see Symplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);
@@ -136,23 +141,27 @@ namespace Simulations {
         }
 
         /**
-         * {@inheritDoc}
+         * 4th order integration step
          *
-         * 4th order integration step Performs the following calls on {@link IModel} per iteration:
+         * Performs the following calls on {@link IModel} per iteration:
          *
          * {{{
-         * qUpdate(h*c_d[0])
-         * pUpdate(h*c_d[1])
-         * qUpdate(h*c_d[2])
-         * pUpdate(h*c_d[3])
-         * qUpdate(h*c_d[2])
-         * pUpdate(h*c_d[1])
-         * qUpdate(h*c_d[0])
+         * qUpdate(0.5 * h * theta)
+         * pUpdate(h * theta)
+         * qUpdate(0.5 * h * (1.0 - theta))
+         * pUpdate(h * (1.0 - 2.0 * theta))
+         * qUpdate(0.5 * h * (1.0 - theta))
+         * pUpdate(h * theta)
+         * qUpdate(0.5 * h * theta)
          * }}}
          *
-         * where {@link Symplectic.c_d} is a private coefficient array calculated internally.
+         * where h is the time step, and
          *
-         * @see ISymplectic.step
+         * {{{
+         * theta = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)))
+         * }}}
+         *
+         * @see Symplectic.step
          */
         public override void step (IModel model) {
             model.qUpdate(c_d[0]);
