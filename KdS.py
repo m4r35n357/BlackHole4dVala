@@ -29,19 +29,18 @@ class Symplectic(object):
         self.h = h
         if order == 'sb1':
             self.c_d = [h]
-            self.step = self.symplectic_euler
+            self.step = self.euler_cromer
         elif order == 'sb2':
             self.c_d = [D05 * h, h]
             self.step = self.stormer_verlet
         elif order == 'sb4':
-            self.cbrt2 = D2 ** (D1 / D3)
-            self.f2 = h / (D2 - self.cbrt2)
-            self.c_d = [D05 * self.f2, self.f2, D05 * (D1 - self.cbrt2) * self.f2, - self.cbrt2 * self.f2]
+            theta = D1 / (D2 - D2 ** (D1 / D3))
+            self.c_d = [D05 * h * theta, h * theta, D05 * h * (D1 - theta), h * (D1 - D2 * theta)]
             self.step = self.forest_ruth
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
 
-    def symplectic_euler(self, model):
+    def euler_cromer(self, model):
         model.qUpdate(self.c_d[0])
         model.pUpdate(self.c_d[0])
 
