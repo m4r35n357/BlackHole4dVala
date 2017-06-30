@@ -39,6 +39,7 @@ namespace Generators {
             public double rMin;
             public double rMax;
             public double elevation;
+            public bool cross;
             public double start;
             public double end;
             public double step;
@@ -153,6 +154,7 @@ namespace Generators {
             stdout.printf("    \"Q\" : %.17g,\n", Q);
             stdout.printf("    \"r0\" : %.17g,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("    \"th0\" : %.0f,\n", 0.0);
+            stdout.printf("    \"cross\" : %s,\n", p->cross ? "true" : "false");
             stdout.printf("    \"start\" : %.1f,\n", p->start);
             stdout.printf("    \"end\" : %.1f,\n", p->end);
             stdout.printf("    \"step\" : %.3f,\n", p->step);
@@ -184,6 +186,7 @@ namespace Generators {
                 elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                 a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
                 Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0,
+                cross = input.has_member("cross") ? input.get_boolean_member("cross") : false,
                 start = input.has_member("start") ? input.get_double_member("start") : 0.0,
                 end = input.has_member("end") ? input.get_double_member("end") : 5000.0,
                 step = input.has_member("step") ? input.get_double_member("step") : 0.001,

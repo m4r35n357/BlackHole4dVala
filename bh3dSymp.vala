@@ -56,6 +56,7 @@ namespace Simulations {
         private double Ur;
         private double Uth;
         private double Uph;
+        private bool cross;
 
         /**
          * Public constructor
@@ -69,7 +70,7 @@ namespace Simulations {
          * @param r0 initial r coordinate = r / M
          * @param th0 initial theta coordinate
          */
-        public BhSymp (double lambda, double spin, double pMass2, double energy, double angMom, double Q, double r0, double th0) {
+        public BhSymp (double lambda, double spin, double pMass2, double energy, double angMom, double Q, double r0, double th0, bool xh) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             l_3 = lambda / 3.0;
             a = spin;
@@ -87,6 +88,7 @@ namespace Simulations {
             K = Q + X2 * (L - aE) * (L - aE);
             r = r0;
             th = (90.0 - th0) * PI / 180.0;
+            cross = xh;
         }
 
         /**
@@ -145,7 +147,7 @@ namespace Simulations {
             refresh();
             Ur = - sqrt(R >= 0.0 ? R : -R);
             Uth = - sqrt(TH >= 0.0 ? TH : -TH);
-            while (tau < end) {
+            while ((tau < end) && (cross || D_r > 0.0)) {
                 if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;

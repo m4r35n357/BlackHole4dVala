@@ -60,7 +60,7 @@ class Symplectic(object):
 
 
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh):
         self.l_3 = Lambda / D3
         self.a = a
         self.mu2 = mu2
@@ -78,6 +78,7 @@ class BhSymp(object):
         self.t = self.ph = D0
         self.r = r0
         self.th = (Decimal('90.0') - th0) * Decimal(pi) / Decimal('180.0')
+        self.cross = xh
 
     def refresh(self):
         self.r2 = self.r**2
@@ -129,7 +130,7 @@ class BhSymp(object):
         self.refresh()
         self.Ur = - Decimal.sqrt(self.R if self.R >= 0.0 else -self.R)
         self.Uth = - Decimal.sqrt(self.TH if self.TH >= 0.0 else -self.TH)
-        while tau < end:
+        while (tau < end) and (self.cross or self.D_r > 0.0):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     input_data = stdin.read()
     ic = loads(input_data, parse_float=Decimal)['IC']
     print >> stderr, input_data
-    BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0']).solve(
+    BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross']).solve(
         Symplectic(ic['step'], ic['integrator']), ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"

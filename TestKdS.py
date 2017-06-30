@@ -26,7 +26,8 @@ class KdSTest(TestCase):
                             Decimal('5.6843449527674236e-13'),
                             Decimal('15.914691393798241'),
                             Decimal('12.0'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
         self.assertEqual(695, counts[0])
         self.assertEqual(695, counts[1])
 
@@ -42,7 +43,8 @@ class KdSTest(TestCase):
                             Decimal('-2.0'),
                             Decimal('27.0'),
                             Decimal('3.0'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb1'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb1'), start, end, interval)
         self.assertEqual(1058, counts[0])
         self.assertEqual(1058, counts[1])
 
@@ -58,7 +60,8 @@ class KdSTest(TestCase):
                             Decimal('1.4343745095317371'),
                             Decimal('7.9787599589278697'),
                             Decimal('7.5'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(220, counts[1])
 
@@ -74,7 +77,8 @@ class KdSTest(TestCase):
                             Decimal('1.4343745095317371'),
                             Decimal('7.9787599589278697'),
                             Decimal('7.5'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb1'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb1'), start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 
@@ -90,7 +94,8 @@ class KdSTest(TestCase):
                             Decimal('1.4343745095317371'),
                             Decimal('7.9787599589278697'),
                             Decimal('7.5'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb2'), start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 
@@ -107,7 +112,8 @@ class KdSTest(TestCase):
                             Decimal('1.4343745095317371'),
                             Decimal('7.9787599589278697'),
                             Decimal('7.5'),
-                            Decimal('0.0')).solve(KdS.Symplectic(step, 'sb4'), start, end, interval)
+                            Decimal('0.0'),
+                            True).solve(KdS.Symplectic(step, 'sb4'), start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 
