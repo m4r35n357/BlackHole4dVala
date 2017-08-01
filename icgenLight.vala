@@ -52,7 +52,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, double start, double end, double step, int64 plotratio, string integrator) {
+        private void printOutput (double r, double a, bool cross, double start, double end, double step, int64 plotratio, string integrator) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -77,6 +77,7 @@ namespace Generators {
             stdout.printf("    \"r1\" : %.3f,\n", r1(a));
             stdout.printf("    \"r2\" : %.3f,\n", r2(a));
             stdout.printf("    \"th0\" : %.0f,\n", 0.0);
+            stdout.printf("    \"cross\" : %s,\n", cross ? "true" : "false");
             stdout.printf("    \"start\" : %.1f,\n", start);
             stdout.printf("    \"end\" : %.1f,\n", end);
             stdout.printf("    \"step\" : %.3f,\n", step);
@@ -94,6 +95,7 @@ namespace Generators {
             // generate output
             printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
                         input.has_member("spin") ? input.get_double_member("spin") : 1.0,
+                        input.has_member("cross") ? input.get_boolean_member("cross") : false,
                         input.has_member("start") ? input.get_double_member("start") : 0.0,
                         input.has_member("end") ? input.get_double_member("end") : 1000.0,
                         input.has_member("step") ? input.get_double_member("step") : 0.001,
