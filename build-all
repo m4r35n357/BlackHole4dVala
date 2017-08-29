@@ -36,6 +36,13 @@ $valac --pkg json-glib-1.0 raytrace-commands.vala
 gcc -o kerr-image kerr-image.c -O$opt -Wall -std=c99 -pedantic -Wextra -Wno-unused-result -lm
 echo ""
 
+# compile Fortran
+echo $C"Compiling Fortran . . ."$NC
+gfortran -Jobj/Release/ -Wall -O2 -fimplicit-none \
+	-c KdS.f90 -o obj/Release/main.o
+gfortran -o bin/Release/KerrDeSitter obj/Release/main.o -s  
+echo ""
+
 # strip executables
 echo $C"Stripping Executables . . ."$NC
 case $opt in
@@ -51,6 +58,7 @@ rm -f KdS
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image
 echo ""
+ls -lAh --color */Release
 
 # generate documentation
 echo $C"Generating Documentation . . ."$NC

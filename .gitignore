@@ -25,6 +25,8 @@ RaytracingOutput/
 tmp/
 images/
 doc/
+obj/
+bin/
 
 .idea
 

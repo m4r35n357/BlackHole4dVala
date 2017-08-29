@@ -42,7 +42,7 @@ cp icgenLight-data.example $icdata
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
-vi $ic; jq . $ic
+vi $ic; jq . $ic; echo $(jq .IC.lambda $ic) $(jq .IC.a $ic) $(jq .IC.mu $ic) $(jq .IC.E $ic) $(jq .IC.L $ic) $(jq .IC.Q $ic) $(jq .IC.r0 $ic) $(jq .IC.th0 $ic)  $(jq .IC.step $ic) $(jq .IC.start $ic) $(jq .IC.end $ic) $(jq .IC.plotratio $ic) >ictest
 
 
 4.	Run tests
@@ -54,6 +54,8 @@ vi $ic; jq . $ic
 
 ./rg2 2>/dev/null
 
+export exe='../../Fortran/KerrDeSitter/bin/Debug/KerrDeSitter'
+export exe='bin/Release/KerrDeSitter'
 export exe='./Simulate'
 export exe='./KdS.py'
 export exe='nc.openbsd pi 1234'
@@ -91,7 +93,7 @@ on a PI 2 or 3:
 
 gsdir='/home/pi/projects/Vala/BlackHole4dVala'
 gs='./geodesic-server'
-script1='./KdS'
+script1='./Simulate'
 script2='./KdS.py'
 script3='./minimal'
 script4='./minimal-symp'
