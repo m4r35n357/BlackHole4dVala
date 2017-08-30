@@ -13,16 +13,16 @@
 
 program KdS
     implicit none
-    real(kind=16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, CC_K, aE, two_EX2, two_aE, aL, step, start, finish, pi = acos(-1.0)
-    integer :: plotratio
+    integer :: plotratio ! CONSTANTS
     logical :: cross
-    real(kind=16) :: r2, ra2, sth, cth, sth2, cth2, D_r, D_th, SIGMA, R_POT, R_tmp, TH_tmp, TH_POT  ! INTERMEDIATE VARIABLES
+    real(kind=16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, two_EX2, two_aE, aL, step, start, finish, pi = acos(-1.0)
+    real(kind=16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(kind=16) :: t = 0.0, r, th, ph = 0.0, Ut, Ur, Uth, Uph  ! VARIABLES
     call init_vars()
 contains
     subroutine init_vars()
-        real(kind=16) :: lambda, spin, pMass2, energy, angMom, CC_Q, r0, th0
-        read(*,*) lambda, spin, pMass2, energy, angMom, CC_Q, r0, th0, step, start, finish, plotratio
+        real(kind=16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
+        read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio
         l_3 = lambda / 3.0
         a = spin
         mu2 = pMass2
@@ -36,7 +36,7 @@ contains
         X2 = (1.0 + a2l_3)**2
         two_EX2 = 2.0 * E * X2
         two_aE = 2.0 * aE
-        CC_K = CC_Q + X2 * (L - aE)**2
+        ccK = ccQ + X2 * (L - aE)**2
         r = r0
         th = (90.0 - th0) * pi / 180.0
         cross = .false.
@@ -47,21 +47,21 @@ contains
         real(kind=16) :: P_Dr, T_Dth
         r2 = r**2
         ra2 = r2 + a2
-        R_tmp = ra2 * E - aL
-        D_r = (1.0 - l_3 * r2) * ra2 - 2.0 * r
-        R_POT = X2 * R_tmp**2 - D_r * (mu2 * r2 + CC_K)
+        Rint = ra2 * E - aL
+        Dr = (1.0 - l_3 * r2) * ra2 - 2.0 * r
+        Rpot = X2 * Rint**2 - Dr * (mu2 * r2 + ccK)
         sth = sin(th)
         cth = cos(th)
         sth2 = sth**2
         cth2 = 1.0 - sth2
-        TH_tmp = aE * sth2 - L
-        D_th = 1.0 + a2l_3 * cth2
-        TH_POT = D_th * (CC_K - a2mu2 * cth2) - X2 * TH_tmp**2 / sth2
-        P_Dr = R_tmp / D_r
-        T_Dth = TH_tmp / D_th
+        THint = aE * sth2 - L
+        Dth = 1.0 + a2l_3 * cth2
+        THpot = Dth * (ccK - a2mu2 * cth2) - X2 * THint**2 / sth2
+        P_Dr = Rint / Dr
+        T_Dth = THint / Dth
         Ut = (P_Dr * ra2 - T_Dth * a) * X2
         Uph = (P_Dr * a - T_Dth / sth2) * X2
-        SIGMA = r2 + a2 * cth2
+        Sigma = r2 + a2 * cth2
     end subroutine refresh
 
     subroutine qUpdate(c)
@@ -75,43 +75,42 @@ contains
 
     subroutine pUpdate(d)
         real(kind=16) :: d
-        Ur = Ur + d * (r * (two_EX2 * R_tmp - mu2 * D_r) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (CC_K + mu2 * r2))
-        Uth = Uth + d * cth * (sth * a2 * (mu2 * D_th - l_3 * (CC_K - a2mu2 * cth2)) + X2 * TH_tmp / sth * (TH_tmp / sth2 - two_aE))
+        Ur = Ur + d * (r * (two_EX2 * Rint - mu2 * Dr) - (r * (1.0 - l_3 * (r2 + ra2)) - 1.0) * (ccK + mu2 * r2))
+        Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - two_aE))
     end subroutine pUpdate
 
     subroutine solve()
-        real(kind=16) :: mino = 0.0, tau = 0.0, theta
-        real(kind=16), dimension(4) :: c_d
+        real(kind=16) :: mino = 0.0, tau = 0.0, theta = 1.0 / (2.0 - 2.0**(1.0 / 3.0))
+        real(kind=16), dimension(4) :: cd
         integer :: counter = 0
-        theta = 1.0 / (2.0 - 2.0**(1.0 / 3.0));
-        c_d = (/ 0.5 * step * theta, step * theta, 0.5 * step * (1.0 - theta), step * (1.0 - 2.0 * theta) /)
+        cd = (/ 0.5 * step * theta, step * theta, 0.5 * step * (1.0 - theta), step * (1.0 - 2.0 * theta) /)
         call refresh()
-        Ur = - sqrt(merge(R_POT, -R_POT, R_POT >= 0.0))
-        Uth = - sqrt(merge(TH_POT, -TH_POT, TH_POT >= 0.0))
-        do while ((tau < finish) .and. (cross .or. D_r > 0.0))
+        Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= 0.0))
+        Uth = - sqrt(merge(THpot, -THpot, THpot >= 0.0))
+        do while ((tau < finish) .and. (cross .or. Dr > 0.0))
             if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
-                call plot(mino, tau, Ut / SIGMA, Ur / SIGMA, Uth / SIGMA, Uph / SIGMA)
+                call plot(mino, tau, Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
             end if
-            call qUpdate(c_d(1))
-            call pUpdate(c_d(2))
-            call qUpdate(c_d(3))
-            call pUpdate(c_d(4))
-            call qUpdate(c_d(3))
-            call pUpdate(c_d(2))
-            call qUpdate(c_d(1))
+            call qUpdate(cd(1))
+            call pUpdate(cd(2))
+            call qUpdate(cd(3))
+            call pUpdate(cd(4))
+            call qUpdate(cd(3))
+            call pUpdate(cd(2))
+            call qUpdate(cd(1))
             counter = counter + 1
             mino = step * counter
-            tau = tau + step * SIGMA
+            tau = tau + step * Sigma
         end do
-        call plot(mino, tau, Ut / SIGMA, Ur / SIGMA, Uth / SIGMA, Uph / SIGMA)
+        call plot(mino, tau, Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
     end subroutine solve
 
     subroutine plot(mino, tau, Vt, Vr, Vth, Vph)
         real(kind=16) :: mino, tau, Vt, Vr, Vth, Vph
         write (*, '(A, 13(ES16.9, A))') '{"mino":', mino, ',"tau":', tau,&
-                    ',"v4e":',mu2 + sth2 * D_th / (SIGMA * X2) * (a * Vt - ra2 * Vph)**2 + SIGMA / D_r * Vr**2&
-                                  + SIGMA / D_th * Vth**2 - D_r / (SIGMA * X2) * (Vt - a * sth2 * Vph)**2,&
-                    ',"ER":', 0.5 * (Vr**2 - R_POT / SIGMA**2), ',"ETh":', 0.5 * (Vth**2 - TH_POT / SIGMA**2),&
+                    ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
+                                  + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
+                    ',"ER":', 0.5 * (Vr**2 - Rpot / Sigma**2), ',"ETh":', 0.5 * (Vth**2 - THpot / Sigma**2),&
                     ',"t":', t, ',"r":', r, ',"th":', th, ',"ph":', ph,&
                     ',"tP":', Vt, ',"rP":', Vr, ',"thP":', Vth, ',"phP":', Vph, '}'
     end subroutine plot
