@@ -59,6 +59,7 @@ ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image
 echo ""
 ls -lAh --color */Release
+echo ""
 
 # generate documentation
 echo $C"Generating Documentation . . ."$NC

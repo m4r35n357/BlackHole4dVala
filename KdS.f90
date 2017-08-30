@@ -108,13 +108,12 @@ contains
 
     subroutine plot(mino, tau, Vt, Vr, Vth, Vph)
         real(kind=16) :: mino, tau, Vt, Vr, Vth, Vph
-        write (*, '(A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9, A, E16.9)')&
-            '{ "mino": ', mino, ', "tau": ', tau,&
-            ', "v4e": ',mu2 + sth2 * D_th / (SIGMA * X2) * (a * Vt - ra2 * Vph)**2 + SIGMA / D_r * Vr**2&
-                            + SIGMA / D_th * Vth**2 - D_r / (SIGMA * X2) * (Vt - a * sth2 * Vph)**2,&
-            ', "ER": ', 0.5 * (Vr**2 - R_POT / SIGMA**2), ', "ETh": ', 0.5 * (Vth**2 - TH_POT / SIGMA**2),&
-            ', "t": ', t, ', "r": ', r, ', "th": ', th, ', "ph": ', ph,&
-            ', "tP": ', Vt, ', "rP": ', Vr, ', "thP": ', Vth, ', "phP": ', Vph, ' }'
+        write (*, '(A, 13(ES16.9, A))') '{"mino":', mino, ',"tau":', tau,&
+                    ',"v4e":',mu2 + sth2 * D_th / (SIGMA * X2) * (a * Vt - ra2 * Vph)**2 + SIGMA / D_r * Vr**2&
+                                  + SIGMA / D_th * Vth**2 - D_r / (SIGMA * X2) * (Vt - a * sth2 * Vph)**2,&
+                    ',"ER":', 0.5 * (Vr**2 - R_POT / SIGMA**2), ',"ETh":', 0.5 * (Vth**2 - TH_POT / SIGMA**2),&
+                    ',"t":', t, ',"r":', r, ',"th":', th, ',"ph":', ph,&
+                    ',"tP":', Vt, ',"rP":', Vr, ',"thP":', Vth, ',"phP":', Vph, '}'
     end subroutine plot
 end program KdS
 
