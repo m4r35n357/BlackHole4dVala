@@ -12,17 +12,18 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    integer :: plotratio ! CONSTANTS
+    real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0, pi = acos(-D1) ! CONSTANTS
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, two_EX2, two_aE, aL, step, start, finish
+    integer :: plotratio
     logical :: cross = .false.
-    real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, two_EX2, two_aE, aL, step, start, finish, pi = acos(-D1)
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph  ! VARIABLES
     call init_vars()
+    call solve()
 contains
     subroutine init_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
-        read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio
+        read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross
         l_3 = lambda / D3
         a = spin
         mu2 = pMass2
@@ -39,7 +40,6 @@ contains
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
         th = (90.0 - th0) * pi / 180.0
-        call solve()
     end subroutine init_vars
 
     subroutine refresh()
