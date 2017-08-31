@@ -54,7 +54,6 @@ vi $ic; jq . $ic; echo $(jq .IC.lambda $ic) $(jq .IC.a $ic) $(jq .IC.mu $ic) $(j
 
 ./rg2 2>/dev/null
 
-export exe='../../Fortran/KerrDeSitter/bin/Debug/KerrDeSitter'
 export exe='bin/Release/KerrDeSitter'
 export exe='./Simulate'
 export exe='./KdS.py'
