@@ -145,19 +145,19 @@ namespace Generators {
             }
             stdout.printf("  },\n");
             stdout.printf("  \"IC\" : {\n");
-            stdout.printf("    \"M\" : %.1f,\n", 1.0);
-            stdout.printf("    \"a\" : %.3f,\n", p->a);
+            stdout.printf("    \"M\" : %.17g,\n", 1.0);
+            stdout.printf("    \"a\" : %.17g,\n", p->a);
             stdout.printf("    \"lambda\" : %.17g,\n", 0.0);
-            stdout.printf("    \"mu\" : %.1f,\n", p->mu2);
+            stdout.printf("    \"mu\" : %.17g,\n", p->mu2);
             stdout.printf("    \"E\" : %.17g,\n", E);
             stdout.printf("    \"L\" : %.17g,\n", L);
             stdout.printf("    \"Q\" : %.17g,\n", Q);
             stdout.printf("    \"r0\" : %.17g,\n", 0.5 * (p->rMin + p->rMax));
-            stdout.printf("    \"th0\" : %.0f,\n", 0.0);
+            stdout.printf("    \"th0\" : %.17g,\n", 0.0);
             stdout.printf("    \"cross\" : %s,\n", p->cross ? "true" : "false");
-            stdout.printf("    \"start\" : %.1f,\n", p->start);
-            stdout.printf("    \"end\" : %.1f,\n", p->end);
-            stdout.printf("    \"step\" : %.3f,\n", p->step);
+            stdout.printf("    \"start\" : %.17g,\n", p->start);
+            stdout.printf("    \"end\" : %.17g,\n", p->end);
+            stdout.printf("    \"step\" : %.17g,\n", p->step);
             stdout.printf("    \"plotratio\" : %.1d,\n", (int)p->plotratio);
             stdout.printf("    \"integrator\" : \"%s\"\n", p->integrator);
             stdout.printf("  }\n");
