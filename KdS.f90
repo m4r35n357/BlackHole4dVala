@@ -12,12 +12,12 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0, pi = acos(-D1) ! CONSTANTS
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, two_EX2, two_aE, aL, step, start, finish
+    real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0, pi = acos(-D1), theta = D1 / (D2 - D2**(D1 / D3)) ! CONSTANTS
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish
     integer :: plotratio
     logical :: cross = .false.
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
-    real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph  ! VARIABLES
+    real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! VARIABLES
     call init_vars()
     call solve()
 contains
@@ -35,8 +35,8 @@ contains
         aE = a * E
         aL = a * L
         X2 = (D1 + a2l_3)**2
-        two_EX2 = D2 * E * X2
-        two_aE = D2 * aE
+        twoEX2 = D2 * E * X2
+        twoEa = D2 * aE
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
         th = (90.0 - th0) * pi / 180.0
@@ -74,21 +74,20 @@ contains
 
     subroutine pUpdate(d)
         real(16) :: d
-        Ur = Ur + d * (r * (two_EX2 * Rint - mu2 * Dr) - (r * (D1 - l_3 * (r2 + ra2)) - D1) * (ccK + mu2 * r2))
-        Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - two_aE))
+        Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (D1 - l_3 * (r2 + ra2)) - D1) * (ccK + mu2 * r2))
+        Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine pUpdate
 
     subroutine solve()
-        real(16) :: mino = D0, tau = D0, theta = D1 / (D2 - D2**(D1 / D3))
-        real(16), dimension(4) :: cd
         integer :: counter = 0
+        real(16), dimension(4) :: cd
         cd = (/ D05 * step * theta, step * theta, D05 * step * (D1 - theta), step * (D1 - D2 * theta) /)
         call refresh()
         Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
         Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
         do while ((tau < finish) .and. (cross .or. Dr > D0))
             if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
-                call plot(mino, tau, Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
+                call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
             end if
             call qUpdate(cd(1))
             call pUpdate(cd(2))
@@ -101,11 +100,11 @@ contains
             mino = step * counter
             tau = tau + step * Sigma
         end do
-        call plot(mino, tau, Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
+        call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
     end subroutine solve
 
-    subroutine plot(mino, tau, Vt, Vr, Vth, Vph)
-        real(16) :: mino, tau, Vt, Vr, Vth, Vph
+    subroutine plot(Vt, Vr, Vth, Vph)
+        real(16) :: Vt, Vr, Vth, Vph
         write (*, '(A, 13(ES16.9, A))') '{"mino":', mino, ',"tau":', tau,&
                     ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
                                   + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
