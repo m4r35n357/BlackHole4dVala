@@ -190,10 +190,7 @@ namespace Simulations {
          */
         private void plot (double mino, double tau, double Ut, double Ur, double Uth, double Uph) {
             var S2 = S * S;
-            var eR = 0.5 * (Ur * Ur - R / S2);
-            var eTh = 0.5 * (Uth * Uth - TH / S2);
-            var v4e = v4Error(Ut, Ur, Uth, Uph);
-            stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino,tau, v4e,eR,eTh, t,r,th,ph, Ut,Ur,Uth,Uph);
+            stdout.printf("{\"mino\":%.9e,\"tau\":%.9e,\"v4e\":%.9e,\"ER\":%.9e,\"ETh\":%.9e,\"t\":%.9e,\"r\":%.9e,\"th\":%.9e,\"ph\":%.9e,\"tP\":%.9e,\"rP\":%.9e,\"thP\":%.9e,\"phP\":%.9e}\n", mino, tau, v4Error(Ut,Ur,Uth,Uph), Ur*Ur-R/S2, Uth*Uth-TH/S2, t,r,th,ph, Ut,Ur,Uth,Uph);
         }
     }
 }

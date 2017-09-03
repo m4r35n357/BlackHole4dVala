@@ -13,11 +13,11 @@
 program KdS
     implicit none
     real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0, pi = acos(-D1), theta = D1 / (D2 - D2**(D1 / D3)) ! CONSTANTS
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
-    logical :: cross = .false.
+    logical :: cross
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
-    real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! VARIABLES
+    real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
     call solve()
 contains
@@ -105,12 +105,11 @@ contains
 
     subroutine plot(Vt, Vr, Vth, Vph)
         real(16) :: Vt, Vr, Vth, Vph
-        write (*, '(A, 13(ES16.9, A))') '{"mino":', mino, ',"tau":', tau,&
+        write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
                     ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
                                   + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
-                    ',"ER":', D05 * (Vr**2 - Rpot / Sigma**2), ',"ETh":', D05 * (Vth**2 - THpot / Sigma**2),&
-                    ',"t":', t, ',"r":', r, ',"th":', th, ',"ph":', ph,&
-                    ',"tP":', Vt, ',"rP":', Vr, ',"thP":', Vth, ',"phP":', Vph, '}'
+                    ',"ER":',Vr**2 - Rpot / Sigma**2,',"ETh":',Vth**2 - THpot / Sigma**2,&
+                    ',"t":', t,',"r":',r,',"th":',th,',"ph":',ph,',"tP":',Vt,',"rP":',Vr,',"thP":',Vth,',"phP":',Vph,'}'
     end subroutine plot
 end program KdS
 

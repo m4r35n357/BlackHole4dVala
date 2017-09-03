@@ -109,8 +109,8 @@ class BhSymp(object):
         self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
 
     def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
-        eR = 0.5 * (Ur**2 - self.R / self.S**2)
-        eTh = 0.5 * (Uth**2 - self.TH / self.S**2)
+        eR = Ur**2 - self.R / self.S**2
+        eTh = Uth**2 - self.TH / self.S**2
         v4e = self.v4_error(Ut, Ur, Uth, Uph)
         print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
             mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
