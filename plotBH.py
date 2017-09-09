@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from json import loads
 from math import sqrt, sin, cos, fabs, pi, atan2, acos, log10
 from sys import argv, stderr, stdin
-from visual import display, sphere, curve, rate, ellipsoid, ring, color, label
+from visual import display, sphere, curve, rate, ellipsoid, ring, color, label, points
 
 
 def isco (a, l):
@@ -124,7 +124,7 @@ def main():
         if counter % 1000 == 0:
             ball.visible = False
             ball = sphere(radius = 0.2)  # Particle
-            ball.trail = curve(size = 1)  #  trail
+            ball.trail = points(size = 1)  #  trail
         data = loads(dataLine)
         error = data['v4e']
         e = error if error >= 0.0 else -error
