@@ -12,14 +12,15 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D2 = 2.0, D3 = 3.0, pi = acos(-D1), theta = D1 / (D2 - D2**(D1 / D3)) ! CONSTANTS
-    real(16), parameter :: rt5 = D2**(D1 / 5.0), rt7 = D2**(D1 / 7.0)
-    real(16), parameter :: z0 = - rt5 / (D2 - rt5), z1 = D1 / (D2 - rt5), y0 = - rt7 / (D2 - rt7), y1 = D1 / (D2 - rt7)
+    real(16), parameter :: D0 = 0.0_16, D05 = 0.5_16, D1 = 1.0_16, D2 = 2.0_16, D3 = 3.0_16, pi = acos(-D1) ! CONSTANTS
+    real(16), parameter :: rt3 = D2**(D1 / D3), rt5 = D2**(D1 / 5.0_16), rt7 = D2**(D1 / 7.0_16)
+    real(16), parameter ::  x0 = - rt7 / (D2 - rt7), x1 = D1 / (D2 - rt7),&
+                            y0 = - rt5 / (D2 - rt5), y1 = D1 / (D2 - rt5),&
+                            z0 = - rt3 / (D2 - rt3), z1 = D1 / (D2 - rt3)
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
     logical :: cross
     character (len=3) :: integrator
-    real(16), dimension(4) :: cd
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
@@ -37,7 +38,6 @@ contains
     subroutine init_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
         read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross, integrator
-        cd = (/ D05 * step * theta, step * theta, D05 * step * (D1 - theta), step * (D1 - D2 * theta) /)
         l_3 = lambda / D3
         a = spin
         mu2 = pMass2
@@ -53,7 +53,7 @@ contains
         twoEa = D2 * aE
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
-        th = (90.0 - th0) * pi / 180.0
+        th = (90.0_16 - th0) * pi / 180.0_16
     end subroutine init_vars
 
     subroutine refresh()
@@ -92,37 +92,59 @@ contains
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine pUpdate
 
-    subroutine fourth_base(y, z)
-        real(16) :: y, z
-        call qUpdate(cd(1) * y * z)
-        call pUpdate(cd(2) * y * z)
-        call qUpdate(cd(3) * y * z)
-        call pUpdate(cd(4) * y * z)
-        call qUpdate(cd(3) * y * z)
-        call pUpdate(cd(2) * y * z)
-        call qUpdate(cd(1) * y * z)
-    end subroutine fourth_base
+    subroutine second_base(x, y, z)
+        real(16) :: x, y, z
+        call qUpdate(step * x * y * z * D05)
+        call pUpdate(step * x * y * z)
+        call qUpdate(step * x * y * z * D05)
+    end subroutine second_base
 
     subroutine fourth()
-        call fourth_base(D1, D1)
+        call second_base(D1, D1, z1)
+        call second_base(D1, D1, z0)
+        call second_base(D1, D1, z1)
     end subroutine fourth
 
     subroutine sixth()
-        call fourth_base(D1, z1)
-        call fourth_base(D1, z0)
-        call fourth_base(D1, z1)
+        call second_base(D1, y1, z1)
+        call second_base(D1, y1, z0)
+        call second_base(D1, y1, z1)
+        call second_base(D1, y0, z1)
+        call second_base(D1, y0, z0)
+        call second_base(D1, y0, z1)
+        call second_base(D1, y1, z1)
+        call second_base(D1, y1, z0)
+        call second_base(D1, y1, z1)
     end subroutine sixth
 
     subroutine eightth()
-        call fourth_base(y1, z1)
-        call fourth_base(y1, z0)
-        call fourth_base(y1, z1)
-        call fourth_base(y0, z1)
-        call fourth_base(y0, z0)
-        call fourth_base(y0, z1)
-        call fourth_base(y1, z1)
-        call fourth_base(y1, z0)
-        call fourth_base(y1, z1)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y1, z0)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y0, z1)
+        call second_base(x1, y0, z0)
+        call second_base(x1, y0, z1)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y1, z0)
+        call second_base(x1, y1, z1)
+        call second_base(x0, y1, z1)
+        call second_base(x0, y1, z0)
+        call second_base(x0, y1, z1)
+        call second_base(x0, y0, z1)
+        call second_base(x0, y0, z0)
+        call second_base(x0, y0, z1)
+        call second_base(x0, y1, z1)
+        call second_base(x0, y1, z0)
+        call second_base(x0, y1, z1)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y1, z0)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y0, z1)
+        call second_base(x1, y0, z0)
+        call second_base(x1, y0, z1)
+        call second_base(x1, y1, z1)
+        call second_base(x1, y1, z0)
+        call second_base(x1, y1, z1)
     end subroutine eightth
 
     subroutine solve(method)
