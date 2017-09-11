@@ -16,6 +16,7 @@ program KdS
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
     logical :: cross
+    real(16), dimension(4) :: cd
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
@@ -24,6 +25,7 @@ contains
     subroutine init_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
         read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross
+        cd = (/ D05 * step * theta, step * theta, D05 * step * (D1 - theta), step * (D1 - D2 * theta) /)
         l_3 = lambda / D3
         a = spin
         mu2 = pMass2
@@ -80,8 +82,6 @@ contains
 
     subroutine solve()
         integer :: counter = 0
-        real(16), dimension(4) :: cd
-        cd = (/ D05 * step * theta, step * theta, D05 * step * (D1 - theta), step * (D1 - D2 * theta) /)
         call refresh()
         Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
         Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
