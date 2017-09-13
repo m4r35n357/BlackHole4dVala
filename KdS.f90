@@ -14,9 +14,9 @@ program KdS
     implicit none
     real(16), parameter :: D0 = 0.0_16, D05 = 0.5_16, D1 = 1.0_16, D2 = 2.0_16, D3 = 3.0_16, D4 = 4.0_16, pi = acos(-D1) ! CONSTANTS
     real(16), parameter :: rt3 = D4**(D1 / D3), rt5 = D4**(D1 / 5.0_16), rt7 = D4**(D1 / 7.0_16)
-    real(16), parameter ::  x1  = D1/(D4-rt7), x3 = -rt7/(D4-rt7),&
-                            y1  = D1/(D4-rt5), y3 = -rt5/(D4-rt5),&
-                            z1  = D1/(D4-rt3), z3 = -rt3/(D4-rt3)
+    real(16), parameter ::  x1 = D1/(D4-rt7), x3 = -rt7/(D4-rt7),&
+                            y1 = D1/(D4-rt5), y3 = -rt5/(D4-rt5),&
+                            z1 = D1/(D4-rt3), z3 = -rt3/(D4-rt3)
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
     logical :: cross
@@ -25,12 +25,14 @@ program KdS
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
     select case (integrator)
+        case ("sb2")
+            call solve(second_order)
         case ("sb4")
-            call solve(fourth)
+            call solve(fourth_order)
         case ("sb6")
-            call solve(sixth)
+            call solve(sixth_order)
         case ("sb8")
-            call solve(eightth)
+            call solve(eightth_order)
         case default
             write (0, *) "Invalid integrator method"
     end select
@@ -99,177 +101,105 @@ contains
         call qUpdate(step * x * y * z * D05)
     end subroutine second_base
 
-    subroutine fourth()
+    subroutine second_order()
+        call second_base(D1, D1, D1)
+    end subroutine second_order
+
+    subroutine fourth_order()
         call second_base(D1, D1, z1)
         call second_base(D1, D1, z1)
         call second_base(D1, D1, z3)
         call second_base(D1, D1, z1)
         call second_base(D1, D1, z1)
-    end subroutine fourth
+    end subroutine fourth_order
 
-    subroutine sixth()
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z3)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z3)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-
+    subroutine sixth_order()
+        integer var
+        do var = 1, 2
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z3)
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z1)
+        end do
         call second_base(D1, y3, z1)
         call second_base(D1, y3, z1)
         call second_base(D1, y3, z3)
         call second_base(D1, y3, z1)
         call second_base(D1, y3, z1)
+        do var = 1, 2
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z3)
+            call second_base(D1, y1, z1)
+            call second_base(D1, y1, z1)
+        end do
+    end subroutine sixth_order
 
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z3)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z3)
-        call second_base(D1, y1, z1)
-        call second_base(D1, y1, z1)
-    end subroutine sixth
-
-    subroutine eightth()
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z3)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z3)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z3)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z3)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
+    subroutine eightth_order()
+        integer var, inner, outer
+        do outer = 1, 2
+            do inner = 1, 2
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z3)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+            end do
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z3)
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z1)
+            do inner = 1, 2
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z3)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+            end do
+        end do
+        do var = 1, 2
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z3)
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z1)
+        end do
         call second_base(x3, y3, z1)
         call second_base(x3, y3, z1)
         call second_base(x3, y3, z3)
         call second_base(x3, y3, z1)
         call second_base(x3, y3, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z3)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z3)
-        call second_base(x3, y1, z1)
-        call second_base(x3, y1, z1)
-
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z3)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z3)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y3, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z3)
-        call second_base(x1, y1, z1)
-        call second_base(x1, y1, z1)
-    end subroutine eightth
+        do var = 1, 2
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z3)
+            call second_base(x3, y1, z1)
+            call second_base(x3, y1, z1)
+        end do
+        do outer = 1, 2
+            do inner = 1, 2
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z3)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+            end do
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z3)
+            call second_base(x1, y3, z1)
+            call second_base(x1, y3, z1)
+            do inner = 1, 2
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z3)
+                call second_base(x1, y1, z1)
+                call second_base(x1, y1, z1)
+            end do
+        end do
+    end subroutine eightth_order
 
     subroutine solve(method)
         integer :: counter = 0
