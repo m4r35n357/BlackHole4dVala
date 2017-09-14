@@ -124,7 +124,7 @@ def main():
         if counter % 1000 == 0:
             ball.visible = False
             ball = sphere(radius = 0.2)  # Particle
-            ball.trail = points(size = 1)  #  trail
+            ball.trail = curve(size = 1)  #  trail
         data = loads(dataLine)
         error = data['v4e']
         e = error if error >= 0.0 else -error
