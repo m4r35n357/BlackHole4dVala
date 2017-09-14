@@ -128,16 +128,16 @@ namespace Simulations {
     /**
      * Fourth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
      */
-    public class ForestRuth : Symplectic {
+    public class SuzukiVerlet : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public ForestRuth (double h) {
+        public SuzukiVerlet (double h) {
             base(h);
-            var theta = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)));
-            this.c_d = { 0.5 * h * theta, h * theta, 0.5 * h * (1.0 - theta), h * (1.0 - 2.0 * theta) };
+            var rt3 = pow(4.0, (1.0 / 3.0));
+            this.c_d = { h / (4.0 - rt3), - h * rt3 / (4.0 - rt3) };
         }
 
         /**
@@ -164,13 +164,25 @@ namespace Simulations {
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            model.qUpdate(c_d[0]);
+            model.qUpdate(c_d[0] * 0.5);
+            model.pUpdate(c_d[0]);
+            model.qUpdate(c_d[0] * 0.5);
+
+            model.qUpdate(c_d[0] * 0.5);
+            model.pUpdate(c_d[0]);
+            model.qUpdate(c_d[0] * 0.5);
+
+            model.qUpdate(c_d[1] * 0.5);
             model.pUpdate(c_d[1]);
-            model.qUpdate(c_d[2]);
-            model.pUpdate(c_d[3]);
-            model.qUpdate(c_d[2]);
-            model.pUpdate(c_d[1]);
-            model.qUpdate(c_d[0]);
+            model.qUpdate(c_d[1] * 0.5);
+
+            model.qUpdate(c_d[0] * 0.5);
+            model.pUpdate(c_d[0]);
+            model.qUpdate(c_d[0] * 0.5);
+
+            model.qUpdate(c_d[0] * 0.5);
+            model.pUpdate(c_d[0]);
+            model.qUpdate(c_d[0] * 0.5);
         }
     }
 
@@ -180,7 +192,7 @@ namespace Simulations {
      * || ''type'' || ''Subclass'' ||  ''Description'' ||
      * || "sb1" || {@link EulerCromer} || 1st Order, Symplectic ||
      * || "sb2" || {@link StormerVerlet} || 2nd Order, Symplectic, Reversible ||
-     * || "sb4" || {@link ForestRuth} || 4th Order, Symplectic, Reversible ||
+     * || "sb4" || {@link SuzukiVerlet} || 4th Order, Symplectic, Reversible ||
      *
      * @param h the time step
      * @param type the selected implementation
@@ -197,7 +209,7 @@ namespace Simulations {
                 return new StormerVerlet(h);
             case "sb4":
                 stderr.printf("4th Order Symplectic Integrator\n");
-                return new ForestRuth(h);
+                return new SuzukiVerlet(h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);
         assert_not_reached();
