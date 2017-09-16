@@ -25,6 +25,9 @@ program KdS
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
     select case (integrator)
+        case ("sb1")
+            write (0, *) "Fortran First order"
+            call solve(first_order)
         case ("sb2")
             write (0, *) "Fortran Second order"
             call solve(second_order)
@@ -97,6 +100,11 @@ contains
         Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (D1 - l_3 * (r2 + ra2)) - D1) * (ccK + mu2 * r2))
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine pUpdate
+
+    subroutine first_order()
+        call qUpdate(step)
+        call pUpdate(step)
+    end subroutine first_order
 
     subroutine second_base(x, y, z)
         real(16), intent(in) :: x, y, z
