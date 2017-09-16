@@ -27,24 +27,52 @@ namespace Simulations {
         private double h;
 
         /**
-         * Symplectic coefficients (time-step multipliers) for a concrete subclass
+         * Suzuki composition coefficients
          */
-        protected double[] c_d;
+        protected double[] x;
+        protected double[] y;
+        protected double[] z;
 
         /**
          * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
-         *
-         * Subclass constructors should populate a {@link c_d} coefficient array, premultiplied by the supplied step size
          *
          * @param h the time step
          */
         protected Symplectic (double h) {
             this.h = h;
+            var rt3 = pow(4.0, (1.0 / 3.0));
+            var rt5 = pow(4.0, (1.0 / 5.0));
+            var rt7 = pow(4.0, (1.0 / 7.0));
+            this.x = { 1.0 / (4.0 - rt7), - rt7 / (4.0 - rt7) };
+            this.y = { 1.0 / (4.0 - rt5), - rt5 / (4.0 - rt5) };
+            this.z = { 1.0 / (4.0 - rt3), - rt3 / (4.0 - rt3) };
+        }
+
+        protected void base2 (IModel model, double s) {
+            model.qUpdate(h * s * 0.5);
+            model.pUpdate(h * s);
+            model.qUpdate(h * s * 0.5);
+        }
+
+        protected void base4 (IModel model, double s) {
+            this.base2(model, s * z[0]);
+            this.base2(model, s * z[0]);
+            this.base2(model, s * z[1]);
+            this.base2(model, s * z[0]);
+            this.base2(model, s * z[0]);
+        }
+
+        protected void base6 (IModel model, double s) {
+            this.base4(model, s * y[0]);
+            this.base4(model, s * y[0]);
+            this.base4(model, s * y[1]);
+            this.base4(model, s * y[0]);
+            this.base4(model, s * y[0]);
         }
 
         /**
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
-         * methods with the combined {@link h} and {@link c_d} array elements as parameters.
+         * methods.
          *
          * @see ISymplectic.step
          */
@@ -62,15 +90,14 @@ namespace Simulations {
     /**
      * First-order symplectic integrator concrete subclass.  This integrator is NOT time symmetrical.
      */
-    public class EulerCromer : Symplectic {
+    public class FirstOrder : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public EulerCromer (double h) {
+        public FirstOrder (double h) {
             base(h);
-            this.c_d = { h };
         }
 
         /**
@@ -86,23 +113,22 @@ namespace Simulations {
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            model.qUpdate(c_d[0]);
-            model.pUpdate(c_d[0]);
+            model.qUpdate(1.0);
+            model.pUpdate(1.0);
         }
     }
 
     /**
      * Second-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
      */
-    public class StormerVerlet : Symplectic {
+    public class SecondOrder : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public StormerVerlet (double h) {
+        public SecondOrder (double h) {
             base(h);
-            this.c_d = { 0.5 * h, h };
         }
 
         /**
@@ -119,70 +145,74 @@ namespace Simulations {
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            model.qUpdate(c_d[0]);
-            model.pUpdate(c_d[1]);
-            model.qUpdate(c_d[0]);
+            base2(model, 1.0);
         }
     }
 
     /**
      * Fourth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
      */
-    public class SuzukiVerlet : Symplectic {
+    public class FourthOrder : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public SuzukiVerlet (double h) {
+        public FourthOrder (double h) {
             base(h);
-            var rt3 = pow(4.0, (1.0 / 3.0));
-            this.c_d = { h / (4.0 - rt3), - h * rt3 / (4.0 - rt3) };
         }
 
         /**
          * 4th order integration step
          *
-         * Performs the following calls on {@link IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(0.5 * h * theta)
-         * pUpdate(h * theta)
-         * qUpdate(0.5 * h * (1.0 - theta))
-         * pUpdate(h * (1.0 - 2.0 * theta))
-         * qUpdate(0.5 * h * (1.0 - theta))
-         * pUpdate(h * theta)
-         * qUpdate(0.5 * h * theta)
-         * }}}
-         *
-         * where h is the time step, and
-         *
-         * {{{
-         * theta = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)))
-         * }}}
+         * @see Symplectic.step
+         */
+        public override void step (IModel model) {
+            base4(model, 1.0);
+        }
+    }
+
+    public class SixthOrder : Symplectic {
+
+        /**
+         * {@inheritDoc}
+         * @see Symplectic.Symplectic
+         */
+        public SixthOrder (double h) {
+            base(h);
+        }
+
+        /**
+         * 6th order integration step
          *
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            model.qUpdate(c_d[0] * 0.5);
-            model.pUpdate(c_d[0]);
-            model.qUpdate(c_d[0] * 0.5);
+            base6(model, 1.0);
+        }
+    }
 
-            model.qUpdate(c_d[0] * 0.5);
-            model.pUpdate(c_d[0]);
-            model.qUpdate(c_d[0] * 0.5);
+    public class EightthOrder : Symplectic {
 
-            model.qUpdate(c_d[1] * 0.5);
-            model.pUpdate(c_d[1]);
-            model.qUpdate(c_d[1] * 0.5);
+        /**
+         * {@inheritDoc}
+         * @see Symplectic.Symplectic
+         */
+        public EightthOrder (double h) {
+            base(h);
+        }
 
-            model.qUpdate(c_d[0] * 0.5);
-            model.pUpdate(c_d[0]);
-            model.qUpdate(c_d[0] * 0.5);
-
-            model.qUpdate(c_d[0] * 0.5);
-            model.pUpdate(c_d[0]);
-            model.qUpdate(c_d[0] * 0.5);
+        /**
+         * 6th order integration step
+         *
+         * @see Symplectic.step
+         */
+        public override void step (IModel model) {
+            this.base6(model, x[0]);
+            this.base6(model, x[0]);
+            this.base6(model, x[1]);
+            this.base6(model, x[0]);
+            this.base6(model, x[0]);
         }
     }
 
@@ -190,9 +220,11 @@ namespace Simulations {
      * Static factory for producing subclass instances from its type argument according to the following table:
      *
      * || ''type'' || ''Subclass'' ||  ''Description'' ||
-     * || "sb1" || {@link EulerCromer} || 1st Order, Symplectic ||
-     * || "sb2" || {@link StormerVerlet} || 2nd Order, Symplectic, Reversible ||
-     * || "sb4" || {@link SuzukiVerlet} || 4th Order, Symplectic, Reversible ||
+     * || "sb1" || {@link FirstOrder} || 1st Order, Symplectic ||
+     * || "sb2" || {@link SecondOrder} || 2nd Order, Symplectic, Reversible ||
+     * || "sb4" || {@link FourthOrder} || 4th Order, Symplectic, Reversible ||
+     * || "sb6" || {@link SixthOrder} || 6th Order, Symplectic, Reversible ||
+     * || "sb8" || {@link EightthOrder} || 8th Order, Symplectic, Reversible ||
      *
      * @param h the time step
      * @param type the selected implementation
@@ -203,13 +235,19 @@ namespace Simulations {
         switch (type) {
             case "sb1":
                 stderr.printf("1st Order Symplectic Integrator\n");
-                return new EulerCromer(h);
+                return new FirstOrder(h);
             case "sb2":
                 stderr.printf("2nd Order Symplectic Integrator\n");
-                return new StormerVerlet(h);
+                return new SecondOrder(h);
             case "sb4":
                 stderr.printf("4th Order Symplectic Integrator\n");
-                return new SuzukiVerlet(h);
+                return new FourthOrder(h);
+            case "sb6":
+                stderr.printf("6th Order Symplectic Integrator\n");
+                return new SixthOrder(h);
+            case "sb8":
+                stderr.printf("8th Order Symplectic Integrator\n");
+                return new EightthOrder(h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);
         assert_not_reached();

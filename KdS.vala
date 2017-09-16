@@ -35,7 +35,7 @@ namespace Simulations {
         if ("Simulate" in executable) {
             var o = getJson().get_object_member("IC");
             var type = o.get_string_member("integrator");
-            if (("sb1" == type) || ("sb2" == type) || ("sb4" == type)) {
+            if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 if (o.has_member("Lfac")) {
                     new Newton(o.get_double_member("Lfac"),
                                o.get_double_member("r0")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
@@ -87,7 +87,7 @@ namespace Simulations {
                                                                                o.get_int_member("plotratio"));
                 }
             } else {
-                stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 ], found {%s}\n", type);
+                stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);
                 assert_not_reached();
             }
         } else if ("GenParticle" in executable) {

@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy
+#!/usr/bin/env python
 """
 Copyright (c) 2014, 2015, 2016, 2017, Ian Smith (m4r35n357)
 All rights reserved.
