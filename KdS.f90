@@ -26,12 +26,16 @@ program KdS
     call init_vars()
     select case (integrator)
         case ("sb2")
+            write (0, *) "Fortran Second order"
             call solve(second_order)
         case ("sb4")
+            write (0, *) "Fortran Fourth order"
             call solve(fourth_order)
         case ("sb6")
+            write (0, *) "Fortran Sixth order"
             call solve(sixth_order)
         case ("sb8")
+            write (0, *) "Fortran Eightth order"
             call solve(eightth_order)
         case default
             write (0, *) "Invalid integrator method"

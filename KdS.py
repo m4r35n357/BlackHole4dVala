@@ -19,37 +19,72 @@ from sys import stdin, stderr, argv
 
 class Symplectic(object):
     def __init__(self, h, order):
+        self.rt3 = 4.0**(1.0 / 3.0)
+        self.rt5 = 4.0**(1.0 / 5.0)
+        self.rt7 = 4.0**(1.0 / 7.0)
         self.h = h
         if order == 'sb1':
-            self.c_d = [h]
+            print >> stderr, "Python First order"
             self.step = self.euler_cromer
         elif order == 'sb2':
-            self.c_d = [0.5 * h, h]
-            self.step = self.stormer_verlet
+            print >> stderr, "Python Second order"
+            self.step = self.second_order
         elif order == 'sb4':
-            theta = 1.0 / (2.0 - 2.0 ** (1.0 / 3.0))
-            self.c_d = [0.5 * h * theta, h * theta, 0.5 * h * (1.0 - theta), h * (1.0 - 2.0 * theta)]
-            self.step = self.forest_ruth
+            print >> stderr, "Python Fourth order"
+            self.z = [1.0 / (4.0 - self.rt3), - self.rt3 / (4.0 - self.rt3)]
+            self.step = self.fourth_order
+        elif order == 'sb6':
+            print >> stderr, "Python Sixth order"
+            self.y = [1.0 / (4.0 - self.rt5), - self.rt5 / (4.0 - self.rt5)]
+            self.z = [1.0 / (4.0 - self.rt3), - self.rt3 / (4.0 - self.rt3)]
+            self.step = self.sixth_order
+        elif order == 'sb8':
+            print >> stderr, "Python Eightth order"
+            self.x = [1.0 / (4.0 - self.rt7), - self.rt7 / (4.0 - self.rt7)]
+            self.y = [1.0 / (4.0 - self.rt5), - self.rt5 / (4.0 - self.rt5)]
+            self.z = [1.0 / (4.0 - self.rt3), - self.rt3 / (4.0 - self.rt3)]
+            self.step = self.eightth_order
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
 
     def euler_cromer(self, model):
-        model.qUpdate(self.c_d[0])
-        model.pUpdate(self.c_d[0])
+        model.qUpdate(self.h)
+        model.pUpdate(self.h)
 
-    def stormer_verlet(self, model):
-        model.qUpdate(self.c_d[0])
-        model.pUpdate(self.c_d[1])
-        model.qUpdate(self.c_d[0])
+    def second_base(self, model, x, y, z):
+        model.qUpdate(self.h * x * y * z * 0.5)
+        model.pUpdate(self.h * x * y * z)
+        model.qUpdate(self.h * x * y * z * 0.5)
 
-    def forest_ruth(self, model):
-        model.qUpdate(self.c_d[0])
-        model.pUpdate(self.c_d[1])
-        model.qUpdate(self.c_d[2])
-        model.pUpdate(self.c_d[3])
-        model.qUpdate(self.c_d[2])
-        model.pUpdate(self.c_d[1])
-        model.qUpdate(self.c_d[0])
+    def second_order(self, model):
+        self.second_base(model, 1.0, 1.0, 1.0)
+
+    def fourth_base(self, model, x, y):
+        self.second_base(model, x, y, self.z[0])
+        self.second_base(model, x, y, self.z[0])
+        self.second_base(model, x, y, self.z[1])
+        self.second_base(model, x, y, self.z[0])
+        self.second_base(model, x, y, self.z[0])
+
+    def fourth_order(self, model):
+        self.fourth_base(model, 1.0, 1.0)
+
+    def sixth_base(self, model, x):
+        self.fourth_base(model, x, self.y[0])
+        self.fourth_base(model, x, self.y[0])
+        self.fourth_base(model, x, self.y[1])
+        self.fourth_base(model, x, self.y[0])
+        self.fourth_base(model, x, self.y[0])
+
+    def sixth_order(self, model):
+        self.sixth_base(model, 1.0)
+
+    def eightth_order(self, model):
+        self.sixth_base(model, self.x[0])
+        self.sixth_base(model, self.x[0])
+        self.sixth_base(model, self.x[1])
+        self.sixth_base(model, self.x[0])
+        self.sixth_base(model, self.x[0])
 
 
 class BhSymp(object):
