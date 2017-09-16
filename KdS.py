@@ -98,44 +98,44 @@ class BhSymp(object):
         self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
         self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
 
-    def euler_cromer(self, model):
-        model.qUpdate(self.h)
-        model.pUpdate(self.h)
+    def euler_cromer(self):
+        self.qUpdate(self.h)
+        self.pUpdate(self.h)
 
-    def second_base(self, model, x, y, z):
-        model.qUpdate(self.h * x * y * z * 0.5)
-        model.pUpdate(self.h * x * y * z)
-        model.qUpdate(self.h * x * y * z * 0.5)
+    def second_base(self, x, y, z):
+        self.qUpdate(self.h * x * y * z * 0.5)
+        self.pUpdate(self.h * x * y * z)
+        self.qUpdate(self.h * x * y * z * 0.5)
 
-    def second_order(self, model):
-        self.second_base(model, 1.0, 1.0, 1.0)
+    def second_order(self):
+        self.second_base(1.0, 1.0, 1.0)
 
-    def fourth_base(self, model, x, y):
-        self.second_base(model, x, y, self.z[0])
-        self.second_base(model, x, y, self.z[0])
-        self.second_base(model, x, y, self.z[1])
-        self.second_base(model, x, y, self.z[0])
-        self.second_base(model, x, y, self.z[0])
+    def fourth_base(self, x, y):
+        self.second_base(x, y, self.z[0])
+        self.second_base(x, y, self.z[0])
+        self.second_base(x, y, self.z[1])
+        self.second_base(x, y, self.z[0])
+        self.second_base(x, y, self.z[0])
 
-    def fourth_order(self, model):
-        self.fourth_base(model, 1.0, 1.0)
+    def fourth_order(self):
+        self.fourth_base(1.0, 1.0)
 
-    def sixth_base(self, model, x):
-        self.fourth_base(model, x, self.y[0])
-        self.fourth_base(model, x, self.y[0])
-        self.fourth_base(model, x, self.y[1])
-        self.fourth_base(model, x, self.y[0])
-        self.fourth_base(model, x, self.y[0])
+    def sixth_base(self, x):
+        self.fourth_base(x, self.y[0])
+        self.fourth_base(x, self.y[0])
+        self.fourth_base(x, self.y[1])
+        self.fourth_base(x, self.y[0])
+        self.fourth_base(x, self.y[0])
 
-    def sixth_order(self, model):
-        self.sixth_base(model, 1.0)
+    def sixth_order(self):
+        self.sixth_base(1.0)
 
-    def eightth_order(self, model):
-        self.sixth_base(model, self.x[0])
-        self.sixth_base(model, self.x[0])
-        self.sixth_base(model, self.x[1])
-        self.sixth_base(model, self.x[0])
-        self.sixth_base(model, self.x[0])
+    def eightth_order(self):
+        self.sixth_base(self.x[0])
+        self.sixth_base(self.x[0])
+        self.sixth_base(self.x[1])
+        self.sixth_base(self.x[0])
+        self.sixth_base(self.x[0])
 
     def solve(self, start, end, tr):
         mino = tau = 0.0
@@ -147,7 +147,7 @@ class BhSymp(object):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
-            self.integrator(self)
+            self.integrator()
             i += 1
             mino = self.h * i
             tau += self.h * self.S
