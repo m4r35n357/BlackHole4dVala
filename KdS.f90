@@ -106,37 +106,37 @@ contains
         call pUpdate(step)
     end subroutine first_order
 
-    subroutine second_base(x, y, z)
-        real(16), intent(in) :: x, y, z
-        call qUpdate(step * x * y * z * D05)
-        call pUpdate(step * x * y * z)
-        call qUpdate(step * x * y * z * D05)
+    subroutine second_base(s)
+        real(16), intent(in) :: s
+        call qUpdate(step * s * D05)
+        call pUpdate(step * s)
+        call qUpdate(step * s * D05)
     end subroutine second_base
 
     subroutine second_order()
-        call second_base(D1, D1, D1)
+        call second_base(D1)
     end subroutine second_order
 
-    subroutine fourth_base(x, y)
-        real(16), intent(in) :: x, y
-        call second_base(x, y, z1)
-        call second_base(x, y, z1)
-        call second_base(x, y, z3)
-        call second_base(x, y, z1)
-        call second_base(x, y, z1)
+    subroutine fourth_base(s)
+        real(16), intent(in) :: s
+        call second_base(s * z1)
+        call second_base(s * z1)
+        call second_base(s * z3)
+        call second_base(s * z1)
+        call second_base(s * z1)
     end subroutine fourth_base
 
     subroutine fourth_order()
-        call fourth_base(D1, D1)
+        call fourth_base(D1)
     end subroutine fourth_order
 
-    subroutine sixth_base(x)
-        real(16), intent(in) :: x
-        call fourth_base(x, y1)
-        call fourth_base(x, y1)
-        call fourth_base(x, y3)
-        call fourth_base(x, y1)
-        call fourth_base(x, y1)
+    subroutine sixth_base(s)
+        real(16), intent(in) :: s
+        call fourth_base(s * y1)
+        call fourth_base(s * y1)
+        call fourth_base(s * y3)
+        call fourth_base(s * y1)
+        call fourth_base(s * y1)
     end subroutine sixth_base
 
     subroutine sixth_order()

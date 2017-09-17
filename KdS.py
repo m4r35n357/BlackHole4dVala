@@ -38,12 +38,12 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
         self.cross = xh
-        self.rt3 = 4.0**(1.0 / 3.0)
-        self.rt5 = 4.0**(1.0 / 5.0)
-        self.rt7 = 4.0**(1.0 / 7.0)
-        self.x = [1.0 / (4.0 - self.rt7), - self.rt7 / (4.0 - self.rt7)]
-        self.y = [1.0 / (4.0 - self.rt5), - self.rt5 / (4.0 - self.rt5)]
-        self.z = [1.0 / (4.0 - self.rt3), - self.rt3 / (4.0 - self.rt3)]
+        rt3 = 4.0**(1.0 / 3.0)
+        rt5 = 4.0**(1.0 / 5.0)
+        rt7 = 4.0**(1.0 / 7.0)
+        self.x = [1.0 / (4.0 - rt7), - rt7 / (4.0 - rt7)]
+        self.y = [1.0 / (4.0 - rt5), - rt5 / (4.0 - rt5)]
+        self.z = [1.0 / (4.0 - rt3), - rt3 / (4.0 - rt3)]
         self.h = h
         if order == 'sb1':
             print >> stderr, "Python First order"
@@ -102,30 +102,30 @@ class BhSymp(object):
         self.qUpdate(self.h)
         self.pUpdate(self.h)
 
-    def second_base(self, x, y, z):
-        self.qUpdate(self.h * x * y * z * 0.5)
-        self.pUpdate(self.h * x * y * z)
-        self.qUpdate(self.h * x * y * z * 0.5)
+    def second_base(self, s):
+        self.qUpdate(self.h * s * 0.5)
+        self.pUpdate(self.h * s)
+        self.qUpdate(self.h * s * 0.5)
 
     def second_order(self):
-        self.second_base(1.0, 1.0, 1.0)
+        self.second_base(1.0)
 
-    def fourth_base(self, x, y):
-        self.second_base(x, y, self.z[0])
-        self.second_base(x, y, self.z[0])
-        self.second_base(x, y, self.z[1])
-        self.second_base(x, y, self.z[0])
-        self.second_base(x, y, self.z[0])
+    def fourth_base(self, s):
+        self.second_base(s * self.z[0])
+        self.second_base(s * self.z[0])
+        self.second_base(s * self.z[1])
+        self.second_base(s * self.z[0])
+        self.second_base(s * self.z[0])
 
     def fourth_order(self):
-        self.fourth_base(1.0, 1.0)
+        self.fourth_base(1.0)
 
-    def sixth_base(self, x):
-        self.fourth_base(x, self.y[0])
-        self.fourth_base(x, self.y[0])
-        self.fourth_base(x, self.y[1])
-        self.fourth_base(x, self.y[0])
-        self.fourth_base(x, self.y[0])
+    def sixth_base(self, s):
+        self.fourth_base(s * self.y[0])
+        self.fourth_base(s * self.y[0])
+        self.fourth_base(s * self.y[1])
+        self.fourth_base(s * self.y[0])
+        self.fourth_base(s * self.y[0])
 
     def sixth_order(self):
         self.sixth_base(1.0)
