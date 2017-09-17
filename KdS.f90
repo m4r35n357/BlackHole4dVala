@@ -13,10 +13,9 @@
 program KdS
     implicit none
     real(16), parameter :: D0 = 0.0_16, D05 = 0.5_16, D1 = 1.0_16, D2 = 2.0_16, D3 = 3.0_16, D4 = 4.0_16, D5 = 5.0_16, D7 = 7.0_16 ! CONSTANTS
-    real(16), parameter :: rt3 = D4**(D1 / D3), rt5 = D4**(D1 / D5), rt7 = D4**(D1 / D7), pi = acos(-D1)
-    real(16), parameter :: x1 = D1 / (D4 - rt7), x3 = - rt7 / (D4 - rt7),&
-                           y1 = D1 / (D4 - rt5), y3 = - rt5 / (D4 - rt5),&
-                           z1 = D1 / (D4 - rt3), z3 = - rt3 / (D4 - rt3)
+    real(16), parameter :: rt7 = D4**(D1 / D7), x1 = D1 / (D4 - rt7), x3 = - rt7 / (D4 - rt7),&
+                           rt5 = D4**(D1 / D5), y1 = D1 / (D4 - rt5), y3 = - rt5 / (D4 - rt5),&
+                           rt3 = D4**(D1 / D3), z1 = D1 / (D4 - rt3), z3 = - rt3 / (D4 - rt3), pi = acos(-D1)
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
     logical :: cross
@@ -106,49 +105,49 @@ contains
         call pUpdate(step)
     end subroutine first_order
 
-    subroutine second_base(s)
+    subroutine base2(s)
         real(16), intent(in) :: s
         call qUpdate(step * s * D05)
         call pUpdate(step * s)
         call qUpdate(step * s * D05)
-    end subroutine second_base
+    end subroutine base2
 
     subroutine second_order()
-        call second_base(D1)
+        call base2(D1)
     end subroutine second_order
 
-    subroutine fourth_base(s)
+    subroutine base4(s)
         real(16), intent(in) :: s
-        call second_base(s * z1)
-        call second_base(s * z1)
-        call second_base(s * z3)
-        call second_base(s * z1)
-        call second_base(s * z1)
-    end subroutine fourth_base
+        call base2(s * z1)
+        call base2(s * z1)
+        call base2(s * z3)
+        call base2(s * z1)
+        call base2(s * z1)
+    end subroutine base4
 
     subroutine fourth_order()
-        call fourth_base(D1)
+        call base4(D1)
     end subroutine fourth_order
 
-    subroutine sixth_base(s)
+    subroutine base6(s)
         real(16), intent(in) :: s
-        call fourth_base(s * y1)
-        call fourth_base(s * y1)
-        call fourth_base(s * y3)
-        call fourth_base(s * y1)
-        call fourth_base(s * y1)
-    end subroutine sixth_base
+        call base4(s * y1)
+        call base4(s * y1)
+        call base4(s * y3)
+        call base4(s * y1)
+        call base4(s * y1)
+    end subroutine base6
 
     subroutine sixth_order()
-        call sixth_base(D1)
+        call base6(D1)
     end subroutine sixth_order
 
     subroutine eightth_order()
-        call sixth_base(x1)
-        call sixth_base(x1)
-        call sixth_base(x3)
-        call sixth_base(x1)
-        call sixth_base(x1)
+        call base6(x1)
+        call base6(x1)
+        call base6(x3)
+        call base6(x1)
+        call base6(x1)
     end subroutine eightth_order
 
     subroutine solve(method)

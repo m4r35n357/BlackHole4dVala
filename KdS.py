@@ -102,40 +102,40 @@ class BhSymp(object):
         self.qUpdate(self.h)
         self.pUpdate(self.h)
 
-    def second_base(self, s):
+    def base2(self, s):
         self.qUpdate(self.h * s * 0.5)
         self.pUpdate(self.h * s)
         self.qUpdate(self.h * s * 0.5)
 
     def second_order(self):
-        self.second_base(1.0)
+        self.base2(1.0)
 
-    def fourth_base(self, s):
-        self.second_base(s * self.z[0])
-        self.second_base(s * self.z[0])
-        self.second_base(s * self.z[1])
-        self.second_base(s * self.z[0])
-        self.second_base(s * self.z[0])
+    def base4(self, s):
+        self.base2(s * self.z[0])
+        self.base2(s * self.z[0])
+        self.base2(s * self.z[1])
+        self.base2(s * self.z[0])
+        self.base2(s * self.z[0])
 
     def fourth_order(self):
-        self.fourth_base(1.0)
+        self.base4(1.0)
 
-    def sixth_base(self, s):
-        self.fourth_base(s * self.y[0])
-        self.fourth_base(s * self.y[0])
-        self.fourth_base(s * self.y[1])
-        self.fourth_base(s * self.y[0])
-        self.fourth_base(s * self.y[0])
+    def base6(self, s):
+        self.base4(s * self.y[0])
+        self.base4(s * self.y[0])
+        self.base4(s * self.y[1])
+        self.base4(s * self.y[0])
+        self.base4(s * self.y[0])
 
     def sixth_order(self):
-        self.sixth_base(1.0)
+        self.base6(1.0)
 
     def eightth_order(self):
-        self.sixth_base(self.x[0])
-        self.sixth_base(self.x[0])
-        self.sixth_base(self.x[1])
-        self.sixth_base(self.x[0])
-        self.sixth_base(self.x[0])
+        self.base6(self.x[0])
+        self.base6(self.x[0])
+        self.base6(self.x[1])
+        self.base6(self.x[0])
+        self.base6(self.x[0])
 
     def solve(self, start, end, tr):
         mino = tau = 0.0
