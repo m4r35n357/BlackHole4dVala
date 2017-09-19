@@ -13,9 +13,9 @@
 program KdS
     implicit none
     real(16), parameter :: D0 = 0.0_16, D05 = 0.5_16, D1 = 1.0_16, D2 = 2.0_16, D3 = 3.0_16, D4 = 4.0_16, D5 = 5.0_16, D7 = 7.0_16 ! CONSTANTS
-    real(16), parameter :: rt7 = D4**(D1 / D7), x1 = D1 / (D4 - rt7), x3 = - rt7 / (D4 - rt7),&
-                           rt5 = D4**(D1 / D5), y1 = D1 / (D4 - rt5), y3 = - rt5 / (D4 - rt5),&
-                           rt3 = D4**(D1 / D3), z1 = D1 / (D4 - rt3), z3 = - rt3 / (D4 - rt3), pi = acos(-D1)
+    real(16), parameter :: x1 = D1 / (D4 - D4**(D1 / D7)), x3 = D1 - D4 * x1,&
+                           y1 = D1 / (D4 - D4**(D1 / D5)), y3 = D1 - D4 * y1,&
+                           z1 = D1 / (D4 - D4**(D1 / D3)), z3 = D1 - D4 * z1, pi = acos(-D1)
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
     integer :: plotratio
     logical :: cross

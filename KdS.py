@@ -38,12 +38,12 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
         self.cross = xh
-        rt3 = 4.0**(1.0 / 3.0)
-        rt5 = 4.0**(1.0 / 5.0)
-        rt7 = 4.0**(1.0 / 7.0)
-        self.x = [1.0 / (4.0 - rt7), - rt7 / (4.0 - rt7)]
-        self.y = [1.0 / (4.0 - rt5), - rt5 / (4.0 - rt5)]
-        self.z = [1.0 / (4.0 - rt3), - rt3 / (4.0 - rt3)]
+        self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
+        self.y1 = 1.0 / (4.0 - 4.0**(1.0 / 5.0))
+        self.z1 = 1.0 / (4.0 - 4.0**(1.0 / 3.0))
+        self.x3 = 1.0 - 4.0 * self.x1
+        self.y3 = 1.0 - 4.0 * self.y1
+        self.z3 = 1.0 - 4.0 * self.z1
         self.h = h
         if order == 'sb1':
             print >> stderr, "Python First order"
@@ -111,31 +111,31 @@ class BhSymp(object):
         self.base2(1.0)
 
     def base4(self, s):
-        self.base2(s * self.z[0])
-        self.base2(s * self.z[0])
-        self.base2(s * self.z[1])
-        self.base2(s * self.z[0])
-        self.base2(s * self.z[0])
+        self.base2(s * self.z1)
+        self.base2(s * self.z1)
+        self.base2(s * self.z3)
+        self.base2(s * self.z1)
+        self.base2(s * self.z1)
 
     def fourth_order(self):
         self.base4(1.0)
 
     def base6(self, s):
-        self.base4(s * self.y[0])
-        self.base4(s * self.y[0])
-        self.base4(s * self.y[1])
-        self.base4(s * self.y[0])
-        self.base4(s * self.y[0])
+        self.base4(s * self.y1)
+        self.base4(s * self.y1)
+        self.base4(s * self.y3)
+        self.base4(s * self.y1)
+        self.base4(s * self.y1)
 
     def sixth_order(self):
         self.base6(1.0)
 
     def eightth_order(self):
-        self.base6(self.x[0])
-        self.base6(self.x[0])
-        self.base6(self.x[1])
-        self.base6(self.x[0])
-        self.base6(self.x[0])
+        self.base6(self.x1)
+        self.base6(self.x1)
+        self.base6(self.x3)
+        self.base6(self.x1)
+        self.base6(self.x1)
 
     def solve(self, start, end, tr):
         mino = tau = 0.0
