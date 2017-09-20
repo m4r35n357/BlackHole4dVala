@@ -24,14 +24,17 @@ namespace Simulations {
         /**
          * Simulation time step, defined at subclass construction
          */
-        private double h;
+        protected double h;
 
         /**
          * Suzuki composition coefficients
          */
-        protected double[] x;
-        protected double[] y;
-        protected double[] z;
+        protected double x1;
+        protected double y1;
+        protected double z1;
+        protected double x3;
+        protected double y3;
+        protected double z3;
 
         /**
          * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
@@ -40,12 +43,12 @@ namespace Simulations {
          */
         protected Symplectic (double h) {
             this.h = h;
-            var rt3 = pow(4.0, (1.0 / 3.0));
-            var rt5 = pow(4.0, (1.0 / 5.0));
-            var rt7 = pow(4.0, (1.0 / 7.0));
-            this.x = { 1.0 / (4.0 - rt7), - rt7 / (4.0 - rt7) };
-            this.y = { 1.0 / (4.0 - rt5), - rt5 / (4.0 - rt5) };
-            this.z = { 1.0 / (4.0 - rt3), - rt3 / (4.0 - rt3) };
+            x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+            y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
+            x3 = 1.0 - 4.0 * x1;
+            y3 = 1.0 - 4.0 * y1;
+            z3 = 1.0 - 4.0 * z1;
         }
 
         protected void base2 (IModel model, double s) {
@@ -55,21 +58,28 @@ namespace Simulations {
         }
 
         protected void base4 (IModel model, double s) {
-            this.base2(model, s * z[0]);
-            this.base2(model, s * z[0]);
-            this.base2(model, s * z[1]);
-            this.base2(model, s * z[0]);
-            this.base2(model, s * z[0]);
+            base2(model, s * z1);
+            base2(model, s * z1);
+            base2(model, s * z3);
+            base2(model, s * z1);
+            base2(model, s * z1);
         }
 
         protected void base6 (IModel model, double s) {
-            this.base4(model, s * y[0]);
-            this.base4(model, s * y[0]);
-            this.base4(model, s * y[1]);
-            this.base4(model, s * y[0]);
-            this.base4(model, s * y[0]);
+            base4(model, s * y1);
+            base4(model, s * y1);
+            base4(model, s * y3);
+            base4(model, s * y1);
+            base4(model, s * y1);
         }
 
+        protected void base8 (IModel model, double s) {
+            base6(model, s * x1);
+            base6(model, s * x1);
+            base6(model, s * x3);
+            base6(model, s * x1);
+            base6(model, s * x1);
+        }
         /**
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
          * methods.
@@ -113,8 +123,8 @@ namespace Simulations {
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            model.qUpdate(1.0);
-            model.pUpdate(1.0);
+            model.qUpdate(h);
+            model.pUpdate(h);
         }
     }
 
@@ -208,11 +218,7 @@ namespace Simulations {
          * @see Symplectic.step
          */
         public override void step (IModel model) {
-            this.base6(model, x[0]);
-            this.base6(model, x[0]);
-            this.base6(model, x[1]);
-            this.base6(model, x[0]);
-            this.base6(model, x[0]);
+            base8(model, 1.0);
         }
     }
 
