@@ -59,7 +59,7 @@ export exe='./Simulate'
 export exe='./KdS.py'
 export exe='nc.openbsd pi 1234'
 
-$exe <$ic | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
+$exe <$ic | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
 
 $exe <$ic | finterp.py tau 0.5 | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
 

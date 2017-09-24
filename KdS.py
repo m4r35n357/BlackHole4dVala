@@ -18,8 +18,79 @@ from math import sin, pi, cos, sqrt
 from sys import stdin, stderr, argv
 
 
+class Symplectic(object):
+    def __init__(self, model, h, order):
+        self.h = h
+        self.model = model
+        self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
+        self.y1 = 1.0 / (4.0 - 4.0**(1.0 / 5.0))
+        self.z1 = 1.0 / (4.0 - 4.0**(1.0 / 3.0))
+        self.x3 = 1.0 - 4.0 * self.x1
+        self.y3 = 1.0 - 4.0 * self.y1
+        self.z3 = 1.0 - 4.0 * self.z1
+        if order == 'sb1':
+            print >> stderr, "Python First order"
+            self.integrator = self.euler_cromer
+        elif order == 'sb2':
+            print >> stderr, "Python Second order"
+            self.integrator = self.second_order
+        elif order == 'sb4':
+            print >> stderr, "Python Fourth order"
+            self.integrator = self.fourth_order
+        elif order == 'sb6':
+            print >> stderr, "Python Sixth order"
+            self.integrator = self.sixth_order
+        elif order == 'sb8':
+            print >> stderr, "Python Eightth order"
+            self.integrator = self.eightth_order
+        else:
+            raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
+
+    def euler_cromer(self):
+        self.model.qUpdate(self.h)
+        self.model.pUpdate(self.h)
+
+    def base2(self, s):
+        self.model.qUpdate(self.h * s * 0.5)
+        self.model.pUpdate(self.h * s)
+        self.model.qUpdate(self.h * s * 0.5)
+
+    def second_order(self):
+        self.base2(1.0)
+
+    def base4(self, s):
+        self.base2(s * self.z1)
+        self.base2(s * self.z1)
+        self.base2(s * self.z3)
+        self.base2(s * self.z1)
+        self.base2(s * self.z1)
+
+    def fourth_order(self):
+        self.base4(1.0)
+
+    def base6(self, s):
+        self.base4(s * self.y1)
+        self.base4(s * self.y1)
+        self.base4(s * self.y3)
+        self.base4(s * self.y1)
+        self.base4(s * self.y1)
+
+    def sixth_order(self):
+        self.base6(1.0)
+
+    def base8(self, s):
+        self.base6(s * self.x1)
+        self.base6(s * self.x1)
+        self.base6(s * self.x3)
+        self.base6(s * self.x1)
+        self.base6(s * self.x1)
+
+    def eightth_order(self):
+        self.base8(1.0)
+
+
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh, h, order):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh, h):
         self.l_3 = Lambda / 3.0
         self.a = a
         self.mu2 = mu2
@@ -38,30 +109,7 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
         self.cross = xh
-        self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
-        self.y1 = 1.0 / (4.0 - 4.0**(1.0 / 5.0))
-        self.z1 = 1.0 / (4.0 - 4.0**(1.0 / 3.0))
-        self.x3 = 1.0 - 4.0 * self.x1
-        self.y3 = 1.0 - 4.0 * self.y1
-        self.z3 = 1.0 - 4.0 * self.z1
         self.h = h
-        if order == 'sb1':
-            print >> stderr, "Python First order"
-            self.integrator = self.euler_cromer
-        elif order == 'sb2':
-            print >> stderr, "Python Second order"
-            self.integrator = self.second_order
-        elif order == 'sb4':
-            print >> stderr, "Python Fourth order"
-            self.integrator = self.fourth_order
-        elif order == 'sb6':
-            print >> stderr, "Python Sixth order"
-            self.integrator = self.sixth_order
-        elif order == 'sb8':
-            print >> stderr, "Python Eightth order"
-            self.integrator = self.eightth_order
-        else:
-            raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
 
     def refresh(self):
         self.r2 = self.r**2
@@ -98,46 +146,7 @@ class BhSymp(object):
         self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
         self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
 
-    def euler_cromer(self):
-        self.qUpdate(self.h)
-        self.pUpdate(self.h)
-
-    def base2(self, s):
-        self.qUpdate(self.h * s * 0.5)
-        self.pUpdate(self.h * s)
-        self.qUpdate(self.h * s * 0.5)
-
-    def second_order(self):
-        self.base2(1.0)
-
-    def base4(self, s):
-        self.base2(s * self.z1)
-        self.base2(s * self.z1)
-        self.base2(s * self.z3)
-        self.base2(s * self.z1)
-        self.base2(s * self.z1)
-
-    def fourth_order(self):
-        self.base4(1.0)
-
-    def base6(self, s):
-        self.base4(s * self.y1)
-        self.base4(s * self.y1)
-        self.base4(s * self.y3)
-        self.base4(s * self.y1)
-        self.base4(s * self.y1)
-
-    def sixth_order(self):
-        self.base6(1.0)
-
-    def eightth_order(self):
-        self.base6(self.x1)
-        self.base6(self.x1)
-        self.base6(self.x3)
-        self.base6(self.x1)
-        self.base6(self.x1)
-
-    def solve(self, start, end, tr):
+    def solve(self, integrator, start, end, tr):
         mino = tau = 0.0
         i = plotCount = 0
         self.refresh()
@@ -147,7 +156,7 @@ class BhSymp(object):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
-            self.integrator()
+            integrator()
             i += 1
             mino = self.h * i
             tau += self.h * self.S
@@ -167,7 +176,7 @@ if __name__ == "__main__":
     input_data = stdin.read()
     ic = loads(input_data)['IC']
     print >> stderr, input_data
-    BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'], ic['step'], ic['integrator']).solve(
-        ic['start'], ic['end'], ic['plotratio'])
+    bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'], ic['step'])
+    bh.solve(Symplectic(bh, ic['step'], ic['integrator']).integrator, ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"
