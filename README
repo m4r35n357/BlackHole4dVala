@@ -27,11 +27,11 @@ export icdata=icgen-data.json
 export ic=initial-conditions.json
 export data=/tmp/data
 export pot=/tmp/potential
+export icgen=./GenParticle
 
 
 2.	Create an initial conditions generator data file
 
-export icgen=./GenParticle
 cp icgenParticle-data.example $icdata
 
 export icgen=./GenLight

@@ -40,7 +40,7 @@ echo ""
 echo $C"Compiling Fortran . . ."$NC
 gfortran -Jobj/Release/ -Wall -O2 -fimplicit-none \
 	-c KdS.f90 -o obj/Release/main.o
-gfortran -o bin/Release/KerrDeSitter obj/Release/main.o -s  
+gfortran -static -o bin/Release/KerrDeSitter obj/Release/main.o -s  
 echo ""
 
 # strip executables
