@@ -88,7 +88,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.step(this);
+                integrator.step();
                 i += 1;
                 t = i * h;
             }

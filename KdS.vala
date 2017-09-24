@@ -37,24 +37,25 @@ namespace Simulations {
             var type = o.get_string_member("integrator");
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 if (o.has_member("Lfac")) {
-                    new Newton(o.get_double_member("Lfac"),
-                               o.get_double_member("r0")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
-                                                                o.get_double_member("start"),
-                                                                o.get_double_member("end"),
-                                                                o.get_int_member("plotratio"));
+                    var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
+                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
+                                                                 o.get_double_member("start"),
+                                                                 o.get_double_member("end"),
+                                                                 o.get_int_member("plotratio"));
                 } else if (o.has_member("a")) {
-                    new BhSymp(o.get_double_member("lambda"),
-                                o.get_double_member("a"),
-                                o.get_double_member("mu"),
-                                o.get_double_member("E"),
-                                o.get_double_member("L"),
-                                o.get_double_member("Q"),
-                                o.get_double_member("r0"),
-                                o.get_double_member("th0"),
-                                o.get_boolean_member("cross")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
-                                                                                              o.get_double_member("start"),
-                                                                                              o.get_double_member("end"),
-                                                                                              o.get_int_member("plotratio"));
+                    var model = new BhSymp(o.get_double_member("lambda"),
+                                           o.get_double_member("a"),
+                                           o.get_double_member("mu"),
+                                           o.get_double_member("E"),
+                                           o.get_double_member("L"),
+                                           o.get_double_member("Q"),
+                                           o.get_double_member("r0"),
+                                           o.get_double_member("th0"),
+                                           o.get_boolean_member("cross"));
+                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
+                                                                 o.get_double_member("start"),
+                                                                 o.get_double_member("end"),
+                                                                 o.get_int_member("plotratio"));
                 } else if (o.has_member("bodies")) {
                     Body[] bodies = {};
                     foreach (var node in o.get_array_member("bodies").get_elements()) {
@@ -80,11 +81,11 @@ namespace Simulations {
                             stderr.printf("Mixed use of momenta and velocity\n");
                         }
                     }
-                    new NBody(bodies, o.get_double_member("g"),
-                                      o.get_double_member("errorLimit")).solve(Simulations.getIntegrator(o.get_double_member("step"), type),
-                                                                               o.get_double_member("start"),
-                                                                               o.get_double_member("end"),
-                                                                               o.get_int_member("plotratio"));
+                    var model = new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
+                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
+                                                                 o.get_double_member("start"),
+                                                                 o.get_double_member("end"),
+                                                                 o.get_int_member("plotratio"));
                 }
             } else {
                 stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);

@@ -160,7 +160,7 @@ namespace Simulations {
                 if ((t > start) && (i % tr == 0)) {
                     output(t, hNow, h0, error);
                 }
-                integrator.step(this);
+                integrator.step();
                 i += 1;
                 t = i * ts;
             }

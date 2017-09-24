@@ -152,7 +152,7 @@ namespace Simulations {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;
                 }
-                integrator.step(this);
+                integrator.step();
                 i += 1;
                 mino = h * i;
                 tau += h * S;

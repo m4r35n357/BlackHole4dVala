@@ -22,6 +22,11 @@ namespace Simulations {
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
         /**
+         * The physical model, defined at subclass construction
+         */
+        protected IModel model;
+
+        /**
          * Simulation time step, defined at subclass construction
          */
         protected double h;
@@ -41,7 +46,8 @@ namespace Simulations {
          *
          * @param h the time step
          */
-        protected Symplectic (double h) {
+        protected Symplectic (IModel model, double h) {
+            this.model = model;
             this.h = h;
             x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
             y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
@@ -51,34 +57,54 @@ namespace Simulations {
             z3 = 1.0 - 4.0 * z1;
         }
 
-        protected void base2 (IModel model, double s) {
+        /**
+         * Stormer-Verlet base integrator.  Performs the following calls on {@link IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h/2)
+         * pUpdate(h)
+         * qUpdate(h/2)
+         * }}}
+         *
+         * where h is the time step.
+         */
+        protected void base2 (double s) {
             model.qUpdate(h * s * 0.5);
             model.pUpdate(h * s);
             model.qUpdate(h * s * 0.5);
         }
 
-        protected void base4 (IModel model, double s) {
-            base2(model, s * z1);
-            base2(model, s * z1);
-            base2(model, s * z3);
-            base2(model, s * z1);
-            base2(model, s * z1);
+        /**
+         * Suzuki composition from 2nd order to 4th order
+         */
+        protected void base4 (double s) {
+            base2(s * z1);
+            base2(s * z1);
+            base2(s * z3);
+            base2(s * z1);
+            base2(s * z1);
         }
 
-        protected void base6 (IModel model, double s) {
-            base4(model, s * y1);
-            base4(model, s * y1);
-            base4(model, s * y3);
-            base4(model, s * y1);
-            base4(model, s * y1);
+        /**
+         * Suzuki composition from 4th order to 6th order
+         */
+        protected void base6 (double s) {
+            base4(s * y1);
+            base4(s * y1);
+            base4(s * y3);
+            base4(s * y1);
+            base4(s * y1);
         }
 
-        protected void base8 (IModel model, double s) {
-            base6(model, s * x1);
-            base6(model, s * x1);
-            base6(model, s * x3);
-            base6(model, s * x1);
-            base6(model, s * x1);
+        /**
+         * Suzuki composition from 6th order to 8th order
+         */
+        protected void base8 (double s) {
+            base6(s * x1);
+            base6(s * x1);
+            base6(s * x3);
+            base6(s * x1);
+            base6(s * x1);
         }
         /**
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
@@ -86,7 +112,7 @@ namespace Simulations {
          *
          * @see ISymplectic.step
          */
-        protected abstract void step (IModel model);
+        protected abstract void step ();
 
         /**
          * {@inheritDoc}
@@ -106,8 +132,8 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public FirstOrder (double h) {
-            base(h);
+        public FirstOrder (IModel model, double h) {
+            base(model, h);
         }
 
         /**
@@ -122,7 +148,7 @@ namespace Simulations {
          *
          * @see Symplectic.step
          */
-        public override void step (IModel model) {
+        public override void step () {
             model.qUpdate(h);
             model.pUpdate(h);
         }
@@ -137,25 +163,17 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public SecondOrder (double h) {
-            base(h);
+        public SecondOrder (IModel model, double h) {
+            base(model, h);
         }
 
         /**
-         * 2nd order integration step  Performs the following calls on {@link IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(h/2)
-         * pUpdate(h)
-         * qUpdate(h/2)
-         * }}}
-         *
-         * where h is the time step.
+         * 2nd order integration step
          *
          * @see Symplectic.step
          */
-        public override void step (IModel model) {
-            base2(model, 1.0);
+        public override void step () {
+            base2(1.0);
         }
     }
 
@@ -168,8 +186,8 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public FourthOrder (double h) {
-            base(h);
+        public FourthOrder (IModel model, double h) {
+            base(model, h);
         }
 
         /**
@@ -177,19 +195,22 @@ namespace Simulations {
          *
          * @see Symplectic.step
          */
-        public override void step (IModel model) {
-            base4(model, 1.0);
+        public override void step () {
+            base4(1.0);
         }
     }
 
+    /**
+     * Sixth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     */
     public class SixthOrder : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public SixthOrder (double h) {
-            base(h);
+        public SixthOrder (IModel model, double h) {
+            base(model, h);
         }
 
         /**
@@ -197,28 +218,31 @@ namespace Simulations {
          *
          * @see Symplectic.step
          */
-        public override void step (IModel model) {
-            base6(model, 1.0);
+        public override void step () {
+            base6(1.0);
         }
     }
 
+    /**
+     * Eightth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     */
     public class EightthOrder : Symplectic {
 
         /**
          * {@inheritDoc}
          * @see Symplectic.Symplectic
          */
-        public EightthOrder (double h) {
-            base(h);
+        public EightthOrder (IModel model, double h) {
+            base(model, h);
         }
 
         /**
-         * 6th order integration step
+         * 8th order integration step
          *
          * @see Symplectic.step
          */
-        public override void step (IModel model) {
-            base8(model, 1.0);
+        public override void step () {
+            base8(1.0);
         }
     }
 
@@ -237,23 +261,23 @@ namespace Simulations {
      *
      * @return concrete implementation of a symplectic integrator
      */
-    public static ISymplectic getIntegrator (double h, string type) {
+    public static ISymplectic getIntegrator (IModel model, double h, string type) {
         switch (type) {
             case "sb1":
                 stderr.printf("1st Order Symplectic Integrator\n");
-                return new FirstOrder(h);
+                return new FirstOrder(model, h);
             case "sb2":
                 stderr.printf("2nd Order Symplectic Integrator\n");
-                return new SecondOrder(h);
+                return new SecondOrder(model, h);
             case "sb4":
                 stderr.printf("4th Order Symplectic Integrator\n");
-                return new FourthOrder(h);
+                return new FourthOrder(model, h);
             case "sb6":
                 stderr.printf("6th Order Symplectic Integrator\n");
-                return new SixthOrder(h);
+                return new SixthOrder(model, h);
             case "sb8":
                 stderr.printf("8th Order Symplectic Integrator\n");
-                return new EightthOrder(h);
+                return new EightthOrder(model, h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);
         assert_not_reached();

@@ -84,10 +84,8 @@ namespace Simulations {
     public interface ISymplectic : GLib.Object {
         /**
          * Should be called by {@link ISolver.solve} as needed, in turn calls {@link IModel.qUpdate} and {@link IModel.pUpdate}
-         *
-         * @param model class providing equations of motion for a separable hamiltonian problem
          */
-        public abstract void step (IModel model);
+        public abstract void step ();
 
         /**
          * Getter method for the time step.
