@@ -38,10 +38,11 @@ namespace Simulations {
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 if (o.has_member("Lfac")) {
                     var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
-                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
-                                                                 o.get_double_member("start"),
-                                                                 o.get_double_member("end"),
-                                                                 o.get_int_member("plotratio"));
+                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
+                    model.solve(integrator, o.get_double_member("step"),
+                                            o.get_double_member("start"),
+                                            o.get_double_member("end"),
+                                            o.get_int_member("plotratio"));
                 } else if (o.has_member("a")) {
                     var model = new BhSymp(o.get_double_member("lambda"),
                                            o.get_double_member("a"),
@@ -52,10 +53,11 @@ namespace Simulations {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
-                                                                 o.get_double_member("start"),
-                                                                 o.get_double_member("end"),
-                                                                 o.get_int_member("plotratio"));
+                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
+                    model.solve(integrator, o.get_double_member("step"),
+                                            o.get_double_member("start"),
+                                            o.get_double_member("end"),
+                                            o.get_int_member("plotratio"));
                 } else if (o.has_member("bodies")) {
                     Body[] bodies = {};
                     foreach (var node in o.get_array_member("bodies").get_elements()) {
@@ -82,10 +84,11 @@ namespace Simulations {
                         }
                     }
                     var model = new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
-                    model.solve(Simulations.getIntegrator(model, o.get_double_member("step"), type),
-                                                                 o.get_double_member("start"),
-                                                                 o.get_double_member("end"),
-                                                                 o.get_int_member("plotratio"));
+                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
+                    model.solve(integrator, o.get_double_member("step"),
+                                            o.get_double_member("start"),
+                                            o.get_double_member("end"),
+                                            o.get_int_member("plotratio"));
                 }
             } else {
                 stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);

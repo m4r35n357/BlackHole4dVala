@@ -148,8 +148,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (ISymplectic integrator, double start, double end, int64 tr) {
-            var ts = integrator.getH();
+        public int64[] solve (ISymplectic integrator, double step, double start, double end, int64 tr) {
             var h0 = h();
             int64 i = 0;
             double t = 0.0;
@@ -162,7 +161,7 @@ namespace Simulations {
                 }
                 integrator.step();
                 i += 1;
-                t = i * ts;
+                t = i * step;
             }
             return { i };
         }

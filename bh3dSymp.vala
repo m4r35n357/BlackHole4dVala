@@ -138,8 +138,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (ISymplectic integrator, double start, double end, int64 tr) {
-            var h = integrator.getH();
+        public int64[] solve (ISymplectic integrator, double h, double start, double end, int64 tr) {
             double mino = 0.0;
             double tau = 0.0;
             int64 i = 0;

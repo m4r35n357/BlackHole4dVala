@@ -113,14 +113,6 @@ namespace Simulations {
          * @see ISymplectic.step
          */
         protected abstract void step ();
-
-        /**
-         * {@inheritDoc}
-         * @see ISymplectic.getH
-         */
-        public double getH () {
-            return h;
-        }
     }
 
     /**

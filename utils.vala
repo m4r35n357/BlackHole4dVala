@@ -50,13 +50,14 @@ namespace Simulations {
          * Sole method called by main(), calls {@link ISymplectic.step} on the selected integrator once per iteration
          *
          * @param integrator the selected implementation
+         * @param h the time step
          * @param start start time
          * @param end finish time
          * @param tr plot ratio i.e. only plot every tr-th point
          *
          * @return an array of iteration counters
          */
-        public abstract int64[] solve (ISymplectic integrator, double start, double end, int64 tr);
+        public abstract int64[] solve (ISymplectic integrator, double h, double start, double end, int64 tr);
     }
 
     /**
@@ -86,13 +87,6 @@ namespace Simulations {
          * Should be called by {@link ISolver.solve} as needed, in turn calls {@link IModel.qUpdate} and {@link IModel.pUpdate}
          */
         public abstract void step ();
-
-        /**
-         * Getter method for the time step.
-         *
-         * @return the baked-in time step
-         */
-        public abstract double getH ();
     }
 
     /**

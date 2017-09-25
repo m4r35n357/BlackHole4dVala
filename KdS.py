@@ -20,8 +20,8 @@ from sys import stdin, stderr, argv
 
 class Symplectic(object):
     def __init__(self, model, h, order):
-        self.h = h
         self.model = model
+        self.h = h
         self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
         self.y1 = 1.0 / (4.0 - 4.0**(1.0 / 5.0))
         self.z1 = 1.0 / (4.0 - 4.0**(1.0 / 3.0))
@@ -30,23 +30,23 @@ class Symplectic(object):
         self.z3 = 1.0 - 4.0 * self.z1
         if order == 'sb1':
             print >> stderr, "Python First order"
-            self.integrator = self.euler_cromer
+            self.method = self.first_order
         elif order == 'sb2':
             print >> stderr, "Python Second order"
-            self.integrator = self.second_order
+            self.method = self.second_order
         elif order == 'sb4':
             print >> stderr, "Python Fourth order"
-            self.integrator = self.fourth_order
+            self.method = self.fourth_order
         elif order == 'sb6':
             print >> stderr, "Python Sixth order"
-            self.integrator = self.sixth_order
+            self.method = self.sixth_order
         elif order == 'sb8':
             print >> stderr, "Python Eightth order"
-            self.integrator = self.eightth_order
+            self.method = self.eightth_order
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
 
-    def euler_cromer(self):
+    def first_order(self):
         self.model.qUpdate(self.h)
         self.model.pUpdate(self.h)
 
@@ -90,7 +90,7 @@ class Symplectic(object):
 
 
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh, h):
+    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh):
         self.l_3 = Lambda / 3.0
         self.a = a
         self.mu2 = mu2
@@ -109,7 +109,6 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
         self.cross = xh
-        self.h = h
 
     def refresh(self):
         self.r2 = self.r**2
@@ -146,7 +145,7 @@ class BhSymp(object):
         self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
         self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
 
-    def solve(self, integrator, start, end, tr):
+    def solve(self, method, h, start, end, tr):
         mino = tau = 0.0
         i = plotCount = 0
         self.refresh()
@@ -156,10 +155,10 @@ class BhSymp(object):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
                 plotCount += 1
-            integrator()
+            method()
             i += 1
-            mino = self.h * i
-            tau += self.h * self.S
+            mino = h * i
+            tau += h * self.S
         self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
         return i, plotCount
 
@@ -176,7 +175,8 @@ if __name__ == "__main__":
     input_data = stdin.read()
     ic = loads(input_data)['IC']
     print >> stderr, input_data
-    bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'], ic['step'])
-    bh.solve(Symplectic(bh, ic['step'], ic['integrator']).integrator, ic['start'], ic['end'], ic['plotratio'])
+    bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])
+    integrator = Symplectic(bh, ic['step'], ic['integrator']).method
+    bh.solve(integrator, ic['step'], ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"
