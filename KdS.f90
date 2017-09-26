@@ -12,8 +12,9 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0 = 0.0_16, D05 = 0.5_16, D1 = 1.0_16, D2 = 2.0_16, D3 = 3.0_16, D4 = 4.0_16, D5 = 5.0_16, D7 = 7.0_16 ! CONSTANTS
-    real(16), parameter :: x1 = D1 / (D4 - D4**(D1 / D7)), x3 = D1 - D4 * x1,&
+    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D4=4.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16  ! CONSTANTS
+    real(16), parameter :: w1 = D1 / (D4 - D4**(D1 / D9)), w3 = D1 - D4 * w1,&
+                           x1 = D1 / (D4 - D4**(D1 / D7)), x3 = D1 - D4 * x1,&
                            y1 = D1 / (D4 - D4**(D1 / D5)), y3 = D1 - D4 * y1,&
                            z1 = D1 / (D4 - D4**(D1 / D3)), z3 = D1 - D4 * z1, pi = acos(-D1)
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
@@ -39,6 +40,9 @@ program KdS
         case ("sb8")
             write (0, *) "Fortran Eightth order"
             call solve(eightth_order)
+        case ("sba")
+            write (0, *) "Fortran Tenth order"
+            call solve(tenth_order)
         case default
             write (0, *) "Invalid integrator method"
     end select
@@ -142,13 +146,31 @@ contains
         call base6(D1)
     end subroutine sixth_order
 
+    subroutine base8(s)
+        real(16), intent(in) :: s
+        call base6(s * x1)
+        call base6(s * x1)
+        call base6(s * x3)
+        call base6(s * x1)
+        call base6(s * x1)
+    end subroutine base8
+
     subroutine eightth_order()
-        call base6(x1)
-        call base6(x1)
-        call base6(x3)
-        call base6(x1)
-        call base6(x1)
+        call base8(D1)
     end subroutine eightth_order
+
+    subroutine base10(s)
+        real(16), intent(in) :: s
+        call base8(s * w1)
+        call base8(s * w1)
+        call base8(s * w3)
+        call base8(s * w1)
+        call base8(s * w1)
+    end subroutine base10
+
+    subroutine tenth_order()
+        call base10(D1)
+    end subroutine tenth_order
 
     subroutine solve(method)
         integer :: counter = 0
