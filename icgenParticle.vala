@@ -144,6 +144,7 @@ namespace Generators {
                 stdout.printf("    \"direction\" : \"RETROGRADE\"\n");
             }
             stdout.printf("  },\n");
+            stdout.printf("  \"Simulator\" : \"KerrDeSitter\",\n");
             stdout.printf("  \"IC\" : {\n");
             stdout.printf("    \"M\" : %.17g,\n", 1.0);
             stdout.printf("    \"a\" : %.17g,\n", p->a);

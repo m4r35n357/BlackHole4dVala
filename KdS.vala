@@ -33,40 +33,53 @@ namespace Simulations {
         var executable = args[0];
         stderr.printf("Executable: %s\n", executable);
         if ("Simulate" in executable) {
-            var o = getJson().get_object_member("IC");
+            var content = getJson();
+            var simulator = content.get_string_member("Simulator");
+            var o = content.get_object_member("IC");
             var type = o.get_string_member("integrator");
             var step = o.get_double_member("step");
             var start = o.get_double_member("start");
             var end = o.get_double_member("end");
             var plotratio = o.get_int_member("plotratio");
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
-                if (o.has_member("Lfac")) {
-                    var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
-                } else if (o.has_member("a")) {
-                    var model = new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
-                                           o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                                           o.get_double_member("r0"), o.get_double_member("th0"),
-                                           o.get_boolean_member("cross"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
-                } else if (o.has_member("bodies")) {
-                    Body[] bodies = {};
-                    foreach (var node in o.get_array_member("bodies").get_elements()) {
-                        var body = node.get_object();
-                        var m = body.get_double_member("mass");
-                        if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                            bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                                               body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"), m);
-                        } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                            bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
-                                               body.get_double_member("vX")*m, body.get_double_member("vY")*m, body.get_double_member("vZ")*m, m);
-                        } else {
-                            stderr.printf("Mixed use of momenta and velocity\n");
+                switch (simulator) {
+                    case "Newton":
+                        stderr.printf("Newton simulator\n");
+                        var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
+                        model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                        break;
+                    case "KerrDeSitter":
+                        stderr.printf("KerrDeSitter simulator\n");
+                        var model = new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
+                                               o.get_double_member("mu"),
+                                               o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
+                                               o.get_double_member("r0"), o.get_double_member("th0"),
+                                               o.get_boolean_member("cross"));
+                        model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                        break;
+                    case "NBody":
+                        stderr.printf("NBody simulator\n");
+                        Body[] bodies = {};
+                        foreach (var node in o.get_array_member("bodies").get_elements()) {
+                            var body = node.get_object();
+                            var m = body.get_double_member("mass");
+                            if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
+                                bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                                   body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"), m);
+                            } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
+                                bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                                   body.get_double_member("vX")*m, body.get_double_member("vY")*m, body.get_double_member("vZ")*m, m);
+                            } else {
+                                stderr.printf("Mixed use of momenta and velocity\n");
+                            }
                         }
-                    }
-                    var model = new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
-                }
+                        var model = new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
+                        model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                        break;
+                    default:
+                        stderr.printf("Bad simulator; should be [ Newton | KerrDeSitter | NBody ], found {%s}\n", simulator);
+                        assert_not_reached();
+                 }
             } else {
                 stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);
                 assert_not_reached();
