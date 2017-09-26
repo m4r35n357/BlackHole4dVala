@@ -106,6 +106,7 @@ namespace Simulations {
             base6(s * x1);
             base6(s * x1);
         }
+
         /**
          * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
          * methods.

@@ -35,60 +35,37 @@ namespace Simulations {
         if ("Simulate" in executable) {
             var o = getJson().get_object_member("IC");
             var type = o.get_string_member("integrator");
+            var step = o.get_double_member("step");
+            var start = o.get_double_member("start");
+            var end = o.get_double_member("end");
+            var plotratio = o.get_int_member("plotratio");
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 if (o.has_member("Lfac")) {
                     var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
-                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
-                    model.solve(integrator, o.get_double_member("step"),
-                                            o.get_double_member("start"),
-                                            o.get_double_member("end"),
-                                            o.get_int_member("plotratio"));
+                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                 } else if (o.has_member("a")) {
-                    var model = new BhSymp(o.get_double_member("lambda"),
-                                           o.get_double_member("a"),
-                                           o.get_double_member("mu"),
-                                           o.get_double_member("E"),
-                                           o.get_double_member("L"),
-                                           o.get_double_member("Q"),
-                                           o.get_double_member("r0"),
-                                           o.get_double_member("th0"),
+                    var model = new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
+                                           o.get_double_member("mu"), o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
+                                           o.get_double_member("r0"), o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
-                    model.solve(integrator, o.get_double_member("step"),
-                                            o.get_double_member("start"),
-                                            o.get_double_member("end"),
-                                            o.get_int_member("plotratio"));
+                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                 } else if (o.has_member("bodies")) {
                     Body[] bodies = {};
                     foreach (var node in o.get_array_member("bodies").get_elements()) {
                         var body = node.get_object();
+                        var m = body.get_double_member("mass");
                         if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                            bodies += new Body(body.get_double_member("qX"),
-                                               body.get_double_member("qY"),
-                                               body.get_double_member("qZ"),
-                                               body.get_double_member("pX"),
-                                               body.get_double_member("pY"),
-                                               body.get_double_member("pZ"),
-                                               body.get_double_member("mass"));
+                            bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                               body.get_double_member("pX"), body.get_double_member("pY"), body.get_double_member("pZ"), m);
                         } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                            var m = body.get_double_member("mass");
-                            bodies += new Body(body.get_double_member("qX"),
-                                               body.get_double_member("qY"),
-                                               body.get_double_member("qZ"),
-                                               body.get_double_member("vX") * m,
-                                               body.get_double_member("vY") * m,
-                                               body.get_double_member("vZ") * m,
-                                               m);
+                            bodies += new Body(body.get_double_member("qX"), body.get_double_member("qY"), body.get_double_member("qZ"),
+                                               body.get_double_member("vX")*m, body.get_double_member("vY")*m, body.get_double_member("vZ")*m, m);
                         } else {
                             stderr.printf("Mixed use of momenta and velocity\n");
                         }
                     }
                     var model = new NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
-                    var integrator = Simulations.getIntegrator(model, o.get_double_member("step"), type);
-                    model.solve(integrator, o.get_double_member("step"),
-                                            o.get_double_member("start"),
-                                            o.get_double_member("end"),
-                                            o.get_int_member("plotratio"));
+                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                 }
             } else {
                 stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);
