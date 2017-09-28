@@ -61,7 +61,9 @@ export exe='nc.openbsd pi 1234'
 
 $exe <$ic | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
 
-$exe <$ic | finterp.py tau 0.5 | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null
+vi initial-conditions.newton.json; jq . initial-conditions.newton.json
+$exe <initial-conditions.newton.json | ./plotBH.py 1.0 `jq .IC.Lfac <initial-conditions.newton.json` 0.0 &
+$exe <initial-conditions.newton.json | tee $data | ./plotErrors.py tau 1 &
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 
