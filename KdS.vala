@@ -21,11 +21,11 @@ namespace Simulations {
      * Common entry point for all simulators based on symplectic integration, reads in JSON data from stdin and executes a program according to the following table:
      *
      * || ''program name'' || ''key JSON variable'' || ''class(es))'' || ''simulation'' ||
-     * || Simulate || "Lfac" || {@link Newton} || Newtonian central body problem ||
-     * || Simulate || "a" || {@link BhSymp} || Kerr-deSitter geodesics ||
-     * || Simulate || "bodies" || {@link NBody} {@link Body} || Newtonian N body problem ||
-     * || GenParticle || none || {@link Generators.Particle} || Generate initial conditions for Kerr-deSitter particle geodesics ||
-     * || GenLight || none || {@link Generators.Light} || Generate initial conditions for Kerr-deSitter light geodesics ||
+     * || Simulate || "Newton" || {@link Newton} || Newtonian central body problem ||
+     * || Simulate || "KerrDeSitter" || {@link BhSymp} || Kerr-deSitter geodesics ||
+     * || Simulate || "NBody" || {@link NBody} {@link Body} || Newtonian N body problem ||
+     * || GenParticle || N/A || {@link Generators.Particle} || Generate initial conditions for Kerr-deSitter particle geodesics ||
+     * || GenLight || N/A || {@link Generators.Light} || Generate initial conditions for Kerr-deSitter light geodesics ||
      *
      * @param args the program is hard linked, so args[0] is used as the program name
      */
@@ -44,21 +44,16 @@ namespace Simulations {
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 switch (simulator) {
                     case "Newton":
-                        stderr.printf("Newton simulator\n");
                         var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
                         model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                         break;
                     case "KerrDeSitter":
-                        stderr.printf("KerrDeSitter simulator\n");
-                        var model = new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"),
-                                               o.get_double_member("mu"),
+                        var model = new BhSymp(o.get_double_member("lambda"), o.get_double_member("a"), o.get_double_member("mu"),
                                                o.get_double_member("E"), o.get_double_member("L"), o.get_double_member("Q"),
-                                               o.get_double_member("r0"), o.get_double_member("th0"),
-                                               o.get_boolean_member("cross"));
+                                               o.get_double_member("r0"), o.get_double_member("th0"), o.get_boolean_member("cross"));
                         model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                         break;
                     case "NBody":
-                        stderr.printf("NBody simulator\n");
                         Body[] bodies = {};
                         foreach (var node in o.get_array_member("bodies").get_elements()) {
                             var body = node.get_object();

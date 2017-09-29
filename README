@@ -63,7 +63,7 @@ $exe <$ic | tee $data | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic`
 
 vi initial-conditions.newton.json; jq . initial-conditions.newton.json
 $exe <initial-conditions.newton.json | ./plotBH.py 1.0 `jq .IC.Lfac <initial-conditions.newton.json` 0.0 &
-$exe <initial-conditions.newton.json | tee $data | ./plotErrors.py tau 1 &
+time $exe <initial-conditions.newton.json >$data; ./plotErrors.py tau 1 <$data 2>/dev/null &
 
 echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
 
@@ -100,6 +100,10 @@ script3='./minimal'
 script4='./minimal-symp'
 su -c "cd $gsdir; $gs 1234 $script1 & $gs 1233 $script2 & $gs 1232 $script3 & $gs 1231 $script4 &" pi
 
+
+9.	Update Valadoc:
+
+rsync -av --delete doc ../../m4r35n357.github.io/BlackHole4dVala
 
 
 REFERENCE DATA

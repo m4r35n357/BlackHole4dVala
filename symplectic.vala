@@ -17,7 +17,7 @@ using GLib.Math;
 namespace Simulations {
 
     /**
-     * Symplectic integrator abstract superclass, leaves integration details to subclasses
+     * Symplectic integrator abstract superclass, leaves integration method selection to subclasses
      */
     protected abstract class Symplectic : ISymplectic, GLib.Object {
 
@@ -61,9 +61,9 @@ namespace Simulations {
          * Stormer-Verlet base integrator.  Performs the following calls on {@link IModel} per iteration:
          *
          * {{{
-         * qUpdate(h/2)
-         * pUpdate(h)
-         * qUpdate(h/2)
+         * qUpdate(s * h/2)
+         * pUpdate(s * h)
+         * qUpdate(s * h/2)
          * }}}
          *
          * where h is the time step.
@@ -75,7 +75,17 @@ namespace Simulations {
         }
 
         /**
-         * Suzuki composition from 2nd order to 4th order
+         * Suzuki composition from 2nd order to 4th order.  Performs the following calls per iteration:
+         *
+         * {{{
+         * base2(s * z1)
+         * base2(s * z1)
+         * base2(s * z3)
+         * base2(s * z1)
+         * base2(s * z1)
+         * }}}
+         *
+         * where z1 = 1 / (4 - 4**(1/3)), and z3 = 1 - 4 * z1
          */
         protected void base4 (double s) {
             base2(s * z1);
@@ -86,7 +96,17 @@ namespace Simulations {
         }
 
         /**
-         * Suzuki composition from 4th order to 6th order
+         * Suzuki composition from 4th order to 6th order.  Performs the following calls per iteration:
+         *
+         * {{{
+         * base4(s * y1)
+         * base4(s * y1)
+         * base4(s * y3)
+         * base4(s * y1)
+         * base4(s * y1)
+         * }}}
+         *
+         * where y1 = 1 / (4 - 4**(1/5)), and y3 = 1 - 4 * y1
          */
         protected void base6 (double s) {
             base4(s * y1);
@@ -97,7 +117,17 @@ namespace Simulations {
         }
 
         /**
-         * Suzuki composition from 6th order to 8th order
+         * Suzuki composition from 6th order to 8th order.  Performs the following calls per iteration:
+         *
+         * {{{
+         * base4(s * x1)
+         * base4(s * x1)
+         * base4(s * x3)
+         * base4(s * x1)
+         * base4(s * x1)
+         * }}}
+         *
+         * where x1 = 1 / (4 - 4**(1/7)), and x3 = 1 - 4 * x1
          */
         protected void base8 (double s) {
             base6(s * x1);
@@ -161,7 +191,7 @@ namespace Simulations {
         }
 
         /**
-         * 2nd order integration step
+         * 2nd order integration step.  Calls {@link Symplectic.base2} with s = 1.
          *
          * @see Symplectic.step
          */
@@ -184,7 +214,7 @@ namespace Simulations {
         }
 
         /**
-         * 4th order integration step
+         * 4th order integration step.  Calls {@link Symplectic.base4} with s = 1.
          *
          * @see Symplectic.step
          */
@@ -207,7 +237,7 @@ namespace Simulations {
         }
 
         /**
-         * 6th order integration step
+         * 6th order integration step.  Calls {@link Symplectic.base6} with s = 1.
          *
          * @see Symplectic.step
          */
@@ -230,7 +260,7 @@ namespace Simulations {
         }
 
         /**
-         * 8th order integration step
+         * 8th order integration step.  Calls {@link Symplectic.base8} with s = 1.
          *
          * @see Symplectic.step
          */
