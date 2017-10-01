@@ -43,6 +43,14 @@ namespace Simulations {
             var plotratio = o.get_int_member("plotratio");
             if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
                 switch (simulator) {
+                    case "Oscillator":
+                        var model = new Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
+                        model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                        break;
+                    case "Pendulum":
+                        var model = new Pendulum(o.get_double_member("length"), o.get_double_member("angle"));
+                        model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                        break;
                     case "Newton":
                         var model = new Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
                         model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);

@@ -9,25 +9,23 @@ valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
+valafiles='KdS.vala bh3dSymp.vala nbody3d.vala newton.vala pendulum.vala oscillator.vala  symplectic.vala icgenParticle.vala icgenLight.vala utils.vala'
+
 # cleanup executables
 echo $C"Cleaning Up . . ."$NC
-rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands kerr-image \
-	Simulate GenParticle GenLight
+rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands pendulum \
+	kerr-image Simulate GenParticle GenLight
 echo ""
 
 # compile vala test files
 echo $C"Compiling Vala Tests . . ."$NC
 $valac --pkg json-glib-1.0 \
-	TestKdS.vala bh3dSymp.vala \
-	symplectic.vala utils.vala
+	TestKdS.vala bh3dSymp.vala symplectic.vala utils.vala
 echo ""
 
 # compile vala files
 echo $C"Compiling Vala . . ."$NC
-$valac --pkg json-glib-1.0 --pkg gsl \
-	KdS.vala bh3dSymp.vala \
-	nbody3d.vala newton.vala symplectic.vala \
-	icgenParticle.vala icgenLight.vala utils.vala
+$valac --pkg json-glib-1.0 --pkg gsl $valafiles
 echo ""
 
 # compile raytracer
@@ -64,7 +62,7 @@ echo ""
 # generate documentation
 echo $C"Generating Documentation . . ."$NC
 rm -rf doc
-valadoc -o doc --pkg json-glib-1.0 --pkg gsl icgenParticle.vala icgenLight.vala KdS.vala symplectic.vala bh3dSymp.vala nbody3d.vala newton.vala utils.vala
+valadoc -o doc --pkg json-glib-1.0 --pkg gsl $valafiles
 echo ""
 
 # test
