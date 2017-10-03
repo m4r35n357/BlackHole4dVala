@@ -1,6 +1,8 @@
 {
   "Simulator": "Pendulum",
   "IC": {
+    "g": 1.0,
+    "m": 1.0,
     "length": 10,
     "angle": 0.8,
     "start": 0,

@@ -24,8 +24,8 @@ namespace Simulations {
         private double H0;
         private double l;
         private double l2;
-        private double g = 1.0;
-        private double m = 1.0;
+        private double g;
+        private double m;
         private double theta;
         private double Utheta = 0.0;
 
@@ -35,8 +35,10 @@ namespace Simulations {
          * @param length of the pendulum
          * @param theta0 initial angle
          */
-        public Pendulum (double length, double theta0) {
+        public Pendulum (double g, double m, double length, double theta0) {
             stderr.printf("Simple Pendulum\n");
+            this.g = g;
+            this.m = m;
             this.l = length;
             this.l2 = length * length;
             this.theta = theta0;

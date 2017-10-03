@@ -48,7 +48,8 @@ namespace Simulations {
                         model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                         break;
                     case "Pendulum":
-                        var model = new Pendulum(o.get_double_member("length"), o.get_double_member("angle"));
+                        var model = new Pendulum(o.get_double_member("g"), o.get_double_member("m"),
+                                                 o.get_double_member("length"), o.get_double_member("angle"));
                         model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
                         break;
                     case "Newton":
