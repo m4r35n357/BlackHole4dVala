@@ -120,11 +120,11 @@ namespace Simulations {
          * Suzuki composition from 6th order to 8th order.  Performs the following calls per iteration:
          *
          * {{{
-         * base4(s * x1)
-         * base4(s * x1)
-         * base4(s * x3)
-         * base4(s * x1)
-         * base4(s * x1)
+         * base6(s * x1)
+         * base6(s * x1)
+         * base6(s * x3)
+         * base6(s * x1)
+         * base6(s * x1)
          * }}}
          *
          * where x1 = 1 / (4 - 4**(1/7)), and x3 = 1 - 4 * x1
