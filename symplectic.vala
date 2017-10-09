@@ -293,13 +293,13 @@ namespace Simulations {
                 stderr.printf("2nd Order Symplectic Integrator\n");
                 return new SecondOrder(model, h);
             case "sb4":
-                stderr.printf("4th Order Symplectic Integrator\n");
+                stderr.printf("4th Order Symplectic Integrator (using Suzuki Composition)\n");
                 return new FourthOrder(model, h);
             case "sb6":
-                stderr.printf("6th Order Symplectic Integrator\n");
+                stderr.printf("6th Order Symplectic Integrator (using Suzuki Composition)\n");
                 return new SixthOrder(model, h);
             case "sb8":
-                stderr.printf("8th Order Symplectic Integrator\n");
+                stderr.printf("8th Order Symplectic Integrator (using Suzuki Composition)\n");
                 return new EightthOrder(model, h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);

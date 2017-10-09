@@ -38,7 +38,7 @@ namespace Simulations {
             this.m = m;
             this.k = k;
             this.x = x0;
-            this.H0 = H();
+            H0 = H();
         }
 
        /**
