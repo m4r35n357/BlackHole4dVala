@@ -13,8 +13,59 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 using GLib.Math;
+using Json;
 
 namespace Simulations {
+
+    /**
+     * External user interface for the physical model
+     */
+    public interface ISolver : GLib.Object {
+        /**
+         * Externally visible method. It sets up, controls and terminates the simulation,
+         * writing its data to stdout.
+         *
+         * Sole method called by main(), calls {@link ISymplectic.step} on the selected integrator once per iteration
+         *
+         * @param integrator the selected implementation
+         * @param h the time step
+         * @param start start time
+         * @param end finish time
+         * @param tr plot ratio i.e. only plot every tr-th point
+         *
+         * @return an array of iteration counters
+         */
+        public abstract int64[] solve (ISymplectic integrator, double h, double start, double end, int64 tr);
+    }
+
+    /**
+     * Internal interface for the symplectic integrator to access and update the model
+     */
+    public interface IModel : GLib.Object {
+        /**
+         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link ISymplectic.step}
+         *
+         * @param d scaled time step
+         */
+        public abstract void qUpdate (double d);
+
+        /**
+         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link ISymplectic.step}
+         *
+         * @param c scaled time step
+         */
+        public abstract void pUpdate (double c);
+    }
+
+    /**
+     * Internal interface for a model to drive the symplectic integrator
+     */
+    public interface ISymplectic : GLib.Object {
+        /**
+         * Should be called by {@link ISolver.solve} as needed, in turn calls {@link IModel.qUpdate} and {@link IModel.pUpdate}
+         */
+        public abstract void step ();
+    }
 
     /**
      * Symplectic integrator abstract superclass, leaves integration method selection to subclasses

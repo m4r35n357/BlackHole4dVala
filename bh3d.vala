@@ -19,7 +19,7 @@ namespace Simulations {
     /**
      * A model for generating geodesics in the Kerr-deSitter spacetime
      */
-    public class BhSymp : IModel, ISolver, GLib.Object {
+    public class Bh3d : IModel, ISolver, GLib.Object {
 
         private double l_3;  // Constants
         private double a;
@@ -70,7 +70,7 @@ namespace Simulations {
          * @param r0 initial r coordinate = r / M
          * @param th0 initial theta coordinate
          */
-        public BhSymp (double lambda, double spin, double pMass2, double energy, double angMom, double Q, double r0, double th0, bool xh) {
+        public Bh3d (double lambda, double spin, double pMass2, double energy, double angMom, double Q, double r0, double th0, bool xh) {
             stderr.printf("Kerr-deSitter Geodesic\n");
             l_3 = lambda / 3.0;
             a = spin;
