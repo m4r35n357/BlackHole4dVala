@@ -23,6 +23,7 @@ Sample usage:
 
 ./build-all [fast]
 
+export LD_LIBRARY_PATH=.
 export icdata=icgen-data.json
 export ic=initial-conditions.json
 export data=/tmp/data

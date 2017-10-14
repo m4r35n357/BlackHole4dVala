@@ -17,6 +17,12 @@ rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands pendulum \
 	kerr-image Simulate GenParticle GenLight
 echo ""
 
+# build vala libraries
+echo $C"Building Vala Libraries. . ."$NC
+valac --library=json-parser -H json-parser.h json-parser.vala -X -fPIC -X -shared -o json-parser.so --gir json-parser-0.1.gir --pkg json-glib-1.0
+valac --library=symplectic -H symplectic.h symplectic.vala -X -fPIC -X -shared -o symplectic.so --gir symplectic-0.1.gir
+echo ""
+
 # compile vala test files
 echo $C"Compiling Vala Tests . . ."$NC
 $valac --pkg json-glib-1.0 \
@@ -25,7 +31,10 @@ echo ""
 
 # compile vala files
 echo $C"Compiling Vala . . ."$NC
-$valac --pkg json-glib-1.0 --pkg gsl $valafiles
+#$valac --pkg json-glib-1.0 --pkg gsl $valafiles
+valac symplectic.vapi json-parser.vapi KdS.vala bh3d.vala nbody3d.vala newton.vala pendulum.vala oscillator.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o KdS --pkg json-glib-1.0 --pkg gsl
+#valac symplectic.vapi json-parser.vapi KdS.vala bh3d.vala nbody3d.vala newton.vala pendulum.vala oscillator.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o valatest --pkg json-glib-1.0 --pkg gsl
+
 echo ""
 
 # compile raytracer
@@ -55,6 +64,8 @@ rm -f KdS
 # admire our work
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image
+echo ""
+ls -lAh --color *.h *.so *.vapi *.gir
 echo ""
 ls -lAh --color */Release
 echo ""

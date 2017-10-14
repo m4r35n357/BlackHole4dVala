@@ -24,7 +24,7 @@ namespace JsonParser {
      *
      * @return an object containing the parsed data
      */
-    private static Json.Object getJson () {
+    public static Json.Object getJson () {
         var json = new StringBuilder();
         var line = stdin.read_line();
         while (line != null) {
