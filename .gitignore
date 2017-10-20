@@ -7,10 +7,15 @@
 *.aux
 *.log
 *.mp4
+*.h
 *.c
 *.o
 *.i
 *.s
+*.vapi
+*.gir
+*.typelib
+*.so
 *.pyc
 .valencia
 TestKdS

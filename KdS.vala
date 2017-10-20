@@ -62,9 +62,9 @@ public static void main (string[] args) {
                     var model = new Simulations.Bh3d(o.get_double_member("lambda"),
                                            o.get_double_member("a"),
                                            o.get_double_member("mu"),
-                                           o.get_double_member("E"),
-                                           o.get_double_member("L"),
-                                           o.get_double_member("Q"),
+                                           o.has_member("Efac") ? o.get_double_member("Efac")*o.get_double_member("E") : o.get_double_member("E"),
+                                           o.has_member("Lfac") ? o.get_double_member("Lfac")*o.get_double_member("L") : o.get_double_member("L"),
+                                           o.has_member("Qfac") ? o.get_double_member("Qfac")*o.get_double_member("Q") : o.get_double_member("Q"),
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));

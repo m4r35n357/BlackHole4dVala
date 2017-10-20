@@ -54,7 +54,6 @@ namespace Generators {
         private struct Params {
             public double a;
             public double mu2;
-            public double Lfac;
             public double rMin;
             public double rMax;
             public double elevation;
@@ -148,16 +147,13 @@ namespace Generators {
          */
         private void printInitialConditions (MultirootFsolver s, size_t iterations) {
             var p = (Params*) s.function.params;
-            var E = s.x.get(X.E);
-            var L = s.x.get(X.L) * p->Lfac;
-            var Q = s.x.get(X.Q);
             stdout.printf("{\n");
             stdout.printf("  \"Generator\" : {\n");
             stdout.printf("    \"name\" : \"icgenParticle %s\",\n", s.name());
             stdout.printf("    \"iterations\" : %zu,\n", iterations);
             stdout.printf("    \"residuals\" : \"R1: %.1e, R2: %.1e, TH: %.1e\",\n", s.f.get(F.R1), s.f.get(F.R2), s.f.get(F.TH));
             stdout.printf("    \"deltas\" : \"dE: %.1e, dL: %.1e, dQ: %.1e\",\n", s.dx.get(X.E), s.dx.get(X.L), s.dx.get(X.Q));
-            if (p->a * L >= 0.0) {
+            if (p->a * s.x.get(X.L) >= 0.0) {
                 stdout.printf("    \"direction\" : \"PROGRADE\"\n");
             } else {
                 stdout.printf("    \"direction\" : \"RETROGRADE\"\n");
@@ -169,9 +165,12 @@ namespace Generators {
             stdout.printf("    \"a\" : %.17g,\n", p->a);
             stdout.printf("    \"lambda\" : %.17g,\n", 0.0);
             stdout.printf("    \"mu\" : %.17g,\n", p->mu2);
-            stdout.printf("    \"E\" : %.17g,\n", E);
-            stdout.printf("    \"L\" : %.17g,\n", L);
-            stdout.printf("    \"Q\" : %.17g,\n", Q);
+            stdout.printf("    \"E\" : %.17g,\n", s.x.get(X.E));
+            stdout.printf("    \"Efac\" : %.17g,\n", 1.0);
+            stdout.printf("    \"L\" : %.17g,\n", s.x.get(X.L));
+            stdout.printf("    \"Lfac\" : %.17g,\n", 1.0);
+            stdout.printf("    \"Q\" : %.17g,\n", s.x.get(X.Q));
+            stdout.printf("    \"Qfac\" : %.17g,\n", 1.0);
             stdout.printf("    \"r0\" : %.17g,\n", 0.5 * (p->rMin + p->rMax));
             stdout.printf("    \"th0\" : %.17g,\n", 0.0);
             stdout.printf("    \"cross\" : %s,\n", p->cross ? "true" : "false");
@@ -205,13 +204,12 @@ namespace Generators {
                 rMax = rMax,
                 elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                 a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                Lfac = input.has_member("Lfac") ? input.get_double_member("Lfac") : 1.0,
                 cross = input.has_member("cross") ? input.get_boolean_member("cross") : false,
                 start = input.has_member("start") ? input.get_double_member("start") : 0.0,
-                end = input.has_member("end") ? input.get_double_member("end") : 5000.0,
-                step = input.has_member("step") ? input.get_double_member("step") : 0.001,
-                plotratio = input.has_member("plotratio") ? input.get_int_member("plotratio") : 500,
-                integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "rk4"
+                end = input.has_member("end") ? input.get_double_member("end") : 1000.0,
+                step = input.has_member("step") ? input.get_double_member("step") : 0.01,
+                plotratio = input.has_member("plotratio") ? input.get_int_member("plotratio") : 1,
+                integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "sb2"
             };
         }
 
