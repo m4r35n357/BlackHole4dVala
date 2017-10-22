@@ -42,9 +42,10 @@ cp icgenLight-data.example $icdata
 3.	Edit the inital conditions data and/or the inital conditions file
 
 vi $icdata; jq . $icdata
-$icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
-vi $ic; jq . $ic; echo $(jq .IC.lambda $ic) $(jq .IC.a $ic) $(jq .IC.mu $ic) $(jq .IC.E $ic) $(jq .IC.L $ic) $(jq .IC.Q $ic) $(jq .IC.r0 $ic) $(jq .IC.th0 $ic)  $(jq .IC.step $ic) $(jq .IC.start $ic) $(jq .IC.end $ic) $(jq .IC.plotratio $ic) "F" $(jq .IC.integrator $ic) >ictest
 
+$icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
+
+vi $ic; jq . $ic; jq '.IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0, .IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.cross, .IC.integrator' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
 
 4.	Run tests
 
