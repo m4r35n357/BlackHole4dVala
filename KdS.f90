@@ -26,22 +26,22 @@ program KdS
     call init_vars()
     select case (integrator)
         case ("sb1")
-            write (0, *) "Fortran First order"
+            write (0, *) "Fortran First Order Symplectic Integrator (using Suzuki Composition)"
             call solve(first_order)
         case ("sb2")
-            write (0, *) "Fortran Second order"
+            write (0, *) "Fortran Second Order Symplectic Integrator (using Suzuki Composition)"
             call solve(second_order)
         case ("sb4")
-            write (0, *) "Fortran Fourth order"
+            write (0, *) "Fortran Fourth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(fourth_order)
         case ("sb6")
-            write (0, *) "Fortran Sixth order"
+            write (0, *) "Fortran Sixth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(sixth_order)
         case ("sb8")
-            write (0, *) "Fortran Eightth order"
+            write (0, *) "Fortran Eightth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(eightth_order)
         case ("sba")
-            write (0, *) "Fortran Tenth order"
+            write (0, *) "Fortran Tenth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(tenth_order)
         case default
             write (0, *) "Invalid integrator method"
