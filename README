@@ -96,19 +96,15 @@ ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -preset veryslow -qp 0 vpython.
 
 8.	Run a geodesic server from eg. /etc/rc.local:
 
-on a PI 1:
 
-su -c "cd /home/pi/projects/Vala/BlackHole4dVala; ./geodesic-server &" pi
-
-on a PI 2 or 3:
+on a Raspberry PI:
 
 gsdir='/home/pi/projects/Vala/BlackHole4dVala'
+export LD_LIBRARY_PATH=$gsdir
 gs='./geodesic-server'
 script1='./Simulate'
-script2='./KdS.py'
-script3='./minimal'
-script4='./minimal-symp'
-su -c "cd $gsdir; $gs 1234 $script1 & $gs 1233 $script2 & $gs 1232 $script3 & $gs 1231 $script4 &" pi
+script2='./Bh3d.py'
+su -c "cd $gsdir; $gs 1234 & $gs 1233 & $gs 1232 $script1 & $gs 1231 $script2 &" pi
 
 
 9.	Update Valadoc:
