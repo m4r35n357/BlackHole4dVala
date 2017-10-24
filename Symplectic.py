@@ -13,13 +13,18 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from json import loads
-from math import sin, pi, cos, sqrt
-from sys import stdin, stderr, argv
+from sys import stderr
 
 
 class Symplectic(object):
-    def __init__(self, model, h, order):
+    def __init__(self, model, h, order, debug=False):
+        if debug:
+            self.base2 = self.coefficients
+        else:
+            self.base2 = self.stormer_verlet
+        self.total = 0.0
+        self.total_abs = 0.0
+        self.count = 0
         self.model = model
         self.h = h
         self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
@@ -45,12 +50,20 @@ class Symplectic(object):
             self.method = self.eightth_order
         else:
             raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
+        if debug:
+            print self.total
 
     def first_order(self):
         self.model.qUpdate(self.h)
         self.model.pUpdate(self.h)
 
-    def base2(self, s):
+    def coefficients(self, s):
+        self.count += 1
+        self.total += s
+        self.total_abs += abs(s)
+        print s, self.total, self.total_abs / self.count
+
+    def stormer_verlet(self, s):
         self.model.qUpdate(self.h * s * 0.5)
         self.model.pUpdate(self.h * s)
         self.model.qUpdate(self.h * s * 0.5)

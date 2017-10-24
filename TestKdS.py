@@ -6,6 +6,18 @@ from Symplectic import Symplectic
 
 
 class KdSTest(TestCase):
+    def test_debug_output_order_2(self):
+        Symplectic(None, 1.0, 'sb2', debug=True).method()
+
+    def test_debug_output_order_4(self):
+        Symplectic(None, 1.0, 'sb4', debug=True).method()
+
+    def test_debug_output_order_6(self):
+        Symplectic(None, 1.0, 'sb6', debug=True).method()
+
+    def test_debug_output_order_8(self):
+        Symplectic(None, 1.0, 'sb8', debug=True).method()
+
     def test_good_integrator_types(self):
         self.assertIsInstance(Symplectic(None, 1.0, 'sb1'), Symplectic)
         self.assertIsInstance(Symplectic(None, 1.0, 'sb2'), Symplectic)
