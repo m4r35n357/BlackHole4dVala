@@ -62,7 +62,6 @@ export exe='./Bh3d.py'
 export exe='nc.openbsd pi 1234'
 
 $exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
-time $exe <$ic >$data; ./plotErrors.py tau 1 <$data 2>/dev/null &
 $exe <$ic | tee $data | ./plotErrors.py tau 1 2>/dev/null &
 
 vi initial-conditions.newton.json; jq . initial-conditions.newton.json

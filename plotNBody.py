@@ -34,10 +34,10 @@ def main():
     colours = [ (1.0, 1.0, 0.0), (1.0, 1.0, 1.0), (0.0, 1.0, 0.0), (0.0, 0.5, 0.5), (1.0, 0.0, 0.0), (0.5, 1.0, 0.0), (1.0, 0.0, 1.0), (1.0, 0.5, 0.0), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0) ]
     spheres = []
     for j in pRange:
-        p = bodies[j]
-        r = 1000000.0 * log10(p['mass']**(1.0 / 3.0))
+        body = bodies[j]
+        r = 1000000.0 * log10(body['mass']**(1.0 / 3.0))
         #ball = sphere(pos = (p['qX'], p['qY'], p['qZ']), radius = 0.1 * p['mass']**(1.0 / 3.0), color = colours[j])
-        ball = sphere(pos = (p['qX'], p['qY'], p['qZ']), radius = r, color = colours[j])
+        ball = sphere(pos = (body['qX'], body['qY'], body['qZ']), radius = r, color = colours[j])
         #ball = sphere(pos = (p['qX'], p['qY'], p['qZ']), radius = 10000000.0, color = colours[j])
         ball.trail = points(color = ball.color, size = 1)
         spheres.append(ball)
@@ -49,17 +49,10 @@ def main():
         #    ball = sphere(radius = 0.2)  # Particle
         #    ball.trail = curve(size = 1)  #  trail
         bodies = loads(line)
-        X = Y = Z = mT = 0.0
-        for j in pRange:  # COG correction
-            p = bodies[j]
-            X += p['qX'] * p['mass']
-            Y += p['qY'] * p['mass']
-            Z += p['qZ'] * p['mass']
-            mT += p['mass']
         for j in pRange:
-            p = bodies[j]
+            body = bodies[j]
             ball = spheres[j]
-            position = (p['qX'] - X / mT, p['qY'] - Y / mT, p['qZ'] - Z / mT)
+            position = (body['qX'], body['qY'], body['qZ'])
             ball.pos = position
             ball.trail.append(pos = position, retain = 1000)
         #popen('import -window 0x3200003 -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')

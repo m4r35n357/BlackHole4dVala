@@ -61,7 +61,8 @@ namespace Simulations {
     public class NBody : IModel, ISolver, GLib.Object {
 
         private Body[] bodies;
-        private int np;
+        private int n;
+        private double m = 0.0;
         private double g;
         private double errorLimit;
 
@@ -75,16 +76,43 @@ namespace Simulations {
         public NBody (Body[] bodies, double g, double errorLimit) {
             stderr.printf("Newtonian N-Body Simulation\n");
             this.bodies = bodies;
-            this.np = bodies.length;
+            this.n = bodies.length;
+            for (var i = 0; i < n; i++) {
+                this.m += bodies[i].mass;
+            }
             this.g = g;
             this.errorLimit = errorLimit;
         }
 
         /**
-         * Euclidean distance between points A and B
+         * Euclidean distance between two bodies, i and j
          */
-        private double distance (double xA, double yA, double zA, double xB, double yB, double zB) {
-            return sqrt((xB - xA) * (xB - xA) + (yB - yA) * (yB - yA) + (zB - zA) * (zB - zA));
+        private double separation (Body i, Body j) {
+            var sX = i.qX - j.qX;
+            var sY = i.qY - j.qY;
+            var sZ = i.qZ - j.qZ;
+            return sqrt(sX * sX + sY * sY + sZ * sZ);
+        }
+
+        /**
+         * Compensate for drift in centre of mass
+         */
+        private void trackCentreOfMass () {
+            var mX = 0.0;
+            var mY = 0.0;
+            var mZ = 0.0;
+            for (var i = 0; i < n; i++) {
+                var a = bodies[i];
+                mX += a.qX * a.mass;
+                mY += a.qY * a.mass;
+                mZ += a.qZ * a.mass;
+            }
+            for (var i = 0; i < n; i++) {
+                var a = bodies[i];
+                a.qX -= mX / m;
+                a.qY -= mY / m;
+                a.qZ -= mZ / m;
+            }
         }
 
         /**
@@ -95,12 +123,12 @@ namespace Simulations {
          */
         private double h () {
             double energy = 0.0;
-            for (var i = 0; i < np; i++) {
+            for (var i = 0; i < n; i++) {
                 var a = bodies[i];
                 energy += 0.5 * (a.pX * a.pX + a.pY * a.pY + a.pZ * a.pZ) / a.mass;
-                for (var j = i + 1; j < np; j++) {
+                for (var j = i + 1; j < n; j++) {
                     var b = bodies[j];
-                    energy -= g * a.mass * b.mass / distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
+                    energy -= g * a.mass * b.mass / separation(a, b);
                 }
             }
             return energy;
@@ -111,7 +139,7 @@ namespace Simulations {
          * @see IModel.qUpdate
          */
         public void qUpdate (double d) {
-            for (var i = 0; i < np; i++) {
+            for (var i = 0; i < n; i++) {
                 var a = bodies[i];
                 var tmp = d / a.mass;
                 a.qX += a.pX * tmp;
@@ -125,12 +153,12 @@ namespace Simulations {
          * @see IModel.pUpdate
          */
         public void pUpdate (double c) {
-            for (var i = 0; i < np; i++) {
+            for (var i = 0; i < n; i++) {
                 var a = bodies[i];
-                for (var j = i + 1; j < np; j++) {
+                for (var j = i + 1; j < n; j++) {
                     var b = bodies[j];
-                    var d = distance(a.qX, a.qY, a.qZ, b.qX, b.qY, b.qZ);
-                    var tmp = - c * g * a.mass * b.mass / (d * d * d);
+                    var s = separation(a, b);
+                    var tmp = - c * g * a.mass * b.mass / (s * s * s);
                     var dPx = (b.qX - a.qX) * tmp;
                     var dPy = (b.qY - a.qY) * tmp;
                     var dPz = (b.qZ - a.qZ) * tmp;
@@ -175,6 +203,7 @@ namespace Simulations {
          * @param error based on the difference
          */
         private void output (double time, double hNow, double h0, double error) {
+            trackCentreOfMass();
             string[] data = {};
             foreach (var body in bodies) {
                 data += body.toString();
