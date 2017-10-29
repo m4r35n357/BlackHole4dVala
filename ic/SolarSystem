@@ -3,7 +3,7 @@
   "IC": {
     "errorLimit": 1.0e-6,
     "g": 6.67384e-20,
-    "integrator": "sb4",
+    "integrator": "sb8",
     "start": 0,
     "end": 10000000000,
     "step": 100000,
