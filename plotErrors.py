@@ -71,7 +71,8 @@ def main():
         line = stdin.readline()
         eCum += e
         ePk = ePk if ePk > e else e
-    print argv[0] + " - Average: " + str(log_error(eCum / count)) + ", Peak: " + str(log_error(ePk))
+    ax1.annotate("Peak: " + str(log_error(ePk)), (0.0, 0.0), xytext=(0.25, 0.95), textcoords='figure fraction', color='0.20', )
+    ax1.annotate("Average: " + str(log_error(eCum / count)), (0.0, 0.0), xytext=(0.55, 0.95), textcoords='figure fraction', color='0.20', )
     try:
         pyplot.show()
     except AttributeError as e:
