@@ -6,7 +6,7 @@
     "start": 0,
     "end": 5000,
     "step": 1.0,
-    "integrator": "sb2",
+    "integrator": "b2",
     "plotratio": 1
   }
 }

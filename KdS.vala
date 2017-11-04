@@ -38,25 +38,26 @@ public static void main (string[] args) {
         var start = o.get_double_member("start");
         var end = o.get_double_member("end");
         var plotratio = o.get_int_member("plotratio");
-        if (("sb1" == type) || ("sb2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type)) {
+        if (("b1" == type) || ("b2" == type) || ("sb4" == type) || ("sb6" == type) || ("sb8" == type) ||
+            ("yb4" == type) || ("yb6" == type) || ("yb8" == type) || ("kl6" == type) || ("kl8" == type)) {
             switch (simulator) {
                 case "Oscillator":
                     var model = new Simulations.Oscillator(o.get_double_member("m"),
                                                o.get_double_member("k"),
                                                o.get_double_member("x"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Pendulum":
                     var model = new Simulations.Pendulum(o.get_double_member("g"),
                                              o.get_double_member("m"),
                                              o.get_double_member("length"),
                                              o.get_double_member("angle"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Newton":
                     var model = new Simulations.Newton(o.get_double_member("Lfac"),
                                            o.get_double_member("r0"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
                     var model = new Simulations.Bh3d(o.get_double_member("lambda"),
@@ -68,7 +69,7 @@ public static void main (string[] args) {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "NBody":
                     Simulations.Body[] bodies = {};
@@ -97,14 +98,14 @@ public static void main (string[] args) {
                     }
                     var model = new Simulations.NBody(bodies, o.get_double_member("g"),
                                                   o.get_double_member("errorLimit"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 default:
                     stderr.printf("Bad simulator; should be [ Newton | KerrDeSitter | NBody ], found {%s}\n", simulator);
                     assert_not_reached();
              }
         } else {
-            stderr.printf("Bad integrator; should be [ sb1 | sb2 | sb4 | sb6 | sb8 ], found {%s}\n", type);
+            stderr.printf("Bad integrator; should be [ b1 | b2 | sb4 | sb6 | sb8 | yb4 | yb6 | yb8 | kl6 | kl8 ], found {%s}\n", type);
             assert_not_reached();
         }
     } else if ("GenParticle" in executable) {

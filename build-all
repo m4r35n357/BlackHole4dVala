@@ -9,7 +9,7 @@ valac="valac -v --save-temps -X -O$opt -X -lm"
 valac --version
 which valac
 
-valafiles='KdS.vala bh3d.vala nbody3d.vala newton.vala pendulum.vala oscillator.vala symplectic.vala generators.vala json-parser.vala'
+valafiles='KdS.vala symplectic.vala models.vala generators.vala json-parser.vala'
 
 # cleanup executables
 echo $C"Cleaning Up . . ."$NC
@@ -29,13 +29,13 @@ echo ""
 # compile vala test files
 echo $C"Compiling Vala Tests . . ."$NC
 $valac --pkg json-glib-1.0 \
-	TestKdS.vala bh3d.vala symplectic.vala json-parser.vala
+	TestKdS.vala models.vala symplectic.vala json-parser.vala
 echo ""
 
 # compile vala files
 echo $C"Compiling Vala . . ."$NC
 #$valac --pkg json-glib-1.0 --pkg gsl $valafiles
-$valac symplectic.vapi json-parser.vapi KdS.vala bh3d.vala nbody3d.vala newton.vala pendulum.vala oscillator.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o KdS --pkg json-glib-1.0 --pkg gsl
+$valac symplectic.vapi json-parser.vapi KdS.vala models.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o KdS --pkg json-glib-1.0 --pkg gsl
 
 echo ""
 

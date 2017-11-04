@@ -1,5 +1,5 @@
 {
   "r": 3.0,
   "spin": 1.0,
-  "integrator": "sb2"
+  "integrator": "b2"
 }
