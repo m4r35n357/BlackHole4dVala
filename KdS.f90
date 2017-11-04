@@ -25,11 +25,11 @@ program KdS
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
     select case (integrator)
-        case ("sb1")
-            write (0, *) "Fortran First Order Symplectic Integrator (using Suzuki Composition)"
+        case ("b1")
+            write (0, *) "Fortran First Order Symplectic Integrator"
             call solve(first_order)
-        case ("sb2")
-            write (0, *) "Fortran Second Order Symplectic Integrator (using Suzuki Composition)"
+        case ("b2")
+            write (0, *) "Fortran Second Order Symplectic Integrator"
             call solve(second_order)
         case ("sb4")
             write (0, *) "Fortran Fourth Order Symplectic Integrator (using Suzuki Composition)"

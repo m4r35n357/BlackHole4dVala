@@ -33,11 +33,11 @@ class Symplectic(object):
         self.x3 = 1.0 - 4.0 * self.x1
         self.y3 = 1.0 - 4.0 * self.y1
         self.z3 = 1.0 - 4.0 * self.z1
-        if order == 'sb1':
-            print >> stderr, "Python First order Symplectic Integrator (using Suzuki Composition)"
+        if order == 'b1':
+            print >> stderr, "Python First order Symplectic Integrator"
             self.method = self.first_order
-        elif order == 'sb2':
-            print >> stderr, "Python Second order Symplectic Integrator (using Suzuki Composition)"
+        elif order == 'b2':
+            print >> stderr, "Python Second order Symplectic Integrator"
             self.method = self.second_order
         elif order == 'sb4':
             print >> stderr, "Python Fourth order Symplectic Integrator (using Suzuki Composition)"
@@ -49,7 +49,7 @@ class Symplectic(object):
             print >> stderr, "Python Eightth order Symplectic Integrator (using Suzuki Composition)"
             self.method = self.eightth_order
         else:
-            raise Exception('>>> Integrator must be sb1, sb2 or sb4, was "{}" <<<'.format(order))
+            raise Exception('>>> Integrator must be b1, b2, sb4, sb6 or sb8, was "{}" <<<'.format(order))
         if debug:
             print self.total
 
