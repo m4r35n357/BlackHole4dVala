@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Copyright (c) 2014, 2015, 2016, 2017 Ian Smith (m4r35n357)
 All rights reserved.
 
@@ -12,7 +12,7 @@ Redistribution and use in source and binary forms, with or without modification,
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 from sys import argv, stdin, stderr
 from math import log10, sqrt
 from visual import scene, sphere, curve, points, rate
@@ -29,11 +29,11 @@ def main():
     # get data dimensions
     line = stdin.readline()
     bodies = loads(line)
-    pRange = range(len(bodies))
+    p_range = range(len(bodies))
     #  set up the balls
     colours = [ (1.0, 1.0, 0.0), (1.0, 1.0, 1.0), (0.0, 1.0, 0.0), (0.0, 0.5, 0.5), (1.0, 0.0, 0.0), (0.5, 1.0, 0.0), (1.0, 0.0, 1.0), (1.0, 0.5, 0.0), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0) ]
     spheres = []
-    for j in pRange:
+    for j in p_range:
         body = bodies[j]
         r = 1000000.0 * log10(body['mass']**(1.0 / 3.0))
         #ball = sphere(pos = (p['qX'], p['qY'], p['qZ']), radius = 0.1 * p['mass']**(1.0 / 3.0), color = colours[j])
@@ -49,7 +49,7 @@ def main():
         #    ball = sphere(radius = 0.2)  # Particle
         #    ball.trail = curve(size = 1)  #  trail
         bodies = loads(line)
-        for j in pRange:
+        for j in p_range:
             body = bodies[j]
             ball = spheres[j]
             position = (body['qX'], body['qY'], body['qZ'])

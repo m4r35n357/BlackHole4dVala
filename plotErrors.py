@@ -21,39 +21,47 @@ from sys import argv, stdin, stderr
 
 
 def log_error(e):
+    """
+    convert error to a pseudo db Value
+    :param e: the numerical value of he error
+    :return: the dB value, clamped to a minimum
+    """
     error = e if e >= 0.0 else -e
     return 10.0 * log10(error) if error > 1.0e-21 else -210.0
 
 
 def main():
+    """
+    Main method
+    """
     print "Error Plotter: {}".format(argv)
     if len(argv) < 3:
         raise Exception('>>> ERROR! Please supply a time variable name and a plotting interval <<<')
-    timeCoordinate = str(argv[1])
+    time_coordinate = str(argv[1])
     interval = int(argv[2])
-    ax1 = pyplot.figure().add_subplot(111)
+    left = pyplot.figure().add_subplot(111)
     pyplot.minorticks_on()
-    majorLocator = MultipleLocator(30)
-    minorLocator = MultipleLocator(10)
-    pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
+    major_locator = MultipleLocator(30)
+    minor_locator = MultipleLocator(10)
+    pyplot.grid(b=True, color='0.25', linestyle='-')
     pyplot.grid(b=True, which='minor', color='0.25', linestyle=':')
-    ax1.yaxis.set_major_locator(majorLocator)
-    ax1.yaxis.set_minor_locator(minorLocator)
-    ax1.set_xlabel('Time: ' + timeCoordinate, color='0.20')
-    ax1.set_ylabel('4-Velocity Norm Error', color='#006000')
-    ax1.set_ylim(-210.0, 0.0)
-    ax2 = ax1.twinx()
-    ax2.yaxis.set_major_locator(majorLocator)
-    ax2.yaxis.set_minor_locator(minorLocator)
-    ax2.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
-    ax2.set_ylim(-210.0, 0.0)
+    left.yaxis.set_major_locator(major_locator)
+    left.yaxis.set_minor_locator(minor_locator)
+    left.set_xlabel('Time: ' + time_coordinate, color='0.20')
+    left.set_ylabel('4-Velocity Norm Error', color='#006000')
+    left.set_ylim(-210.0, 0.0)
+    right = left.twinx()
+    right.yaxis.set_major_locator(major_locator)
+    right.yaxis.set_minor_locator(minor_locator)
+    right.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
+    right.set_ylim(-210.0, 0.0)
     pyplot.axhspan(-30.0, 0.0, facecolor='red', alpha=0.3)
     pyplot.axhspan(-60.0, -30.0, facecolor='orange', alpha=0.3)
     pyplot.axhspan(-90.0, -60.0, facecolor='yellow', alpha=0.3)
     pyplot.axhspan(-120.0, -90.0, facecolor='cyan', alpha=0.3)
     pyplot.axhspan(-210.0, -120.0, facecolor='green', alpha=0.3)
     count = 0
-    eCum = ePk = 0.0
+    e_cum = e_pk = 0.0
     line = stdin.readline()
     while line:  # build raw data arrays
         p = loads(line)
@@ -61,18 +69,18 @@ def main():
         e = e if e >= 0.0 else -e
         count += 1
         if count % interval == 0:
-            timeValue = p[timeCoordinate]
+            time_value = p[time_coordinate]
             if 'ER' in p:
-                ax2.plot(timeValue, log_error(p['ER']), color='blue', linestyle='-', marker='.', markersize=1)
+                right.plot(time_value, log_error(p['ER']), color='blue', linestyle='-', marker='.', markersize=1)
             if 'ETh' in p:
-                ax2.plot(timeValue, log_error(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
-            ax1.plot(timeValue, log_error(eCum / count), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
-            ax1.plot(timeValue, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=2)
+                right.plot(time_value, log_error(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
+            left.plot(time_value, log_error(e_cum / count), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
+            left.plot(time_value, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=2)
         line = stdin.readline()
-        eCum += e
-        ePk = ePk if ePk > e else e
-    ax1.annotate("Peak: " + str(log_error(ePk)), (0.0, 0.0), xytext=(0.25, 0.95), textcoords='figure fraction', color='0.20', )
-    ax1.annotate("Average: " + str(log_error(eCum / count)), (0.0, 0.0), xytext=(0.55, 0.95), textcoords='figure fraction', color='0.20', )
+        e_cum += e
+        e_pk = e_pk if e_pk > e else e
+    left.annotate("Peak: " + str(log_error(e_pk)), (0.0, 0.0), xytext=(0.25, 0.95), textcoords='figure fraction', color='0.20', )
+    left.annotate("Average: " + str(log_error(e_cum / count)), (0.0, 0.0), xytext=(0.55, 0.95), textcoords='figure fraction', color='0.20', )
     try:
         pyplot.show()
     except AttributeError as e:

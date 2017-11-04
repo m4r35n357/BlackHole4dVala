@@ -27,7 +27,7 @@ def isco (a, l):
     else:
         return 3.0 + z2 + sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2))
 
-def pSphere (a, l):
+def p_sphere (a, l):
     if a * l >= 0.0:
         return 2.0 * (1.0 + cos(2.0 / 3.0 * acos(-a if a >= 0.0 else a)))
     else:
@@ -71,8 +71,8 @@ def main():
     horizon = m * (1.0 + sqrt(1.0 - a**2))
     cauchy = m * (1.0 - sqrt(1.0 - a**2))
     #  set up the scene
-    windowName = 'orbit'
-    my_scene = display(title=windowName)
+    window_name = 'orbit'
+    my_scene = display(title=window_name)
     my_scene.center = centre = (0.0, 0.0, 0.0)
     my_scene.width = my_scene.height = 1024
     my_scene.range = (20.0, 20.0, 20.0)
@@ -97,9 +97,9 @@ def main():
     ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((isco(a, l), 0.5 * pi, 0.0), a)[0],
          color=color.magenta, thickness=0.01)
     # Photon Sphere(s)
-    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((pSphere(a, l), 0.5 * pi, 0.0), a)[0],
+    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((p_sphere(a, l), 0.5 * pi, 0.0), a)[0],
          color=color.orange, thickness=0.01)
-    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((pSphere(-a, l), 0.5 * pi, 0.0), a)[0],
+    ring(pos=centre, axis=(0, 0, 1), radius=to_rectangular((p_sphere(-a, l), 0.5 * pi, 0.0), a)[0],
          color=color.orange, thickness=0.01)
     #photons = 2.0 * to_rectangular((pSphere(a, l), 0.5 * pi, 0.0), a)[0]
     #ellipsoid(pos=centre, length=photons, height=photons, width=2.0*to_rectangular((pSphere(a, l), 0.0, 0.0), a)[2],
@@ -116,20 +116,20 @@ def main():
     # animate!
     ball = sphere()  # Particle
     counter = 0
-    dataLine = stdin.readline()
+    data_line = stdin.readline()
     t_old = 0.0
-    eCum = 0.0
-    while dataLine:  # build raw data arrays
+    e_cum = 0.0
+    while data_line:  # build raw data arrays
         rate(60)
         if counter % 1000 == 0:
             ball.visible = False
-            ball = sphere(radius = 0.2)  # Particle
-            ball.trail = curve(size = 1)  #  trail
-        data = loads(dataLine)
+            ball = sphere(radius=0.2)  # Particle
+            ball.trail = curve(size=1)  #  trail
+        data = loads(data_line)
         error = data['v4e']
         e = error if error >= 0.0 else -error
         counter += 1
-        ball.color = error_colour(eCum / counter)
+        ball.color = error_colour(e_cum / counter)
         r = data['r']
         th = data['th']
         ph = data['ph']
@@ -137,7 +137,7 @@ def main():
         if data['tP'] * t_old < 0 or data['tP'] - t_old > 100.0:
             ball.color = color.white
         else:
-            ball.trail.append(pos = ball.pos, color = error_colour(e))
+            ball.trail.append(pos=ball.pos, color=error_colour(e))
         if mu and fabs(mu) > 0.0:
             hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(data['tP']), data['tau'], data['t'],
                                                                                                  r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
@@ -146,9 +146,9 @@ def main():
                                                                                         r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         t_old = data['tP']
-        eCum += e
-        dataLine = stdin.readline()
-    print argv[0] + " Average error: " + str(10.0 * log10(eCum / counter))
+        e_cum += e
+        data_line = stdin.readline()
+    print argv[0] + " Average error: " + str(10.0 * log10(e_cum / counter))
 
 if __name__ == "__main__":
     main()

@@ -26,7 +26,7 @@ def main():
     coordinate2 = argv[3]
     line = stdin.readline()
     ax1 = pyplot.figure().add_subplot(111)
-    pyplot.grid(b=True, which='major', color='0.25', linestyle='-')
+    pyplot.grid(b=True, color='0.25', linestyle='-')
     ax1.set_xlabel(coordinate1, color='k')
     ax1.set_ylabel(coordinate2, color='b')
     n = 0
