@@ -12,6 +12,32 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+void add_test_solve_symplectic_start_non_0_kl6() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_kl6", () => {
+        var start = 50.0;
+        var end = 100;
+        var step = 0.00005;
+        var interval = 10;
+        var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
+        var counts = model.solve(Simulations.getIntegrator(model, step, "kl6"), step, start, end, interval);
+        assert(counts[0] == 85532);
+        assert(counts[1] == 3215);
+    });
+}
+
+void add_test_solve_symplectic_start_non_0_kl8() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_kl8", () => {
+        var start = 50.0;
+        var end = 100;
+        var step = 0.00005;
+        var interval = 10;
+        var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
+        var counts = model.solve(Simulations.getIntegrator(model, step, "kl8"), step, start, end, interval);
+        assert(counts[0] == 85532);
+        assert(counts[1] == 3215);
+    });
+}
+
 void add_test_solve_symp_polar_b1() {
     Test.add_func ("/KdS/test_solve_symp_polar_b1", () => {
         var start = 0.0;
@@ -274,6 +300,9 @@ void add_test_solve_symplectic_start_non_0_sb8() {
 
 void main (string[] args) {
     Test.init(ref args);
+
+    add_test_solve_symplectic_start_non_0_kl6();
+    add_test_solve_symplectic_start_non_0_kl8();
 
     add_test_solve_symp_polar_b1();
     add_test_solve_symp_polar_b2();

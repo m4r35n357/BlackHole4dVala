@@ -348,7 +348,50 @@ namespace Simulations {
     }
 
     /**
-     * Fourth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Generic composed integrator abstract superclass, leaves integration method selection to subclasses
+     */
+    protected abstract class GenericComposer : SymplecticBase {
+        /**
+         * Generic composition coefficients
+         */
+        protected double[] delta;
+
+        /**
+         * Size of coefficients array
+         */
+        protected int n;
+
+        /**
+         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
+         *
+         * @param h the time step
+         */
+        protected GenericComposer (IModel model, double h, double[] coefficients) {
+            base(model, h);
+            n = 2 * coefficients.length - 1;
+            delta = new double[n];
+            var m = coefficients.length - 1;
+            for (var i = 0; i < m; i++) {
+                delta[i] = coefficients[i];
+                delta[n - 1 - i] = coefficients[i];
+            }
+            delta[m] = coefficients[m];
+        }
+
+        /**
+         * Generic integration step.  Calls {@link SymplecticBase.base2} with delta array.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            for (var i = 0; i < n; i++) {
+                base2(delta[i]);
+            }
+        }
+    }
+
+    /**
+     * Fourth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
      */
     public class FourthOrderSuzuki : Suzuki {
 
@@ -371,7 +414,7 @@ namespace Simulations {
     }
 
     /**
-     * Fourth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Fourth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
      */
     public class FourthOrderYoshida : Yoshida {
 
@@ -394,7 +437,7 @@ namespace Simulations {
     }
 
     /**
-     * Sixth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Sixth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
      */
     public class SixthOrderSuzuki : Suzuki {
 
@@ -417,7 +460,7 @@ namespace Simulations {
     }
 
     /**
-     * Sixth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Sixth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
      */
     public class SixthOrderYoshida : Yoshida {
 
@@ -440,7 +483,27 @@ namespace Simulations {
     }
 
     /**
-     * Eightth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Sixth-order symplectic integrator concrete subclass using Kahan-Li composition s9odr6b.  This integrator is time symmetrical.
+     */
+    public class SixthOrderKahanLi9o6b : GenericComposer {
+
+        /**
+         * {@inheritDoc}
+         * @see GenericComposer.GenericComposer
+         */
+        public SixthOrderKahanLi9o6b (IModel model, double h) {
+            base(model, h, {
+                            0.39103020330868478817,
+                            0.33403728961113601749,
+                            -0.70622728118756134346,
+                            0.081877549648059445768,
+                            0.79856447723936218406
+                           });
+        }
+    }
+
+    /**
+     * Eightth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
      */
     public class EightthOrderSuzuki : Suzuki {
 
@@ -463,7 +526,7 @@ namespace Simulations {
     }
 
     /**
-     * Eightth-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Eightth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
      */
     public class EightthOrderYoshida : Yoshida {
 
@@ -486,6 +549,30 @@ namespace Simulations {
     }
 
     /**
+     * Eightth-order symplectic integrator concrete subclass using Kahan-Li composition s17odr8b.  This integrator is time symmetrical.
+     */
+    public class EightthOrderKahanLi17o8b : GenericComposer {
+
+        /**
+         * {@inheritDoc}
+         * @see GenericComposer.GenericComposer
+         */
+        public EightthOrderKahanLi17o8b (IModel model, double h) {
+            base(model, h, {
+                            0.12713692773487857916,
+                            0.56170253798880269972,
+                            -0.38253471994883018888,
+                            0.16007605629464743119,
+                            -0.40181637432680696673,
+                            0.18736671654227849724,
+                            0.26070870920779240570,
+                            0.29039738812516162389,
+                            -0.60607448323584816258
+                           });
+        }
+    }
+
+    /**
      * Static factory for producing subclass instances from its type argument according to the following table:
      *
      * || ''type'' || ''Subclass'' ||  ''Description'' ||
@@ -497,6 +584,8 @@ namespace Simulations {
      * || "yb4" || {@link FourthOrderYoshida} || 4th Order, Symplectic, Reversible ||
      * || "yb6" || {@link SixthOrderYoshida} || 6th Order, Symplectic, Reversible ||
      * || "yb8" || {@link EightthOrderYoshida} || 8th Order, Symplectic, Reversible ||
+     * || "kl6" || {@link SixthOrderKahanLi9o6b} || 6th Order, Symplectic, Reversible ||
+     * || "kl8" || {@link EightthOrderKahanLi17o8b} || 8th Order, Symplectic, Reversible ||
      *
      * @param h the time step
      * @param type the selected implementation
@@ -529,6 +618,12 @@ namespace Simulations {
             case "yb8":
                 stderr.printf("8th Order Symplectic Integrator (using Yoshida Composition)\n");
                 return new EightthOrderYoshida(model, h);
+            case "kl6":
+                stderr.printf("6th Order Symplectic Integrator (using Kahan-Li s9odr6b Composition)\n");
+                return new SixthOrderKahanLi9o6b(model, h);
+            case "kl8":
+                stderr.printf("8th Order Symplectic Integrator (using Kahan-Li s17odr8b Composition)\n");
+                return new EightthOrderKahanLi17o8b(model, h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);
         assert_not_reached();
