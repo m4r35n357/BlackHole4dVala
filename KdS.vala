@@ -45,19 +45,19 @@ public static void main (string[] args) {
                     var model = new Simulations.Oscillator(o.get_double_member("m"),
                                                o.get_double_member("k"),
                                                o.get_double_member("x"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Pendulum":
                     var model = new Simulations.Pendulum(o.get_double_member("g"),
                                              o.get_double_member("m"),
                                              o.get_double_member("length"),
                                              o.get_double_member("angle"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Newton":
                     var model = new Simulations.Newton(o.get_double_member("Lfac"),
                                            o.get_double_member("r0"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
                     var model = new Simulations.Bh3d(o.get_double_member("lambda"),
@@ -69,7 +69,7 @@ public static void main (string[] args) {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "NBody":
                     Simulations.Body[] bodies = {};
@@ -98,7 +98,7 @@ public static void main (string[] args) {
                     }
                     var model = new Simulations.NBody(bodies, o.get_double_member("g"),
                                                   o.get_double_member("errorLimit"));
-                    model.solve(Simulations.getIntegrator(model, step, type), step, start, end, plotratio);
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 default:
                     stderr.printf("Bad simulator; should be [ Newton | KerrDeSitter | NBody ], found {%s}\n", simulator);

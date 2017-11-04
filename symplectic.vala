@@ -15,7 +15,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using GLib.Math;
 
 namespace Simulations {
-
     /**
      * External user interface for the physical model
      */
@@ -24,7 +23,7 @@ namespace Simulations {
          * Externally visible method. It sets up, controls and terminates the simulation,
          * writing its data to stdout.
          *
-         * Sole method called by main(), calls {@link ISymplectic.step} on the selected integrator once per iteration
+         * Sole method called by main(), calls {@link Integrators.ISymplectic.step} on the selected integrator once per iteration
          *
          * @param integrator the selected implementation
          * @param h the time step
@@ -34,7 +33,7 @@ namespace Simulations {
          *
          * @return an array of iteration counters
          */
-        public abstract int64[] solve (ISymplectic integrator, double h, double start, double end, int64 tr);
+        public abstract int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr);
     }
 
     /**
@@ -42,26 +41,29 @@ namespace Simulations {
      */
     public interface IModel : GLib.Object {
         /**
-         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link ISymplectic.step}
+         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link Integrators.ISymplectic.step}
          *
          * @param d scaled time step
          */
         public abstract void qUpdate (double d);
 
         /**
-         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link ISymplectic.step}
+         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link Integrators.ISymplectic.step}
          *
          * @param c scaled time step
          */
         public abstract void pUpdate (double c);
     }
+}
+
+namespace Integrators {
 
     /**
      * Internal interface for a model to drive the symplectic integrator
      */
     public interface ISymplectic : GLib.Object {
         /**
-         * Should be called by {@link ISolver.solve} as needed, in turn calls {@link IModel.qUpdate} and {@link IModel.pUpdate}
+         * Should be called by {@link Simulations.ISolver.solve} as needed, in turn calls {@link Simulations.IModel.qUpdate} and {@link Simulations.IModel.pUpdate}
          */
         public abstract void step ();
     }
@@ -74,7 +76,7 @@ namespace Simulations {
         /**
          * The physical model, defined at subclass construction
          */
-        protected IModel model;
+        protected Simulations.IModel model;
 
         /**
          * Simulation time step, defined at subclass construction
@@ -86,13 +88,13 @@ namespace Simulations {
          *
          * @param h the time step
          */
-        protected SymplecticBase (IModel model, double h) {
+        protected SymplecticBase (Simulations.IModel model, double h) {
             this.model = model;
             this.h = h;
         }
 
         /**
-         * Stormer-Verlet base integrator.  Performs the following calls on {@link IModel} per iteration:
+         * Stormer-Verlet base integrator.  Performs the following calls on {@link Simulations.IModel} per iteration:
          *
          * {{{
          * qUpdate(s * h/2)
@@ -109,7 +111,7 @@ namespace Simulations {
         }
 
         /**
-         * Subclasses should perform one integration step by executing alternating {@link IModel.qUpdate} and {@link IModel.pUpdate}
+         * Subclasses should perform one integration step by executing alternating {@link Simulations.IModel.qUpdate} and {@link Simulations.IModel.pUpdate}
          * methods.
          *
          * @see ISymplectic.step
@@ -126,12 +128,12 @@ namespace Simulations {
          * {@inheritDoc}
          * @see SymplecticBase.SymplecticBase
          */
-        public FirstOrder (IModel model, double h) {
+        public FirstOrder (Simulations.IModel model, double h) {
             base(model, h);
         }
 
         /**
-         * 1st order integration step.  Performs the following calls on {@link IModel} per iteration:
+         * 1st order integration step.  Performs the following calls on {@link Simulations.IModel} per iteration:
          *
          * {{{
          * qUpdate(h)
@@ -157,7 +159,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see SymplecticBase.SymplecticBase
          */
-        public SecondOrder (IModel model, double h) {
+        public SecondOrder (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -191,7 +193,7 @@ namespace Simulations {
          *
          * @param h the time step
          */
-        protected Suzuki (IModel model, double h) {
+        protected Suzuki (Simulations.IModel model, double h) {
             base(model, h);
             x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
             y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
@@ -285,7 +287,7 @@ namespace Simulations {
          *
          * @param h the time step
          */
-        protected Yoshida (IModel model, double h) {
+        protected Yoshida (Simulations.IModel model, double h) {
             base(model, h);
             x1 = 1.0 / (2.0 - pow(2.0, (1.0 / 7.0)));
             y1 = 1.0 / (2.0 - pow(2.0, (1.0 / 5.0)));
@@ -366,7 +368,7 @@ namespace Simulations {
          *
          * @param h the time step
          */
-        protected GenericComposer (IModel model, double h, double[] coefficients) {
+        protected GenericComposer (Simulations.IModel model, double h, double[] coefficients) {
             base(model, h);
             n = 2 * coefficients.length - 1;
             delta = new double[n];
@@ -399,7 +401,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Suzuki.Suzuki
          */
-        public FourthOrderSuzuki (IModel model, double h) {
+        public FourthOrderSuzuki (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -422,7 +424,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Yoshida.Yoshida
          */
-        public FourthOrderYoshida (IModel model, double h) {
+        public FourthOrderYoshida (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -445,7 +447,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Suzuki.Suzuki
          */
-        public SixthOrderSuzuki (IModel model, double h) {
+        public SixthOrderSuzuki (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -468,7 +470,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Yoshida.Yoshida
          */
-        public SixthOrderYoshida (IModel model, double h) {
+        public SixthOrderYoshida (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -491,7 +493,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see GenericComposer.GenericComposer
          */
-        public SixthOrderKahanLi9o6b (IModel model, double h) {
+        public SixthOrderKahanLi9o6b (Simulations.IModel model, double h) {
             base(model, h, {
                             0.39103020330868478817,
                             0.33403728961113601749,
@@ -511,7 +513,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Suzuki.Suzuki
          */
-        public EightthOrderSuzuki (IModel model, double h) {
+        public EightthOrderSuzuki (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -534,7 +536,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see Yoshida.Yoshida
          */
-        public EightthOrderYoshida (IModel model, double h) {
+        public EightthOrderYoshida (Simulations.IModel model, double h) {
             base(model, h);
         }
 
@@ -557,7 +559,7 @@ namespace Simulations {
          * {@inheritDoc}
          * @see GenericComposer.GenericComposer
          */
-        public EightthOrderKahanLi17o8b (IModel model, double h) {
+        public EightthOrderKahanLi17o8b (Simulations.IModel model, double h) {
             base(model, h, {
                             0.12713692773487857916,
                             0.56170253798880269972,
@@ -592,7 +594,7 @@ namespace Simulations {
      *
      * @return concrete implementation of a symplectic integrator
      */
-    public static ISymplectic getIntegrator (IModel model, double h, string type) {
+    public static ISymplectic getIntegrator (Simulations.IModel model, double h, string type) {
         switch (type) {
             case "b1":
                 stderr.printf("1st Order Symplectic Integrator\n");
