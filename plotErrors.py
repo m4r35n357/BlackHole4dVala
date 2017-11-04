@@ -19,6 +19,8 @@ from matplotlib import pyplot
 from matplotlib.ticker import MultipleLocator
 from sys import argv, stdin, stderr
 
+import os
+
 
 def log_error(e):
     """
@@ -35,10 +37,14 @@ def main():
     Main method
     """
     print "Error Plotter: {}".format(argv)
-    if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply a time variable name and a plotting interval <<<')
-    time_coordinate = str(argv[1])
-    interval = int(argv[2])
+    if len(argv) < 5:
+        raise Exception(
+            '>>> ERROR! Please supply an integrator type, a time step, a time variable name and a plotting interval <<<')
+    executable = os.environ['exe']
+    integrator_type = str(argv[1])
+    time_step = str(argv[2])
+    time_coordinate = str(argv[3])
+    interval = int(argv[4])
     left = pyplot.figure().add_subplot(111)
     pyplot.minorticks_on()
     major_locator = MultipleLocator(30)
@@ -74,18 +80,22 @@ def main():
                 right.plot(time_value, log_error(p['ER']), color='blue', linestyle='-', marker='.', markersize=1)
             if 'ETh' in p:
                 right.plot(time_value, log_error(p['ETh']), color='red', linestyle='-', marker='.', markersize=1)
-            left.plot(time_value, log_error(e_cum / count), color='black', linestyle='-', marker='.', markersize=1, zorder=10)
+            left.plot(time_value, log_error(e_cum / count), color='black', linestyle='-', marker='.', markersize=1,
+                      zorder=10)
             left.plot(time_value, log_error(e), color='#000f00', linestyle='-', marker='.', markersize=2)
         line = stdin.readline()
         e_cum += e
         e_pk = e_pk if e_pk > e else e
-    left.annotate("Peak: " + str(log_error(e_pk)), (0.0, 0.0), xytext=(0.25, 0.95), textcoords='figure fraction', color='0.20', )
-    left.annotate("Average: " + str(log_error(e_cum / count)), (0.0, 0.0), xytext=(0.55, 0.95), textcoords='figure fraction', color='0.20', )
+    left.annotate(executable + " - " + integrator_type + ", ts = " + time_step, (0.0, 0.0),
+                  xytext=(0.15, 0.96), textcoords='figure fraction', color='0.20', )
+    left.annotate("Peak: " + str(log_error(e_pk)) + ",   Average: " + str(log_error(e_cum / count)), (0.0, 0.0),
+                  xytext=(0.25, 0.92), textcoords='figure fraction', color='0.20', )
     try:
         pyplot.show()
     except AttributeError as e:
         print('ATTRIBUTE ERROR: ' + str(argv[0]) + ':' + str(e))
         exit(-3)
+
 
 if __name__ == "__main__":
     main()
