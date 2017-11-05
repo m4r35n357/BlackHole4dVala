@@ -94,23 +94,6 @@ namespace Integrators {
         }
 
         /**
-         * Stormer-Verlet base integrator.  Performs the following calls on {@link Simulations.IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(s * h/2)
-         * pUpdate(s * h)
-         * qUpdate(s * h/2)
-         * }}}
-         *
-         * where h is the time step.
-         */
-        protected void base2 (double s) {
-            model.qUpdate(h * s * 0.5);
-            model.pUpdate(h * s);
-            model.qUpdate(h * s * 0.5);
-        }
-
-        /**
          * Subclasses should perform one integration step by executing alternating {@link Simulations.IModel.qUpdate} and {@link Simulations.IModel.pUpdate}
          * methods.
          *
@@ -164,7 +147,24 @@ namespace Integrators {
         }
 
         /**
-         * 2nd order integration step.  Calls {@link SymplecticBase.base2} with s = 1.
+         * Stormer-Verlet base integrator.  Performs the following calls on {@link Simulations.IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(s * h/2)
+         * pUpdate(s * h)
+         * qUpdate(s * h/2)
+         * }}}
+         *
+         * where h is the time step.
+         */
+        protected void base2 (double s) {
+            model.qUpdate(h * s * 0.5);
+            model.pUpdate(h * s);
+            model.qUpdate(h * s * 0.5);
+        }
+
+        /**
+         * 2nd order integration step.  Calls {@link base2} with s = 1.
          *
          * @see SymplecticBase.step
          */
@@ -174,37 +174,28 @@ namespace Integrators {
     }
 
     /**
-     * Suzuki composed integrator abstract superclass, leaves integration method selection to subclasses
+     * Fourth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
      */
-    protected abstract class Suzuki : SymplecticBase {
+    public class FourthOrderSuzuki : SecondOrder {
 
         /**
-         * Suzuki composition coefficients
+         * Composition coefficients
          */
-        protected double x1;
-        protected double y1;
         protected double z1;
-        protected double x3;
-        protected double y3;
         protected double z3;
 
         /**
-         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
-         *
-         * @param h the time step
+         * {@inheritDoc}
+         * @see SymplecticBase.SymplecticBase
          */
-        protected Suzuki (Simulations.IModel model, double h) {
+        public FourthOrderSuzuki (Simulations.IModel model, double h) {
             base(model, h);
-            x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
-            y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
             z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
-            x3 = 1.0 - 4.0 * x1;
-            y3 = 1.0 - 4.0 * y1;
             z3 = 1.0 - 4.0 * z1;
         }
 
         /**
-         * Suzuki composition from 2nd order to 4th order.  Performs the following calls to {@link SymplecticBase.base2} per iteration:
+         * Suzuki composition from 2nd order to 4th order.  Performs the following calls to {@link SecondOrder.base2} per iteration:
          *
          * {{{
          * base2(s * z1)
@@ -222,6 +213,37 @@ namespace Integrators {
             base2(s * z3);
             base2(s * z1);
             base2(s * z1);
+        }
+
+        /**
+         * 4th order integration step.  Calls {@link base4} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base4(1.0);
+        }
+    }
+
+    /**
+     * Sixth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
+     */
+    public class SixthOrderSuzuki : FourthOrderSuzuki {
+
+        /**
+         * Composition coefficients
+         */
+        protected double y1;
+        protected double y3;
+
+        /**
+         * {@inheritDoc}
+         * @see FourthOrderSuzuki.FourthOrderSuzuki
+         */
+        public SixthOrderSuzuki (Simulations.IModel model, double h) {
+            base(model, h);
+            y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            y3 = 1.0 - 4.0 * y1;
         }
 
         /**
@@ -246,6 +268,37 @@ namespace Integrators {
         }
 
         /**
+         * 6th order integration step.  Calls {@link base6} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base6(1.0);
+        }
+    }
+
+    /**
+     * Eightth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
+     */
+    public class EightthOrderSuzuki : SixthOrderSuzuki {
+
+        /**
+         * Composition coefficients
+         */
+        protected double x1;
+        protected double x3;
+
+        /**
+         * {@inheritDoc}
+         * @see SixthOrderSuzuki.SixthOrderSuzuki
+         */
+        public EightthOrderSuzuki (Simulations.IModel model, double h) {
+            base(model, h);
+            x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+            x3 = 1.0 - 4.0 * x1;
+        }
+
+        /**
          * Suzuki composition from 6th order to 8th order.  Performs the following calls per iteration:
          *
          * {{{
@@ -265,40 +318,40 @@ namespace Integrators {
             base6(s * x1);
             base6(s * x1);
         }
+
+        /**
+         * 8th order integration step.  Calls {@link base8} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base8(1.0);
+        }
     }
 
     /**
-     * Yoshida composed integrator abstract superclass, leaves integration method selection to subclasses
+     * Fourth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
      */
-    protected abstract class Yoshida : SymplecticBase {
+    public class FourthOrderYoshida : SecondOrder {
 
         /**
-         * Yoshida composition coefficients
+         * Composition coefficients
          */
-        protected double x1;
-        protected double y1;
         protected double z1;
-        protected double x2;
-        protected double y2;
         protected double z2;
 
         /**
-         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
-         *
-         * @param h the time step
+         * {@inheritDoc}
+         * @see SymplecticBase.SymplecticBase
          */
-        protected Yoshida (Simulations.IModel model, double h) {
+        public FourthOrderYoshida (Simulations.IModel model, double h) {
             base(model, h);
-            x1 = 1.0 / (2.0 - pow(2.0, (1.0 / 7.0)));
-            y1 = 1.0 / (2.0 - pow(2.0, (1.0 / 5.0)));
             z1 = 1.0 / (2.0 - pow(2.0, (1.0 / 3.0)));
-            x2 = 1.0 - 2.0 * x1;
-            y2 = 1.0 - 2.0 * y1;
             z2 = 1.0 - 2.0 * z1;
         }
 
         /**
-         * Yoshida composition from 2nd order to 4th order.  Performs the following calls to {@link SymplecticBase.base2} per iteration:
+         * Yoshida composition from 2nd order to 4th order.  Performs the following calls to {@link SecondOrder.base2} per iteration:
          *
          * {{{
          * base2(s * z1)
@@ -312,6 +365,37 @@ namespace Integrators {
             base2(s * z1);
             base2(s * z2);
             base2(s * z1);
+        }
+
+        /**
+         * 4th order integration step.  Calls {@link base4} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base4(1.0);
+        }
+    }
+
+    /**
+     * Sixth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
+     */
+    public class SixthOrderYoshida : FourthOrderYoshida {
+
+        /**
+         * Composition coefficients
+         */
+        protected double y1;
+        protected double y2;
+
+        /**
+         * {@inheritDoc}
+         * @see FourthOrderYoshida.FourthOrderYoshida
+         */
+        public SixthOrderYoshida (Simulations.IModel model, double h) {
+            base(model, h);
+            y1 = 1.0 / (2.0 - pow(2.0, (1.0 / 5.0)));
+            y2 = 1.0 - 2.0 * y1;
         }
 
         /**
@@ -332,6 +416,37 @@ namespace Integrators {
         }
 
         /**
+         * 6th order integration step.  Calls {@link base6} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base6(1.0);
+        }
+    }
+
+    /**
+     * Eightth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
+     */
+    public class EightthOrderYoshida : SixthOrderYoshida {
+
+        /**
+         * Composition coefficients
+         */
+        protected double x1;
+        protected double x2;
+
+        /**
+         * {@inheritDoc}
+         * @see SixthOrderYoshida.SixthOrderYoshida
+         */
+        public EightthOrderYoshida (Simulations.IModel model, double h) {
+            base(model, h);
+            x1 = 1.0 / (2.0 - pow(2.0, (1.0 / 7.0)));
+            x2 = 1.0 - 2.0 * x1;
+        }
+
+        /**
          * Yoshida composition from 6th order to 8th order.  Performs the following calls per iteration:
          *
          * {{{
@@ -347,12 +462,21 @@ namespace Integrators {
             base6(s * x2);
             base6(s * x1);
         }
+
+        /**
+         * 8th order integration step.  Calls {@link base8} with s = 1.
+         *
+         * @see SymplecticBase.step
+         */
+        public override void step () {
+            base8(1.0);
+        }
     }
 
     /**
      * Generic composed integrator abstract superclass, leaves integration method selection to subclasses
      */
-    protected abstract class GenericComposer : SymplecticBase {
+    protected abstract class GenericComposer : SecondOrder {
         /**
          * Generic composition coefficients
          */
@@ -364,6 +488,8 @@ namespace Integrators {
         protected int n;
 
         /**
+         * Populates a symmetric delta array from the asymmetric coefficients passed in.
+         *
          * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
          *
          * @param h the time step
@@ -381,7 +507,7 @@ namespace Integrators {
         }
 
         /**
-         * Generic integration step.  Calls {@link SymplecticBase.base2} with delta array.
+         * Generic integration step.  Calls {@link SecondOrder.base2} with delta array.
          *
          * @see SymplecticBase.step
          */
@@ -389,98 +515,6 @@ namespace Integrators {
             for (var i = 0; i < n; i++) {
                 base2(delta[i]);
             }
-        }
-    }
-
-    /**
-     * Fourth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
-     */
-    public class FourthOrderSuzuki : Suzuki {
-
-        /**
-         * {@inheritDoc}
-         * @see Suzuki.Suzuki
-         */
-        public FourthOrderSuzuki (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 4th order integration step.  Calls {@link Suzuki.base4} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base4(1.0);
-        }
-    }
-
-    /**
-     * Fourth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
-     */
-    public class FourthOrderYoshida : Yoshida {
-
-        /**
-         * {@inheritDoc}
-         * @see Yoshida.Yoshida
-         */
-        public FourthOrderYoshida (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 4th order integration step.  Calls {@link Yoshida.base4} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base4(1.0);
-        }
-    }
-
-    /**
-     * Sixth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
-     */
-    public class SixthOrderSuzuki : Suzuki {
-
-        /**
-         * {@inheritDoc}
-         * @see Suzuki.Suzuki
-         */
-        public SixthOrderSuzuki (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 6th order integration step.  Calls {@link Suzuki.base6} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base6(1.0);
-        }
-    }
-
-    /**
-     * Sixth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
-     */
-    public class SixthOrderYoshida : Yoshida {
-
-        /**
-         * {@inheritDoc}
-         * @see Yoshida.Yoshida
-         */
-        public SixthOrderYoshida (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 6th order integration step.  Calls {@link Yoshida.base6} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base6(1.0);
         }
     }
 
@@ -501,52 +535,6 @@ namespace Integrators {
                             0.081877549648059445768,
                             0.79856447723936218406
                            });
-        }
-    }
-
-    /**
-     * Eightth-order symplectic integrator concrete subclass using Suzuki composition.  This integrator is time symmetrical.
-     */
-    public class EightthOrderSuzuki : Suzuki {
-
-        /**
-         * {@inheritDoc}
-         * @see Suzuki.Suzuki
-         */
-        public EightthOrderSuzuki (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 8th order integration step.  Calls {@link Suzuki.base8} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base8(1.0);
-        }
-    }
-
-    /**
-     * Eightth-order symplectic integrator concrete subclass using Yoshida composition.  This integrator is time symmetrical.
-     */
-    public class EightthOrderYoshida : Yoshida {
-
-        /**
-         * {@inheritDoc}
-         * @see Yoshida.Yoshida
-         */
-        public EightthOrderYoshida (Simulations.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 8th order integration step.  Calls {@link Yoshida.base8} with s = 1.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            base8(1.0);
         }
     }
 
