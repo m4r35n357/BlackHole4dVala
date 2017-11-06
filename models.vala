@@ -274,6 +274,89 @@ namespace Simulations {
     }
 
     /**
+     * Hamiltonian model for Henon-Heiles Potential
+     */
+    public class HenonHeiles : IModel, ISolver, GLib.Object {
+
+        private double H0;
+        private double lambda = 1.0;
+        private double x;
+        private double y;
+        private double Ux = 0.0;
+        private double Uy = 0.0;
+
+        /**
+         * Public constructor
+         *
+         * @param x0 the initial displacement in x
+         * @param y0 the initial displacement in y
+         */
+        public HenonHeiles (double x0, double y0) {
+            stderr.printf("Henon-Heiles Potential\n");
+            this.x = x0;
+            this.y = y0;
+            H0 = H();
+        }
+
+       /**
+        *
+        * Total (kinetic + potential) energy of the system, T + V
+        *
+        * @return the Hamiltonian
+        */
+        private double H () {
+            return 0.5 * (Ux * Ux + Uy * Uy + x * x + y * y) + lambda * (x * x * y - y * y * y / 3.0);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @see IModel.qUpdate
+         */
+        public void qUpdate (double c) {
+            x += c * Ux;
+            y += c * Uy;
+        }
+
+        /**
+         * {@inheritDoc}
+         * @see IModel.pUpdate
+         */
+        public void pUpdate (double d) {
+            Ux -= d * (x + 2.0 * lambda * x * y);
+            Uy -= d * (y + lambda * (x * x - y * y));
+        }
+
+        /**
+         * {@inheritDoc}
+         * @see ISolver.solve
+         */
+        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+            int64 i = 0;
+            double t = 0.0;
+            while (t < end) {
+                if ((t > start) && (i % tr == 0)) {
+                    output(t);
+                }
+                integrator.step();
+                i += 1;
+                t = i * h;
+            }
+            output(t);
+            return { i };
+        }
+
+        /**
+         * Write the simulated data to STDOUT as a JSON string
+         *
+         * @param time absolute Newtonian time
+         */
+        private void output (double time) {
+            stdout.printf("{\"tau\":%.9e,\"v4e\":%.9e,\"t\":%.9e,\"x\":%.9e,\"xP\":%.9e,\"y\":%.9e,\"yP\":%.9e}\n",
+                            time, H() - H0, time, x, Ux, y, Uy);
+        }
+    }
+
+    /**
      * Description of a single Newtonian body using its coordinates, momenta and mass
      */
     public class Body : GLib.Object {

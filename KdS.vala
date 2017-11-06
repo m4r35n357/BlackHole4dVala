@@ -42,21 +42,50 @@ public static void main (string[] args) {
             ("yb4" == type) || ("yb6" == type) || ("yb8" == type) || ("kl6" == type) || ("kl8" == type)) {
             switch (simulator) {
                 case "Oscillator":
-                    var model = new Simulations.Oscillator(o.get_double_member("m"),
-                                               o.get_double_member("k"),
-                                               o.get_double_member("x"));
+                    var model = new Simulations.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
                     model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Pendulum":
                     var model = new Simulations.Pendulum(o.get_double_member("g"),
-                                             o.get_double_member("m"),
-                                             o.get_double_member("length"),
-                                             o.get_double_member("angle"));
+                                                         o.get_double_member("m"),
+                                                         o.get_double_member("length"),
+                                                         o.get_double_member("angle"));
                     model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "Newton":
-                    var model = new Simulations.Newton(o.get_double_member("Lfac"),
-                                           o.get_double_member("r0"));
+                    var model = new Simulations.Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
+                    break;
+                case "HenonHeiles":
+                    var model = new Simulations.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
+                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
+                    break;
+                case "NBody":
+                    Simulations.Body[] bodies = {};
+                    foreach (var node in o.get_array_member("bodies").get_elements()) {
+                        var body = node.get_object();
+                        var m = body.get_double_member("mass");
+                        if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
+                            bodies += new Simulations.Body(body.get_double_member("qX"),
+                                                           body.get_double_member("qY"),
+                                                           body.get_double_member("qZ"),
+                                                           body.get_double_member("pX"),
+                                                           body.get_double_member("pY"),
+                                                           body.get_double_member("pZ"),
+                                                           m);
+                        } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
+                            bodies += new Simulations.Body(body.get_double_member("qX"),
+                                                           body.get_double_member("qY"),
+                                                           body.get_double_member("qZ"),
+                                                           body.get_double_member("vX") * m,
+                                                           body.get_double_member("vY") * m,
+                                                           body.get_double_member("vZ") * m,
+                                                           m);
+                        } else {
+                            stderr.printf("Mixed use of momenta and velocity\n");
+                        }
+                    }
+                    var model = new Simulations.NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
                     model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
@@ -69,35 +98,6 @@ public static void main (string[] args) {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
-                    break;
-                case "NBody":
-                    Simulations.Body[] bodies = {};
-                    foreach (var node in o.get_array_member("bodies").get_elements()) {
-                        var body = node.get_object();
-                        var m = body.get_double_member("mass");
-                        if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                            bodies += new Simulations.Body(body.get_double_member("qX"),
-                                               body.get_double_member("qY"),
-                                               body.get_double_member("qZ"),
-                                               body.get_double_member("pX"),
-                                               body.get_double_member("pY"),
-                                               body.get_double_member("pZ"),
-                                               m);
-                        } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                            bodies += new Simulations.Body(body.get_double_member("qX"),
-                                               body.get_double_member("qY"),
-                                               body.get_double_member("qZ"),
-                                               body.get_double_member("vX") * m,
-                                               body.get_double_member("vY") * m,
-                                               body.get_double_member("vZ") * m,
-                                               m);
-                        } else {
-                            stderr.printf("Mixed use of momenta and velocity\n");
-                        }
-                    }
-                    var model = new Simulations.NBody(bodies, o.get_double_member("g"),
-                                                  o.get_double_member("errorLimit"));
                     model.solve(Integrators.getIntegrator(model, step, type), step, start, end, plotratio);
                     break;
                 default:
