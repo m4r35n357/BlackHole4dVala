@@ -31,16 +31,16 @@ program KdS
         case ("b2")
             write (0, *) "Fortran Second Order Symplectic Integrator"
             call solve(second_order)
-        case ("sb4")
+        case ("b4")
             write (0, *) "Fortran Fourth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(fourth_order)
-        case ("sb6")
+        case ("b6")
             write (0, *) "Fortran Sixth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(sixth_order)
-        case ("sb8")
+        case ("b8")
             write (0, *) "Fortran Eightth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(eightth_order)
-        case ("sba")
+        case ("ba")
             write (0, *) "Fortran Tenth Order Symplectic Integrator (using Suzuki Composition)"
             call solve(tenth_order)
         case default
