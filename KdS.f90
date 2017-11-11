@@ -12,13 +12,10 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D4=4.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16  ! CONSTANTS
-    real(16), parameter :: w1 = D1 / (D4 - D4**(D1 / D9)), w3 = D1 - D4 * w1,&
-                           x1 = D1 / (D4 - D4**(D1 / D7)), x3 = D1 - D4 * x1,&
-                           y1 = D1 / (D4 - D4**(D1 / D5)), y3 = D1 - D4 * y1,&
-                           z1 = D1 / (D4 - D4**(D1 / D3)), z3 = D1 - D4 * z1, pi = acos(-D1)
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish ! IMMUTABLES
-    integer :: plotratio
+    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, pi = acos(-D1)  ! CONSTANTS
+    real(16) :: w1, w3, x1, x3, y1, y3, z1, z3
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish, root ! IMMUTABLES
+    integer :: plotratio, stages, outer
     logical :: cross
     character (len=3) :: integrator
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
@@ -32,16 +29,16 @@ program KdS
             write (0, *) "Fortran Second Order Symplectic Integrator"
             call solve(second_order)
         case ("b4")
-            write (0, *) "Fortran Fourth Order Symplectic Integrator (using Suzuki Composition)"
+            write (0, *) "Fortran Fourth Order Symplectic Integrator (using explicit composition)"
             call solve(fourth_order)
         case ("b6")
-            write (0, *) "Fortran Sixth Order Symplectic Integrator (using Suzuki Composition)"
+            write (0, *) "Fortran Sixth Order Symplectic Integrator (using explicit composition)"
             call solve(sixth_order)
         case ("b8")
-            write (0, *) "Fortran Eightth Order Symplectic Integrator (using Suzuki Composition)"
+            write (0, *) "Fortran Eightth Order Symplectic Integrator (using explicit composition)"
             call solve(eightth_order)
         case ("ba")
-            write (0, *) "Fortran Tenth Order Symplectic Integrator (using Suzuki Composition)"
+            write (0, *) "Fortran Tenth Order Symplectic Integrator (using explicit composition)"
             call solve(tenth_order)
         case default
             write (0, *) "Invalid integrator method"
@@ -49,7 +46,7 @@ program KdS
 contains
     subroutine init_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
-        read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross, integrator
+        read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross, integrator, stages
         l_3 = lambda / D3
         a = spin
         mu2 = pMass2
@@ -66,6 +63,16 @@ contains
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
         th = (90.0_16 - th0) * pi / 180.0_16
+        root = stages - D1;
+        outer = (stages - 1) / 2;
+        w1 = D1 / (root - root**(D1 / D9))
+        w3 = D1 - root * w1
+        x1 = D1 / (root - root**(D1 / D7))
+        x3 = D1 - root * x1
+        y1 = D1 / (root - root**(D1 / D5))
+        y3 = D1 - root * y1
+        z1 = D1 / (root - root**(D1 / D3))
+        z3 = D1 - root * z1
     end subroutine init_vars
 
     subroutine refresh()
@@ -122,11 +129,14 @@ contains
 
     subroutine base4(s)
         real(16), intent(in) :: s
-        call base2(s * z1)
-        call base2(s * z1)
+        integer i
+        do i = 1, outer
+            call base2(s * z1)
+        end do
         call base2(s * z3)
-        call base2(s * z1)
-        call base2(s * z1)
+        do i = 1, outer
+            call base2(s * z1)
+        end do
     end subroutine base4
 
     subroutine fourth_order()
@@ -135,11 +145,14 @@ contains
 
     subroutine base6(s)
         real(16), intent(in) :: s
-        call base4(s * y1)
-        call base4(s * y1)
+        integer j
+        do j = 1, outer
+            call base4(s * y1)
+        end do
         call base4(s * y3)
-        call base4(s * y1)
-        call base4(s * y1)
+        do j = 1, outer
+            call base4(s * y1)
+        end do
     end subroutine base6
 
     subroutine sixth_order()
@@ -148,11 +161,14 @@ contains
 
     subroutine base8(s)
         real(16), intent(in) :: s
-        call base6(s * x1)
-        call base6(s * x1)
+        integer k
+        do k = 1, outer
+            call base6(s * x1)
+        end do
         call base6(s * x3)
-        call base6(s * x1)
-        call base6(s * x1)
+        do k = 1, outer
+            call base6(s * x1)
+        end do
     end subroutine base8
 
     subroutine eightth_order()
@@ -161,11 +177,14 @@ contains
 
     subroutine base10(s)
         real(16), intent(in) :: s
-        call base8(s * w1)
-        call base8(s * w1)
+        integer l
+        do l = 1, outer
+            call base8(s * w1)
+        end do
         call base8(s * w3)
-        call base8(s * w1)
-        call base8(s * w1)
+        do l = 1, outer
+            call base8(s * w1)
+        end do
     end subroutine base10
 
     subroutine tenth_order()
