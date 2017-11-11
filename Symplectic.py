@@ -17,7 +17,7 @@ from sys import stderr
 
 
 class Symplectic(object):
-    def __init__(self, model, h, order, debug=False):
+    def __init__(self, model, h, order, stages, debug=False):
         if debug:
             self.base2 = self.coefficients
         else:
@@ -39,19 +39,26 @@ class Symplectic(object):
         elif order == 'b2':
             print >> stderr, "Python Second order Symplectic Integrator"
             self.method = self.second_order
-        elif order == 'sb4':
+        elif order == 'b4':
             print >> stderr, "Python Fourth order Symplectic Integrator (using Suzuki Composition)"
             self.method = self.fourth_order
-        elif order == 'sb6':
+        elif order == 'b6':
             print >> stderr, "Python Sixth order Symplectic Integrator (using Suzuki Composition)"
             self.method = self.sixth_order
-        elif order == 'sb8':
+        elif order == 'b8':
             print >> stderr, "Python Eightth order Symplectic Integrator (using Suzuki Composition)"
             self.method = self.eightth_order
         else:
             raise Exception('>>> Integrator must be b1, b2, sb4, sb6 or sb8, was "{}" <<<'.format(order))
-        if debug:
-            print self.total
+        root = stages - 1
+        self.outer = root / 2
+        self.x1 = 1.0 / (root - root**(1.0 / 7.0))
+        self.y1 = 1.0 / (root - root**(1.0 / 5.0))
+        self.z1 = 1.0 / (root - root**(1.0 / 3.0))
+        self.x3 = 1.0 - root * self.x1
+        self.y3 = 1.0 - root * self.y1
+        self.z3 = 1.0 - root * self.z1
+        self.outer_range = range(0, self.outer)
 
     def first_order(self):
         self.model.qUpdate(self.h)
@@ -61,7 +68,7 @@ class Symplectic(object):
         self.count += 1
         self.total += s
         self.total_abs += abs(s)
-        print s, self.total, self.total_abs / self.count
+        print  >> stderr, s, self.total, self.total / self.count, self.total_abs / self.count
 
     def stormer_verlet(self, s):
         self.model.qUpdate(self.h * s * 0.5)
@@ -72,31 +79,31 @@ class Symplectic(object):
         self.base2(1.0)
 
     def base4(self, s):
-        self.base2(s * self.z1)
-        self.base2(s * self.z1)
+        for i in self.outer_range:
+            self.base2(s * self.z1)
         self.base2(s * self.z3)
-        self.base2(s * self.z1)
-        self.base2(s * self.z1)
+        for i in self.outer_range:
+            self.base2(s * self.z1)
 
     def fourth_order(self):
         self.base4(1.0)
 
     def base6(self, s):
-        self.base4(s * self.y1)
-        self.base4(s * self.y1)
+        for j in self.outer_range:
+            self.base4(s * self.y1)
         self.base4(s * self.y3)
-        self.base4(s * self.y1)
-        self.base4(s * self.y1)
+        for j in self.outer_range:
+            self.base4(s * self.y1)
 
     def sixth_order(self):
         self.base6(1.0)
 
     def base8(self, s):
-        self.base6(s * self.x1)
-        self.base6(s * self.x1)
+        for k in self.outer_range:
+            self.base6(s * self.x1)
         self.base6(s * self.x3)
-        self.base6(s * self.x1)
-        self.base6(s * self.x1)
+        for k in self.outer_range:
+            self.base6(s * self.x1)
 
     def eightth_order(self):
         self.base8(1.0)

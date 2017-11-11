@@ -1,5 +1,6 @@
 {
   "r": 3.0,
   "spin": 1.0,
-  "integrator": "b2"
+  "integrator": "b2",
+  "stages": 5
 }

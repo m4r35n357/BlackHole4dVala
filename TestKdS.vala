@@ -19,7 +19,7 @@ void add_test_solve_symplectic_start_non_0_kl6() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "kl6"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "kl6", 0), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
@@ -32,7 +32,7 @@ void add_test_solve_symplectic_start_non_0_kl8() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "kl8"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "kl8", 0), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
@@ -45,7 +45,7 @@ void add_test_solve_symp_polar_b1() {
         var step = 0.00001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b1"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b1", 0), step, start, end, interval);
         assert(counts[0] == 69174);
         assert(counts[1] == 6918);
     });
@@ -58,46 +58,46 @@ void add_test_solve_symp_polar_b2() {
         var step = 0.00001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b2"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b2", 0), step, start, end, interval);
         assert(counts[0] == 69174);
         assert(counts[1] == 6918);
     });
 }
 
-void add_test_solve_symp_polar_sb4() {
-    Test.add_func ("/KdS/test_solve_symp_polar_sb4", () => {
+void add_test_solve_symp_polar_b4() {
+    Test.add_func ("/KdS/test_solve_symp_polar_b4", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb4"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b4", 5), step, start, end, interval);
         assert(counts[0] == 69174);
         assert(counts[1] == 6918);
     });
 }
 
-void add_test_solve_symp_polar_sb6() {
-    Test.add_func ("/KdS/test_solve_symp_polar_sb6", () => {
+void add_test_solve_symp_polar_b6() {
+    Test.add_func ("/KdS/test_solve_symp_polar_b6", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb6"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b6", 5), step, start, end, interval);
         assert(counts[0] == 69174);
         assert(counts[1] == 6918);
     });
 }
 
-void add_test_solve_symp_polar_sb8() {
-    Test.add_func ("/KdS/test_solve_symp_polar_sb8", () => {
+void add_test_solve_symp_polar_b8() {
+    Test.add_func ("/KdS/test_solve_symp_polar_b8", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 1.0, 0.96210432940242041, 5.6843449527674236e-13, 15.914691393798241, 12.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb8"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b8", 5), step, start, end, interval);
         assert(counts[0] == 69174);
         assert(counts[1] == 6918);
     });
@@ -110,7 +110,7 @@ void add_test_solve_symp_light_b1() {
         var step = 0.0001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b1"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b1", 0), step, start, end, interval);
         assert(counts[0] == 105951);
         assert(counts[1] == 10596);
     });
@@ -123,46 +123,46 @@ void add_test_solve_symp_light_b2() {
         var step = 0.0001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b2"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b2", 0), step, start, end, interval);
         assert(counts[0] == 105951);
         assert(counts[1] == 10596);
     });
 }
 
-void add_test_solve_symp_light_sb4() {
-    Test.add_func ("/KdS/test_solve_symp_light_sb4", () => {
+void add_test_solve_symp_light_b4() {
+    Test.add_func ("/KdS/test_solve_symp_light_b4", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.0001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb4"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b4", 5), step, start, end, interval);
         assert(counts[0] == 105951);
         assert(counts[1] == 10596);
     });
 }
 
-void add_test_solve_symp_light_sb6() {
-    Test.add_func ("/KdS/test_solve_symp_light_sb6", () => {
+void add_test_solve_symp_light_b6() {
+    Test.add_func ("/KdS/test_solve_symp_light_b6", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.0001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb6"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b6", 5), step, start, end, interval);
         assert(counts[0] == 105951);
         assert(counts[1] == 10596);
     });
 }
 
-void add_test_solve_symp_light_sb8() {
-    Test.add_func ("/KdS/test_solve_symp_light_sb8", () => {
+void add_test_solve_symp_light_b8() {
+    Test.add_func ("/KdS/test_solve_symp_light_b8", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.0001;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 1.0, 0.0, 1.0, -2.0, 27.0, 3.0, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb8"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b8", 5), step, start, end, interval);
         assert(counts[0] == 105951);
         assert(counts[1] == 10596);
     });
@@ -175,7 +175,7 @@ void add_test_solve_symplectic_start_0_b1() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b1"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b1", 0), step, start, end, interval);
         assert(counts[0] == 85862);
         assert(counts[1] == 8587);
     });
@@ -188,46 +188,46 @@ void add_test_solve_symplectic_start_0_b2() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b2"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b2", 0), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 8554);
     });
 }
 
-void add_test_solve_symplectic_start_0_sb4() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_0_sb4", () => {
+void add_test_solve_symplectic_start_0_b4() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_0_b4", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb4"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b4", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 8554);
     });
 }
 
-void add_test_solve_symplectic_start_0_sb6() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_0_sb6", () => {
+void add_test_solve_symplectic_start_0_b6() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_0_b6", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb6"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b6", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 8554);
     });
 }
 
-void add_test_solve_symplectic_start_0_sb8() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_0_sb8", () => {
+void add_test_solve_symplectic_start_0_b8() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_0_b8", () => {
         var start = 0.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb8"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b8", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 8554);
     });
@@ -240,7 +240,7 @@ void add_test_solve_symplectic_start_non_0_b1() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b1"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b1", 0), step, start, end, interval);
         assert(counts[0] == 85862);
         assert(counts[1] == 3242);
     });
@@ -253,46 +253,46 @@ void add_test_solve_symplectic_start_non_0_b2() {
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "b2"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b2", 0), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
 }
 
-void add_test_solve_symplectic_start_non_0_sb4() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb4", () => {
+void add_test_solve_symplectic_start_non_0_b4() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_b4", () => {
         var start = 50.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb4"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b4", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
 }
 
-void add_test_solve_symplectic_start_non_0_sb6() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb6", () => {
+void add_test_solve_symplectic_start_non_0_b6() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_b6", () => {
         var start = 50.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb6"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b6", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
 }
 
-void add_test_solve_symplectic_start_non_0_sb8() {
-    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_sb8", () => {
+void add_test_solve_symplectic_start_non_0_b8() {
+    Test.add_func ("/KdS/test_solve_symplectic_start_non_0_b8", () => {
         var start = 50.0;
         var end = 100;
         var step = 0.00005;
         var interval = 10;
         var model = new Simulations.Bh3d(0.0, 0.8, 1.0, 0.94550509567490792, 1.4343745095317371, 7.9787599589278697, 7.5, 0.0, true);
-        var counts = model.solve(Integrators.getIntegrator(model, step, "sb8"), step, start, end, interval);
+        var counts = model.solve(Integrators.getIntegrator(model, step, "b8", 5), step, start, end, interval);
         assert(counts[0] == 85532);
         assert(counts[1] == 3215);
     });
@@ -306,27 +306,27 @@ void main (string[] args) {
 
     add_test_solve_symp_polar_b1();
     add_test_solve_symp_polar_b2();
-    add_test_solve_symp_polar_sb4();
-    add_test_solve_symp_polar_sb6();
-    add_test_solve_symp_polar_sb8();
+    add_test_solve_symp_polar_b4();
+    add_test_solve_symp_polar_b6();
+    add_test_solve_symp_polar_b8();
 
     add_test_solve_symp_light_b1();
     add_test_solve_symp_light_b2();
-    add_test_solve_symp_light_sb4();
-    add_test_solve_symp_light_sb6();
-    add_test_solve_symp_light_sb8();
+    add_test_solve_symp_light_b4();
+    add_test_solve_symp_light_b6();
+    add_test_solve_symp_light_b8();
 
     add_test_solve_symplectic_start_0_b1();
     add_test_solve_symplectic_start_0_b2();
-    add_test_solve_symplectic_start_0_sb4();
-    add_test_solve_symplectic_start_0_sb6();
-    add_test_solve_symplectic_start_0_sb8();
+    add_test_solve_symplectic_start_0_b4();
+    add_test_solve_symplectic_start_0_b6();
+    add_test_solve_symplectic_start_0_b8();
 
     add_test_solve_symplectic_start_non_0_b1();
     add_test_solve_symplectic_start_non_0_b2();
-    add_test_solve_symplectic_start_non_0_sb4();
-    add_test_solve_symplectic_start_non_0_sb6();
-    add_test_solve_symplectic_start_non_0_sb8();
+    add_test_solve_symplectic_start_non_0_b4();
+    add_test_solve_symplectic_start_non_0_b6();
+    add_test_solve_symplectic_start_non_0_b8();
 
     Test.run();
 }
