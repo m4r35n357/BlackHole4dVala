@@ -29,7 +29,7 @@ def log_error(e):
     :return: the dB value, clamped to a minimum
     """
     error = e if e >= 0.0 else -e
-    return 10.0 * log10(error) if error > 1.0e-21 else -210.0
+    return 10.0 * log10(error) if error > 1.0e-24 else -240.0
 
 
 def main():
@@ -56,17 +56,17 @@ def main():
     left.yaxis.set_minor_locator(minor_locator)
     left.set_xlabel('Time: ' + time_coordinate, color='0.20')
     left.set_ylabel('4-Velocity Norm Error', color='#006000')
-    left.set_ylim(-210.0, 0.0)
+    left.set_ylim(-240.0, 0.0)
     right = left.twinx()
     right.yaxis.set_major_locator(major_locator)
     right.yaxis.set_minor_locator(minor_locator)
     right.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
-    right.set_ylim(-210.0, 0.0)
+    right.set_ylim(-240.0, 0.0)
     pyplot.axhspan(-30.0, 0.0, facecolor='red', alpha=0.3)
     pyplot.axhspan(-60.0, -30.0, facecolor='orange', alpha=0.3)
     pyplot.axhspan(-90.0, -60.0, facecolor='yellow', alpha=0.3)
     pyplot.axhspan(-120.0, -90.0, facecolor='cyan', alpha=0.3)
-    pyplot.axhspan(-210.0, -120.0, facecolor='green', alpha=0.3)
+    pyplot.axhspan(-240.0, -120.0, facecolor='green', alpha=0.3)
     count = 0
     e_cum = e_pk = 0.0
     line = stdin.readline()

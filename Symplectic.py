@@ -27,12 +27,6 @@ class Symplectic(object):
         self.count = 0
         self.model = model
         self.h = h
-        self.x1 = 1.0 / (4.0 - 4.0**(1.0 / 7.0))
-        self.y1 = 1.0 / (4.0 - 4.0**(1.0 / 5.0))
-        self.z1 = 1.0 / (4.0 - 4.0**(1.0 / 3.0))
-        self.x3 = 1.0 - 4.0 * self.x1
-        self.y3 = 1.0 - 4.0 * self.y1
-        self.z3 = 1.0 - 4.0 * self.z1
         if order == 'b1':
             print >> stderr, "Python First order Symplectic Integrator"
             self.method = self.first_order
@@ -68,7 +62,7 @@ class Symplectic(object):
         self.count += 1
         self.total += s
         self.total_abs += abs(s)
-        print  >> stderr, s, self.total, self.total / self.count, self.total_abs / self.count
+        print  >> stderr, self.count, s, self.total, self.total / self.count, self.total_abs / self.count
 
     def stormer_verlet(self, s):
         self.model.qUpdate(self.h * s * 0.5)
