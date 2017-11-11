@@ -37,14 +37,15 @@ def main():
     Main method
     """
     print "Error Plotter: {}".format(argv)
-    if len(argv) < 5:
+    if len(argv) < 6:
         raise Exception(
-            '>>> ERROR! Please supply an integrator type, a time step, a time variable name and a plotting interval <<<')
+            '>>> ERROR! Please supply an integrator type, number of composition stages, a time step, a time variable name and a plotting interval <<<')
     executable = os.environ['exe']
     integrator_type = str(argv[1])
-    time_step = str(argv[2])
-    time_coordinate = str(argv[3])
-    interval = int(argv[4])
+    composition_stages = str(argv[2])
+    time_step = str(argv[3])
+    time_coordinate = str(argv[4])
+    interval = int(argv[5])
     left = pyplot.figure().add_subplot(111)
     pyplot.minorticks_on()
     major_locator = MultipleLocator(30)
@@ -86,8 +87,8 @@ def main():
         line = stdin.readline()
         e_cum += e
         e_pk = e_pk if e_pk > e else e
-    left.annotate(executable + " - " + integrator_type + ", ts = " + time_step, (0.0, 0.0),
-                  xytext=(0.15, 0.96), textcoords='figure fraction', color='0.20', )
+    left.annotate(executable + " - " + integrator_type + " (" + composition_stages + " stages),  ts = " + time_step,
+                  (0.0, 0.0), xytext=(0.15, 0.96), textcoords='figure fraction', color='0.20', )
     left.annotate("Peak: " + str(log_error(e_pk)) + ",   Average: " + str(log_error(e_cum / count)), (0.0, 0.0),
                   xytext=(0.25, 0.92), textcoords='figure fraction', color='0.20', )
     try:
