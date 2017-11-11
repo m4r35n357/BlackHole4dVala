@@ -134,7 +134,7 @@ namespace Integrators {
     }
 
     /**
-     * Second-order symplectic integrator concrete subclass.  This integrator is time symmetrical.
+     * Second-order symplectic integrator concrete subclass.
      */
     public class SecondOrder : SymplecticBase {
 
@@ -194,13 +194,13 @@ namespace Integrators {
          */
         public ExplicitComposed (Simulations.IModel model, double h, int64 stages) {
             base(model, h);
-            root = (stages - 1);
+            root = stages - 1;
             outer = root / 2;
         }
     }
 
     /**
-     * Fourth-order symplectic integrator concrete subclass using various compositions.  This integrator is time symmetrical.
+     * Fourth-order symplectic integrator concrete subclass using various compositions.
      */
     public class FourthOrder : ExplicitComposed {
 
@@ -254,7 +254,7 @@ namespace Integrators {
     }
 
     /**
-     * Sixth-order symplectic integrator concrete subclass using various compositions.  This integrator is time symmetrical.
+     * Sixth-order symplectic integrator concrete subclass using various compositions.
      */
     public class SixthOrder : FourthOrder {
 
@@ -308,7 +308,7 @@ namespace Integrators {
     }
 
     /**
-     * Eightth-order symplectic integrator concrete subclass using various compositions.  This integrator is time symmetrical.
+     * Eightth-order symplectic integrator concrete subclass using various compositions.
      */
     public class EightthOrder : SixthOrder {
 
@@ -407,7 +407,7 @@ namespace Integrators {
     }
 
     /**
-     * Sixth-order symplectic integrator concrete subclass using Kahan-Li composition s9odr6b.  This integrator is time symmetrical.
+     * Sixth-order symplectic integrator concrete subclass using Kahan-Li composition s9odr6b.
      */
     public class SixthOrderKahanLi9o6b : GenericComposer {
 
@@ -427,7 +427,7 @@ namespace Integrators {
     }
 
     /**
-     * Eightth-order symplectic integrator concrete subclass using Kahan-Li composition s17odr8b.  This integrator is time symmetrical.
+     * Eightth-order symplectic integrator concrete subclass using Kahan-Li composition s17odr8b.
      */
     public class EightthOrderKahanLi17o8b : GenericComposer {
 
@@ -451,6 +451,38 @@ namespace Integrators {
     }
 
     /**
+     * Tenth-order symplectic integrator concrete subclass using Kahan-Li composition s33odr10a.
+     */
+    public class TenthOrderKahanLi33o10a : GenericComposer {
+
+        /**
+         * {@inheritDoc}
+         * @see GenericComposer.GenericComposer
+         */
+        public TenthOrderKahanLi33o10a (Simulations.IModel model, double h) {
+            base(model, h, {
+                            0.070428877682658066880,
+                            0.87415651735353949041,
+                            0.055414604963802442707,
+                            -0.066800477898797011598,
+                            -0.62641308958799555593,
+                            0.23682621087528762872,
+                            -0.42221063403170054210,
+                            0.24222942201040859249,
+                            0.047374515478601436594,
+                            0.54386826052472423338,
+                            -0.93252230928447264311,
+                            0.16960179883676464855,
+                            0.71608567578450563608,
+                            -0.80016730247310573512,
+                            0.23778185292256770747,
+                            -0.32330301550863943389,
+                            0.95529818470370207691
+                           });
+        }
+    }
+
+    /**
      * Static factory for producing subclass instances from its type argument according to the following table:
      *
      * || ''type'' || ''Subclass'' ||  ''Description'' ||
@@ -461,6 +493,7 @@ namespace Integrators {
      * || "b8" || {@link EightthOrder} || 8th Order, Symplectic, Reversible ||
      * || "kl6" || {@link SixthOrderKahanLi9o6b} || 6th Order, Symplectic, Reversible ||
      * || "kl8" || {@link EightthOrderKahanLi17o8b} || 8th Order, Symplectic, Reversible ||
+     * || "kl10" || {@link TenthOrderKahanLi33o10a} || 10th Order, Symplectic, Reversible ||
      *
      * @param h the time step
      * @param type the selected implementation
@@ -476,20 +509,23 @@ namespace Integrators {
                 stderr.printf("2nd Order Symplectic Integrator\n");
                 return new SecondOrder(model, h);
             case "b4":
-                stderr.printf("4th Order Symplectic Integrator (using Suzuki Composition)\n");
+                stderr.printf("4th Order Symplectic Integrator (using explicit composition)\n");
                 return new FourthOrder(model, h, stages);
             case "b6":
-                stderr.printf("6th Order Symplectic Integrator (using Suzuki Composition)\n");
+                stderr.printf("6th Order Symplectic Integrator (using explicit composition)\n");
                 return new SixthOrder(model, h, stages);
             case "b8":
-                stderr.printf("8th Order Symplectic Integrator (using Suzuki Composition)\n");
+                stderr.printf("8th Order Symplectic Integrator (using explicit composition)\n");
                 return new EightthOrder(model, h, stages);
             case "kl6":
-                stderr.printf("6th Order Symplectic Integrator (using Kahan-Li s9odr6b Composition)\n");
+                stderr.printf("6th Order Symplectic Integrator (using Kahan-Li s9odr6b composition)\n");
                 return new SixthOrderKahanLi9o6b(model, h);
             case "kl8":
-                stderr.printf("8th Order Symplectic Integrator (using Kahan-Li s17odr8b Composition)\n");
+                stderr.printf("8th Order Symplectic Integrator (using Kahan-Li s17odr8b composition)\n");
                 return new EightthOrderKahanLi17o8b(model, h);
+            case "kl10":
+                stderr.printf("10th Order Symplectic Integrator (using Kahan-Li s33odr10a composition)\n");
+                return new TenthOrderKahanLi33o10a(model, h);
         }
         stderr.printf("Integrator not recognized: %s\n", type);
         assert_not_reached();

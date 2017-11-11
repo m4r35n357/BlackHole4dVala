@@ -39,7 +39,8 @@ public static void main (string[] args) {
         var start = o.get_double_member("start");
         var end = o.get_double_member("end");
         var plotratio = o.get_int_member("plotratio");
-        if (("b1" == type) || ("b2" == type) || ("b4" == type) || ("b6" == type) || ("b8" == type) || ("kl6" == type) || ("kl8" == type)) {
+        if (("b1" == type) || ("b2" == type) || ("b4" == type) || ("b6" == type) || ("b8" == type) ||
+            ("kl6" == type) || ("kl8" == type) || ("kl10" == type)) {
             switch (simulator) {
                 case "Oscillator":
                     var model = new Simulations.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
@@ -105,7 +106,7 @@ public static void main (string[] args) {
                     assert_not_reached();
              }
         } else {
-            stderr.printf("Bad integrator; should be [ b1 | b2 | b4 | b6 | b8 | kl6 | kl8 ], found {%s}\n", type);
+            stderr.printf("Bad integrator; should be [ b1 | b2 | b4 | b6 | b8 | kl6 | kl8 | kl10 ], found {%s}\n", type);
             assert_not_reached();
         }
     } else if ("GenParticle" in executable) {
