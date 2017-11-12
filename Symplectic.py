@@ -44,6 +44,8 @@ class Symplectic(object):
             self.method = self.eightth_order
         else:
             raise Exception('>>> Integrator must be b1, b2, sb4, sb6 or sb8, was "{}" <<<'.format(order))
+        if debug:
+            print  >> stderr, self.count, 0.0, self.total
         root = stages - 1
         self.outer = root / 2
         self.x1 = 1.0 / (root - root**(1.0 / 7.0))
