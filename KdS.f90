@@ -13,8 +13,8 @@
 program KdS
     implicit none
     real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, pi = acos(-D1)  ! CONSTANTS
-    real(16) :: w1, w3, x1, x3, y1, y3, z1, z3
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish, root ! IMMUTABLES
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish  ! IMMUTABLES
+    real(16) :: root, w1, w3, x1, x3, y1, y3, z1, z3
     integer :: plotratio, stages, outer
     logical :: cross
     character (len=3) :: integrator
@@ -37,7 +37,7 @@ program KdS
         case ("b8")
             write (0, *) "Fortran Eightth Order Symplectic Integrator (using explicit composition)"
             call solve(eightth_order)
-        case ("ba")
+        case ("b10")
             write (0, *) "Fortran Tenth Order Symplectic Integrator (using explicit composition)"
             call solve(tenth_order)
         case default
