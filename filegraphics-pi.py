@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from json import loads
 from numpy import sqrt, sin, cos, radians, array
-from sys import argv
+from sys import argv, stdin
 
 from pi3d import Sphere, Points, Display, Camera, Shader, Keyboard, screenshot
 
@@ -50,23 +50,20 @@ class Planet(Sphere):
                 self.trace_shape.draw()
 
 
-if len(argv) < 4:
-    raise Exception('>>> ERROR! Please supply a data file name, a parameter file name and an interval <<<')
-dataFile = open(argv[1])
-line = dataFile.readline()
-parameters = loads(open(argv[2]).read())
-interval = int(argv[3])
-a = parameters['IC']['a']
-a2 = a ** 2
+if len(argv) < 2:
+    raise Exception('>>> ERROR! Please supply a parameter file name <<<')
+parameters = loads(open(argv[1]).read())
+interval = parameters['IC']['plotratio']
 m = parameters['IC']['M']
+a = parameters['IC']['a']
+a2 = a**2
 horizon = m * (1.0 + sqrt(1.0 - a2))
 # Setup display and initialise pi3d ------
 DISPLAY = Display.create(x=0, y=0, frames_per_second=0)
 DISPLAY.set_background(0, 0, 0, 1)  # r,g,b,alpha
 # Camera ---------------------------------
 CAMERA = Camera()
-rot = 0
-tilt = 0
+rot = tilt = 0
 rot_tilt = True
 camRad = 30.0
 # Shaders --------------------------------
@@ -80,6 +77,7 @@ mykeys = Keyboard()
 # Display scene
 colour = None
 counter = 0
+line = stdin.readline()
 while DISPLAY.loop_running():
     params = loads(line)
     if rot_tilt:
@@ -119,7 +117,7 @@ while DISPLAY.loop_running():
             mykeys.close()
             DISPLAY.destroy()
             break
-    line = dataFile.readline()
+    line = stdin.readline()
     counter += 1
     if not line:
         DISPLAY.stop()
