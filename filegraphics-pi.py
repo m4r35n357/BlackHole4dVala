@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -42,9 +42,9 @@ dataFile = open(argv[1], 'r')
 line = dataFile.readline()
 parameters = loads(open(argv[2], 'r').read())
 interval = int(argv[3])
-a = parameters['a']
+a = parameters['IC']['a']
 a2 = a ** 2
-m = parameters['M']
+m = parameters['IC']['M']
 horizon = m * (1.0 + sqrt(1.0 - a2))
 # Setup display and initialise pi3d ------
 DISPLAY = Display.create(x=0, y=0, frames_per_second=0)
