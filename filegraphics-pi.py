@@ -9,6 +9,20 @@ from sys import argv
 from pi3d import Sphere, Points, Display, Camera, Shader, Keyboard, screenshot
 
 
+def error_colour (e):
+    error = abs(e)
+    if error < 1.0e-12:
+        return 0.0, 1.0, 0.0
+    elif error < 1.0e-9:
+        return 0.0, 0.5, 0.5
+    elif error < 1.0e-6:
+        return 1.0, 1.0, 0.0
+    elif error < 1.0e-3:
+        return 0.5, 0.5, 0.0
+    else:
+        return 1.0, 0.0, 0.0
+
+
 class Planet(Sphere):
     def __init__(self, shdr, clr, radius, pos=(0.0, 0.0, 0.0), track_shader=None):
         super(Planet, self).__init__(radius=radius, x=pos[0], y=pos[1], z=pos[2])
@@ -38,9 +52,9 @@ class Planet(Sphere):
 
 if len(argv) < 4:
     raise Exception('>>> ERROR! Please supply a data file name, a parameter file name and an interval <<<')
-dataFile = open(argv[1], 'r')
+dataFile = open(argv[1])
 line = dataFile.readline()
-parameters = loads(open(argv[2], 'r').read())
+parameters = loads(open(argv[2]).read())
 interval = int(argv[3])
 a = parameters['IC']['a']
 a2 = a ** 2
@@ -79,19 +93,9 @@ while DISPLAY.loop_running():
         r = float(params['r'])
         th = float(params['th'])
         ph = float(params['ph'])
-        rasth = sqrt(r ** 2 + a2) * sin(th)
-        earth.pos = [rasth * cos(ph), rasth * sin(ph), r * cos(th)]
-        error = params['v4e']
-        if error < -120.0:
-            colour = (0.0, 1.0, 0.0)
-        elif error < -90.0:
-            colour = (0.0, 0.5, 0.5)
-        elif error < -60.0:
-            colour = (1.0, 1.0, 0.0)
-        elif error < -30.0:
-            colour = (0.5, 0.5, 0.0)
-        else:
-            colour = (1.0, 0.0, 0.0)
+        ra_sth = sqrt(r**2 + a2) * sin(th)
+        earth.pos = [ra_sth * cos(ph), ra_sth * sin(ph), r * cos(th)]
+        colour = error_colour( params['v4e'])
         earth.set_material(colour)
     earth.position_and_draw(trace_material=colour)
     k = mykeys.read()
