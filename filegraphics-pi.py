@@ -6,7 +6,8 @@ from json import loads
 from numpy import sqrt, sin, cos, radians, array
 from sys import argv, stdin, stderr
 
-from pi3d import Sphere, Points, Display, Camera, Shader, Keyboard, screenshot
+from pi3d import Sphere, Points, Display, Camera, Shader, Keyboard, screenshot, Lines
+
 
 def error_colour (error):
     e = abs(error)
@@ -41,8 +42,8 @@ class Body(Sphere):
         if self.track_shader:
             self.track_length += 1
             self.vertices.append(tuple(self.pos))
-            if (self.track_length % 10) == 0:
-                self.trace_shape = Points(vertices=self.vertices, material=trace_material)
+            if (self.track_length % 1) == 0:
+                self.trace_shape = Lines(vertices=self.vertices, material=trace_material)
                 self.trace_shape.set_shader(self.track_shader)
                 if self.track_length > self.track_max:
                     self.vertices = self.vertices[-self.track_max:]
@@ -69,9 +70,12 @@ def main():
     cam_rad = 30.0
     # Bodies
     body_shader = Shader("mat_light")
+    track_shader = Shader("mat_flat")
     black_hole = Body(body_shader, (0.0, 0.0, 1.0), m * (1.0 + sqrt(1.0 - a2)), position=[0.0, 0.0, 0.0])
-    particle = Body(body_shader, (0.0, 1.0, 0.0), 0.125, track_shader=Shader("mat_flat"))
+    particle = Body(body_shader, (0.0, 1.0, 0.0), 0.125, track_shader=track_shader)
     # Enable key presses
+    axis = Lines(vertices=[(0, 0, 5,), (0, 0, -5,)], line_width=10)
+    axis.set_draw_details(track_shader, [])
     keys = Keyboard()
     # Display scene
     counter = 1
@@ -91,6 +95,7 @@ def main():
             rot_tilt = False
         # plot the black hole
         black_hole.position_and_draw()
+        axis.draw()
         # plot the orbiter
         if counter % interval == 0:
             r = float(data['r'])
