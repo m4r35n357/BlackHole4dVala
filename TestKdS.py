@@ -7,21 +7,21 @@ from Symplectic import Symplectic
 
 class KdSTest(TestCase):
     def test_debug_output_order_2(self):
-        Symplectic(None, 1.0, 'sb2', debug=True).method()
+        Symplectic(None, 1.0, 'b2', stages = 5, debug=True).method()
 
     def test_debug_output_order_4(self):
-        Symplectic(None, 1.0, 'sb4', debug=True).method()
+        Symplectic(None, 1.0, 'b4', stages = 5, debug=True).method()
 
     def test_debug_output_order_6(self):
-        Symplectic(None, 1.0, 'sb6', debug=True).method()
+        Symplectic(None, 1.0, 'b6', stages = 5, debug=True).method()
 
     def test_debug_output_order_8(self):
-        Symplectic(None, 1.0, 'sb8', debug=True).method()
+        Symplectic(None, 1.0, 'b8', stages = 5, debug=True).method()
 
     def test_good_integrator_types(self):
-        self.assertIsInstance(Symplectic(None, 1.0, 'sb1'), Symplectic)
-        self.assertIsInstance(Symplectic(None, 1.0, 'sb2'), Symplectic)
-        self.assertIsInstance(Symplectic(None, 1.0, 'sb4'), Symplectic)
+        self.assertIsInstance(Symplectic(None, 1.0, 'b1', stages=5), Symplectic)
+        self.assertIsInstance(Symplectic(None, 1.0, 'b2', stages=5), Symplectic)
+        self.assertIsInstance(Symplectic(None, 1.0, 'b4', stages=5), Symplectic)
 
     def test_bad_integrator_types(self):
         self.assertRaises(Exception, Symplectic, 1.0, 'xxx')
@@ -40,7 +40,7 @@ class KdSTest(TestCase):
                         12.0,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb2').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b2', stages=5).method, step, start, end, interval)
         self.assertEqual(695, counts[0])
         self.assertEqual(695, counts[1])
 
@@ -58,7 +58,7 @@ class KdSTest(TestCase):
                         3.0,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb1').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b1', stages=5).method, step, start, end, interval)
         self.assertEqual(1058, counts[0])
         self.assertEqual(1058, counts[1])
 
@@ -76,7 +76,7 @@ class KdSTest(TestCase):
                         7.5,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb2').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b2', stages=5).method, step, start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(220, counts[1])
 
@@ -94,7 +94,7 @@ class KdSTest(TestCase):
                         7.5,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb1').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b1', stages=5).method, step, start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 
@@ -112,7 +112,7 @@ class KdSTest(TestCase):
                         7.5,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb2').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b2', stages=5).method, step, start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 
@@ -130,7 +130,7 @@ class KdSTest(TestCase):
                         7.5,
                         0.0,
                         True)
-        counts = model.solve(Symplectic(model, step, 'sb4').method, step, start, end, interval)
+        counts = model.solve(Symplectic(model, step, 'b4', stages=5).method, step, start, end, interval)
         self.assertEqual(220, counts[0])
         self.assertEqual(121, counts[1])
 

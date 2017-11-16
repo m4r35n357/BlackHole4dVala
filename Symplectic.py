@@ -34,13 +34,13 @@ class Symplectic(object):
             print >> stderr, "Python Second order Symplectic Integrator"
             self.method = self.second_order
         elif order == 'b4':
-            print >> stderr, "Python Fourth order Symplectic Integrator (using Suzuki Composition)"
+            print >> stderr, "Python Fourth order Symplectic Integrator (using explicit composition)"
             self.method = self.fourth_order
         elif order == 'b6':
-            print >> stderr, "Python Sixth order Symplectic Integrator (using Suzuki Composition)"
+            print >> stderr, "Python Sixth order Symplectic Integrator (using explicit composition)"
             self.method = self.sixth_order
         elif order == 'b8':
-            print >> stderr, "Python Eightth order Symplectic Integrator (using Suzuki Composition)"
+            print >> stderr, "Python Eightth order Symplectic Integrator (using explicit composition)"
             self.method = self.eightth_order
         else:
             raise Exception('>>> Integrator must be b1, b2, sb4, sb6 or sb8, was "{}" <<<'.format(order))
