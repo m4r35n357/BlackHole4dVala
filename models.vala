@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 using GLib.Math;
 
-namespace Simulations {
+namespace Models {
 
     /**
      * Hamiltonian model for a Harmonic Oscillator

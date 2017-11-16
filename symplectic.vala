@@ -14,7 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 using GLib.Math;
 
-namespace Simulations {
+namespace Models {
     /**
      * External user interface for the physical model
      */
@@ -63,7 +63,7 @@ namespace Integrators {
      */
     public interface ISymplectic : GLib.Object {
         /**
-         * Should be called by {@link Simulations.ISolver.solve} as needed, in turn calls {@link Simulations.IModel.qUpdate} and {@link Simulations.IModel.pUpdate}
+         * Should be called by {@link Models.ISolver.solve} as needed, in turn calls {@link Models.IModel.qUpdate} and {@link Models.IModel.pUpdate}
          */
         public abstract void step ();
     }
@@ -76,7 +76,7 @@ namespace Integrators {
         /**
          * The physical model, defined at subclass construction
          */
-        protected Simulations.IModel model;
+        protected Models.IModel model;
 
         /**
          * Simulation time step, defined at subclass construction
@@ -88,13 +88,13 @@ namespace Integrators {
          *
          * @param h the time step
          */
-        protected SymplecticBase (Simulations.IModel model, double h) {
+        protected SymplecticBase (Models.IModel model, double h) {
             this.model = model;
             this.h = h;
         }
 
         /**
-         * Subclasses should perform one integration step by executing alternating {@link Simulations.IModel.qUpdate} and {@link Simulations.IModel.pUpdate}
+         * Subclasses should perform one integration step by executing alternating {@link Models.IModel.qUpdate} and {@link Models.IModel.pUpdate}
          * methods.
          *
          * @see ISymplectic.step
@@ -111,12 +111,12 @@ namespace Integrators {
          * {@inheritDoc}
          * @see SymplecticBase.SymplecticBase
          */
-        public FirstOrder (Simulations.IModel model, double h) {
+        public FirstOrder (Models.IModel model, double h) {
             base(model, h);
         }
 
         /**
-         * 1st order integration step.  Performs the following calls on {@link Simulations.IModel} per iteration:
+         * 1st order integration step.  Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
          * qUpdate(h)
@@ -142,12 +142,12 @@ namespace Integrators {
          * {@inheritDoc}
          * @see SymplecticBase.SymplecticBase
          */
-        public SecondOrder (Simulations.IModel model, double h) {
+        public SecondOrder (Models.IModel model, double h) {
             base(model, h);
         }
 
         /**
-         * Stormer-Verlet base integrator.  Performs the following calls on {@link Simulations.IModel} per iteration:
+         * Stormer-Verlet base integrator.  Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
          * qUpdate(s * h/2)
@@ -192,7 +192,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see SecondOrder.SecondOrder
          */
-        public ExplicitComposed (Simulations.IModel model, double h, int64 stages) {
+        public ExplicitComposed (Models.IModel model, double h, int64 stages) {
             base(model, h);
             root = stages - 1;
             outer = root / 2;
@@ -214,7 +214,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see SymplecticBase.SymplecticBase
          */
-        public FourthOrder (Simulations.IModel model, double h, int64 stages) {
+        public FourthOrder (Models.IModel model, double h, int64 stages) {
             base(model, h, stages);
             zOuter = 1.0 / (root - pow(root, (1.0 / 3.0)));
             zCentral = 1.0 - root * zOuter;
@@ -268,7 +268,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see FourthOrder.FourthOrder
          */
-        public SixthOrder (Simulations.IModel model, double h, int64 stages) {
+        public SixthOrder (Models.IModel model, double h, int64 stages) {
             base(model, h, stages);
             yOuter = 1.0 / (root - pow(root, (1.0 / 5.0)));
             yCentral = 1.0 - root * yOuter;
@@ -322,7 +322,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see SixthOrder.SixthOrder
          */
-        public EightthOrder (Simulations.IModel model, double h, int64 stages) {
+        public EightthOrder (Models.IModel model, double h, int64 stages) {
             base(model, h, stages);
             xOuter = 1.0 / (root - pow(root, (1.0 / 7.0)));
             xCentral = 1.0 - root * xOuter;
@@ -382,7 +382,7 @@ namespace Integrators {
          *
          * @param h the time step
          */
-        protected GenericComposer (Simulations.IModel model, double h, double[] coefficients) {
+        protected GenericComposer (Models.IModel model, double h, double[] coefficients) {
             base(model, h);
             n = 2 * coefficients.length - 1;
             delta = new double[n];
@@ -415,7 +415,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see GenericComposer.GenericComposer
          */
-        public SixthOrderKahanLi9o6b (Simulations.IModel model, double h) {
+        public SixthOrderKahanLi9o6b (Models.IModel model, double h) {
             base(model, h, {
                             0.39103020330868478817,
                             0.33403728961113601749,
@@ -435,7 +435,7 @@ namespace Integrators {
          * {@inheritDoc}
          * @see GenericComposer.GenericComposer
          */
-        public EightthOrderKahanLi17o8b (Simulations.IModel model, double h) {
+        public EightthOrderKahanLi17o8b (Models.IModel model, double h) {
             base(model, h, {
                             0.12713692773487857916,
                             0.56170253798880269972,
@@ -467,7 +467,7 @@ namespace Integrators {
      *
      * @return concrete implementation of a symplectic integrator
      */
-    public static ISymplectic getIntegrator (Simulations.IModel model, double h, string type, int64 stages) {
+    public static ISymplectic getIntegrator (Models.IModel model, double h, string type, int64 stages) {
         switch (type) {
             case "b1":
                 stderr.printf("1st Order Symplectic Integrator\n");

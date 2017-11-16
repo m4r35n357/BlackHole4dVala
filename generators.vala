@@ -42,7 +42,7 @@ namespace Generators {
 
     /**
     * Turns fixed parameters and other constraints into initial conditions data
-    * suitable as input to {@link Simulations.Bh3d}
+    * suitable as input to {@link Models.Bh3d}
     * (passing some items directly through to the output data),
     * alternatively takes the data and creates potential plots from it.
      */

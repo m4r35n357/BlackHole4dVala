@@ -18,9 +18,9 @@ using Json;
  * Common entry point for all simulators based on symplectic integration, reads in JSON data from stdin and executes a program according to the following table:
  *
  * || ''program name'' || ''key JSON variable'' || ''class(es))'' || ''simulation'' ||
- * || Simulate || "Newton" || {@link Simulations.Newton} || Newtonian central body problem ||
- * || Simulate || "KerrDeSitter" || {@link Simulations.Bh3d} || Kerr-deSitter geodesics ||
- * || Simulate || "NBody" || {@link Simulations.NBody} {@link Simulations.Body} || Newtonian N body problem ||
+ * || Simulate || "Newton" || {@link Models.Newton} || Newtonian central body problem ||
+ * || Simulate || "KerrDeSitter" || {@link Models.Bh3d} || Kerr-deSitter geodesics ||
+ * || Simulate || "NBody" || {@link Models.NBody} {@link Models.Body} || Newtonian N body problem ||
  * || GenParticle || N/A || {@link Generators.Particle} || Generate initial conditions for Kerr-deSitter particle geodesics ||
  * || GenLight || N/A || {@link Generators.Light} || Generate initial conditions for Kerr-deSitter light geodesics ||
  *
@@ -42,31 +42,31 @@ public static void main (string[] args) {
         if (("b1" == type) || ("b2" == type) || ("b4" == type) || ("b6" == type) || ("b8" == type) || ("kl6" == type) || ("kl8" == type)) {
             switch (simulator) {
                 case "Oscillator":
-                    var model = new Simulations.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
+                    var model = new Models.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
                     model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
                     break;
                 case "Pendulum":
-                    var model = new Simulations.Pendulum(o.get_double_member("g"),
+                    var model = new Models.Pendulum(o.get_double_member("g"),
                                                          o.get_double_member("m"),
                                                          o.get_double_member("length"),
                                                          o.get_double_member("angle"));
                     model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
                     break;
                 case "Newton":
-                    var model = new Simulations.Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
+                    var model = new Models.Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
                     model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
                     break;
                 case "HenonHeiles":
-                    var model = new Simulations.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
+                    var model = new Models.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
                     model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
                     break;
                 case "NBody":
-                    Simulations.Body[] bodies = {};
+                    Models.Body[] bodies = {};
                     foreach (var node in o.get_array_member("bodies").get_elements()) {
                         var body = node.get_object();
                         var m = body.get_double_member("mass");
                         if (body.has_member("pX") && body.has_member("pY") && body.has_member("pZ")) {
-                            bodies += new Simulations.Body(body.get_double_member("qX"),
+                            bodies += new Models.Body(body.get_double_member("qX"),
                                                            body.get_double_member("qY"),
                                                            body.get_double_member("qZ"),
                                                            body.get_double_member("pX"),
@@ -74,7 +74,7 @@ public static void main (string[] args) {
                                                            body.get_double_member("pZ"),
                                                            m);
                         } else if (body.has_member("vX") && body.has_member("vY") && body.has_member("vZ")) {
-                            bodies += new Simulations.Body(body.get_double_member("qX"),
+                            bodies += new Models.Body(body.get_double_member("qX"),
                                                            body.get_double_member("qY"),
                                                            body.get_double_member("qZ"),
                                                            body.get_double_member("vX") * m,
@@ -85,11 +85,11 @@ public static void main (string[] args) {
                             stderr.printf("Mixed use of momenta and velocity\n");
                         }
                     }
-                    var model = new Simulations.NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
+                    var model = new Models.NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
                     model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
-                    var model = new Simulations.Bh3d(o.get_double_member("lambda"),
+                    var model = new Models.Bh3d(o.get_double_member("lambda"),
                                            o.get_double_member("a"),
                                            o.get_double_member("mu"),
                                            o.has_member("Efac") ? o.get_double_member("Efac")*o.get_double_member("E") : o.get_double_member("E"),
