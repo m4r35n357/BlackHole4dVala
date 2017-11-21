@@ -52,11 +52,9 @@ vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
 vi $ic; jq . $ic; jq '.IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0, .IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.cross, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
 
-$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic` 2>/dev/null &
-
+$exe <$ic | ./plotBH.py $ic 2>/dev/null &
 $exe <$ic | ./filegraphics-pi.py $ic
-
-$exe <$ic | tee $data | ./plotErrors.py `jq .IC.integrator $ic` `jq .IC.stages $ic` `jq .IC.step $ic` tau 1 2>/dev/null &
+$exe <$ic | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &
 
 4.	Some more example pipelines . . .
 
@@ -64,7 +62,7 @@ $exe <$ic | tee $data | ./plotErrors.py `jq .IC.integrator $ic` `jq .IC.stages $
 
 export ic=initial-conditions.newton.json
 vi $ic; jq . $ic
-$exe <$ic | ./plotBH.py 1.0 `jq .IC.Lfac <$ic` 0.0 &
+$exe <$ic | ./plotBH.py $ic &
 
 export ic=initial-conditions.pendulum.json
 vi $ic; jq . $ic

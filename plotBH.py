@@ -59,15 +59,13 @@ def error_colour (error):
 
 def main():
     print "Geodesic Plotter: {}".format(argv)
-    if len(argv) < 3:
-        raise Exception('>>> ERROR! Please supply values for black hole mass [>= 1.0], spin [0.0 - 1.0] and angular momentum <<<')
-    m = float(argv[1])
-    a = float(argv[2])
-    l = float(argv[3])
-    if len(argv) == 5:
-        mu = float(argv[4])
-    else:
-        mu = None
+    if len(argv) < 2:
+        raise Exception('>>> ERROR! Please supply a parameter file name <<<')
+    parameters = loads(open(argv[1]).read())['IC']
+    m = parameters['M'] if 'M' in parameters else 1.0
+    a = parameters['a'] if 'a' in parameters else  1.0
+    l = parameters['L'] if 'L' in parameters else 0.0
+    mu = parameters['mu'] if 'mu' in parameters else 0.0
     horizon = m * (1.0 + sqrt(1.0 - a**2))
     cauchy = m * (1.0 - sqrt(1.0 - a**2))
     #  set up the scene
@@ -138,7 +136,7 @@ def main():
             ball.color = color.white
         else:
             ball.trail.append(pos=ball.pos, color=error_colour(e))
-        if mu and fabs(mu) > 0.0:
+        if fabs(mu) > 0.0:
             hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(data['tP']), data['tau'], data['t'],
                                                                                                  r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)
         else:
