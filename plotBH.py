@@ -104,6 +104,8 @@ def main():
     #     color=color.white, opacity=0.1)
     # z axis
     curve(pos=[(0.0, 0.0, -15.0), (0.0, 0.0, 15.0)], color = color.gray(0.7))
+    # radial line
+    radial = curve(pos=[(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)], color=color.gray(0.2))
     # Data display
     hud = label(pos=(0.0, 0.0, 0.0), xoffset=340, yoffset=330, line=False, border=10, font='Monospace', height=16,
                     color=(0.5, 0.5, 0.0), linecolor=color.gray(0.1))
@@ -132,10 +134,12 @@ def main():
         th = data['th']
         ph = data['ph']
         ball.pos = to_rectangular((r, th, ph), a)
+        radial.pos = ((0.0, 0.0, 0.0), ball.pos)
         if data['tP'] * t_old < 0 or data['tP'] - t_old > 100.0:
             ball.color = color.white
         else:
             ball.trail.append(pos=ball.pos, color=error_colour(e))
+        # Data display
         if fabs(mu) > 0.0:
             hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(data['tP']), data['tau'], data['t'],
                                                                                                  r, atan2(ball.pos.z, sqrt(ball.pos.x**2 + ball.pos.y**2)) * 180.0 / pi, ph * 180.0 / pi % 360.0)

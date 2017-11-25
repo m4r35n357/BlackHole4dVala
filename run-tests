@@ -11,7 +11,7 @@ run_particle () {
 	echo $params | jq .
 	echo $params | ./GenParticle >$ic 2>$pot
 	jq . $ic
-	$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | ./plotBH.py $ic
 }
 
 run_light () {
@@ -20,7 +20,7 @@ run_light () {
 	echo $params | jq .
 	echo $params | ./GenLight >$ic 2>$pot
 	jq . $ic
-	$exe <$ic | ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
+	$exe <$ic | ./plotBH.py $ic
 }
 
 run_particle '{ "method": "dnewton", "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 0.8, "Lfac": 1.0, "integrator": "b8", "stages": 5, "step": 0.01, "plotratio": 1 }'
@@ -39,5 +39,6 @@ $exe <$ssic 2>/tmp/progress | ./plotNBody.py
 params='{ "Simulator" : "Newton", "IC": { "r0": 12.0, "Lfac": 0.8, "start": 0.0, "end": 5000.0, "step": 1.0, "integrator": "b8", "stages": 5, "plotratio": 1 } }'
 echo ${C}"./newton"${NC}
 echo $params | jq .
-echo $params | $exe | ./plotBH.py 1.0 `echo $params | jq .IC.Lfac` 0.0
+echo $params >$ic
+echo $params | $exe | ./plotBH.py $ic
 

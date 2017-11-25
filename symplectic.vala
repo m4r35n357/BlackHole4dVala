@@ -184,9 +184,9 @@ namespace Integrators {
         protected int64 root;
 
         /**
-         * For looping over the outer portions
+         * For looping over the outer stages
          */
-        protected int64 outer;
+        protected int64 nOuter;
 
         /**
          * {@inheritDoc}
@@ -195,7 +195,7 @@ namespace Integrators {
         public ExplicitComposed (Models.IModel model, double h, int64 stages) {
             base(model, h);
             root = stages - 1;
-            outer = root / 2;
+            nOuter = root / 2;
         }
     }
 
@@ -234,11 +234,11 @@ namespace Integrators {
          * where zOuter = 1 / (4 - 4**(1/3)), and zCentral = 1 - 4 * zOuter
          */
         protected void base4 (double s) {
-            for (var i = 0; i < outer; i++) {
+            for (var i = 0; i < nOuter; i++) {
                 base2(s * zOuter);
             }
             base2(s * zCentral);
-            for (var i = 0; i < outer; i++) {
+            for (var i = 0; i < nOuter; i++) {
                 base2(s * zOuter);
             }
         }
@@ -288,11 +288,11 @@ namespace Integrators {
          * where yOuter = 1 / (4 - 4**(1/5)), and yCentral = 1 - 4 * yOuter
          */
         protected void base6 (double s) {
-            for (var j = 0; j < outer; j++) {
+            for (var j = 0; j < nOuter; j++) {
                 base4(s * yOuter);
             }
             base4(s * yCentral);
-            for (var j = 0; j < outer; j++) {
+            for (var j = 0; j < nOuter; j++) {
                 base4(s * yOuter);
             }
         }
@@ -342,11 +342,11 @@ namespace Integrators {
          * where xOuter = 1 / (4 - 4**(1/7)), and xCentral = 1 - 4 * xOuter
          */
         protected void base8 (double s) {
-            for (var k = 0; k < outer; k++) {
+            for (var k = 0; k < nOuter; k++) {
                 base6(s * xOuter);
             }
             base6(s * xCentral);
-            for (var k = 0; k < outer; k++) {
+            for (var k = 0; k < nOuter; k++) {
                 base6(s * xOuter);
             }
         }
