@@ -468,6 +468,10 @@ namespace Integrators {
      * @return concrete implementation of a symplectic integrator
      */
     public static ISymplectic getIntegrator (Models.IModel model, double h, string type, int64 stages) {
+        if ((stages < 3) || (stages % 2 == 0)) {
+            stderr.printf("'stages' should be odd and at least 3\n");
+            assert_not_reached();
+        }
         switch (type) {
             case "b1":
                 stderr.printf("1st Order Symplectic Integrator\n");

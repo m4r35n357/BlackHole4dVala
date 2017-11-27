@@ -21,6 +21,9 @@ program KdS
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
     call init_vars()
+    if ((stages < 3) .or. (mod(stages, 2) == 0)) then
+        error stop "'stages' should be odd and at least 3"
+    end if
     select case (integrator)
         case ("b1")
             write (0, *) "Fortran First Order Symplectic Integrator"
@@ -41,7 +44,7 @@ program KdS
             write (0, *) "Fortran Tenth Order Symplectic Integrator (using explicit composition)"
             call solve(tenth_order)
         case default
-            write (0, *) "Invalid integrator method"
+            error stop "Invalid integrator method"
     end select
 contains
     subroutine init_vars()
