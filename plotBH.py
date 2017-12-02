@@ -46,7 +46,9 @@ def to_rectangular (polar, a):
     return ra * sth * cos(polar[2]), ra * sth * sin(polar[2]), polar[0] * cos(polar[1])
 
 def error_colour (error):
-    if error < 1.0e-12:
+    if error < 1.0e-18:
+        return color.blue
+    elif error < 1.0e-12:
         return color.green
     elif error < 1.0e-9:
         return color.cyan

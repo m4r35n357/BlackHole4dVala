@@ -66,7 +66,8 @@ def main():
     pyplot.axhspan(-60.0, -30.0, facecolor='orange', alpha=0.3)
     pyplot.axhspan(-90.0, -60.0, facecolor='yellow', alpha=0.3)
     pyplot.axhspan(-120.0, -90.0, facecolor='cyan', alpha=0.3)
-    pyplot.axhspan(-240.0, -120.0, facecolor='green', alpha=0.3)
+    pyplot.axhspan(-180.0, -120.0, facecolor='green', alpha=0.3)
+    pyplot.axhspan(-240.0, -180.0, facecolor='blue', alpha=0.3)
     count = 0
     e_cum = e_pk = 0.0
     line = stdin.readline()
