@@ -12,7 +12,7 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, pi = acos(-D1)  ! CONSTANTS
+    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16  ! CONSTANTS
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish  ! IMMUTABLES
     real(16) :: root, w1, w3, x1, x3, y1, y3, z1, z3
     integer :: plotratio, stages, outer
@@ -20,28 +20,31 @@ program KdS
     character (len=3) :: integrator
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: t = D0, r, th, ph = D0, Ut, Ur, Uth, Uph, mino = D0, tau = D0  ! PARTICLE VARIABLES
+    character(len=32) :: arg
+    call get_command_argument(0, arg)
+    write (0, *) "Executable: ", trim(arg)
     call init_vars()
     if ((stages < 3) .or. (mod(stages, 2) == 0)) then
         error stop "'stages' should be odd and at least 3"
     end if
     select case (integrator)
         case ("b1")
-            write (0, *) "Fortran First Order Symplectic Integrator"
+            write (0, *) "1st Order Symplectic Integrator"
             call solve(first_order)
         case ("b2")
-            write (0, *) "Fortran Second Order Symplectic Integrator"
+            write (0, *) "2nd Order Symplectic Integrator"
             call solve(second_order)
         case ("b4")
-            write (0, *) "Fortran Fourth Order Symplectic Integrator (using explicit composition)"
+            write (0, *) "4th Order Symplectic Integrator (using explicit composition)"
             call solve(fourth_order)
         case ("b6")
-            write (0, *) "Fortran Sixth Order Symplectic Integrator (using explicit composition)"
+            write (0, *) "6th Order Symplectic Integrator (using explicit composition)"
             call solve(sixth_order)
         case ("b8")
-            write (0, *) "Fortran Eightth Order Symplectic Integrator (using explicit composition)"
+            write (0, *) "8th Order Symplectic Integrator (using explicit composition)"
             call solve(eightth_order)
         case ("b10")
-            write (0, *) "Fortran Tenth Order Symplectic Integrator (using explicit composition)"
+            write (0, *) "10th Order Symplectic Integrator (using explicit composition)"
             call solve(tenth_order)
         case default
             error stop "Invalid integrator method"
@@ -49,6 +52,7 @@ program KdS
 contains
     subroutine init_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
+        write (0, *) "Kerr-deSitter Geodesic"
         read(*,*) lambda, spin, pMass2, energy, angMom, ccQ, r0, th0, step, start, finish, plotratio, cross, integrator, stages
         l_3 = lambda / D3
         a = spin
@@ -65,7 +69,7 @@ contains
         twoEa = D2 * aE
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
-        th = (90.0_16 - th0) * pi / 180.0_16
+        th = (90.0_16 - th0) * acos(-D1) / 180.0_16
         root = stages - D1;
         outer = (stages - 1) / 2;
         w1 = D1 / (root - root**(D1 / D9))
