@@ -28,22 +28,22 @@ class Symplectic(object):
         self.model = model
         self.h = h
         if order == 'b1':
-            print >> stderr, "Python First order Symplectic Integrator"
+            print >> stderr, "1st order Symplectic Integrator"
             self.method = self.first_order
         elif order == 'b2':
-            print >> stderr, "Python Second order Symplectic Integrator"
+            print >> stderr, "2nd order Symplectic Integrator"
             self.method = self.second_order
         elif order == 'b4':
-            print >> stderr, "Python Fourth order Symplectic Integrator (using explicit composition)"
+            print >> stderr, "4th order Symplectic Integrator (using explicit composition)"
             self.method = self.fourth_order
         elif order == 'b6':
-            print >> stderr, "Python Sixth order Symplectic Integrator (using explicit composition)"
+            print >> stderr, "6th order Symplectic Integrator (using explicit composition)"
             self.method = self.sixth_order
         elif order == 'b8':
-            print >> stderr, "Python Eightth order Symplectic Integrator (using explicit composition)"
+            print >> stderr, "8th order Symplectic Integrator (using explicit composition)"
             self.method = self.eightth_order
         else:
-            raise Exception('>>> Integrator must be b1, b2, sb4, sb6 or sb8, was "{}" <<<'.format(order))
+            raise Exception('>>> Integrator must be b1, b2, b4, b6 or b8, was "{}" <<<'.format(order))
         if debug:
             print  >> stderr, self.count, 0.0, self.total
         root = stages - 1

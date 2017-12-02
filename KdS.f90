@@ -118,6 +118,32 @@ contains
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine pUpdate
 
+    subroutine solve(method)
+        integer :: counter = 0
+        call refresh()
+        Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
+        Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
+        do while ((tau < finish) .and. (cross .or. Dr > D0))
+            if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
+                call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
+            end if
+            call method()
+            counter = counter + 1
+            mino = step * counter
+            tau = tau + step * Sigma
+        end do
+        call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
+    end subroutine solve
+
+    subroutine plot(Vt, Vr, Vth, Vph)
+        real(16), intent(in) :: Vt, Vr, Vth, Vph
+        write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
+                    ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
+                                  + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
+                    ',"ER":',Vr**2 - Rpot / Sigma**2,',"ETh":',Vth**2 - THpot / Sigma**2,&
+                    ',"t":', t,',"r":',r,',"th":',th,',"ph":',ph,',"tP":',Vt,',"rP":',Vr,',"thP":',Vth,',"phP":',Vph,'}'
+    end subroutine plot
+
     subroutine first_order()
         call qUpdate(step)
         call pUpdate(step)
@@ -197,31 +223,5 @@ contains
     subroutine tenth_order()
         call base10(D1)
     end subroutine tenth_order
-
-    subroutine solve(method)
-        integer :: counter = 0
-        call refresh()
-        Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
-        Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
-        do while ((tau < finish) .and. (cross .or. Dr > D0))
-            if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
-                call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
-            end if
-            call method()
-            counter = counter + 1
-            mino = step * counter
-            tau = tau + step * Sigma
-        end do
-        call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
-    end subroutine solve
-
-    subroutine plot(Vt, Vr, Vth, Vph)
-        real(16), intent(in) :: Vt, Vr, Vth, Vph
-        write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
-                    ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
-                                  + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
-                    ',"ER":',Vr**2 - Rpot / Sigma**2,',"ETh":',Vth**2 - THpot / Sigma**2,&
-                    ',"t":', t,',"r":',r,',"th":',th,',"ph":',ph,',"tP":',Vt,',"rP":',Vr,',"thP":',Vth,',"phP":',Vph,'}'
-    end subroutine plot
 end program KdS
 
