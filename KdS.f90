@@ -12,9 +12,9 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program KdS
     implicit none
-    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16  ! CONSTANTS
+    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, D11=11.0_16  ! CONSTANTS
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL, step, start, finish  ! IMMUTABLES
-    real(16) :: root, w1, w3, x1, x3, y1, y3, z1, z3
+    real(16) :: root, v1, v3, w1, w3, x1, x3, y1, y3, z1, z3
     integer :: plotratio, stages, outer
     logical :: cross
     character (len=3) :: integrator
@@ -46,6 +46,9 @@ program KdS
         case ("b10")
             write (0, *) "10th Order Symplectic Integrator (using explicit composition)"
             call solve(tenth_order)
+        case ("b12")
+            write (0, *) "12th Order Symplectic Integrator (using explicit composition)"
+            call solve(twelfth_order)
         case default
             error stop "Invalid integrator method"
     end select
@@ -72,6 +75,8 @@ contains
         th = (90.0_16 - th0) * acos(-D1) / 180.0_16
         root = stages - D1;
         outer = (stages - 1) / 2;
+        v1 = D1 / (root - root**(D1 / D11))
+        v3 = D1 - root * v1
         w1 = D1 / (root - root**(D1 / D9))
         w3 = D1 - root * w1
         x1 = D1 / (root - root**(D1 / D7))
@@ -223,5 +228,21 @@ contains
     subroutine tenth_order()
         call base10(D1)
     end subroutine tenth_order
+
+    subroutine base12(s)
+        real(16), intent(in) :: s
+        integer m
+        do m = 1, outer
+            call base10(s * v1)
+        end do
+        call base10(s * v3)
+        do m = 1, outer
+            call base10(s * v1)
+        end do
+    end subroutine base12
+
+    subroutine twelfth_order()
+        call base12(D1)
+    end subroutine twelfth_order
 end program KdS
 
