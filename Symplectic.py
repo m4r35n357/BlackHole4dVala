@@ -75,30 +75,30 @@ class Symplectic(object):
         self.base2(1.0)
 
     def base4(self, s):
-        for i in self.outer_range:
+        for _ in self.outer_range:
             self.base2(s * self.z1)
         self.base2(s * self.z3)
-        for i in self.outer_range:
+        for _ in self.outer_range:
             self.base2(s * self.z1)
 
     def fourth_order(self):
         self.base4(1.0)
 
     def base6(self, s):
-        for j in self.outer_range:
+        for _ in self.outer_range:
             self.base4(s * self.y1)
         self.base4(s * self.y3)
-        for j in self.outer_range:
+        for _ in self.outer_range:
             self.base4(s * self.y1)
 
     def sixth_order(self):
         self.base6(1.0)
 
     def base8(self, s):
-        for k in self.outer_range:
+        for _ in self.outer_range:
             self.base6(s * self.x1)
         self.base6(s * self.x3)
-        for k in self.outer_range:
+        for _ in self.outer_range:
             self.base6(s * self.x1)
 
     def eightth_order(self):
