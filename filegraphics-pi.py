@@ -24,7 +24,9 @@ from pi3d import Sphere, Display, Camera, Shader, Keyboard, screenshot, Lines
 
 def error_colour (error):
     e = abs(error)
-    if e < 1.0e-12:
+    if e < 1.0e-18:
+        return 0.0, 0.0, 1.0
+    elif e < 1.0e-12:
         return 0.0, 1.0, 0.0
     elif e < 1.0e-9:
         return 0.0, 0.5, 0.5

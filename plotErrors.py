@@ -54,12 +54,14 @@ def main():
     pyplot.grid(b=True, which='minor', color='0.25', linestyle=':')
     left.yaxis.set_major_locator(major_locator)
     left.yaxis.set_minor_locator(minor_locator)
+    left.set_xlim(parameters['start'], parameters['end'])
     left.set_xlabel('Time: ' + time_coordinate, color='0.20')
     left.set_ylabel('4-Velocity Norm Error', color='#006000')
     left.set_ylim(-360.0, 0.0)
     right = left.twinx()
     right.yaxis.set_major_locator(major_locator)
     right.yaxis.set_minor_locator(minor_locator)
+    right.set_xlim(parameters['start'], parameters['end'])
     right.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
     right.set_ylim(-360.0, 0.0)
     pyplot.axhspan(-30.0, 0.0, facecolor='red', alpha=0.3)
@@ -88,10 +90,10 @@ def main():
         line = stdin.readline()
         e_cum += e
         e_pk = e_pk if e_pk > e else e
-    left.annotate(executable + " - " + integrator_type + " (" + str(composition_stages) + " stages),  ts = " + str(time_step),
+    left.annotate("{} - {} ({} stages),  ts = {}".format(executable, integrator_type, composition_stages, time_step),
                   (0.0, 0.0), xytext=(0.15, 0.96), textcoords='figure fraction', color='0.20', )
-    left.annotate("Peak: " + str(log_error(e_pk)) + ",   Average: " + str(log_error(e_cum / count)), (0.0, 0.0),
-                  xytext=(0.25, 0.92), textcoords='figure fraction', color='0.20', )
+    left.annotate("Peak: {:.1f},   Average: {:.1f}".format(log_error(e_pk), log_error(e_cum / count)),
+                  (0.0, 0.0), xytext=(0.2, 0.92), textcoords='figure fraction', color='0.20', )
     try:
         pyplot.show()
     except AttributeError as e:

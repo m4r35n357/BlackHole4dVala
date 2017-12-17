@@ -21,21 +21,21 @@ from Symplectic import Symplectic
 
 
 class BhSymp(object):
-    def __init__(self, Lambda, a, mu2, E, L, C, r0, th0, xh):
-        self.l_3 = Lambda / 3.0
+    def __init__(self, cc, a, mu2, e, l, q, r0, th0, xh):
+        self.l_3 = cc / 3.0
         self.a = a
         self.mu2 = mu2
-        self.E = E
-        self.L = L
+        self.E = e
+        self.L = l
         self.a2 = a**2
         self.a2l_3 = self.a2 * self.l_3
         self.a2mu2 = self.a2 * mu2
-        self.aE = a * E
-        self.aL = a * L
+        self.aE = a * e
+        self.aL = a * l
         self.X2 = (1.0 + self.a2l_3)**2
-        self.two_EX2 = 2.0 * E * self.X2
-        self.two_aE = 2.0 * a * E
-        self.K = C + self.X2 * (L - self.aE)**2
+        self.two_EX2 = 2.0 * e * self.X2
+        self.two_aE = 2.0 * a * e
+        self.K = q + self.X2 * (l - self.aE) ** 2
         self.t = self.ph = 0.0
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
@@ -49,56 +49,56 @@ class BhSymp(object):
         self.cth2 = 1.0 - self.sth2
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
-        self.D_r = (1.0 - self.l_3 * self.r2) * self.ra2 - 2.0 * self.r
-        self.R = self.X2 * self.P**2 - self.D_r * (self.mu2 * self.r2 + self.K)
+        self.d_r = (1.0 - self.l_3 * self.r2) * self.ra2 - 2.0 * self.r
+        self.r_potential = self.X2 * self.P ** 2 - self.d_r * (self.mu2 * self.r2 + self.K)
         self.T = self.aE * self.sth2 - self.L
-        self.D_th = 1.0 + self.a2l_3 * self.cth2
-        self.TH = self.D_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
-        P_Dr = self.P / self.D_r
-        T_Dth = self.T / self.D_th
+        self.d_th = 1.0 + self.a2l_3 * self.cth2
+        self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T ** 2 / self.sth2
+        p_dr = self.P / self.d_r
+        t_dth = self.T / self.d_th
         self.S = self.r2 + self.a2 * self.cth2
-        self.Ut = (P_Dr * self.ra2 - T_Dth * self.a) * self.X2
-        self.Uph = (P_Dr * self.a - T_Dth / self.sth2) * self.X2
+        self.Ut = (p_dr * self.ra2 - t_dth * self.a) * self.X2
+        self.Uph = (p_dr * self.a - t_dth / self.sth2) * self.X2
 
-    def v4_error(self, Ut, Ur, Uth, Uph):
-        SX2 = self.S * self.X2
-        return self.mu2 + self.sth2 * self.D_th / SX2 * (self.a * Ut - self.ra2 * Uph)**2 + self.S / self.D_r * Ur**2 \
-               + self.S / self.D_th * Uth**2 - self.D_r / SX2 * (Ut - self.a * self.sth2 * Uph)**2
+    def v4_error(self, ut, ur, uth, uph):
+        sx2 = self.S * self.X2
+        return self.mu2 + self.sth2 * self.d_th / sx2 * (self.a * ut - self.ra2 * uph) ** 2 + self.S / self.d_r * ur ** 2 \
+               + self.S / self.d_th * uth ** 2 - self.d_r / sx2 * (ut - self.a * self.sth2 * uph) ** 2
 
-    def qUpdate(self, c):
+    def q_update(self, c):
         self.t += c * self.Ut
         self.r += c * self.Ur
         self.th += c * self.Uth
         self.ph += c * self.Uph
         self.refresh()
 
-    def pUpdate(self, d):
-        self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.D_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.D_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
+    def p_update(self, d):
+        self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.d_r) - (self.r * (1.0 - self.l_3 * (self.r2 + self.ra2)) - 1.0) * (self.K + self.mu2 * self.r2))
+        self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.d_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
 
     def solve(self, method, h, start, end, tr):
         mino = tau = 0.0
-        i = plotCount = 0
+        i = plot_count = 0
         self.refresh()
-        self.Ur = - sqrt(self.R if self.R >= 0.0 else -self.R)
-        self.Uth = - sqrt(self.TH if self.TH >= 0.0 else -self.TH)
-        while (tau < end) and (self.cross or self.D_r > 0.0):
+        self.Ur = - sqrt(self.r_potential if self.r_potential >= 0.0 else -self.r_potential)
+        self.Uth = - sqrt(self.th_potential if self.th_potential >= 0.0 else -self.th_potential)
+        while (tau < end) and (self.cross or self.d_r > 0.0):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
-                plotCount += 1
+                plot_count += 1
             method()
             i += 1
             mino = h * i
             tau += h * self.S
         self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
-        return i, plotCount
+        return i, plot_count
 
-    def plot(self, mino, tau, Ut ,Ur, Uth, Uph):
-        eR = Ur**2 - self.R / self.S**2
-        eTh = Uth**2 - self.TH / self.S**2
-        v4e = self.v4_error(Ut, Ur, Uth, Uph)
+    def plot(self, mino, tau, ut, ur, uth, uph):
+        er = ur ** 2 - self.r_potential / self.S ** 2
+        eth = uth ** 2 - self.th_potential / self.S ** 2
+        v4e = self.v4_error(ut, ur, uth, uph)
         print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            mino, tau, v4e, eR, eTh, self.t, self.r, self.th, self.ph, Ut, Ur, Uth, Uph)
+            mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph, ut, ur, uth, uph)
 
 
 if __name__ == "__main__":
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     print >> stderr, input_data
     bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])
     step = ic['step']
-    integrator = Symplectic(bh, step, ic['integrator'], ic['stages'], debug=False).method
+    integrator = Symplectic(bh, step, ic['integrator'], ic['stages']).method
     bh.solve(integrator, step, ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"

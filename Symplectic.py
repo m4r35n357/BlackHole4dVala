@@ -27,6 +27,8 @@ class Symplectic(object):
         self.count = 0
         self.model = model
         self.h = h
+        if stages < 3 or stages % 2 == 0:
+            print >> stderr, "'stages' should be odd and at least 3"
         if order == 'b1':
             print >> stderr, "1st order Symplectic Integrator"
             self.method = self.first_order
@@ -43,22 +45,21 @@ class Symplectic(object):
             print >> stderr, "8th order Symplectic Integrator (using explicit composition)"
             self.method = self.eightth_order
         else:
-            raise Exception('>>> Integrator must be b1, b2, b4, b6 or b8, was "{}" <<<'.format(order))
+            raise Exception('>>> Integrator must be b1, b2, b4, b6 or b8, was "{found}" <<<'.format(found=order))
         if debug:
             print  >> stderr, self.count, 0.0, self.total
         root = stages - 1
-        self.outer = root / 2
-        self.x1 = 1.0 / (root - root**(1.0 / 7.0))
-        self.y1 = 1.0 / (root - root**(1.0 / 5.0))
-        self.z1 = 1.0 / (root - root**(1.0 / 3.0))
-        self.x3 = 1.0 - root * self.x1
-        self.y3 = 1.0 - root * self.y1
-        self.z3 = 1.0 - root * self.z1
-        self.outer_range = range(0, self.outer)
+        self.x_outer = 1.0 / (root - root**(1.0 / 7.0))
+        self.y_outer = 1.0 / (root - root**(1.0 / 5.0))
+        self.z_outer = 1.0 / (root - root**(1.0 / 3.0))
+        self.x_central = 1.0 - root * self.x_outer
+        self.y_central = 1.0 - root * self.y_outer
+        self.z_central = 1.0 - root * self.z_outer
+        self.outer_range = range(0, root / 2)
 
     def first_order(self):
-        self.model.qUpdate(self.h)
-        self.model.pUpdate(self.h)
+        self.model.q_update(self.h)
+        self.model.p_update(self.h)
 
     def coefficients(self, s):
         self.count += 1
@@ -67,39 +68,39 @@ class Symplectic(object):
         print  >> stderr, self.count, s, self.total, self.total / self.count, self.total_abs / self.count
 
     def stormer_verlet(self, s):
-        self.model.qUpdate(self.h * s * 0.5)
-        self.model.pUpdate(self.h * s)
-        self.model.qUpdate(self.h * s * 0.5)
+        self.model.q_update(self.h * s * 0.5)
+        self.model.p_update(self.h * s)
+        self.model.q_update(self.h * s * 0.5)
 
     def second_order(self):
         self.base2(1.0)
 
     def base4(self, s):
         for _ in self.outer_range:
-            self.base2(s * self.z1)
-        self.base2(s * self.z3)
+            self.base2(s * self.z_outer)
+        self.base2(s * self.z_central)
         for _ in self.outer_range:
-            self.base2(s * self.z1)
+            self.base2(s * self.z_outer)
 
     def fourth_order(self):
         self.base4(1.0)
 
     def base6(self, s):
         for _ in self.outer_range:
-            self.base4(s * self.y1)
-        self.base4(s * self.y3)
+            self.base4(s * self.y_outer)
+        self.base4(s * self.y_central)
         for _ in self.outer_range:
-            self.base4(s * self.y1)
+            self.base4(s * self.y_outer)
 
     def sixth_order(self):
         self.base6(1.0)
 
     def base8(self, s):
         for _ in self.outer_range:
-            self.base6(s * self.x1)
-        self.base6(s * self.x3)
+            self.base6(s * self.x_outer)
+        self.base6(s * self.x_central)
         for _ in self.outer_range:
-            self.base6(s * self.x1)
+            self.base6(s * self.x_outer)
 
     def eightth_order(self):
         self.base8(1.0)
