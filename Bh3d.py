@@ -40,6 +40,9 @@ class BhSymp(object):
         self.r = r0
         self.th = (90.0 - th0) * pi / 180.0
         self.cross = xh
+        self.refresh()
+        self.Ur = - sqrt(self.r_potential if self.r_potential >= 0.0 else -self.r_potential)
+        self.Uth = - sqrt(self.th_potential if self.th_potential >= 0.0 else -self.th_potential)
 
     def refresh(self):
         self.r2 = self.r**2
@@ -79,9 +82,6 @@ class BhSymp(object):
     def solve(self, method, h, start, end, tr):
         mino = tau = 0.0
         i = plot_count = 0
-        self.refresh()
-        self.Ur = - sqrt(self.r_potential if self.r_potential >= 0.0 else -self.r_potential)
-        self.Uth = - sqrt(self.th_potential if self.th_potential >= 0.0 else -self.th_potential)
         while (tau < end) and (self.cross or self.d_r > 0.0):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)

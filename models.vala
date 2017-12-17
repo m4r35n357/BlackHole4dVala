@@ -626,6 +626,9 @@ namespace Models {
             r = r0;
             th = (90.0 - th0) * PI / 180.0;
             cross = xh;
+            refresh();
+            Ur = - sqrt(R >= 0.0 ? R : -R);
+            Uth = - sqrt(TH >= 0.0 ? TH : -TH);
         }
 
         /**
@@ -680,9 +683,6 @@ namespace Models {
             double tau = 0.0;
             int64 i = 0;
             int64 plotCount = 0;
-            refresh();
-            Ur = - sqrt(R >= 0.0 ? R : -R);
-            Uth = - sqrt(TH >= 0.0 ? TH : -TH);
             while ((tau < end) && (cross || D_r > 0.0)) {
                 if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);

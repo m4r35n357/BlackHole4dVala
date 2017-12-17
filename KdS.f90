@@ -73,6 +73,9 @@ contains
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
         th = (90.0_16 - th0) * acos(-D1) / 180.0_16
+        call refresh()
+        Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
+        Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
         root = stages - D1;
         outer = (stages - 1) / 2;
         v1 = D1 / (root - root**(D1 / D11))
@@ -125,9 +128,6 @@ contains
 
     subroutine solve(method)
         integer :: counter = 0
-        call refresh()
-        Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= D0))
-        Uth = - sqrt(merge(THpot, -THpot, THpot >= D0))
         do while ((tau < finish) .and. (cross .or. Dr > D0))
             if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
                 call plot(Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
