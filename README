@@ -62,7 +62,7 @@ $exe <$ic | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &
 
 export ic=initial-conditions.newton.json
 vi $ic; jq . $ic
-$exe <$ic | ./plotBH.py $ic &
+$exe <$ic | ./plotBH.py $ic 2>/dev/null &
 
 export ic=initial-conditions.pendulum.json
 vi $ic; jq . $ic

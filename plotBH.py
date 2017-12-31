@@ -59,6 +59,16 @@ def error_colour (error):
     else:
         return color.red
 
+def log_error(e):
+    """
+    convert error to a pseudo db Value
+    :param e: the numerical value of he error
+    :return: the dB value, clamped to a minimum
+    """
+    error = e if e >= 0.0 else -e
+    return 10.0 * log10(error) if error > 1.0e-36 else -360.0
+
+
 def main():
     print "Geodesic Plotter: {}".format(argv)
     if len(argv) < 2:
@@ -117,21 +127,21 @@ def main():
     #sphere(pos=(0,0,0), radius=12.0, opacity=0.1)
     # animate!
     ball = sphere()  # Particle
-    counter = 0
+    count = 0
     data_line = stdin.readline()
     t_old = 0.0
-    e_cum = 0.0
+    e_cum = e_pk = 0.0
     while data_line:  # build raw data arrays
         rate(60)
-        if counter % 1000 == 0:
+        if count % 1000 == 0:
             ball.visible = False
             ball = sphere(radius=0.2)  # Particle
             ball.trail = curve(size=1)  #  trail
         data = loads(data_line)
         error = data['v4e']
         e = error if error >= 0.0 else -error
-        counter += 1
-        ball.color = error_colour(e_cum / counter)
+        count += 1
+        ball.color = error_colour(e_cum / count)
         r = data['r']
         th = data['th']
         ph = data['ph']
@@ -151,8 +161,9 @@ def main():
         #popen('import -window ' + windowName + ' -compress None VPythonOutput/' + str(counter).zfill(4) + '.png')
         t_old = data['tP']
         e_cum += e
+        e_pk = e_pk if e_pk > e else e
         data_line = stdin.readline()
-    print argv[0] + " Average error: " + str(10.0 * log10(e_cum / counter))
+    print "{}: Errors - Peak: {:.1f}, Average: {:.1f}".format(argv[0], log_error(e_pk), log_error(e_cum / count))
 
 if __name__ == "__main__":
     main()
