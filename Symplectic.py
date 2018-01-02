@@ -12,14 +12,16 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from qd import DD
 from sys import stderr
+from numpy import longfloat
 
-D0 = DD(0.0)
-D1 = DD(1.0)
-D2 = DD(2.0)
-D3 = DD(3.0)
-D05 = DD(0.5)
+D0 = longfloat(0.0)
+D1 = longfloat(1.0)
+D2 = longfloat(2.0)
+D3 = longfloat(3.0)
+D5 = longfloat(5.0)
+D7 = longfloat(7.0)
+D05 = longfloat(0.5)
 
 class Symplectic(object):
     def __init__(self, model, h, order, stages, debug=False):
@@ -55,10 +57,10 @@ class Symplectic(object):
             print  >> stderr, self.count, 0.0, self.total
         root = stages - 1
         self.outer_range = range(0, root / 2)
-        mp_root = DD(root)
-        self.x_outer = D1 / (mp_root - mp_root.nroot(7))
-        self.y_outer = D1 / (mp_root - mp_root.nroot(5))
-        self.z_outer = D1 / (mp_root - mp_root.nroot(3))
+        mp_root = longfloat(root)
+        self.x_outer = D1 / (mp_root - mp_root**(D1 / D7))
+        self.y_outer = D1 / (mp_root - mp_root**(D1 / D5))
+        self.z_outer = D1 / (mp_root - mp_root**(D1 / D3))
         self.x_central = D1 - mp_root * self.x_outer
         self.y_central = D1 - mp_root * self.y_outer
         self.z_central = D1 - mp_root * self.z_outer

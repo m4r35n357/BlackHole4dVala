@@ -13,9 +13,8 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from qd import fpu_restore, fpu_init, DD
 from json import loads
-from math import sqrt
+from numpy import longfloat, pi, sqrt, cos, sin
 from sys import stdin, stderr, argv
 
 from Symplectic import Symplectic, D1, D2, D0, D3
@@ -28,36 +27,36 @@ class BhSymp(object):
         self.mu2 = mu2
         self.E = e
         self.L = l
-        self.a2 = a.sqr()
+        self.a2 = a**2
         self.a2l_3 = self.a2 * self.l_3
         self.a2mu2 = self.a2 * mu2
         self.aE = a * e
         self.aL = a * l
-        self.X2 = (D1 + self.a2l_3).sqr()
+        self.X2 = (D1 + self.a2l_3)**2
         self.two_EX2 = D2 * e * self.X2
         self.two_aE = D2 * a * e
-        self.K = q + self.X2 * (l - self.aE).sqr()
+        self.K = q + self.X2 * (l - self.aE)**2
         self.t = self.ph = D0
         self.r = r0
-        self.th = (DD(90.0) - th0) * DD.pi / DD(180.0)
+        self.th = (longfloat(90.0) - th0) * longfloat(pi) / longfloat(180.0)
         self.cross = xh
         self.refresh()
         self.Ur = - sqrt(self.r_potential if self.r_potential >= D0 else -self.r_potential)
         self.Uth = - sqrt(self.th_potential if self.th_potential >= D0 else -self.th_potential)
 
     def refresh(self):
-        self.r2 = self.r.sqr()
-        self.sth = self.th.sin()
-        self.cth = self.th.cos()
-        self.sth2 = self.sth.sqr()
+        self.r2 = self.r**2
+        self.sth = sin(self.th)
+        self.cth = cos(self.th)
+        self.sth2 = self.sth**2
         self.cth2 = D1 - self.sth2
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
         self.d_r = (D1 - self.l_3 * self.r2) * self.ra2 - D2 * self.r
-        self.r_potential = self.X2 * self.P.sqr() - self.d_r * (self.mu2 * self.r2 + self.K)
+        self.r_potential = self.X2 * self.P**2 - self.d_r * (self.mu2 * self.r2 + self.K)
         self.T = self.aE * self.sth2 - self.L
         self.d_th = D1 + self.a2l_3 * self.cth2
-        self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T.sqr() / self.sth2
+        self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
         p_dr = self.P / self.d_r
         t_dth = self.T / self.d_th
         self.S = self.r2 + self.a2 * self.cth2
@@ -66,8 +65,8 @@ class BhSymp(object):
 
     def v4_error(self, ut, ur, uth, uph):
         sx2 = self.S * self.X2
-        return self.mu2 + self.sth2 * self.d_th / sx2 * (self.a * ut - self.ra2 * uph).sqr() + self.S / self.d_r * ur.sqr() \
-               + self.S / self.d_th * uth.sqr() - self.d_r / sx2 * (ut - self.a * self.sth2 * uph).sqr()
+        return self.mu2 + self.sth2 * self.d_th / sx2 * (self.a * ut - self.ra2 * uph)**2 + self.S / self.d_r * ur**2 \
+               + self.S / self.d_th * uth**2 - self.d_r / sx2 * (ut - self.a * self.sth2 * uph)**2
 
     def q_update(self, c):
         self.t += c * self.Ut
@@ -95,23 +94,21 @@ class BhSymp(object):
         return i, plot_count
 
     def plot(self, mino, tau, ut, ur, uth, uph):
-        er = ur.sqr() - self.r_potential / self.S.sqr()
-        eth = uth.sqr() - self.th_potential / self.S.sqr()
+        er = ur**2 - self.r_potential / self.S**2
+        eth = uth**2 - self.th_potential / self.S**2
         v4e = self.v4_error(ut, ur, uth, uph)
         print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            mino.__float__(), tau.__float__(), v4e.__float__(), er.__float__(), eth.__float__(), self.t.__float__(), self.r.__float__(), self.th.__float__(), self.ph.__float__(), ut.__float__(), ur.__float__(), uth.__float__(), uph.__float__())
+            mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph, ut, ur, uth, uph)
 
 
 if __name__ == "__main__":
     print >> stderr, "Simulator: {}".format(argv[0])
-    init_state = fpu_init()
     input_data = stdin.read()
-    ic = loads(input_data, parse_float=DD)['IC']
+    ic = loads(input_data, parse_float=longfloat)['IC']
     print >> stderr, input_data
     bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])
     step = ic['step']
     integrator = Symplectic(bh, step, ic['integrator'], ic['stages']).method
     bh.solve(integrator, step, ic['start'], ic['end'], ic['plotratio'])
-    fpu_restore(init_state)
 else:
     print >> stderr, __name__ + " module loaded"
