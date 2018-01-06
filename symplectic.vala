@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, 2015, 2016, 2017 Ian Smith (m4r35n357)
+Copyright (c) 2014-2018, Ian Smith (m4r35n357)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -234,11 +234,11 @@ namespace Integrators {
          * where zOuter = 1 / (4 - 4**(1/3)), and zCentral = 1 - 4 * zOuter
          */
         protected void base4 (double s) {
-            for (var i = 0; i < nOuter; i++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base2(s * zOuter);
             }
             base2(s * zCentral);
-            for (var i = 0; i < nOuter; i++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base2(s * zOuter);
             }
         }
@@ -288,11 +288,11 @@ namespace Integrators {
          * where yOuter = 1 / (4 - 4**(1/5)), and yCentral = 1 - 4 * yOuter
          */
         protected void base6 (double s) {
-            for (var j = 0; j < nOuter; j++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base4(s * yOuter);
             }
             base4(s * yCentral);
-            for (var j = 0; j < nOuter; j++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base4(s * yOuter);
             }
         }
@@ -342,11 +342,11 @@ namespace Integrators {
          * where xOuter = 1 / (4 - 4**(1/7)), and xCentral = 1 - 4 * xOuter
          */
         protected void base8 (double s) {
-            for (var k = 0; k < nOuter; k++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base6(s * xOuter);
             }
             base6(s * xCentral);
-            for (var k = 0; k < nOuter; k++) {
+            for (var _ = 0; _ < nOuter; _++) {
                 base6(s * xOuter);
             }
         }
