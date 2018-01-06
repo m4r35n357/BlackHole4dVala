@@ -15,8 +15,8 @@ module Model
     real(16), parameter :: MD0=0.0_16, MD1=1.0_16, MD2=2.0_16, MD3=3.0_16  ! CONSTANTS
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
-    real(16) :: t = MD0, r, th, ph = MD0, Ut, Ur, Uth, Uph, tau = MD0  ! PARTICLE VARIABLES
-    logical :: cross
+    real(16) :: mino, t = MD0, r, th, ph = MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
+    logical :: cross, carryOn = .true.
 contains
     subroutine init_model_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
@@ -79,18 +79,21 @@ contains
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine pUpdate
 
-    subroutine postLoop(timestep)
-        real(16), intent(in) :: timestep
-        tau = tau + timestep * Sigma
-    end subroutine postLoop
+    real(16) function tUpdate(tau, step, counter)
+        real(16), intent(in) :: tau, step
+        integer, intent(in) :: counter
+        carryOn = cross .or. Dr > MD0
+        mino = step * counter
+        tUpdate = tau + step * Sigma
+    end function tUpdate
 
-    subroutine plotModel(mino)
-        real(16), intent(in) :: mino
-        call plot(mino, Ut / Sigma, Ur / Sigma, Uth / Sigma, Uph / Sigma)
-    end subroutine plotModel
-
-    subroutine plot(mino, Vt, Vr, Vth, Vph)
-        real(16), intent(in) :: mino, Vt, Vr, Vth, Vph
+    subroutine plot(tau)
+        real(16), intent(in) :: tau
+        real(16) :: Vt, Vr, Vth, Vph
+        Vt = Ut / Sigma
+        Vr = Ur / Sigma
+        Vth = Uth / Sigma
+        Vph = Uph / Sigma
         write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
                     ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
                                   + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&

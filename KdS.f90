@@ -14,7 +14,7 @@ program KdS
     use Model
     implicit none
     real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D2=2.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, D11=11.0_16  ! CONSTANTS
-    real(16) :: root, v1, v3, w1, w3, x1, x3, y1, y3, z1, z3, time = D0, h, start, finish
+    real(16) :: root, v1, v3, w1, w3, x1, x3, y1, y3, z1, z3, time = D0, step, start, finish
     integer :: plotratio, stages, outer
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -51,7 +51,7 @@ program KdS
     end select
 contains
     subroutine init_vars()
-        read(*,*) h, start, finish, plotratio, integrator, stages
+        read(*,*) step, start, finish, plotratio, integrator, stages
         root = stages - D1;
         outer = (stages - 1) / 2;
         v1 = D1 / (root - root**(D1 / D11))
@@ -69,28 +69,27 @@ contains
 
     subroutine solve(method)
         integer :: counter = 0
-        do while ((tau < finish) .and. (cross .or. Dr > D0))
-            if ((tau >= start) .and. (mod(counter, plotratio) == 0)) then
-                call plotModel(time)
+        do while ((time < finish) .and. carryOn)
+            if ((time >= start) .and. (mod(counter, plotratio) == 0)) then
+                call plot(time)
             end if
             call method()
             counter = counter + 1
-            time = h * counter
-            call postLoop(h)
+            time = tUpdate(time, step, counter)
         end do
-        call plotModel(time)
+        call plot(time)
     end subroutine solve
 
     subroutine first_order()
-        call qUpdate(h)
-        call pUpdate(h)
+        call qUpdate(step)
+        call pUpdate(step)
     end subroutine first_order
 
     subroutine base2(s)
         real(16), intent(in) :: s
-        call qUpdate(h * s * D05)
-        call pUpdate(h * s)
-        call qUpdate(h * s * D05)
+        call qUpdate(step * s * D05)
+        call pUpdate(step * s)
+        call qUpdate(step * s * D05)
     end subroutine base2
 
     subroutine second_order()

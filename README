@@ -19,23 +19,25 @@ ffmpeg
 
 Sample usage:
 
-1.	Build all the Vala executables, and select one
+1.  Build all the Vala executables, and select one
 
 ./build-all [fast]
 
 export LD_LIBRARY_PATH=.
 export exe='bin/Release/KerrDeSitter'
+export exe='./FortranBh3d'
+export exe='./FortranNewton'
 export exe='./Simulate'
 export exe='./Bh3d.py'
 export exe='nc.openbsd pi 1234'
 
 
-2.	Run tests
+2.  Run tests
 
 ./run-tests 2>/dev/null
 
 
-3.	Edit the inital conditions data and/or the inital conditions file (using particles around black hole as an example)
+3.  Edit the inital conditions data and/or the inital conditions file (using particles around black hole as an example)
 
 export icdata=icgen-data.json
 export ic=initial-conditions.json
@@ -50,19 +52,19 @@ cp icgenLight-data.example $icdata
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
-#vi $ic; jq . $ic; jq '.IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0, .IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.cross, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
 vi $ic; jq . $ic; jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.cross, .IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
 
 $exe <$ic | ./plotBH.py $ic 2>/dev/null &
 $exe <$ic | ./filegraphics-pi.py $ic
 $exe <$ic | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &
 
-4.	Some more example pipelines . . .
+4.  Some more example pipelines . . .
 
 ./rg2 2>/dev/null
 
+cp initial-conditions.newton.example initial-conditions.newton.json
 export ic=initial-conditions.newton.json
-vi $ic; jq . $ic
+vi $ic; jq . $ic; jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.Lfac, .IC.r0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
 $exe <$ic | ./plotBH.py $ic 2>/dev/null &
 
 export ic=initial-conditions.pendulum.json
@@ -75,17 +77,17 @@ $exe <$ic | ./plotOscillator.py 2>/dev/null &
 export ic=initial-conditions.henonheiles.json
 vi $ic; jq . $ic
 
-echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`  
+echo '{ "rMin": 3.0, "rMax": 12.0, "elevation": 63.0, "spin": 1.0 }' | ./icgenParticle 2>/dev/null | tee $ic | jq .; $exe <$ic| ./plotBH.py `jq .IC.M $ic` `jq .IC.a $ic` `jq .IC.L $ic` `jq .IC.mu $ic`
 
 params='{ "IC": { "r0": 12.0, "Lfac": 0.8, "start": 0.0, "end": 5000.0, "step": 0.1, "integrator": "sb2", "plotratio": 10 } }'; echo $params | jq .; echo $params | $exe >$data; ./plotErrors.py tau 1 <$data 2>/dev/null & echo $params | $exe | ./plotBH.py 1.0 `echo $params | jq .IC.Lfac` 0.0 2>/dev/null &
 
 
-5.	Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
+5.  Generate geodesic data and pass it to David Madore's kerr-image raytracer (ftp://ftp.madore.org/pub/madore/misc/kerr-image.c).
 
 ./icgenParticle <$icdata 2>$pot | $exe | ./raytrace-commands 0 2>/dev/null | ./raytrace
 
 
-6.	Make a video out of the output files:
+6.  Make a video out of the output files:
 
 ffmpeg -y -i RaytracingOutput/%04d.png -c:v libx264 -crf 1 raytrace.mp4
 mplayer raytrace.mp4 -fps 10
@@ -94,7 +96,7 @@ ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -crf 1 vpython.mp4
 ffmpeg -y -i VPythonOutput/%04d.png -c:v libx264 -preset veryslow -qp 0 vpython.mp4
 
 
-7.	Run a geodesic server from eg. /etc/rc.local:
+7.  Run a geodesic server from eg. /etc/rc.local:
 
 e.g. on a Raspberry PI:
 
@@ -106,7 +108,7 @@ script2='./Bh3d.py'
 su -c "cd $gsdir; $gs 1234 & $gs 1233 & $gs 1232 $script1 & $gs 1231 $script2 &" pi
 
 
-8.	Update Valadoc:
+8.  Update Valadoc:
 
 rsync -av --delete doc ../../m4r35n357.github.io/BlackHole4dVala
 
