@@ -50,7 +50,8 @@ cp icgenLight-data.example $icdata
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
-vi $ic; jq . $ic; jq '.IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0, .IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.cross, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
+#vi $ic; jq . $ic; jq '.IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0, .IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.cross, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
+vi $ic; jq . $ic; jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.cross, .IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
 
 $exe <$ic | ./plotBH.py $ic 2>/dev/null &
 $exe <$ic | ./filegraphics-pi.py $ic

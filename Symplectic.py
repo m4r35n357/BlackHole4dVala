@@ -1,6 +1,5 @@
-#!/usr/bin/env pypy
 """
-Copyright (c) 2014, 2015, 2016, 2017, Ian Smith (m4r35n357)
+Copyright (c) 2014-2018, Ian Smith (m4r35n357)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
