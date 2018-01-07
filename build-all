@@ -51,7 +51,9 @@ echo $C"Compiling Fortran . . ."$NC
 #	-c KdS.f90 -o obj/Release/main.o
 #gfortran -static -o bin/Release/KerrDeSitter obj/Release/main.o -s  
 gfortran -Wall -O2 -fimplicit-none \
-	-static -o fortran_test KdS.f90 Bh3d.f90
+	-static -o FortranBh3d KdS.f90 Bh3d.f90
+gfortran -Wall -O2 -fimplicit-none \
+	-static -o FortranNewton KdS.f90 Newton.f90
 echo ""
 
 # strip executables
@@ -67,7 +69,8 @@ rm -f KdS
 
 # admire our work
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
-		raytrace-commands kerr-image fortran_test
+		raytrace-commands kerr-image \
+		FortranBh3d FortranNewton
 echo ""
 ls -lAh --color *.h *.so *.vapi *.gir *.typelib
 echo ""
