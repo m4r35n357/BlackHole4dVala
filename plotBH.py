@@ -163,7 +163,7 @@ def main():
         e_cum += e
         e_pk = e_pk if e_pk > e else e
         data_line = stdin.readline()
-    print "{}: Errors - Peak: {:.1f}, Average: {:.1f}".format(argv[0], log_error(e_pk), log_error(e_cum / count))
+    print " {}: Errors - Peak: {:.1f}, Average: {:.1f}".format(argv[0], log_error(e_pk), log_error(e_cum / count))
 
 if __name__ == "__main__":
     main()

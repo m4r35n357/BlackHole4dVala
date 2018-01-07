@@ -16,7 +16,7 @@ module Model
     real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
     real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: mino, t = MD0, r, th, ph = MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
-    logical :: cross, carryOn = .true.
+    logical :: cross, carry_on = .true.
 contains
     subroutine init_model_vars()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
@@ -64,28 +64,28 @@ contains
         Sigma = r2 + a2 * cth2
     end subroutine refresh
 
-    subroutine qUpdate(c)
+    subroutine q_update(c)
         real(16), intent(in) :: c
         t = t + c * Ut
         r = r + c * Ur
         th = th + c * Uth
         ph = ph + c * Uph
         call refresh()
-    end subroutine qUpdate
+    end subroutine q_update
 
-    subroutine pUpdate(d)
+    subroutine p_update(d)
         real(16), intent(in) :: d
         Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (MD1 - l_3 * (r2 + ra2)) - MD1) * (ccK + mu2 * r2))
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
-    end subroutine pUpdate
+    end subroutine p_update
 
-    real(16) function tUpdate(tau, step, counter)
+    real(16) function t_update(tau, step, counter)
         real(16), intent(in) :: tau, step
         integer, intent(in) :: counter
-        carryOn = cross .or. Dr > MD0
+        carry_on = cross .or. Dr > MD0
         mino = step * counter
-        tUpdate = tau + step * Sigma
-    end function tUpdate
+        t_update = tau + step * Sigma
+    end function t_update
 
     subroutine plot(tau)
         real(16), intent(in) :: tau

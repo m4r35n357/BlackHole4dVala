@@ -15,7 +15,7 @@ module Model
     real(16), parameter :: MD0=0.0_16, MD05=0.5_16, MD1=1.0_16, MD2=2.0_16, PI_2=MD05*acos(-MD1)  ! CONSTANTS
     real(16) :: L, L2, E0, V, H0  ! INTERMEDIATE VARIABLES
     real(16) :: r, ph = MD0, rDot, phDot  ! PARTICLE VARIABLES (coordinates and velocities))
-    logical :: carryOn = .true.
+    logical :: carry_on = .true.
 contains
     subroutine init_model_vars()
         real(16) :: lFac, r0, LC
@@ -35,24 +35,24 @@ contains
         hamiltonian = MD05 * (rDot * rDot + L2 / (r * r)) - MD1 / r
     end function hamiltonian
 
-    subroutine qUpdate(c)
+    subroutine q_update(c)
         real(16), intent(in) :: c
         r = r + c * rDot
         phDot = L / (r * r)
         ph = ph + c * phDot
-    end subroutine qUpdate
+    end subroutine q_update
 
-    subroutine pUpdate(d)
+    subroutine p_update(d)
         real(16), intent(in) :: d
         rDot = rDot - d * (MD1 / (r * r) - L2 / (r * r * r))
-    end subroutine pUpdate
+    end subroutine p_update
 
-    real(16) function tUpdate(time, step, counter)
+    real(16) function t_update(time, step, counter)
         real(16), intent(in) :: time, step
         integer, intent(in) :: counter
-        carryOn = r > MD2
-        tUpdate = step * counter
-    end function tUpdate
+        carry_on = r > MD2
+        t_update = step * counter
+    end function t_update
 
     subroutine plot(time)
         real(16), intent(in) :: time
