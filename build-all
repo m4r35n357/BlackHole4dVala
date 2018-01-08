@@ -53,6 +53,9 @@ gfortran -static -o FortranBh3d KdS.f90 Bh3d.o
 rm -f model.mod Bh3d.o
 gfortran -Wall -O2 -fimplicit-none -c Newton.f90
 gfortran -static -o FortranNewton KdS.f90 Newton.o
+rm -f model.mod Bh3d.o
+gfortran -Wall -O2 -fimplicit-none -c Oscillator.f90
+gfortran -static -o FortranOscillator KdS.f90 Oscillator.o
 echo ""
 
 # strip executables
@@ -69,7 +72,7 @@ rm -f KdS
 # admire our work
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image \
-		FortranBh3d FortranNewton
+		FortranBh3d FortranNewton FortranOscillator
 echo ""
 ls -lAh --color *.h *.so *.vapi *.gir *.typelib
 echo ""
