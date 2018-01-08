@@ -47,13 +47,12 @@ echo ""
 
 # compile Fortran
 echo $C"Compiling Fortran . . ."$NC
-#gfortran -Jobj/Release/ -Wall -O2 -fimplicit-none \
-#	-c KdS.f90 -o obj/Release/main.o
-#gfortran -static -o bin/Release/KerrDeSitter obj/Release/main.o -s  
-gfortran -Wall -O2 -fimplicit-none \
-	-static -o FortranBh3d KdS.f90 Bh3d.f90
-gfortran -Wall -O2 -fimplicit-none \
-	-static -o FortranNewton KdS.f90 Newton.f90
+rm -f model.mod Bh3d.o
+gfortran -Wall -O2 -fimplicit-none -c Bh3d.f90
+gfortran -static -o FortranBh3d KdS.f90 Bh3d.o
+rm -f model.mod Bh3d.o
+gfortran -Wall -O2 -fimplicit-none -c Newton.f90
+gfortran -static -o FortranNewton KdS.f90 Newton.o
 echo ""
 
 # strip executables
