@@ -14,7 +14,7 @@ valafiles='KdS.vala symplectic.vala models.vala generators.vala json-parser.vala
 # cleanup executables
 echo $C"Cleaning Up . . ."$NC
 rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands pendulum \
-	kerr-image Simulate GenParticle GenLight
+	kerr-image Simulate GenParticle GenLight Fortran*
 rm -f *.h *.vapi
 echo ""
 
@@ -47,15 +47,24 @@ echo ""
 
 # compile Fortran
 echo $C"Compiling Fortran . . ."$NC
+if [ '.' = $LD_LIBRARY_PATH ]
+then
+	STATIC=''
+else
+	STATIC='-static'
+fi
+rm -f model.mod KdS.o Kerr.o Newton.o Oscillator.o
+gfortran -Wall -O2 -fimplicit-none -c KdS.f90
+gfortran $STATIC -o FortranKdS Symplectic.f90 KdS.o
 rm -f model.mod Bh3d.o
-gfortran -Wall -O2 -fimplicit-none -c Bh3d.f90
-gfortran -static -o FortranBh3d KdS.f90 Bh3d.o
+gfortran -Wall -O2 -fimplicit-none -c Kerr.f90
+gfortran $STATIC -o FortranKerr Symplectic.f90 Kerr.o
 rm -f model.mod Bh3d.o
 gfortran -Wall -O2 -fimplicit-none -c Newton.f90
-gfortran -static -o FortranNewton KdS.f90 Newton.o
+gfortran $STATIC -o FortranNewton Symplectic.f90 Newton.o
 rm -f model.mod Bh3d.o
 gfortran -Wall -O2 -fimplicit-none -c Oscillator.f90
-gfortran -static -o FortranOscillator KdS.f90 Oscillator.o
+gfortran $STATIC -o FortranOscillator Symplectic.f90 Oscillator.o
 echo ""
 
 # strip executables
@@ -72,11 +81,9 @@ rm -f KdS
 # admire our work
 ls -lAh --color TestKdS Simulate GenParticle GenLight \
 		raytrace-commands kerr-image \
-		FortranBh3d FortranNewton FortranOscillator
+		Fortran*
 echo ""
-ls -lAh --color *.h *.so *.vapi *.gir *.typelib
-echo ""
-ls -lAh --color */Release
+ls -lAh --color *.h *.so *.vapi *.gir *.typelib *.o
 echo ""
 
 # generate documentation

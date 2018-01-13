@@ -24,8 +24,7 @@ Sample usage:
 ./build-all [fast]
 
 export LD_LIBRARY_PATH=.
-export exe='bin/Release/KerrDeSitter'
-export exe='./FortranBh3d'
+export exe='./FortranKdS'
 export exe='./FortranNewton'
 export exe='./Simulate'
 export exe='./Bh3d.py'
@@ -58,14 +57,19 @@ $exe <$ic | ./plotBH.py $ic 2>/dev/null &
 $exe <$ic | ./filegraphics-pi.py $ic
 $exe <$ic | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &
 
+$exe <ictest | ./plotBH.py $ic 2>/dev/null &
+$exe <ictest | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &
+
 4.  Some more example pipelines . . .
 
 ./rg2 2>/dev/null
 
 cp initial-conditions.newton.example initial-conditions.newton.json
 export ic=initial-conditions.newton.json
+export exe='./FortranNewton'
 vi $ic; jq . $ic; jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.Lfac, .IC.r0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
 $exe <$ic | ./plotBH.py $ic 2>/dev/null &
+$exe <ictest | ./plotBH.py $ic 2>/dev/null &
 
 export ic=initial-conditions.pendulum.json
 vi $ic; jq . $ic
