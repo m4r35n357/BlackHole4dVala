@@ -13,16 +13,16 @@
 module Model
     implicit none
     real(16), parameter :: MD05=0.5_16
-    real(16) :: x, Ux, k, m, H0
+    real(16) :: x, Ux, k, m, h0
     logical :: carry_on = .true.
 contains
-    subroutine init_model_vars()
+    subroutine init_model()
         real(16) :: x0
         write (0, *) "Harmonic Oscillator"
         read(*,*) k, m, x0
         x = x0
-        H0 = hamiltonian()
-    end subroutine init_model_vars
+        h0 = hamiltonian()
+    end subroutine init_model
 
     real(16) function hamiltonian ()
         hamiltonian = MD05 * (m * Ux**2 + k * x**2)
@@ -46,7 +46,7 @@ contains
 
     subroutine plot(time)
         real(16), intent(in) :: time
-        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - H0, ',"t":', time,',"x":',x,',"xP":',Ux,'}'
+        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0, ',"t":', time,',"x":',x,',"xP":',Ux,'}'
     end subroutine plot
 end module Model
 

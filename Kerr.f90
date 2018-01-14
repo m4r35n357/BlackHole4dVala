@@ -13,54 +13,49 @@
 module Model
     implicit none
     real(16), parameter :: MD0=0.0_16, MD1=1.0_16, MD2=2.0_16, MD3=3.0_16  ! CONSTANTS
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
-    real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
+    real(16) :: a, a2, mu2, a2mu2, E, L, ccK, aE, twoE, twoEa, aL  ! IMMUTABLES
+    real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
     real(16) :: mino, t = MD0, r, th, ph = MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
     logical :: cross, carry_on = .true.
 contains
-    subroutine init_model_vars()
+    subroutine init_model()
         real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
-        write (0, *) "Kerr-deSitter Geodesic"
+        write (0, *) "Kerr Geodesic"
         read(*,*) cross, lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
-        l_3 = lambda / MD3
         a = spin
         mu2 = pMass2
         E = energy
         L = angMom
         a2 = a**2
-        a2l_3 = a2 * l_3
         a2mu2 = a2 * mu2
         aE = a * E
         aL = a * L
-        X2 = (MD1 + a2l_3)**2
-        twoEX2 = MD2 * E * X2
+        twoE = MD2 * E
         twoEa = MD2 * aE
-        ccK = ccQ + X2 * (L - aE)**2
+        ccK = ccQ + (L - aE)**2
         r = r0
         th = (90.0_16 - th0) * acos(-MD1) / 180.0_16
         call refresh()
         Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= MD0))
         Uth = - sqrt(merge(THpot, -THpot, THpot >= MD0))
-    end subroutine init_model_vars
+    end subroutine init_model
 
     subroutine refresh()
-        real(16) :: P_Dr, T_Dth
+        real(16) :: P_Dr
         r2 = r**2
         ra2 = r2 + a2
         Rint = ra2 * E - aL
-        Dr = (MD1 - l_3 * r2) * ra2 - MD2 * r
-        Rpot = X2 * Rint**2 - Dr * (mu2 * r2 + ccK)
+        Dr = ra2 - MD2 * r
+        Rpot = Rint**2 - Dr * (mu2 * r2 + ccK)
         sth = sin(th)
         cth = cos(th)
         sth2 = sth**2
         cth2 = MD1 - sth2
         THint = aE * sth2 - L
-        Dth = MD1 + a2l_3 * cth2
-        THpot = Dth * (ccK - a2mu2 * cth2) - X2 * THint**2 / sth2
+        THpot = (ccK - a2mu2 * cth2) - THint**2 / sth2
         P_Dr = Rint / Dr
-        T_Dth = THint / Dth
-        Ut = (P_Dr * ra2 - T_Dth * a) * X2
-        Uph = (P_Dr * a - T_Dth / sth2) * X2
+        Ut = P_Dr * ra2 - THint * a
+        Uph = P_Dr * a - THint / sth2
         Sigma = r2 + a2 * cth2
     end subroutine refresh
 
@@ -75,8 +70,8 @@ contains
 
     subroutine p_update(d)
         real(16), intent(in) :: d
-        Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (MD1 - l_3 * (r2 + ra2)) - MD1) * (ccK + mu2 * r2))
-        Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
+        Ur = Ur + d * (r * (twoE * Rint - mu2 * Dr) - (r - MD1) * (ccK + mu2 * r2))
+        Uth = Uth + d * cth * (sth * a2 * mu2 + THint / sth * (THint / sth2 - twoEa))
     end subroutine p_update
 
     real(16) function t_update(tau, step, counter)
@@ -95,8 +90,8 @@ contains
         Vth = Uth / Sigma
         Vph = Uph / Sigma
         write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
-                    ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
-                                  + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
+                    ',"v4e":',mu2 + sth2 / Sigma * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
+                                  + Sigma * Vth**2 - Dr / Sigma * (Vt - a * sth2 * Vph)**2,&
                     ',"ER":',Vr**2 - Rpot / Sigma**2,',"ETh":',Vth**2 - THpot / Sigma**2,&
                     ',"t":', t,',"r":',r,',"th":',th,',"ph":',ph,',"tP":',Vt,',"rP":',Vr,',"thP":',Vth,',"phP":',Vph,'}'
     end subroutine plot

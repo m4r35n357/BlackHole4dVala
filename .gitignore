@@ -18,6 +18,7 @@
 *.so
 *.pyc
 .valencia
+Fortran*
 TestKdS
 raytrace-commands
 Simulate

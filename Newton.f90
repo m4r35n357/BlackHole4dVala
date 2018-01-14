@@ -13,38 +13,39 @@
 module Model
     implicit none
     real(16), parameter :: MD0=0.0_16, MD05=0.5_16, MD1=1.0_16, MD2=2.0_16, PI_2=MD05*acos(-MD1)  ! CONSTANTS
-    real(16) :: L, L2, E0, V, H0  ! INTERMEDIATE VARIABLES
-    real(16) :: r, ph = MD0, rDot, phDot  ! PARTICLE VARIABLES (coordinates and velocities))
+    real(16) :: l, l2, h0  ! IMMUTABLES
+    real(16) :: r, ph=MD0, Ur, Uph  ! PARTICLE VARIABLES (coordinates and velocities))
     logical :: carry_on = .true.
 contains
-    subroutine init_model_vars()
-        real(16) :: lFac, r0, LC
-        write (0, *) "Newtonian Central-Body Problem"
+    subroutine init_model()
+        real(16) :: lFac, r0, e0, v
+        write (0, *) "Newtonian Central Body Problem"
         read(*,*) lFac, r0
         r = r0
-        LC = sqrt(r0)
-        E0 = MD05 * LC**2 / (r * r) - MD1 / r
-        L = lFac * LC
-        L2 = L**2
-        V = MD05 * L2 / (r * r) - MD1 / r
-        rDot = - sqrt(MD2 * merge(E0 - V, V - E0, E0 > V))
-        H0 = hamiltonian()
-    end subroutine init_model_vars
+        l = sqrt(r0)
+        e0 = MD05 * l**2 / r**2 - MD1 / r
+        l = lFac * l
+        l2 = l**2
+        v = MD05 * l2 / r**2 - MD1 / r
+        Ur = - sqrt(MD2 * merge(e0 - v, v - e0, e0 > v))
+        Uph = l / r**2
+        h0 = hamiltonian()
+    end subroutine init_model
 
     real(16) function hamiltonian ()
-        hamiltonian = MD05 * (rDot * rDot + L2 / (r * r)) - MD1 / r
+        hamiltonian = MD05 * (Ur**2 + l2 / r**2) - MD1 / r
     end function hamiltonian
 
     subroutine q_update(c)
         real(16), intent(in) :: c
-        r = r + c * rDot
-        phDot = L / (r * r)
-        ph = ph + c * phDot
+        r = r + c * Ur
+        ph = ph + c * Uph
     end subroutine q_update
 
     subroutine p_update(d)
         real(16), intent(in) :: d
-        rDot = rDot - d * (MD1 / (r * r) - L2 / (r * r * r))
+        Ur = Ur - d * (MD1 / r**2 - l2 / r**3)
+        Uph = l / r**2
     end subroutine p_update
 
     real(16) function t_update(time, step, counter)
@@ -56,8 +57,8 @@ contains
 
     subroutine plot(time)
         real(16), intent(in) :: time
-        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - H0,&
-            ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"rDot":',rDot,',"thP":',0.0,',"phP":',phDot,'}'
+        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0,&
+            ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"Ur":',Ur,',"thP":',0.0,',"phP":',Uph,'}'
     end subroutine plot
 end module Model
 
