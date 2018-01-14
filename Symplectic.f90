@@ -14,7 +14,7 @@ program Symplectic
     use Model
     implicit none
     real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D4=4.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, D11=11.0_16  ! CONSTANTS
-    real(16) :: v_plus, v_minus, w_plus, w_minus, x_plus, x_minus, y_plus, y_minus, z_plus, z_minus, time=D0, step, start, finish
+    real(16) :: v_plus, v_minus, w_plus, w_minus, x_plus, x_minus, y_plus, y_minus, z_plus, z_minus, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -34,31 +34,32 @@ program Symplectic
     call init_model()
     select case (integrator)
         case ("b1")
-            write (0, *) "1st Order Symplectic Integrator (Euler-Cromer)"
+            write (0, *) "1st Order Integrator (Euler-Cromer)"
             call evolve(first_order)
         case ("b2")
-            write (0, *) "2nd Order Symplectic Integrator Base (Stormer-Verlet)"
+            write (0, *) "2nd Order Integrator Base (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (0, *) "4th Order Symplectic Integrator (using Suzuki composition)"
+            write (0, *) "4th Order Integrator (using Suzuki composition)"
             call evolve(fourth_order)
         case ("b6")
-            write (0, *) "6th Order Symplectic Integrator (using Suzuki composition)"
+            write (0, *) "6th Order Integrator (using Suzuki composition)"
             call evolve(sixth_order)
         case ("b8")
-            write (0, *) "8th Order Symplectic Integrator (using Suzuki composition)"
+            write (0, *) "8th Order Integrator (using Suzuki composition)"
             call evolve(eightth_order)
         case ("b10")
-            write (0, *) "10th Order Symplectic Integrator (using Suzuki composition)"
+            write (0, *) "10th Order Integrator (using Suzuki composition)"
             call evolve(tenth_order)
         case ("b12")
-            write (0, *) "12th Order Symplectic Integrator (using Suzuki composition)"
+            write (0, *) "12th Order Integrator (using Suzuki composition)"
             call evolve(twelfth_order)
         case default
             error stop "Invalid integrator method"
     end select
 contains
     subroutine evolve(nth_order)
+        real(16) :: time = D0
         integer :: counter = 0
         do while ((time < finish) .and. carry_on)
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
@@ -152,4 +153,3 @@ contains
         call base_12(D1)
     end subroutine twelfth_order
 end program Symplectic
-
