@@ -18,16 +18,12 @@ module Model
     logical :: carry_on = .true.
 contains
     subroutine init_model()
-        real(16) :: lFac, r0, e0, v
+        real(16) :: lFac
         write (0, *) "Newtonian Central Body Problem"
-        read(*,*) lFac, r0
-        r = r0
-        l = sqrt(r0)
-        e0 = MD05 * l**2 / r**2 - MD1 / r
-        l = lFac * l
+        read(*,*) lFac, r
+        l = lFac * sqrt(r)
         l2 = l**2
-        v = MD05 * l2 / r**2 - MD1 / r
-        Ur = - sqrt(MD2 * merge(e0 - v, v - e0, e0 > v))
+        Ur = - sqrt(r - l2) / r
         Uph = l / r**2
         h0 = hamiltonian()
     end subroutine init_model
@@ -44,7 +40,7 @@ contains
 
     subroutine p_update(d)
         real(16), intent(in) :: d
-        Ur = Ur - d * (MD1 / r**2 - l2 / r**3)
+        Ur = Ur - d * (MD1 - l2 / r) / r**2
         Uph = l / r**2
     end subroutine p_update
 

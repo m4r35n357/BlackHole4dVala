@@ -204,13 +204,9 @@ namespace Models {
         public Newton (double lFac, double r0) {
             stderr.printf("Newtonian Orbit\n");
             this.r = r0;
-            this.L = sqrt(r0);
+            this.L = lFac * sqrt(r0);
             this.L2 = L * L;
-            var E0 = 0.5 * L2 / (r * r) - 1.0 / r;
-            this.L = lFac * L;
-            this.L2 = L * L;
-            var V = 0.5 * L2 / (r * r) - 1.0 / r;
-            this.rDot = - sqrt(2.0 * (E0 > V ? E0 - V : V - E0));
+            this.rDot = - sqrt(r0 - L2) / r;
             this.H0 = H();
         }
 
@@ -239,7 +235,7 @@ namespace Models {
          * @see IModel.pUpdate
          */
         public void pUpdate (double c) {
-            rDot -= c * (1.0 / (r * r) - L2 / (r * r * r));
+            rDot -= c * (1.0 - L2 / r) / (r * r);
         }
 
         /**
