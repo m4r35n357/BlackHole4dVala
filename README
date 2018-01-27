@@ -22,7 +22,10 @@ Sample usage:
 1.  Build all the Vala executables, and select one
 
 ./build-all [fast]
+FORTRAN128='true' ./build-all
+FORTRAN128='false' ./build-all
 
+export FORTRAN128='true'
 export LD_LIBRARY_PATH=.
 export exe='./FortranKdS'
 export exe='./FortranNewton'

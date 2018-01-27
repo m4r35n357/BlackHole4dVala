@@ -11,6 +11,15 @@ which valac
 
 valafiles='KdS.vala symplectic.vala models.vala generators.vala json-parser.vala'
 
+if [ 'xtrue' = "x$FORTRAN128" ]
+then
+	echo 'FORTRAN 128 bit double precision'
+	gf='gfortran -Wall -O2 -fimplicit-none -fdefault-real-8'
+else
+	echo 'FORTRAN default double precision'
+	gf='gfortran -Wall -O2 -fimplicit-none'
+fi
+
 # cleanup executables
 echo $C"Cleaning Up . . ."$NC
 rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands pendulum \
@@ -54,14 +63,14 @@ else
 	STATIC='-static'
 fi
 rm -f model.mod KdS.o Newton.o Oscillator.o
-gfortran -Wall -O2 -fimplicit-none -c KdS.f90
-gfortran $STATIC -o FortranKdS Symplectic.f90 KdS.o
+$gf -c KdS.f90
+$gf $STATIC -o FortranKdS Symplectic.f90 KdS.o
 rm -f model.mod
-gfortran -Wall -O2 -fimplicit-none -c Newton.f90
-gfortran $STATIC -o FortranNewton Symplectic.f90 Newton.o
+$gf -c Newton.f90
+$gf $STATIC -o FortranNewton Symplectic.f90 Newton.o
 rm -f model.mod
-gfortran -Wall -O2 -fimplicit-none -c Oscillator.f90
-gfortran $STATIC -o FortranOscillator Symplectic.f90 Oscillator.o
+$gf -c Oscillator.f90
+$gf $STATIC -o FortranOscillator Symplectic.f90 Oscillator.o
 echo ""
 
 # strip executables

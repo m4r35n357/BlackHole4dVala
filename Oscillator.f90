@@ -12,40 +12,40 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Model
     implicit none
-    real(16), parameter :: MD05=0.5_16
-    real(16) :: x, Ux, k, m, h0
+    double precision, parameter :: MD05=0.5
+    double precision :: x, Ux, k, m, h0
     logical :: carry_on = .true.
 contains
     subroutine init_model()
-        real(16) :: x0
+        double precision :: x0
         write (0, *) "Harmonic Oscillator"
         read(*,*) k, m, x0
         x = x0
         h0 = hamiltonian()
     end subroutine init_model
 
-    real(16) function hamiltonian ()
+    double precision function hamiltonian ()
         hamiltonian = MD05 * (m * Ux**2 + k * x**2)
     end function hamiltonian
 
     subroutine q_update(c)
-        real(16), intent(in) :: c
+        double precision, intent(in) :: c
         x = x + c * m * Ux
     end subroutine q_update
 
     subroutine p_update(d)
-        real(16), intent(in) :: d
+        double precision, intent(in) :: d
         Ux = Ux - d * k * x
     end subroutine p_update
 
-    real(16) function t_update(time, step, counter)
-        real(16), intent(in) :: time, step
+    double precision function t_update(time, step, counter)
+        double precision, intent(in) :: time, step
         integer, intent(in) :: counter
         t_update = step * counter
     end function t_update
 
     subroutine plot(time)
-        real(16), intent(in) :: time
+        double precision, intent(in) :: time
         write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0, ',"t":', time,',"x":',x,',"xP":',Ux,'}'
     end subroutine plot
 end module Model

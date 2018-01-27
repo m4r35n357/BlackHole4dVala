@@ -13,13 +13,14 @@
 program Symplectic
     use Model
     implicit none
-    real(16), parameter :: D0=0.0_16, D05=0.5_16, D1=1.0_16, D4=4.0_16, D3=3.0_16, D5=5.0_16, D7=7.0_16, D9=9.0_16, D11=11.0_16  ! CONSTANTS
-    real(16) :: v_plus, v_minus, w_plus, w_minus, x_plus, x_minus, y_plus, y_minus, z_plus, z_minus, step, start, finish
+    double precision, parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0  ! CONSTANTS
+    double precision :: v_plus, v_minus, w_plus, w_minus, x_plus, x_minus, y_plus, y_minus, z_plus, z_minus, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
     call get_command_argument(0, arg)
     write (0, *) "Executable: ", trim(arg)
+    write (0, *) 'double precision is:', precision(D0), ' decimal places'
     v_plus = D1 / (D4 - D4**(D1 / D11))
     w_plus = D1 / (D4 - D4**(D1 / D9))
     x_plus = D1 / (D4 - D4**(D1 / D7))
@@ -59,7 +60,7 @@ program Symplectic
     end select
 contains
     subroutine evolve(nth_order)
-        real(16) :: time = D0
+        double precision :: time = D0
         integer :: counter = 0
         do while ((time < finish) .and. carry_on)
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
@@ -78,7 +79,7 @@ contains
     end subroutine first_order
 
     subroutine base_2(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call q_update(step * s * D05)
         call p_update(step * s)
         call q_update(step * s * D05)
@@ -89,7 +90,7 @@ contains
     end subroutine second_order
 
     subroutine base_4(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call base_2(s * z_plus)
         call base_2(s * z_plus)
         call base_2(s * z_minus)
@@ -102,7 +103,7 @@ contains
     end subroutine fourth_order
 
     subroutine base_6(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call base_4(s * y_plus)
         call base_4(s * y_plus)
         call base_4(s * y_minus)
@@ -115,7 +116,7 @@ contains
     end subroutine sixth_order
 
     subroutine base_8(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call base_6(s * x_plus)
         call base_6(s * x_plus)
         call base_6(s * x_minus)
@@ -128,7 +129,7 @@ contains
     end subroutine eightth_order
 
     subroutine base_10(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call base_8(s * w_plus)
         call base_8(s * w_plus)
         call base_8(s * w_minus)
@@ -141,7 +142,7 @@ contains
     end subroutine tenth_order
 
     subroutine base_12(s)
-        real(16), intent(in) :: s
+        double precision, intent(in) :: s
         call base_10(s * v_plus)
         call base_10(s * v_plus)
         call base_10(s * v_minus)

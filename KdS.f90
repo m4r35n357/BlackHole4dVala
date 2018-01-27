@@ -12,14 +12,14 @@
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Model
     implicit none
-    real(16), parameter :: MD0=0.0_16, MD1=1.0_16, MD2=2.0_16, MD3=3.0_16  ! CONSTANTS
-    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
-    real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
-    real(16) :: mino, t=MD0, r, th, ph=MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
+    double precision, parameter :: MD0=0.0, MD1=1.0, MD2=2.0, MD3=3.0  ! CONSTANTS
+    double precision :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
+    double precision :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
+    double precision :: mino, t=MD0, r, th, ph=MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
     logical :: cross, carry_on = .true.
 contains
     subroutine init_model()
-        real(16) :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
+        double precision :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
         write (0, *) "Kerr-deSitter Geodesic"
         read(*,*) cross, lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
         l_3 = lambda / MD3
@@ -37,14 +37,14 @@ contains
         twoEa = MD2 * aE
         ccK = ccQ + X2 * (L - aE)**2
         r = r0
-        th = (90.0_16 - th0) * acos(-MD1) / 180.0_16
+        th = (90.0 - th0) * acos(-MD1) / 180.0
         call refresh()
         Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= MD0))
         Uth = - sqrt(merge(THpot, -THpot, THpot >= MD0))
     end subroutine init_model
 
     subroutine refresh()
-        real(16) :: P_Dr, T_Dth
+        double precision :: P_Dr, T_Dth
         r2 = r**2
         ra2 = r2 + a2
         Rint = ra2 * E - aL
@@ -65,7 +65,7 @@ contains
     end subroutine refresh
 
     subroutine q_update(c)
-        real(16), intent(in) :: c
+        double precision, intent(in) :: c
         t = t + c * Ut
         r = r + c * Ur
         th = th + c * Uth
@@ -74,13 +74,13 @@ contains
     end subroutine q_update
 
     subroutine p_update(d)
-        real(16), intent(in) :: d
+        double precision, intent(in) :: d
         Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (MD1 - l_3 * (r2 + ra2)) - MD1) * (ccK + mu2 * r2))
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine p_update
 
-    real(16) function t_update(tau, step, counter)
-        real(16), intent(in) :: tau, step
+    double precision function t_update(tau, step, counter)
+        double precision, intent(in) :: tau, step
         integer, intent(in) :: counter
         carry_on = cross .or. Dr > MD0
         mino = step * counter
@@ -88,8 +88,8 @@ contains
     end function t_update
 
     subroutine plot(tau)
-        real(16), intent(in) :: tau
-        real(16) :: Vt, Vr, Vth, Vph
+        double precision, intent(in) :: tau
+        double precision :: Vt, Vr, Vth, Vph
         Vt = Ut / Sigma
         Vr = Ur / Sigma
         Vth = Uth / Sigma
