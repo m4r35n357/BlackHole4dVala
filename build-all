@@ -47,22 +47,19 @@ echo ""
 
 # compile Fortran
 echo $C"Compiling Fortran . . ."$NC
-if [ '.' = $LD_LIBRARY_PATH ]
+if [ 'x.' = "x$LD_LIBRARY_PATH" ]
 then
 	STATIC=''
 else
 	STATIC='-static'
 fi
-rm -f model.mod KdS.o Kerr.o Newton.o Oscillator.o
+rm -f model.mod KdS.o Newton.o Oscillator.o
 gfortran -Wall -O2 -fimplicit-none -c KdS.f90
 gfortran $STATIC -o FortranKdS Symplectic.f90 KdS.o
-rm -f model.mod Bh3d.o
-gfortran -Wall -O2 -fimplicit-none -c Kerr.f90
-gfortran $STATIC -o FortranKerr Symplectic.f90 Kerr.o
-rm -f model.mod Bh3d.o
+rm -f model.mod
 gfortran -Wall -O2 -fimplicit-none -c Newton.f90
 gfortran $STATIC -o FortranNewton Symplectic.f90 Newton.o
-rm -f model.mod Bh3d.o
+rm -f model.mod
 gfortran -Wall -O2 -fimplicit-none -c Oscillator.f90
 gfortran $STATIC -o FortranOscillator Symplectic.f90 Oscillator.o
 echo ""
