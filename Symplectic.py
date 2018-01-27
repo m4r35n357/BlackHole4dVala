@@ -13,7 +13,15 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 from sys import stderr
+from numpy import longfloat
 
+D0 = longfloat(0.0)
+D1 = longfloat(1.0)
+D2 = longfloat(2.0)
+D3 = longfloat(3.0)
+D5 = longfloat(5.0)
+D7 = longfloat(7.0)
+D05 = longfloat(0.5)
 
 class Symplectic(object):
     def __init__(self, model, h, order, stages, debug=False):
@@ -48,13 +56,14 @@ class Symplectic(object):
         if debug:
             print  >> stderr, self.count, 0.0, self.total
         root = stages - 1
-        self.x_outer = 1.0 / (root - root**(1.0 / 7.0))
-        self.y_outer = 1.0 / (root - root**(1.0 / 5.0))
-        self.z_outer = 1.0 / (root - root**(1.0 / 3.0))
-        self.x_central = 1.0 - root * self.x_outer
-        self.y_central = 1.0 - root * self.y_outer
-        self.z_central = 1.0 - root * self.z_outer
         self.outer_range = range(0, root / 2)
+        mp_root = longfloat(root)
+        self.x_outer = D1 / (mp_root - mp_root**(D1 / D7))
+        self.y_outer = D1 / (mp_root - mp_root**(D1 / D5))
+        self.z_outer = D1 / (mp_root - mp_root**(D1 / D3))
+        self.x_central = D1 - mp_root * self.x_outer
+        self.y_central = D1 - mp_root * self.y_outer
+        self.z_central = D1 - mp_root * self.z_outer
 
     def first_order(self):
         self.model.q_update(self.h)
@@ -67,12 +76,12 @@ class Symplectic(object):
         print  >> stderr, self.count, s, self.total, self.total / self.count, self.total_abs / self.count
 
     def stormer_verlet(self, s):
-        self.model.q_update(self.h * s * 0.5)
+        self.model.q_update(self.h * s * D05)
         self.model.p_update(self.h * s)
-        self.model.q_update(self.h * s * 0.5)
+        self.model.q_update(self.h * s * D05)
 
     def second_order(self):
-        self.base2(1.0)
+        self.base2(D1)
 
     def base4(self, s):
         for _ in self.outer_range:
@@ -82,7 +91,7 @@ class Symplectic(object):
             self.base2(s * self.z_outer)
 
     def fourth_order(self):
-        self.base4(1.0)
+        self.base4(D1)
 
     def base6(self, s):
         for _ in self.outer_range:
@@ -92,7 +101,7 @@ class Symplectic(object):
             self.base4(s * self.y_outer)
 
     def sixth_order(self):
-        self.base6(1.0)
+        self.base6(D1)
 
     def base8(self, s):
         for _ in self.outer_range:
@@ -102,7 +111,7 @@ class Symplectic(object):
             self.base6(s * self.x_outer)
 
     def eightth_order(self):
-        self.base8(1.0)
+        self.base8(D1)
 
 
 print >> stderr, __name__ + " module loaded"
