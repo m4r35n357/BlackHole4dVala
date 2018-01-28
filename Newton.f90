@@ -14,7 +14,7 @@ module Model
     implicit none
     double precision, parameter :: MD0=0.0, MD05=0.5, MD1=1.0, MD2=2.0, PI_2=MD05*acos(-MD1)  ! CONSTANTS
     double precision :: l, l2, h0  ! IMMUTABLES
-    double precision :: r, ph=MD0, Ur, Uph  ! PARTICLE VARIABLES (coordinates and velocities))
+    double precision :: r, ph = MD0, Ur, Uph  ! PARTICLE VARIABLES (coordinates and velocities))
     logical :: carry_on = .true.
 contains
     subroutine init_model()

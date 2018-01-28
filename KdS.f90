@@ -19,14 +19,10 @@ module Model
     logical :: cross, carry_on = .true.
 contains
     subroutine init_model()
-        double precision :: lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
+        double precision :: lambda, ccQ, th0
         write (0, *) "Kerr-deSitter Geodesic"
-        read(*,*) cross, lambda, spin, pMass2, energy, angMom, ccQ, r0, th0
+        read(*,*) cross, lambda, a, mu2, E, L, ccQ, r, th0
         l_3 = lambda / MD3
-        a = spin
-        mu2 = pMass2
-        E = energy
-        L = angMom
         a2 = a**2
         a2l_3 = a2 * l_3
         a2mu2 = a2 * mu2
@@ -36,7 +32,6 @@ contains
         twoEX2 = MD2 * E * X2
         twoEa = MD2 * aE
         ccK = ccQ + X2 * (L - aE)**2
-        r = r0
         th = (90.0 - th0) * acos(-MD1) / 180.0
         call refresh()
         Ur = - sqrt(merge(Rpot, -Rpot, Rpot >= MD0))
