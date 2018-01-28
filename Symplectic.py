@@ -83,32 +83,28 @@ class Symplectic(object):
     def second_order(self):
         self.base2(D1)
 
+    @staticmethod
+    def suzuki(base_method, s, plus, minus):
+        base_method(s * plus)
+        base_method(s * plus)
+        base_method(s * minus)
+        base_method(s * plus)
+        base_method(s * plus)
+
     def base4(self, s):
-        for _ in self.outer_range:
-            self.base2(s * self.z_outer)
-        self.base2(s * self.z_central)
-        for _ in self.outer_range:
-            self.base2(s * self.z_outer)
+        self.suzuki(self.base2, s, self.z_outer, self.z_central)
 
     def fourth_order(self):
         self.base4(D1)
 
     def base6(self, s):
-        for _ in self.outer_range:
-            self.base4(s * self.y_outer)
-        self.base4(s * self.y_central)
-        for _ in self.outer_range:
-            self.base4(s * self.y_outer)
+        self.suzuki(self.base4, s, self.y_outer, self.y_central)
 
     def sixth_order(self):
         self.base6(D1)
 
     def base8(self, s):
-        for _ in self.outer_range:
-            self.base6(s * self.x_outer)
-        self.base6(s * self.x_central)
-        for _ in self.outer_range:
-            self.base6(s * self.x_outer)
+        self.suzuki(self.base6, s, self.x_outer, self.x_central)
 
     def eightth_order(self):
         self.base8(D1)

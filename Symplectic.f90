@@ -59,7 +59,7 @@ program Symplectic
             error stop "Invalid integrator method"
     end select
 contains
-    subroutine evolve(nth_order)
+    subroutine evolve (nth_order)
         double precision :: time = D0
         integer :: counter = 0
         do while ((time < finish) .and. carry_on)
@@ -73,84 +73,73 @@ contains
         call plot(time)
     end subroutine evolve
 
-    subroutine first_order()
+    subroutine first_order ()
         call q_update(step)
         call p_update(step)
     end subroutine first_order
 
-    subroutine base_2(s)
+    subroutine base_2 (s)
         double precision, intent(in) :: s
         call q_update(step * s * D05)
         call p_update(step * s)
         call q_update(step * s * D05)
     end subroutine base_2
 
-    subroutine second_order()
+    subroutine second_order ()
         call base_2(D1)
     end subroutine second_order
 
-    subroutine base_4(s)
+    subroutine suzuki (base, s, plus, minus)
+        double precision, intent(in) :: s, plus, minus
+        call base(s * plus)
+        call base(s * plus)
+        call base(s * minus)
+        call base(s * plus)
+        call base(s * plus)
+    end subroutine suzuki
+
+    subroutine base_4 (s)
         double precision, intent(in) :: s
-        call base_2(s * z_plus)
-        call base_2(s * z_plus)
-        call base_2(s * z_minus)
-        call base_2(s * z_plus)
-        call base_2(s * z_plus)
+        call suzuki(base_2, s, z_plus, z_minus)
     end subroutine base_4
 
-    subroutine fourth_order()
+    subroutine fourth_order ()
         call base_4(D1)
     end subroutine fourth_order
 
-    subroutine base_6(s)
+    subroutine base_6 (s)
         double precision, intent(in) :: s
-        call base_4(s * y_plus)
-        call base_4(s * y_plus)
-        call base_4(s * y_minus)
-        call base_4(s * y_plus)
-        call base_4(s * y_plus)
+        call suzuki(base_4, s, y_plus, y_minus)
     end subroutine base_6
 
-    subroutine sixth_order()
+    subroutine sixth_order ()
         call base_6(D1)
     end subroutine sixth_order
 
-    subroutine base_8(s)
+    subroutine base_8 (s)
         double precision, intent(in) :: s
-        call base_6(s * x_plus)
-        call base_6(s * x_plus)
-        call base_6(s * x_minus)
-        call base_6(s * x_plus)
-        call base_6(s * x_plus)
+        call suzuki(base_6, s, x_plus, x_minus)
     end subroutine base_8
 
-    subroutine eightth_order()
+    subroutine eightth_order ()
         call base_8(D1)
     end subroutine eightth_order
 
-    subroutine base_10(s)
+    subroutine base_10 (s)
         double precision, intent(in) :: s
-        call base_8(s * w_plus)
-        call base_8(s * w_plus)
-        call base_8(s * w_minus)
-        call base_8(s * w_plus)
-        call base_8(s * w_plus)
+        call suzuki(base_8, s, w_plus, w_minus)
     end subroutine base_10
 
-    subroutine tenth_order()
+    subroutine tenth_order ()
         call base_10(D1)
     end subroutine tenth_order
 
-    subroutine base_12(s)
+    subroutine base_12 (s)
         double precision, intent(in) :: s
-        call base_10(s * v_plus)
-        call base_10(s * v_plus)
-        call base_10(s * v_minus)
-        call base_10(s * v_plus)
-        call base_10(s * v_plus)
+        call suzuki(base_10, s, v_plus, v_minus)
     end subroutine base_12
 
-    subroutine twelfth_order()
+    subroutine twelfth_order ()
         call base_12(D1)
     end subroutine twelfth_order
 end program Symplectic
