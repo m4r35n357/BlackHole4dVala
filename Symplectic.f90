@@ -34,9 +34,6 @@ program Symplectic
     read(*,*) step, start, finish, plot_ratio, integrator
     call init_model()
     select case (integrator)
-        case ("b1")
-            write (0, *) "1st Order Integrator (Euler-Cromer)"
-            call evolve(first_order)
         case ("b2")
             write (0, *) "2nd Order Integrator Base (Stormer-Verlet)"
             call evolve(second_order)
@@ -73,10 +70,14 @@ contains
         call plot(time)
     end subroutine evolve
 
-    subroutine first_order ()
-        call q_update(step)
-        call p_update(step)
-    end subroutine first_order
+    subroutine suzuki (base, s, plus, minus)
+        double precision, intent(in) :: s, plus, minus
+        call base(s * plus)
+        call base(s * plus)
+        call base(s * minus)
+        call base(s * plus)
+        call base(s * plus)
+    end subroutine suzuki
 
     subroutine base_2 (s)
         double precision, intent(in) :: s
@@ -88,15 +89,6 @@ contains
     subroutine second_order ()
         call base_2(D1)
     end subroutine second_order
-
-    subroutine suzuki (base, s, plus, minus)
-        double precision, intent(in) :: s, plus, minus
-        call base(s * plus)
-        call base(s * plus)
-        call base(s * minus)
-        call base(s * plus)
-        call base(s * plus)
-    end subroutine suzuki
 
     subroutine base_4 (s)
         double precision, intent(in) :: s
