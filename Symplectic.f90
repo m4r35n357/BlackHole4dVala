@@ -14,8 +14,8 @@ program Symplectic
     use iso_fortran_env
     use Model
     implicit none
-    double precision, parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0
-    double precision :: v_fwd, v_back, w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
+    real(16), parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0
+    real(16) :: v_fwd, v_back, w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -58,8 +58,8 @@ program Symplectic
     end select
 contains
     subroutine evolve (nth_order)
-        double precision :: time = D0
-        integer :: counter = 0
+        real(16) :: time = D0
+        integer(16) :: counter = 0
         do while ((time < finish) .and. carry_on)
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
                 call plot(time)
@@ -68,11 +68,10 @@ contains
             counter = counter + 1
             time = t_update(time, step, counter)
         end do
-        !call plot(time)
     end subroutine evolve
 
     subroutine suzuki (base, s, forward, back)
-        double precision, intent(in) :: s, forward, back
+        real(16), intent(in) :: s, forward, back
         call base(s * forward)
         call base(s * forward)
         call base(s * back)
@@ -81,7 +80,7 @@ contains
     end subroutine suzuki
 
     subroutine base_2 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call q_update(step * s * D05)
         call p_update(step * s)
         call q_update(step * s * D05)
@@ -92,7 +91,7 @@ contains
     end subroutine second_order
 
     subroutine base_4 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call suzuki(base_2, s, z_fwd, z_back)
     end subroutine base_4
 
@@ -101,7 +100,7 @@ contains
     end subroutine fourth_order
 
     subroutine base_6 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call suzuki(base_4, s, y_fwd, y_back)
     end subroutine base_6
 
@@ -110,7 +109,7 @@ contains
     end subroutine sixth_order
 
     subroutine base_8 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call suzuki(base_6, s, x_fwd, x_back)
     end subroutine base_8
 
@@ -119,7 +118,7 @@ contains
     end subroutine eightth_order
 
     subroutine base_10 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call suzuki(base_8, s, w_fwd, w_back)
     end subroutine base_10
 
@@ -128,7 +127,7 @@ contains
     end subroutine tenth_order
 
     subroutine base_12 (s)
-        double precision, intent(in) :: s
+        real(16), intent(in) :: s
         call suzuki(base_10, s, v_fwd, v_back)
     end subroutine base_12
 

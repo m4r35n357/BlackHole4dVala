@@ -13,13 +13,13 @@
 module Model
     use iso_fortran_env
     implicit none
-    double precision, parameter :: MD0=0.0, MD05=0.5, MD1=1.0, MD2=2.0, PI_2=MD05*acos(-MD1)  ! CONSTANTS
-    double precision :: l, l2, h0  ! IMMUTABLES
-    double precision :: r, ph = MD0, Ur, Uph  ! PARTICLE VARIABLES (coordinates and velocities))
+    real(16), parameter :: MD0=0.0, MD05=0.5, MD1=1.0, MD2=2.0, PI_2=MD05*acos(-MD1)  ! CONSTANTS
+    real(16) :: l, l2, h0  ! IMMUTABLES
+    real(16) :: r, ph = MD0, Ur, Uph  ! PARTICLE VARIABLES (coordinates and velocities))
     logical :: carry_on = .true.
 contains
     subroutine init_model()
-        double precision :: lFac
+        real(16) :: lFac
         write (error_unit, *) "Newtonian Central Body Problem"
         read (input_unit, *) lFac, r
         l = lFac * sqrt(r)
@@ -29,31 +29,31 @@ contains
         h0 = hamiltonian()
     end subroutine init_model
 
-    double precision function hamiltonian ()
+    real(16) function hamiltonian ()
         hamiltonian = MD05 * (Ur**2 + l2 / r**2) - MD1 / r
     end function hamiltonian
 
     subroutine q_update(c)
-        double precision, intent(in) :: c
+        real(16), intent(in) :: c
         r = r + c * Ur
         ph = ph + c * Uph
     end subroutine q_update
 
     subroutine p_update(d)
-        double precision, intent(in) :: d
+        real(16), intent(in) :: d
         Ur = Ur - d * (MD1 - l2 / r) / r**2
         Uph = l / r**2
     end subroutine p_update
 
-    double precision function t_update(time, step, counter)
-        double precision, intent(in) :: time, step
-        integer, intent(in) :: counter
+    real(16) function t_update(time, step, counter)
+        real(16), intent(in) :: time, step
+        integer(16), intent(in) :: counter
         carry_on = r > MD2
         t_update = step * counter
     end function t_update
 
     subroutine plot(time)
-        double precision, intent(in) :: time
+        real(16), intent(in) :: time
         write (output_unit, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0,&
             ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"Ur":',Ur,',"thP":',0.0,',"phP":',Uph,'}'
     end subroutine plot
