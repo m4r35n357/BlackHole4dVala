@@ -11,6 +11,7 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Model
+    use ISO_FORTRAN_ENV
     implicit none
     double precision, parameter :: MD0=0.0, MD05=0.5, MD1=1.0, MD2=2.0, PI_2=MD05*acos(-MD1)  ! CONSTANTS
     double precision :: l, l2, h0  ! IMMUTABLES
@@ -19,8 +20,8 @@ module Model
 contains
     subroutine init_model()
         double precision :: lFac
-        write (0, *) "Newtonian Central Body Problem"
-        read(*,*) lFac, r
+        write (ERROR_UNIT, *) "Newtonian Central Body Problem"
+        read (INPUT_UNIT, *) lFac, r
         l = lFac * sqrt(r)
         l2 = l**2
         Ur = - sqrt(r - l2) / r
@@ -53,7 +54,7 @@ contains
 
     subroutine plot(time)
         double precision, intent(in) :: time
-        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0,&
+        write (OUTPUT_UNIT, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0,&
             ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"Ur":',Ur,',"thP":',0.0,',"phP":',Uph,'}'
     end subroutine plot
 end module Model

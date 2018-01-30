@@ -11,46 +11,47 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program Symplectic
+    use ISO_FORTRAN_ENV
     use Model
     implicit none
-    double precision, parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0  ! CONSTANTS
-    double precision :: v_plus, v_minus, w_plus, w_minus, x_plus, x_minus, y_plus, y_minus, z_plus, z_minus, step, start, finish
+    double precision, parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0
+    double precision :: v_fwd, v_back, w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
     call get_command_argument(0, arg)
-    write (0, *) "Executable: ", trim(arg)
-    write (0, *) 'double precision is:', precision(D0), ' decimal places'
-    v_plus = D1 / (D4 - D4**(D1 / D11))
-    w_plus = D1 / (D4 - D4**(D1 / D9))
-    x_plus = D1 / (D4 - D4**(D1 / D7))
-    y_plus = D1 / (D4 - D4**(D1 / D5))
-    z_plus = D1 / (D4 - D4**(D1 / D3))
-    v_minus = D1 - D4 * v_plus
-    w_minus = D1 - D4 * w_plus
-    x_minus = D1 - D4 * x_plus
-    y_minus = D1 - D4 * y_plus
-    z_minus = D1 - D4 * z_plus
-    read(*,*) step, start, finish, plot_ratio, integrator
+    write (ERROR_UNIT, *) "Executable: ", trim(arg)
+    write (ERROR_UNIT, *) 'double precision is:', precision(D0), ' decimal places'
+    v_fwd = D1 / (D4 - D4**(D1 / D11))
+    w_fwd = D1 / (D4 - D4**(D1 / D9))
+    x_fwd = D1 / (D4 - D4**(D1 / D7))
+    y_fwd = D1 / (D4 - D4**(D1 / D5))
+    z_fwd = D1 / (D4 - D4**(D1 / D3))
+    v_back = D1 - D4 * v_fwd
+    w_back = D1 - D4 * w_fwd
+    x_back = D1 - D4 * x_fwd
+    y_back = D1 - D4 * y_fwd
+    z_back = D1 - D4 * z_fwd
+    read (INPUT_UNIT, *) step, start, finish, plot_ratio, integrator
     call init_model()
     select case (integrator)
         case ("b2")
-            write (0, *) "2nd Order Integrator Base (Stormer-Verlet)"
+            write (ERROR_UNIT, *) "2nd Order Integrator Base (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (0, *) "4th Order Integrator (using Suzuki composition)"
+            write (ERROR_UNIT, *) "4th Order Integrator (using Suzuki composition)"
             call evolve(fourth_order)
         case ("b6")
-            write (0, *) "6th Order Integrator (using Suzuki composition)"
+            write (ERROR_UNIT, *) "6th Order Integrator (using Suzuki composition)"
             call evolve(sixth_order)
         case ("b8")
-            write (0, *) "8th Order Integrator (using Suzuki composition)"
+            write (ERROR_UNIT, *) "8th Order Integrator (using Suzuki composition)"
             call evolve(eightth_order)
         case ("b10")
-            write (0, *) "10th Order Integrator (using Suzuki composition)"
+            write (ERROR_UNIT, *) "10th Order Integrator (using Suzuki composition)"
             call evolve(tenth_order)
         case ("b12")
-            write (0, *) "12th Order Integrator (using Suzuki composition)"
+            write (ERROR_UNIT, *) "12th Order Integrator (using Suzuki composition)"
             call evolve(twelfth_order)
         case default
             error stop "Invalid integrator method"
@@ -67,16 +68,16 @@ contains
             counter = counter + 1
             time = t_update(time, step, counter)
         end do
-        call plot(time)
+        !call plot(time)
     end subroutine evolve
 
-    subroutine suzuki (base, s, plus, minus)
-        double precision, intent(in) :: s, plus, minus
-        call base(s * plus)
-        call base(s * plus)
-        call base(s * minus)
-        call base(s * plus)
-        call base(s * plus)
+    subroutine suzuki (base, s, forward, back)
+        double precision, intent(in) :: s, forward, back
+        call base(s * forward)
+        call base(s * forward)
+        call base(s * back)
+        call base(s * forward)
+        call base(s * forward)
     end subroutine suzuki
 
     subroutine base_2 (s)
@@ -92,7 +93,7 @@ contains
 
     subroutine base_4 (s)
         double precision, intent(in) :: s
-        call suzuki(base_2, s, z_plus, z_minus)
+        call suzuki(base_2, s, z_fwd, z_back)
     end subroutine base_4
 
     subroutine fourth_order ()
@@ -101,7 +102,7 @@ contains
 
     subroutine base_6 (s)
         double precision, intent(in) :: s
-        call suzuki(base_4, s, y_plus, y_minus)
+        call suzuki(base_4, s, y_fwd, y_back)
     end subroutine base_6
 
     subroutine sixth_order ()
@@ -110,7 +111,7 @@ contains
 
     subroutine base_8 (s)
         double precision, intent(in) :: s
-        call suzuki(base_6, s, x_plus, x_minus)
+        call suzuki(base_6, s, x_fwd, x_back)
     end subroutine base_8
 
     subroutine eightth_order ()
@@ -119,7 +120,7 @@ contains
 
     subroutine base_10 (s)
         double precision, intent(in) :: s
-        call suzuki(base_8, s, w_plus, w_minus)
+        call suzuki(base_8, s, w_fwd, w_back)
     end subroutine base_10
 
     subroutine tenth_order ()
@@ -128,7 +129,7 @@ contains
 
     subroutine base_12 (s)
         double precision, intent(in) :: s
-        call suzuki(base_10, s, v_plus, v_minus)
+        call suzuki(base_10, s, v_fwd, v_back)
     end subroutine base_12
 
     subroutine twelfth_order ()

@@ -11,15 +11,6 @@ which valac
 
 valafiles='KdS.vala symplectic.vala models.vala generators.vala json-parser.vala'
 
-if [ 'xtrue' = "x$FORTRAN128" ]
-then
-	echo 'FORTRAN 128 bit double precision'
-	gf='gfortran -Wall -O2 -fimplicit-none -fdefault-real-8'
-else
-	echo 'FORTRAN default double precision'
-	gf='gfortran -Wall -O2 -fimplicit-none'
-fi
-
 # cleanup executables
 echo $C"Cleaning Up . . ."$NC
 rm -f $outfile TestKdS KdS bh3dRk4 raytrace-commands pendulum \
@@ -56,6 +47,15 @@ echo ""
 
 # compile Fortran
 echo $C"Compiling Fortran . . ."$NC
+if [ 'xtrue' = "x$FORTRAN128" ]
+then
+	echo 'Requesting FORTRAN 128 bit double precision'
+	gf='gfortran -Wall -O2 -fimplicit-none -fdefault-real-8'
+else
+	echo 'Requesting FORTRAN default double precision'
+	gf='gfortran -Wall -O2 -fimplicit-none'
+fi
+
 if [ 'x.' = "x$LD_LIBRARY_PATH" ]
 then
 	STATIC=''

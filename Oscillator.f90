@@ -11,14 +11,15 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Model
+    use ISO_FORTRAN_ENV
     implicit none
     double precision, parameter :: MD0=0.0, MD05=0.5
     double precision :: x, Ux = MD0, k, m, h0
     logical :: carry_on = .true.
 contains
     subroutine init_model()
-        write (0, *) "Harmonic Oscillator"
-        read(*,*) k, m, x
+        write (ERROR_UNIT, *) "Harmonic Oscillator"
+        read (INPUT_UNIT, *) k, m, x
         h0 = hamiltonian()
     end subroutine init_model
 
@@ -44,7 +45,7 @@ contains
 
     subroutine plot(time)
         double precision, intent(in) :: time
-        write (*, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0, ',"t":', time,',"x":',x,',"xP":',Ux,'}'
+        write (OUTPUT_UNIT, '(A, 13(ES16.9, A))') '{"tau":',time,',"v4e":',hamiltonian()-h0,',"t":',time,',"x":',x,',"xP":',Ux,'}'
     end subroutine plot
 end module Model
 

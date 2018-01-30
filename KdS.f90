@@ -11,6 +11,7 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Model
+    use ISO_FORTRAN_ENV
     implicit none
     double precision, parameter :: MD0=0.0, MD1=1.0, MD2=2.0, MD3=3.0  ! CONSTANTS
     double precision :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
@@ -20,8 +21,8 @@ module Model
 contains
     subroutine init_model()
         double precision :: lambda, ccQ, th0
-        write (0, *) "Kerr-deSitter Geodesic"
-        read(*,*) cross, lambda, a, mu2, E, L, ccQ, r, th0
+        write (ERROR_UNIT, *) "Kerr-deSitter Geodesic"
+        read (INPUT_UNIT, *) cross, lambda, a, mu2, E, L, ccQ, r, th0
         l_3 = lambda / MD3
         a2 = a**2
         a2l_3 = a2 * l_3
@@ -89,7 +90,7 @@ contains
         Vr = Ur / Sigma
         Vth = Uth / Sigma
         Vph = Uph / Sigma
-        write (*, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
+        write (OUTPUT_UNIT, '(A, 13(ES16.9, A))') '{"mino":',mino,',"tau":',tau,&
                     ',"v4e":',mu2 + sth2 * Dth / (Sigma * X2) * (a * Vt - ra2 * Vph)**2 + Sigma / Dr * Vr**2&
                                   + Sigma / Dth * Vth**2 - Dr / (Sigma * X2) * (Vt - a * sth2 * Vph)**2,&
                     ',"ER":',Vr**2 - Rpot / Sigma**2,',"ETh":',Vth**2 - THpot / Sigma**2,&
