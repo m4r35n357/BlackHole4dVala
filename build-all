@@ -47,6 +47,7 @@ echo ""
 
 # compile Fortran
 echo $C"Compiling Fortran . . ."$NC
+gfortran --version
 if [ 'xtrue' = "x$FORTRAN128" ]
 then
 	echo 'Requesting FORTRAN 128 bit double precision'

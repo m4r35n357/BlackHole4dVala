@@ -11,7 +11,7 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program Symplectic
-    use ISO_FORTRAN_ENV
+    use iso_fortran_env
     use Model
     implicit none
     double precision, parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0
@@ -20,8 +20,8 @@ program Symplectic
     character (len=3) :: integrator
     character(len=32) :: arg
     call get_command_argument(0, arg)
-    write (ERROR_UNIT, *) "Executable: ", trim(arg)
-    write (ERROR_UNIT, *) 'double precision is:', precision(D0), ' decimal places'
+    write (error_unit, *) "Executable: ", trim(arg)
+    write (error_unit, *) 'double precision is:', precision(D0), ' decimal places'
     v_fwd = D1 / (D4 - D4**(D1 / D11))
     w_fwd = D1 / (D4 - D4**(D1 / D9))
     x_fwd = D1 / (D4 - D4**(D1 / D7))
@@ -32,26 +32,26 @@ program Symplectic
     x_back = D1 - D4 * x_fwd
     y_back = D1 - D4 * y_fwd
     z_back = D1 - D4 * z_fwd
-    read (INPUT_UNIT, *) step, start, finish, plot_ratio, integrator
+    read (input_unit, *) step, start, finish, plot_ratio, integrator
     call init_model()
     select case (integrator)
         case ("b2")
-            write (ERROR_UNIT, *) "2nd Order Integrator Base (Stormer-Verlet)"
+            write (error_unit, *) "2nd Order Integrator Base (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (ERROR_UNIT, *) "4th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "4th Order Integrator (using Suzuki composition)"
             call evolve(fourth_order)
         case ("b6")
-            write (ERROR_UNIT, *) "6th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "6th Order Integrator (using Suzuki composition)"
             call evolve(sixth_order)
         case ("b8")
-            write (ERROR_UNIT, *) "8th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "8th Order Integrator (using Suzuki composition)"
             call evolve(eightth_order)
         case ("b10")
-            write (ERROR_UNIT, *) "10th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "10th Order Integrator (using Suzuki composition)"
             call evolve(tenth_order)
         case ("b12")
-            write (ERROR_UNIT, *) "12th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "12th Order Integrator (using Suzuki composition)"
             call evolve(twelfth_order)
         case default
             error stop "Invalid integrator method"
