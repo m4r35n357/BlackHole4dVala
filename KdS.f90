@@ -13,14 +13,14 @@
 module Model
     use iso_fortran_env
     implicit none
-    double precision, parameter :: MD0=0.0, MD1=1.0, MD2=2.0, MD3=3.0  ! CONSTANTS
-    double precision :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
-    double precision :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
-    double precision :: mino, t=MD0, r, th, ph=MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
+    real(16), parameter :: MD0=0.0, MD1=1.0, MD2=2.0, MD3=3.0  ! CONSTANTS
+    real(16) :: l_3, a, a2, a2l_3, mu2, a2mu2, X2, E, L, ccK, aE, twoEX2, twoEa, aL  ! IMMUTABLES
+    real(16) :: r2, ra2, sth, cth, sth2, cth2, Dr, Dth, Sigma, Rpot, Rint, THint, THpot  ! INTERMEDIATE VARIABLES
+    real(16) :: mino, t=MD0, r, th, ph=MD0, Ut, Ur, Uth, Uph  ! PARTICLE VARIABLES (proper time, coordinates, and velocities))
     logical :: cross, carry_on = .true.
 contains
     subroutine init_model()
-        double precision :: lambda, ccQ, th0
+        real(16) :: lambda, ccQ, th0
         write (error_unit, *) "Kerr-deSitter Geodesic"
         read (input_unit, *) cross, lambda, a, mu2, E, L, ccQ, r, th0
         l_3 = lambda / MD3
@@ -40,7 +40,7 @@ contains
     end subroutine init_model
 
     subroutine refresh()
-        double precision :: P_Dr, T_Dth
+        real(16) :: P_Dr, T_Dth
         r2 = r**2
         ra2 = r2 + a2
         Rint = ra2 * E - aL
@@ -61,7 +61,7 @@ contains
     end subroutine refresh
 
     subroutine q_update(c)
-        double precision, intent(in) :: c
+        real(16), intent(in) :: c
         t = t + c * Ut
         r = r + c * Ur
         th = th + c * Uth
@@ -70,22 +70,22 @@ contains
     end subroutine q_update
 
     subroutine p_update(d)
-        double precision, intent(in) :: d
+        real(16), intent(in) :: d
         Ur = Ur + d * (r * (twoEX2 * Rint - mu2 * Dr) - (r * (MD1 - l_3 * (r2 + ra2)) - MD1) * (ccK + mu2 * r2))
         Uth = Uth + d * cth * (sth * a2 * (mu2 * Dth - l_3 * (ccK - a2mu2 * cth2)) + X2 * THint / sth * (THint / sth2 - twoEa))
     end subroutine p_update
 
-    double precision function t_update(tau, step, counter)
-        double precision, intent(in) :: tau, step
-        integer, intent(in) :: counter
+    real(16) function t_update(tau, step, counter)
+        real(16), intent(in) :: tau, step
+        integer(16), intent(in) :: counter
         carry_on = cross .or. Dr > MD0
         mino = step * counter
         t_update = tau + step * Sigma
     end function t_update
 
     subroutine plot(tau)
-        double precision, intent(in) :: tau
-        double precision :: Vt, Vr, Vth, Vph
+        real(16), intent(in) :: tau
+        real(16) :: Vt, Vr, Vth, Vph
         Vt = Ut / Sigma
         Vr = Ur / Sigma
         Vth = Uth / Sigma
