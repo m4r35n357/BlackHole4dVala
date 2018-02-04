@@ -149,8 +149,7 @@ def main():
         radial.pos = ((0.0, 0.0, 0.0), ball.pos)
         if data['tP'] * t_old < 0 or data['tP'] - t_old > 100.0:
             ball.color = color.white
-        else:
-            ball.trail.append(pos=ball.pos, color=error_colour(e))
+        ball.trail.append(pos=ball.pos, color=error_colour(e))
         # Data display
         if fabs(mu) > 0.0:
             hud.text = u"v  %.6f\n\u03c4  %.1f\nt  %.1f\nr  %.3f\n\u03b8  %.0f\n\u03d5  %.0f" % (speed(data['tP']), data['tau'], data['t'],

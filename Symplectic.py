@@ -62,14 +62,6 @@ class Symplectic(object):
         self.model.q_update(self.h)
         self.model.p_update(self.h)
 
-    def base2(self, s):
-        self.model.q_update(self.h * s * D05)
-        self.model.p_update(self.h * s)
-        self.model.q_update(self.h * s * D05)
-
-    def second_order(self):
-        self.base2(D1)
-
     @staticmethod
     def suzuki(base_method, s, plus, minus):
         base_method(s * plus)
@@ -77,6 +69,14 @@ class Symplectic(object):
         base_method(s * minus)
         base_method(s * plus)
         base_method(s * plus)
+
+    def base2(self, s):
+        self.model.q_update(self.h * s * D05)
+        self.model.p_update(self.h * s)
+        self.model.q_update(self.h * s * D05)
+
+    def second_order(self):
+        self.base2(D1)
 
     def base4(self, s):
         self.suzuki(self.base2, s, self.z_outer, self.z_central)
