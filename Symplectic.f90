@@ -11,11 +11,10 @@
 !
 !THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 program Symplectic
-    use iso_fortran_env
     use Model
     implicit none
-    real(16), parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0, D11=11.0
-    real(16) :: v_fwd, v_back, w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
+    real(16), parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0
+    real(16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -24,12 +23,10 @@ program Symplectic
     write (error_unit, *) 'double precision is:', precision(D0), ' decimal places'
     read (input_unit, *) step, start, finish, plot_ratio, integrator
     call init_model()
-    v_fwd = D1 / (D4 - D4**(D1 / D11))
     w_fwd = D1 / (D4 - D4**(D1 / D9))
     x_fwd = D1 / (D4 - D4**(D1 / D7))
     y_fwd = D1 / (D4 - D4**(D1 / D5))
     z_fwd = D1 / (D4 - D4**(D1 / D3))
-    v_back = D1 - D4 * v_fwd
     w_back = D1 - D4 * w_fwd
     x_back = D1 - D4 * x_fwd
     y_back = D1 - D4 * y_fwd
@@ -50,9 +47,6 @@ program Symplectic
         case ("b10")
             write (error_unit, *) "10th Order (Suzuki composition)"
             call evolve(tenth_order)
-        case ("b12")
-            write (error_unit, *) "12th Order (Suzuki composition)"
-            call evolve(twelfth_order)
         case default
             error stop "Invalid integrator method"
     end select
@@ -117,21 +111,7 @@ contains
         call base_8(D1)
     end subroutine eightth_order
 
-    subroutine base_10 (s)
-        real(16), intent(in) :: s
-        call compose_suzuki(base_8, s, w_fwd, w_back)
-    end subroutine base_10
-
     subroutine tenth_order ()
-        call base_10(D1)
+        call compose_suzuki(base_8, D1, w_fwd, w_back)
     end subroutine tenth_order
-
-    subroutine base_12 (s)
-        real(16), intent(in) :: s
-        call compose_suzuki(base_10, s, v_fwd, v_back)
-    end subroutine base_12
-
-    subroutine twelfth_order ()
-        call base_12(D1)
-    end subroutine twelfth_order
 end program Symplectic
