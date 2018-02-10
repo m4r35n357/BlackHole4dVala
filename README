@@ -19,6 +19,11 @@ ffmpeg
 
 Sample usage:
 
+0. Set up aliases and shell functions
+
+. shell-functions
+
+
 1.  Build all the Vala executables, and select one
 
 ./build-all [fast]
@@ -46,7 +51,9 @@ export ic=initial-conditions.json
 export data=/tmp/data
 export pot=/tmp/potential
 export icgen=./GenParticle
+
 cp icgenParticle-data.example $icdata
+cp icgenLight-data.example $icdata
 
 ... or for light
 export icgen=./GenLight

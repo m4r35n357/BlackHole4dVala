@@ -1,21 +1,59 @@
 
 set -x
 
+export data=/tmp/data
+export pot=/tmp/potential
+
 alias build_mode_dynamic='export LD_LIBRARY_PATH=.'
 alias build_mode_static='unset LD_LIBRARY_PATH'
 
-alias build_fortran='FORTRAN128=false ./build-all'
-alias build_fortran_default_128='FORTRAN128=true ./build-all'
+alias build_all='FORTRAN128=false ./build-all'
+alias build_all_fortran_default_128='FORTRAN128=true ./build-all'
 
-alias mode_python='export exe=./Bh3d.py'
-alias mode_vala='export exe=./Simulate'
-alias mode_fortran_kds='export exe=./FortranKdS'
-alias mode_fortran_newton='export exe=./FortranNewton'
-alias mode_fortran_oscillator='export exe=./FortranOscillator'
-
-mode_remote () {
+alias exe_python='export exe=./Bh3d.py; export infile=$ic; ic=initial-conditions.json'
+alias exe_vala='export exe=./Simulate; export infile=$ic; ic=initial-conditions.json'
+alias exe_fortran_kds='export exe=./FortranKdS; export infile=ictest; export ic=initial-conditions.kds.json'
+alias exe_fortran_newton='export exe=./FortranNewton; export infile=ictest; export ic=initial-conditions.newton.json'
+alias exe_fortran_oscillator='export exe=./FortranOscillator; export infile=ictest; export ic=initial-conditions.oscillator.json'
+exe_remote () {
 	export exe="nc.openbsd $1 $2"
 }
+
+alias ic_gen_light='export icgen=./GenLight; export icdata=icgen.light.json'
+alias ic_gen_particle='export icgen=./GenParticle; export icdata=icgen.particle.json'
+
+alias ic_gen_edit='vi $icdata; jq . $icdata'
+alias ic_gen='$icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot'
+
+icedit () {
+	vi $ic
+	jq . $ic
+	case $exe in
+		*Fortran*)
+			jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest
+			echo "" >>ictest
+		;;
+	esac
+	case $exe in
+		*KdS)
+			jq '.IC.cross, .IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest
+			echo "" >>ictest
+		;;
+		*Newton)
+			jq '.IC.Lfac, .IC.r0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest
+			echo "" >>ictest
+		;;
+		*Oscillator)
+			jq '.IC.k, .IC.x' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest
+			echo "" >>ictest
+		;;
+	esac
+}
+
+alias plot_graphics='$exe <$infile | ./plotBH.py $ic 2>/dev/null &'
+alias plot_errors='$exe <$infile | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &'
+
+alias benchmark='time $exe <$infile >$data'
 
 set +x
 
