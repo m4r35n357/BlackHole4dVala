@@ -14,22 +14,22 @@ module Model
     use iso_fortran_env
     implicit none
     real(16), parameter :: MD0=0.0, MD05=0.5
-    real(16) :: x, Ux = MD0, k, m, h0
+    real(16) :: x, Ux = MD0, k, h0
     logical :: carry_on = .true.
 contains
     subroutine init_model()
         write (error_unit, *) "Harmonic Oscillator"
-        read (input_unit, *) k, m, x
+        read (input_unit, *) k, x
         h0 = hamiltonian()
     end subroutine init_model
 
     real(16) function hamiltonian ()
-        hamiltonian = MD05 * (m * Ux**2 + k * x**2)
+        hamiltonian = MD05 * (Ux**2 + k * x**2)
     end function hamiltonian
 
     subroutine q_update(c)
         real(16), intent(in) :: c
-        x = x + c * m * Ux
+        x = x + c * Ux
     end subroutine q_update
 
     subroutine p_update(d)
