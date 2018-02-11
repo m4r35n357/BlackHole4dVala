@@ -25,7 +25,7 @@ alias ic_gen_particle='export icgen=./GenParticle; export icdata=icgen.particle.
 alias ic_gen_edit='vi $icdata; jq . $icdata'
 alias ic_gen='$icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot'
 
-icedit () {
+ic_edit () {
 	vi $ic
 	jq . $ic
 	case $exe in
