@@ -22,6 +22,8 @@ program Symplectic
     call get_command_argument(0, arg)
     write (error_unit, *) "Executable: ", trim(arg)
     write (error_unit, *) 'double precision is:', precision(D0), ' decimal places'
+    read (input_unit, *) step, start, finish, plot_ratio, integrator
+    call init_model()
     v_fwd = D1 / (D4 - D4**(D1 / D11))
     w_fwd = D1 / (D4 - D4**(D1 / D9))
     x_fwd = D1 / (D4 - D4**(D1 / D7))
@@ -32,26 +34,24 @@ program Symplectic
     x_back = D1 - D4 * x_fwd
     y_back = D1 - D4 * y_fwd
     z_back = D1 - D4 * z_fwd
-    read (input_unit, *) step, start, finish, plot_ratio, integrator
-    call init_model()
     select case (integrator)
         case ("b2")
-            write (error_unit, *) "2nd Order Integrator Base (Stormer-Verlet)"
+            write (error_unit, *) "2nd Order Base (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (error_unit, *) "4th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "4th Order (Suzuki composition)"
             call evolve(fourth_order)
         case ("b6")
-            write (error_unit, *) "6th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "6th Order (Suzuki composition)"
             call evolve(sixth_order)
         case ("b8")
-            write (error_unit, *) "8th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "8th Order (Suzuki composition)"
             call evolve(eightth_order)
         case ("b10")
-            write (error_unit, *) "10th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "10th Order (Suzuki composition)"
             call evolve(tenth_order)
         case ("b12")
-            write (error_unit, *) "12th Order Integrator (using Suzuki composition)"
+            write (error_unit, *) "12th Order (Suzuki composition)"
             call evolve(twelfth_order)
         case default
             error stop "Invalid integrator method"
@@ -70,20 +70,20 @@ contains
         end do
     end subroutine evolve
 
-    subroutine suzuki (base, s, forward, back)
+    subroutine compose_suzuki (base_method, s, forward, back)
         real(16), intent(in) :: s, forward, back
-        call base(s * forward)
-        call base(s * forward)
-        call base(s * back)
-        call base(s * forward)
-        call base(s * forward)
-    end subroutine suzuki
+        call base_method(s * forward)
+        call base_method(s * forward)
+        call base_method(s * back)
+        call base_method(s * forward)
+        call base_method(s * forward)
+    end subroutine compose_suzuki
 
     subroutine base_2 (s)
         real(16), intent(in) :: s
-        call q_update(step * s * D05)
-        call p_update(step * s)
-        call q_update(step * s * D05)
+        call q_update(s * step * D05)
+        call p_update(s * step)
+        call q_update(s * step * D05)
     end subroutine base_2
 
     subroutine second_order ()
@@ -92,7 +92,7 @@ contains
 
     subroutine base_4 (s)
         real(16), intent(in) :: s
-        call suzuki(base_2, s, z_fwd, z_back)
+        call compose_suzuki(base_2, s, z_fwd, z_back)
     end subroutine base_4
 
     subroutine fourth_order ()
@@ -101,7 +101,7 @@ contains
 
     subroutine base_6 (s)
         real(16), intent(in) :: s
-        call suzuki(base_4, s, y_fwd, y_back)
+        call compose_suzuki(base_4, s, y_fwd, y_back)
     end subroutine base_6
 
     subroutine sixth_order ()
@@ -110,7 +110,7 @@ contains
 
     subroutine base_8 (s)
         real(16), intent(in) :: s
-        call suzuki(base_6, s, x_fwd, x_back)
+        call compose_suzuki(base_6, s, x_fwd, x_back)
     end subroutine base_8
 
     subroutine eightth_order ()
@@ -119,7 +119,7 @@ contains
 
     subroutine base_10 (s)
         real(16), intent(in) :: s
-        call suzuki(base_8, s, w_fwd, w_back)
+        call compose_suzuki(base_8, s, w_fwd, w_back)
     end subroutine base_10
 
     subroutine tenth_order ()
@@ -128,7 +128,7 @@ contains
 
     subroutine base_12 (s)
         real(16), intent(in) :: s
-        call suzuki(base_10, s, v_fwd, v_back)
+        call compose_suzuki(base_10, s, v_fwd, v_back)
     end subroutine base_12
 
     subroutine twelfth_order ()
