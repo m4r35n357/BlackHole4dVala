@@ -74,14 +74,14 @@ namespace Models {
         public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
-            while (t < end) {
+            do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
                 integrator.step();
                 i += 1;
                 t = i * h;
-            }
+            } while (t < end);
             output(t);
             return { i };
         }
@@ -158,14 +158,14 @@ namespace Models {
         public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
-            while (t < end) {
+            do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
                 integrator.step();
                 i += 1;
                 t = i * h;
-            }
+            } while (t < end);
             output(t);
             return { i };
         }
@@ -245,14 +245,14 @@ namespace Models {
         public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
-            while (t < end) {
+            do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
                 integrator.step();
                 i += 1;
                 t = i * h;
-            }
+            } while (t < end);
             output(t);
             return { i };
         }
@@ -329,14 +329,14 @@ namespace Models {
         public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
-            while (t < end) {
+            do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
                 integrator.step();
                 i += 1;
                 t = i * h;
-            }
+            } while (t < end);
             output(t);
             return { i };
         }
@@ -517,7 +517,7 @@ namespace Models {
             int64 i = 0;
             double t = 0.0;
             double error = 0.0;
-            while ((t < end) && (error < errorLimit)) {
+            do {
                 var hNow = h();
                 error = hNow / h0 - 1.0;
                 if ((t > start) && (i % tr == 0)) {
@@ -526,7 +526,7 @@ namespace Models {
                 integrator.step();
                 i += 1;
                 t = i * step;
-            }
+            } while ((t < end) && (error < errorLimit));
             return { i };
         }
 
@@ -679,7 +679,7 @@ namespace Models {
             double tau = 0.0;
             int64 i = 0;
             int64 plotCount = 0;
-            while ((tau < end) && (cross || D_r > 0.0)) {
+            do {
                 if ((tau >= start) && (i % tr == 0)) {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;
@@ -688,7 +688,7 @@ namespace Models {
                 i += 1;
                 mino = h * i;
                 tau += h * S;
-            }
+            } while ((tau < end) && (cross || D_r > 0.0));
             plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
             return { i, plotCount };  // for testing
         }
