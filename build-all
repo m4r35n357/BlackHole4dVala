@@ -96,7 +96,7 @@ echo ""
 # generate documentation
 echo $C"Generating Documentation . . ."$NC
 rm -rf doc
-valadoc -o doc --pkg json-glib-1.0 --pkg gsl $valafiles
+valadoc --private -o doc --pkg json-glib-1.0 --pkg gsl $valafiles
 echo ""
 
 # test

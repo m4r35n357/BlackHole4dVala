@@ -34,31 +34,30 @@ public static void main (string[] args) {
         var simulator = content.get_string_member("Simulator");
         var o = content.get_object_member("IC");
         var type = o.get_string_member("integrator");
-        var stages = o.get_int_member("stages");
         var step = o.get_double_member("step");
         var start = o.get_double_member("start");
         var end = o.get_double_member("end");
         var plotratio = o.get_int_member("plotratio");
-        if (("b1" == type) || ("b2" == type) || ("b4" == type) || ("b6" == type) || ("b8" == type) || ("kl6" == type) || ("kl8" == type)) {
+        if (("b1" == type) || ("b2" == type) || ("b4" == type) || ("b6" == type) || ("b8" == type)) {
             switch (simulator) {
                 case "Oscillator":
                     var model = new Models.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 case "Pendulum":
                     var model = new Models.Pendulum(o.get_double_member("g"),
                                                          o.get_double_member("m"),
                                                          o.get_double_member("length"),
                                                          o.get_double_member("angle"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 case "Newton":
                     var model = new Models.Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 case "HenonHeiles":
                     var model = new Models.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 case "NBody":
                     Models.Body[] bodies = {};
@@ -86,7 +85,7 @@ public static void main (string[] args) {
                         }
                     }
                     var model = new Models.NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
                     var model = new Models.Bh3d(o.get_double_member("lambda"),
@@ -98,14 +97,14 @@ public static void main (string[] args) {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(Integrators.getIntegrator(model, step, type, stages), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
                     break;
                 default:
                     stderr.printf("Bad simulator; should be [ Newton | KerrDeSitter | NBody ], found {%s}\n", simulator);
                     assert_not_reached();
              }
         } else {
-            stderr.printf("Bad integrator; should be [ b1 | b2 | b4 | b6 | b8 | kl6 | kl8 ], found {%s}\n", type);
+            stderr.printf("Bad integrator; should be [ b1 | b2 | b4 | b6 | b8 ], found {%s}\n", type);
             assert_not_reached();
         }
     } else if ("GenParticle" in executable) {
