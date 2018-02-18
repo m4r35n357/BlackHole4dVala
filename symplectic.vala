@@ -24,13 +24,11 @@ namespace Models {
          * writing its data to stdout.
          *
          * Sole method called by main(), calls {@link Integrators.ISymplectic.step} on the selected integrator once per iteration
-         *
          * @param integrator the selected implementation
          * @param h the time step
          * @param start start time
          * @param end finish time
          * @param tr plot ratio i.e. only plot every tr-th point
-         *
          * @return an array of iteration counters
          */
         public abstract int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr);
@@ -42,14 +40,12 @@ namespace Models {
     public interface IModel : GLib.Object {
         /**
          * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link Integrators.ISymplectic.step}
-         *
          * @param d scaled time step
          */
         public abstract void qUpdate (double d);
 
         /**
          * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link Integrators.ISymplectic.step}
-         *
          * @param c scaled time step
          */
         public abstract void pUpdate (double c);
@@ -71,83 +67,128 @@ namespace Integrators {
     /**
      * Symplectic integrator abstract superclass, leaves integration method selection to subclasses
      */
-    protected abstract class SymplecticBase : ISymplectic, GLib.Object {
+    public class Symplectic : ISymplectic, GLib.Object {
 
         /**
-         * The physical model, defined at subclass construction
+         * Signature for integrator methods
          */
-        protected Models.IModel model;
+        delegate void IntegratorOrder ();
 
         /**
-         * Simulation time step, defined at subclass construction
+         * Signature for composable base methods
          */
-        protected double h;
+        delegate void BaseMethod (double s);
 
         /**
-         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
+         * The integrator order
+         */
+        private IntegratorOrder integratorOrder;
+
+        /**
+         * The physical model
+         */
+        private Models.IModel model;
+
+        /**
+         * Simulation time step,
+         */
+        private double h;
+
+        /**
+         * Composition coefficients
+         */
+        private double zOuter;
+        private double zCentral;
+        private double yOuter;
+        private double yCentral;
+        private double xOuter;
+        private double xCentral;
+
+        /**
+         * This constructor produces instances from its label argument according to the following table:
          *
+         * || ''label'' || ''Subclass'' ||  ''Description'' ||
+         * || "b1" || {@link firstOrder} || 1st Order, Symplectic, NOT Reversible ||
+         * || "b2" || {@link secondOrder} || 2nd Order, Symplectic, Reversible ||
+         * || "b4" || {@link fourthOrder} || 4th Order, Symplectic, Reversible ||
+         * || "b6" || {@link sixthOrder} || 6th Order, Symplectic, Reversible ||
+         * || "b8" || {@link eightthOrder} || 8th Order, Symplectic, Reversible ||
+         * @param model the model
          * @param h the time step
+         * @param label the integrator order
          */
-        protected SymplecticBase (Models.IModel model, double h) {
+        public Symplectic (Models.IModel model, double h, string label) {
             this.model = model;
             this.h = h;
+            zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
+            yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+            zCentral = 1.0 - 4.0 * zOuter;
+            yCentral = 1.0 - 4.0 * yOuter;
+            xCentral = 1.0 - 4.0 * xOuter;
+            switch (label) {
+                case "b1":
+                    stderr.printf("1st Order (Euler-Cromer)\n");
+                    integratorOrder = firstOrder;
+                    break;
+                case "b2":
+                    stderr.printf("2nd Order (Stormer-Verlet)\n");
+                    integratorOrder = secondOrder;
+                    break;
+                case "b4":
+                    stderr.printf("4th Order (Suzuki composition)\n");
+                    integratorOrder = fourthOrder;
+                    break;
+                case "b6":
+                    stderr.printf("6th Order (Suzuki composition)\n");
+                    integratorOrder = sixthOrder;
+                    break;
+                case "b8":
+                    stderr.printf("8th Order (Suzuki composition)\n");
+                    integratorOrder = eightthOrder;
+                    break;
+                default:
+                    stderr.printf("Integrator not recognized: %s\n", label);
+                    break;
+            }
         }
 
         /**
-         * Subclasses should perform one integration step by executing alternating {@link Models.IModel.qUpdate} and {@link Models.IModel.pUpdate}
-         * methods.
+         * Euler-Cromer 1st order integrator.
          *
-         * @see ISymplectic.step
-         */
-        protected abstract void step ();
-    }
-
-    /**
-     * First-order symplectic integrator concrete subclass.  This integrator is NOT time symmetrical.
-     */
-    public class FirstOrder : SymplecticBase {
-
-        /**
-         * {@inheritDoc}
-         * @see SymplecticBase.SymplecticBase
-         */
-        public FirstOrder (Models.IModel model, double h) {
-            base(model, h);
-        }
-
-        /**
-         * 1st order integration step.  Performs the following calls on {@link Models.IModel} per iteration:
+         * Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
-         * qUpdate(h)
-         * pUpdate(h)
+         * qUpdate(s * h)
+         * pUpdate(s * h)
          * }}}
          *
          * where h is the time step.
-         *
-         * @see SymplecticBase.step
          */
-        public override void step () {
+        private void firstOrder () {
             model.qUpdate(h);
             model.pUpdate(h);
         }
-    }
-
-    /**
-     * Second-order symplectic integrator concrete subclass.
-     */
-    public class SecondOrder : SymplecticBase {
 
         /**
-         * {@inheritDoc}
-         * @see SymplecticBase.SymplecticBase
+         * Suzuki composition
+         * @param baseMethod the method being composed into a higher order
+         * @param s the current multipler
+         * @param outer size of the forward steps
+         * @param central size of the backward step
          */
-        public SecondOrder (Models.IModel model, double h) {
-            base(model, h);
+        private void composeSuzuki (BaseMethod baseMethod, double s, double outer, double central) {
+            baseMethod(s * outer);
+            baseMethod(s * outer);
+            baseMethod(s * central);
+            baseMethod(s * outer);
+            baseMethod(s * outer);
         }
 
         /**
-         * Stormer-Verlet base integrator.  Performs the following calls on {@link Models.IModel} per iteration:
+         * Stormer-Verlet base integrator.
+         *
+         * Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
          * qUpdate(s * h/2)
@@ -157,345 +198,114 @@ namespace Integrators {
          *
          * where h is the time step.
          */
-        protected void base2 (double s) {
+        private void base2 (double s) {
             model.qUpdate(h * s * 0.5);
             model.pUpdate(h * s);
             model.qUpdate(h * s * 0.5);
         }
 
         /**
-         * 2nd order integration step.  Calls {@link base2} with s = 1.
+         * 2nd order integration step.
          *
-         * @see SymplecticBase.step
+         * Calls {@link base2} with s = 1.
          */
-        public override void step () {
+        private void secondOrder () {
             base2(1.0);
         }
-    }
-
-    /**
-     * Abstract base for compositions that are defined by explicit formulas (Yoshida, Suzuki and others)).
-     */
-    protected abstract class ExplicitComposed : SecondOrder {
 
         /**
-         * Root of exponential formulas
-         */
-        protected int64 root;
-
-        /**
-         * For looping over the outer stages
-         */
-        protected int64 nOuter;
-
-        /**
-         * {@inheritDoc}
-         * @see SecondOrder.SecondOrder
-         */
-        public ExplicitComposed (Models.IModel model, double h, int64 stages) {
-            base(model, h);
-            root = stages - 1;
-            nOuter = root / 2;
-        }
-    }
-
-    /**
-     * Fourth-order symplectic integrator concrete subclass using various compositions.
-     */
-    public class FourthOrder : ExplicitComposed {
-
-        /**
-         * Composition coefficients
-         */
-        protected double zOuter;
-        protected double zCentral;
-
-        /**
-         * {@inheritDoc}
-         * @see SymplecticBase.SymplecticBase
-         */
-        public FourthOrder (Models.IModel model, double h, int64 stages) {
-            base(model, h, stages);
-            zOuter = 1.0 / (root - pow(root, (1.0 / 3.0)));
-            zCentral = 1.0 - root * zOuter;
-        }
-
-        /**
-         * General composition from 2nd order to 4th order.  Performs the following calls to {@link SecondOrder.base2} per iteration:
+         * Suzuki composition from 2nd order to 4th order.
+         *
+         * Performs the following calls to {@link base2} per iteration:
          *
          * {{{
          * base2(s * zOuter)
-         * ...
+         * base2(s * zOuter)
          * base2(s * zCentral)
-         * ...
+         * base2(s * zOuter)
          * base2(s * zOuter)
          * }}}
          *
          * where zOuter = 1 / (4 - 4**(1/3)), and zCentral = 1 - 4 * zOuter
+         * @param s the current multipler
          */
-        protected void base4 (double s) {
-            for (var _ = 0; _ < nOuter; _++) {
-                base2(s * zOuter);
-            }
-            base2(s * zCentral);
-            for (var _ = 0; _ < nOuter; _++) {
-                base2(s * zOuter);
-            }
+        private void base4 (double s) {
+            composeSuzuki(base2, s, zOuter, zCentral);
         }
 
         /**
-         * 4th order integration step.  Calls {@link base4} with s = 1.
+         * 4th order integration step.
          *
-         * @see SymplecticBase.step
+         * Calls {@link base4} with s = 1.
          */
-        public override void step () {
+        private void fourthOrder () {
             base4(1.0);
         }
-    }
-
-    /**
-     * Sixth-order symplectic integrator concrete subclass using various compositions.
-     */
-    public class SixthOrder : FourthOrder {
 
         /**
-         * Composition coefficients
-         */
-        protected double yOuter;
-        protected double yCentral;
-
-        /**
-         * {@inheritDoc}
-         * @see FourthOrder.FourthOrder
-         */
-        public SixthOrder (Models.IModel model, double h, int64 stages) {
-            base(model, h, stages);
-            yOuter = 1.0 / (root - pow(root, (1.0 / 5.0)));
-            yCentral = 1.0 - root * yOuter;
-        }
-
-        /**
-         * General composition from 4th order to 6th order.  Performs the following calls per iteration:
+         * Suzuki composition from 4th order to 6th order.
+         *
+         * Performs the following calls to {@link base4} per iteration:
          *
          * {{{
          * base4(s * yOuter)
-         * ...
+         * base4(s * yOuter)
          * base4(s * yCentral)
-         * ...
+         * base4(s * yOuter)
          * base4(s * yOuter)
          * }}}
          *
          * where yOuter = 1 / (4 - 4**(1/5)), and yCentral = 1 - 4 * yOuter
+         * @param s the current multipler
          */
-        protected void base6 (double s) {
-            for (var _ = 0; _ < nOuter; _++) {
-                base4(s * yOuter);
-            }
-            base4(s * yCentral);
-            for (var _ = 0; _ < nOuter; _++) {
-                base4(s * yOuter);
-            }
+        private void base6 (double s) {
+            composeSuzuki(base4, s, yOuter, yCentral);
         }
 
         /**
-         * 6th order integration step.  Calls {@link base6} with s = 1.
+         * 6th order integration step.
          *
-         * @see SymplecticBase.step
+         * Calls {@link base6} with s = 1.
          */
-        public override void step () {
+        private void sixthOrder () {
             base6(1.0);
         }
-    }
-
-    /**
-     * Eightth-order symplectic integrator concrete subclass using various compositions.
-     */
-    public class EightthOrder : SixthOrder {
 
         /**
-         * Composition coefficients
-         */
-        protected double xOuter;
-        protected double xCentral;
-
-        /**
-         * {@inheritDoc}
-         * @see SixthOrder.SixthOrder
-         */
-        public EightthOrder (Models.IModel model, double h, int64 stages) {
-            base(model, h, stages);
-            xOuter = 1.0 / (root - pow(root, (1.0 / 7.0)));
-            xCentral = 1.0 - root * xOuter;
-        }
-
-        /**
-         * General composition from 6th order to 8th order.  Performs the following calls per iteration:
+         * Suzuki composition from 6th order to 8th order.
+         *
+         * Performs the following calls to {@link base6} per iteration:
          *
          * {{{
          * base6(s * xOuter)
-         * ...
+         * base6(s * xOuter)
          * base6(s * xCentral)
-         * ...
+         * base6(s * xOuter)
          * base6(s * xOuter)
          * }}}
          *
          * where xOuter = 1 / (4 - 4**(1/7)), and xCentral = 1 - 4 * xOuter
+         * @param s the current multipler
          */
-        protected void base8 (double s) {
-            for (var _ = 0; _ < nOuter; _++) {
-                base6(s * xOuter);
-            }
-            base6(s * xCentral);
-            for (var _ = 0; _ < nOuter; _++) {
-                base6(s * xOuter);
-            }
+        private void base8 (double s) {
+            composeSuzuki(base6, s, xOuter, xCentral);
         }
 
         /**
-         * 8th order integration step.  Calls {@link base8} with s = 1.
+         * 8th order integration step.
          *
-         * @see SymplecticBase.step
+         * Calls {@link base8} with s = 1.
          */
-        public override void step () {
+        private void eightthOrder () {
             base8(1.0);
         }
-    }
-
-    /**
-     * Generic composed integrator abstract superclass, leaves integration method selection to subclasses
-     */
-    protected abstract class GenericComposer : SecondOrder {
-        /**
-         * Generic composition coefficients
-         */
-        protected double[] delta;
 
         /**
-         * Size of coefficients array
+         * External access to an integrator step
+         * @see ISymplectic.step
          */
-        protected int n;
-
-        /**
-         * Populates a symmetric delta array from the asymmetric coefficients passed in.
-         *
-         * This is a protected constructor; use the static factory {@link getIntegrator} to obtain a concrete subclass.
-         *
-         * @param h the time step
-         */
-        protected GenericComposer (Models.IModel model, double h, double[] coefficients) {
-            base(model, h);
-            n = 2 * coefficients.length - 1;
-            delta = new double[n];
-            var m = coefficients.length - 1;
-            for (var i = 0; i < m; i++) {
-                delta[i] = coefficients[i];
-                delta[n - 1 - i] = coefficients[i];
-            }
-            delta[m] = coefficients[m];
+        public void step () {
+            integratorOrder();
         }
-
-        /**
-         * Generic integration step.  Calls {@link SecondOrder.base2} with delta array.
-         *
-         * @see SymplecticBase.step
-         */
-        public override void step () {
-            for (var i = 0; i < n; i++) {
-                base2(delta[i]);
-            }
-        }
-    }
-
-    /**
-     * Sixth-order symplectic integrator concrete subclass using Kahan-Li composition s9odr6b.
-     */
-    public class SixthOrderKahanLi9o6b : GenericComposer {
-
-        /**
-         * {@inheritDoc}
-         * @see GenericComposer.GenericComposer
-         */
-        public SixthOrderKahanLi9o6b (Models.IModel model, double h) {
-            base(model, h, {
-                            0.39103020330868478817,
-                            0.33403728961113601749,
-                            -0.70622728118756134346,
-                            0.081877549648059445768,
-                            0.79856447723936218406
-                           });
-        }
-    }
-
-    /**
-     * Eightth-order symplectic integrator concrete subclass using Kahan-Li composition s17odr8b.
-     */
-    public class EightthOrderKahanLi17o8b : GenericComposer {
-
-        /**
-         * {@inheritDoc}
-         * @see GenericComposer.GenericComposer
-         */
-        public EightthOrderKahanLi17o8b (Models.IModel model, double h) {
-            base(model, h, {
-                            0.12713692773487857916,
-                            0.56170253798880269972,
-                            -0.38253471994883018888,
-                            0.16007605629464743119,
-                            -0.40181637432680696673,
-                            0.18736671654227849724,
-                            0.26070870920779240570,
-                            0.29039738812516162389,
-                            -0.60607448323584816258
-                           });
-        }
-    }
-
-    /**
-     * Static factory for producing subclass instances from its type argument according to the following table:
-     *
-     * || ''type'' || ''Subclass'' ||  ''Description'' ||
-     * || "b1" || {@link FirstOrder} || 1st Order, Symplectic ||
-     * || "b2" || {@link SecondOrder} || 2nd Order, Symplectic, Reversible ||
-     * || "b4" || {@link FourthOrder} || 4th Order, Symplectic, Reversible ||
-     * || "b6" || {@link SixthOrder} || 6th Order, Symplectic, Reversible ||
-     * || "b8" || {@link EightthOrder} || 8th Order, Symplectic, Reversible ||
-     * || "kl6" || {@link SixthOrderKahanLi9o6b} || 6th Order, Symplectic, Reversible ||
-     * || "kl8" || {@link EightthOrderKahanLi17o8b} || 8th Order, Symplectic, Reversible ||
-     *
-     * @param h the time step
-     * @param type the selected implementation
-     *
-     * @return concrete implementation of a symplectic integrator
-     */
-    public static ISymplectic getIntegrator (Models.IModel model, double h, string type, int64 stages) {
-        if ((stages < 3) || (stages % 2 == 0)) {
-            stderr.printf("'stages' should be odd and at least 3\n");
-            assert_not_reached();
-        }
-        switch (type) {
-            case "b1":
-                stderr.printf("1st Order Symplectic Integrator\n");
-                return new FirstOrder(model, h);
-            case "b2":
-                stderr.printf("2nd Order Symplectic Integrator\n");
-                return new SecondOrder(model, h);
-            case "b4":
-                stderr.printf("4th Order Symplectic Integrator (using explicit composition)\n");
-                return new FourthOrder(model, h, stages);
-            case "b6":
-                stderr.printf("6th Order Symplectic Integrator (using explicit composition)\n");
-                return new SixthOrder(model, h, stages);
-            case "b8":
-                stderr.printf("8th Order Symplectic Integrator (using explicit composition)\n");
-                return new EightthOrder(model, h, stages);
-            case "kl6":
-                stderr.printf("6th Order Symplectic Integrator (using Kahan-Li s9odr6b composition)\n");
-                return new SixthOrderKahanLi9o6b(model, h);
-            case "kl8":
-                stderr.printf("8th Order Symplectic Integrator (using Kahan-Li s17odr8b composition)\n");
-                return new EightthOrderKahanLi17o8b(model, h);
-        }
-        stderr.printf("Integrator not recognized: %s\n", type);
-        assert_not_reached();
     }
 }
