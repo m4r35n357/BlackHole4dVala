@@ -71,14 +71,14 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
             do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 t = i * h;
             } while (t < end);
@@ -155,14 +155,14 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
             do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 t = i * h;
             } while (t < end);
@@ -242,14 +242,14 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
             do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 t = i * h;
             } while (t < end);
@@ -326,14 +326,14 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr) {
             int64 i = 0;
             double t = 0.0;
             do {
                 if ((t > start) && (i % tr == 0)) {
                     output(t);
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 t = i * h;
             } while (t < end);
@@ -512,7 +512,7 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double step, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double step, double start, double end, int64 tr) {
             var h0 = h();
             int64 i = 0;
             double t = 0.0;
@@ -523,7 +523,7 @@ namespace Models {
                 if ((t > start) && (i % tr == 0)) {
                     output(t, hNow, h0, error);
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 t = i * step;
             } while ((t < end) && (error < errorLimit));
@@ -674,7 +674,7 @@ namespace Models {
          * {@inheritDoc}
          * @see ISolver.solve
          */
-        public int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr) {
+        public int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr) {
             double mino = 0.0;
             double tau = 0.0;
             int64 i = 0;
@@ -684,7 +684,7 @@ namespace Models {
                     plot(mino, tau, Ut / S, Ur / S, Uth / S, Uph / S);
                     plotCount += 1;
                 }
-                integrator.step();
+                integrator();
                 i += 1;
                 mino = h * i;
                 tau += h * S;

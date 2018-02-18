@@ -42,22 +42,22 @@ public static void main (string[] args) {
             switch (simulator) {
                 case "Oscillator":
                     var model = new Models.Oscillator(o.get_double_member("m"), o.get_double_member("k"), o.get_double_member("x"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 case "Pendulum":
                     var model = new Models.Pendulum(o.get_double_member("g"),
                                                          o.get_double_member("m"),
                                                          o.get_double_member("length"),
                                                          o.get_double_member("angle"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 case "Newton":
                     var model = new Models.Newton(o.get_double_member("Lfac"), o.get_double_member("r0"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 case "HenonHeiles":
                     var model = new Models.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 case "NBody":
                     Models.Body[] bodies = {};
@@ -85,7 +85,7 @@ public static void main (string[] args) {
                         }
                     }
                     var model = new Models.NBody(bodies, o.get_double_member("g"), o.get_double_member("errorLimit"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 case "KerrDeSitter":
                     var model = new Models.Bh3d(o.get_double_member("lambda"),
@@ -97,7 +97,7 @@ public static void main (string[] args) {
                                            o.get_double_member("r0"),
                                            o.get_double_member("th0"),
                                            o.get_boolean_member("cross"));
-                    model.solve(new Integrators.Symplectic(model, step, type), step, start, end, plotratio);
+                    model.solve(new Integrators.Symplectic(model, step, type).integrator, step, start, end, plotratio);
                     break;
                 default:
                     stderr.printf("Bad simulator; should be [ Newton | KerrDeSitter | NBody ], found {%s}\n", simulator);

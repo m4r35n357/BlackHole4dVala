@@ -23,7 +23,7 @@ namespace Models {
          * Externally visible method. It sets up, controls and terminates the simulation,
          * writing its data to stdout.
          *
-         * Sole method called by main(), calls {@link Integrators.ISymplectic.step} on the selected integrator once per iteration
+         * Sole method called by main(), calls {@link Integrators.Symplectic.integrator} on the selected integrator once per iteration
          * @param integrator the selected implementation
          * @param h the time step
          * @param start start time
@@ -31,7 +31,7 @@ namespace Models {
          * @param tr plot ratio i.e. only plot every tr-th point
          * @return an array of iteration counters
          */
-        public abstract int64[] solve (Integrators.ISymplectic integrator, double h, double start, double end, int64 tr);
+        public abstract int64[] solve (Integrators.Symplectic.Integrator integrator, double h, double start, double end, int64 tr);
     }
 
     /**
@@ -39,13 +39,13 @@ namespace Models {
      */
     public interface IModel : GLib.Object {
         /**
-         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link Integrators.ISymplectic.step}
+         * Hamiltonian equations of motion - coordinate updates (dT/dp), called by {@link Integrators.Symplectic.integrator}
          * @param d scaled time step
          */
         public abstract void qUpdate (double d);
 
         /**
-         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link Integrators.ISymplectic.step}
+         * Hamiltonian equations of motion - momentum updates (dV/dq), called by {@link Integrators.Symplectic.integrator}
          * @param c scaled time step
          */
         public abstract void pUpdate (double c);
@@ -55,34 +55,24 @@ namespace Models {
 namespace Integrators {
 
     /**
-     * Internal interface for a model to drive the symplectic integrator
-     */
-    public interface ISymplectic : GLib.Object {
-        /**
-         * Should be called by {@link Models.ISolver.solve} as needed, in turn calls {@link Models.IModel.qUpdate} and {@link Models.IModel.pUpdate}
-         */
-        public abstract void step ();
-    }
-
-    /**
      * Symplectic integrator abstract superclass, leaves integration method selection to subclasses
      */
-    public class Symplectic : ISymplectic, GLib.Object {
+    public class Symplectic : GLib.Object {
 
         /**
          * Signature for integrator methods
          */
-        delegate void IntegratorOrder ();
+        public delegate void Integrator ();
 
         /**
          * Signature for composable base methods
          */
-        delegate void BaseMethod (double s);
+        private delegate void BaseMethod (double s);
 
         /**
-         * The integrator order
+         * The integrator method
          */
-        private IntegratorOrder integratorOrder;
+        public Integrator integrator;
 
         /**
          * The physical model
@@ -129,23 +119,23 @@ namespace Integrators {
             switch (label) {
                 case "b1":
                     stderr.printf("1st Order (Euler-Cromer)\n");
-                    integratorOrder = firstOrder;
+                    integrator = firstOrder;
                     break;
                 case "b2":
                     stderr.printf("2nd Order (Stormer-Verlet)\n");
-                    integratorOrder = secondOrder;
+                    integrator = secondOrder;
                     break;
                 case "b4":
                     stderr.printf("4th Order (Suzuki composition)\n");
-                    integratorOrder = fourthOrder;
+                    integrator = fourthOrder;
                     break;
                 case "b6":
                     stderr.printf("6th Order (Suzuki composition)\n");
-                    integratorOrder = sixthOrder;
+                    integrator = sixthOrder;
                     break;
                 case "b8":
                     stderr.printf("8th Order (Suzuki composition)\n");
-                    integratorOrder = eightthOrder;
+                    integrator = eightthOrder;
                     break;
                 default:
                     stderr.printf("Integrator not recognized: %s\n", label);
@@ -298,14 +288,6 @@ namespace Integrators {
          */
         private void eightthOrder () {
             base8(1.0);
-        }
-
-        /**
-         * External access to an integrator step
-         * @see ISymplectic.step
-         */
-        public void step () {
-            integratorOrder();
         }
     }
 }
