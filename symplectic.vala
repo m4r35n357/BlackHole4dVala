@@ -87,11 +87,11 @@ namespace Integrators {
         /**
          * Composition coefficients
          */
-        private double zOuter;
+        private double zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
+        private double yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+        private double xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
         private double zCentral;
-        private double yOuter;
         private double yCentral;
-        private double xOuter;
         private double xCentral;
 
         /**
@@ -110,9 +110,6 @@ namespace Integrators {
         public Symplectic (Models.IModel model, double h, string label) {
             this.model = model;
             this.h = h;
-            zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
-            yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
-            xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
             zCentral = 1.0 - 4.0 * zOuter;
             yCentral = 1.0 - 4.0 * yOuter;
             xCentral = 1.0 - 4.0 * xOuter;

@@ -108,7 +108,6 @@ if __name__ == "__main__":
     print >> stderr, input_data
     bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])
     step = ic['step']
-    integrator = Symplectic(bh, step, ic['integrator']).method
-    bh.solve(integrator, step, ic['start'], ic['end'], ic['plotratio'])
+    bh.solve(Symplectic(bh, step, ic['integrator']).method, step, ic['start'], ic['end'], ic['plotratio'])
 else:
     print >> stderr, __name__ + " module loaded"

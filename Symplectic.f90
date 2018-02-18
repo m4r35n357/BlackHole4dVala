@@ -74,45 +74,45 @@ contains
         call base_method(s * forward)
     end subroutine compose_suzuki
 
-    subroutine base_2 (s)
+    subroutine base_method_2 (s)
         real(16), intent(in) :: s
         call q_update(s * step * D05)
         call p_update(s * step)
         call q_update(s * step * D05)
-    end subroutine base_2
+    end subroutine base_method_2
 
     subroutine second_order_integrator ()
-        call base_2(D1)
+        call base_method_2(D1)
     end subroutine second_order_integrator
 
-    subroutine base_4 (s)
+    subroutine base_method_4 (s)
         real(16), intent(in) :: s
-        call compose_suzuki(base_2, s, z_fwd, z_back)
-    end subroutine base_4
+        call compose_suzuki(base_method_2, s, z_fwd, z_back)
+    end subroutine base_method_4
 
     subroutine fourth_order_integrator ()
-        call base_4(D1)
+        call base_method_4(D1)
     end subroutine fourth_order_integrator
 
-    subroutine base_6 (s)
+    subroutine base_method_6 (s)
         real(16), intent(in) :: s
-        call compose_suzuki(base_4, s, y_fwd, y_back)
-    end subroutine base_6
+        call compose_suzuki(base_method_4, s, y_fwd, y_back)
+    end subroutine base_method_6
 
     subroutine sixth_order_integrator ()
-        call base_6(D1)
+        call base_method_6(D1)
     end subroutine sixth_order_integrator
 
-    subroutine base_8 (s)
+    subroutine base_method_8 (s)
         real(16), intent(in) :: s
-        call compose_suzuki(base_6, s, x_fwd, x_back)
-    end subroutine base_8
+        call compose_suzuki(base_method_6, s, x_fwd, x_back)
+    end subroutine base_method_8
 
     subroutine eightth_order_integrator ()
-        call base_8(D1)
+        call base_method_8(D1)
     end subroutine eightth_order_integrator
 
     subroutine tenth_order_integrator ()
-        call compose_suzuki(base_8, D1, w_fwd, w_back)
+        call compose_suzuki(base_method_8, D1, w_fwd, w_back)
     end subroutine tenth_order_integrator
 end program Symplectic

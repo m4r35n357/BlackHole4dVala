@@ -1,5 +1,5 @@
 
-set -x
+#set -x
 
 export data=/tmp/data
 export pot=/tmp/potential
@@ -55,5 +55,5 @@ alias plot_errors='$exe <$infile | tee $data | ./plotErrors.py $ic tau 1 2>/dev/
 
 alias benchmark='time $exe <$infile >$data'
 
-set +x
+#set +x
 
