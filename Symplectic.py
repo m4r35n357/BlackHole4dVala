@@ -26,41 +26,71 @@ D9 = longfloat(9.0)
 D05 = longfloat(0.5)
 
 class Symplectic(object):
-    def __init__(self, model, h, order):
+    def __init__(self, model, h, order, scheme):
         self.model = model
         self.h = h
+        if scheme == 'yoshida':
+            print >> stderr, "Yoshida composition"
+            self.scheme = self.yoshida
+            self.scheme_root = D2
+        elif scheme == 'suzuki':
+            print >> stderr, "Suzuki composition"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+        else:
+            raise Exception('>>> Composition scheme must be yoshida or suzuki, was "{found}" <<<'.format(found=scheme))
         if order == 'b1':
-            print >> stderr, "1st order Symplectic Integrator"
-            self.method = self.first_order
+            print >> stderr, "1st order (Euler-Cromer)"
+            self.method = self.euler_cromer
+        elif order == 'fr4':
+            print >> stderr, "4th order (Forest-Ruth)"
+            theta = D1 / (D2 - D2 ** (D1 / D3))
+            self.c_d = [D05 * h * theta, h * theta, D05 * h * (D1 - theta), h * (D1 - D2 * theta)]
+            self.method = self.forest_ruth
         elif order == 'b2':
-            print >> stderr, "2nd order Symplectic Integrator"
+            print >> stderr, "2nd order (Stormer-Verlet))"
             self.method = self.second_order
         elif order == 'b4':
-            print >> stderr, "4th order Symplectic Integrator (using suzuki composition)"
+            print >> stderr, "4th order (Composed)"
             self.method = self.fourth_order
         elif order == 'b6':
-            print >> stderr, "6th order Symplectic Integrator (using suzuki composition)"
+            print >> stderr, "6th order (Composed)"
             self.method = self.sixth_order
         elif order == 'b8':
-            print >> stderr, "8th order Symplectic Integrator (using suzuki composition)"
+            print >> stderr, "8th order (Composed)"
             self.method = self.eightth_order
         elif order == 'b10':
-            print >> stderr, "10th order Symplectic Integrator (using suzuki composition)"
+            print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
         else:
             raise Exception('>>> Integrator must be b1, b2, b4, b6, b8 or b10, was "{found}" <<<'.format(found=order))
-        self.w_outer = D1 / (D4 - D4**(D1 / D9))
-        self.x_outer = D1 / (D4 - D4**(D1 / D7))
-        self.y_outer = D1 / (D4 - D4**(D1 / D5))
-        self.z_outer = D1 / (D4 - D4**(D1 / D3))
-        self.w_central = D1 - D4 * self.w_outer
-        self.x_central = D1 - D4 * self.x_outer
-        self.y_central = D1 - D4 * self.y_outer
-        self.z_central = D1 - D4 * self.z_outer
+        self.w_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D9))
+        self.x_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D7))
+        self.y_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D5))
+        self.z_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D3))
+        self.w_central = D1 - self.scheme_root * self.w_outer
+        self.x_central = D1 - self.scheme_root * self.x_outer
+        self.y_central = D1 - self.scheme_root * self.y_outer
+        self.z_central = D1 - self.scheme_root * self.z_outer
 
-    def first_order(self):
+    def euler_cromer(self):
         self.model.q_update(self.h)
         self.model.p_update(self.h)
+
+    def forest_ruth(self):
+        self.model.q_update(self.c_d[0])
+        self.model.p_update(self.c_d[1])
+        self.model.q_update(self.c_d[2])
+        self.model.p_update(self.c_d[3])
+        self.model.q_update(self.c_d[2])
+        self.model.p_update(self.c_d[1])
+        self.model.q_update(self.c_d[0])
+
+    @staticmethod
+    def yoshida(base_method, s, plus, minus):
+        base_method(s * plus)
+        base_method(s * minus)
+        base_method(s * plus)
 
     @staticmethod
     def suzuki(base_method, s, plus, minus):
@@ -70,37 +100,34 @@ class Symplectic(object):
         base_method(s * plus)
         base_method(s * plus)
 
-    def base2(self, s):
+    def stormer_verlet(self, s):
         self.model.q_update(self.h * s * D05)
         self.model.p_update(self.h * s)
         self.model.q_update(self.h * s * D05)
 
     def second_order(self):
-        self.base2(D1)
+        self.stormer_verlet(D1)
 
     def base4(self, s):
-        self.suzuki(self.base2, s, self.z_outer, self.z_central)
+        self.scheme(self.stormer_verlet, s, self.z_outer, self.z_central)
 
     def fourth_order(self):
         self.base4(D1)
 
     def base6(self, s):
-        self.suzuki(self.base4, s, self.y_outer, self.y_central)
+        self.scheme(self.base4, s, self.y_outer, self.y_central)
 
     def sixth_order(self):
         self.base6(D1)
 
     def base8(self, s):
-        self.suzuki(self.base6, s, self.x_outer, self.x_central)
+        self.scheme(self.base6, s, self.x_outer, self.x_central)
 
     def eightth_order(self):
         self.base8(D1)
 
-    def base10(self, s):
-        self.suzuki(self.base8, s, self.w_outer, self.w_central)
-
     def tenth_order(self):
-        self.base10(D1)
+        self.scheme(self.base8, D1, self.w_outer, self.w_central)
 
 
 print >> stderr, __name__ + " module loaded"

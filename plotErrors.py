@@ -42,7 +42,7 @@ def main():
         raise Exception('>>> ERROR! Please supply a parameter file name, a time variable name, and a plotting interval <<<')
     parameters = loads(open(argv[1]).read())['IC']
     integrator_type = parameters['integrator']
-    composition_stages = parameters['stages']
+    composition_scheme = parameters['scheme']
     time_step = parameters['step']
     time_coordinate = str(argv[2])
     interval = int(argv[3])
@@ -57,13 +57,13 @@ def main():
     left.set_xlim(parameters['start'], parameters['end'])
     left.set_xlabel('Time: ' + time_coordinate, color='0.20')
     left.set_ylabel('4-Velocity Norm Error', color='#006000')
-    left.set_ylim(-360.0, 0.0)
+    left.set_ylim(-300.0, 0.0)
     right = left.twinx()
     right.yaxis.set_major_locator(major_locator)
     right.yaxis.set_minor_locator(minor_locator)
     right.set_xlim(parameters['start'], parameters['end'])
     right.set_ylabel('Radial (blue) and Latitudinal (red) Errors, dB', color='0.25')
-    right.set_ylim(-360.0, 0.0)
+    right.set_ylim(-300.0, 0.0)
     pyplot.axhspan(-30.0, 0.0, facecolor='red', alpha=0.3)
     pyplot.axhspan(-60.0, -30.0, facecolor='orange', alpha=0.3)
     pyplot.axhspan(-90.0, -60.0, facecolor='yellow', alpha=0.3)
@@ -90,7 +90,7 @@ def main():
         line = stdin.readline()
         e_cum += e
         e_pk = e_pk if e_pk > e else e
-    left.annotate("{} - {} ({} stages),  ts = {}".format(executable, integrator_type, composition_stages, time_step),
+    left.annotate("{} - {} ({}),  ts = {}".format(executable, integrator_type, composition_scheme, time_step),
                   (0.0, 0.0), xytext=(0.15, 0.96), textcoords='figure fraction', color='0.20', )
     left.annotate("Peak: {:.1f},   Average: {:.1f}".format(log_error(e_pk), log_error(e_cum / count)),
                   (0.0, 0.0), xytext=(0.2, 0.92), textcoords='figure fraction', color='0.20', )

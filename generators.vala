@@ -63,7 +63,7 @@ namespace Generators {
             public double step;
             public int64 plotratio;
             public string integrator;
-            public int64 stages;
+            public string scheme;
         }
 
         /**
@@ -180,7 +180,7 @@ namespace Generators {
             stdout.printf("    \"step\" : %.17g,\n", p->step);
             stdout.printf("    \"plotratio\" : %.1d,\n", (int)p->plotratio);
             stdout.printf("    \"integrator\" : \"%s\",\n", p->integrator);
-            stdout.printf("    \"stages\" : %.1d\n", (int)p->stages);
+            stdout.printf("    \"scheme\" : \"%s\"\n", p->scheme);
             stdout.printf("  }\n");
             stdout.printf("}\n");
         }
@@ -212,7 +212,7 @@ namespace Generators {
                 step = input.has_member("step") ? input.get_double_member("step") : 0.01,
                 plotratio = input.has_member("plotratio") ? input.get_int_member("plotratio") : 1,
                 integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "sb2",
-                stages = input.has_member("stages") ? input.get_int_member("stages") : 5
+                scheme = input.has_member("scheme") ? input.get_string_member("scheme") : "suzuki"
             };
         }
 
@@ -356,7 +356,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, bool cross, double start, double end, double step, int64 plotratio, string integrator, int64 stages) {
+        private void printOutput (double r, double a, bool cross, double start, double end, double step, int64 plotratio, string integrator, string scheme) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -388,7 +388,7 @@ namespace Generators {
             stdout.printf("    \"step\" : %.17g,\n", step);
             stdout.printf("    \"plotratio\" : %.1d,\n", (int)plotratio);
             stdout.printf("    \"integrator\" : \"%s\",\n", integrator);
-            stdout.printf("    \"stages\" : %.1d\n", (int)stages);
+            stdout.printf("    \"scheme\" : \"%s\"\n", scheme);
             stdout.printf("  }\n");
             stdout.printf("}\n");
         }
@@ -407,7 +407,7 @@ namespace Generators {
                         input.has_member("step") ? input.get_double_member("step") : 0.001,
                         input.has_member("plotratio") ? input.get_int_member("plotratio") : 50,
                         input.has_member("integrator") ? input.get_string_member("integrator") : "b2",
-                        input.has_member("stages") ? input.get_int_member("stages") : 5);
+                        input.has_member("scheme") ? input.get_string_member("scheme") : "suzuki");
         }
 
         /**
