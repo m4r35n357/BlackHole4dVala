@@ -63,7 +63,7 @@ class Symplectic(object):
             print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
         else:
-            raise Exception('>>> Integrator must be b1, b2, b4, b6, b8 or b10, was "{found}" <<<'.format(found=order))
+            raise Exception('>>> Integrator must be b1, b2, b4, b6, b8, b10 or fr4, was "{found}" <<<'.format(found=order))
         self.w_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D9))
         self.x_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D7))
         self.y_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D5))
@@ -112,21 +112,25 @@ class Symplectic(object):
         self.scheme(self.stormer_verlet, s, self.z_outer, self.z_central)
 
     def fourth_order(self):
+        # noinspection PyTypeChecker
         self.base4(D1)
 
     def base6(self, s):
         self.scheme(self.base4, s, self.y_outer, self.y_central)
 
     def sixth_order(self):
+        # noinspection PyTypeChecker
         self.base6(D1)
 
     def base8(self, s):
         self.scheme(self.base6, s, self.x_outer, self.x_central)
 
     def eightth_order(self):
+        # noinspection PyTypeChecker
         self.base8(D1)
 
     def tenth_order(self):
+        # noinspection PyTypeChecker
         self.scheme(self.base8, D1, self.w_outer, self.w_central)
 
 

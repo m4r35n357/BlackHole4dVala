@@ -159,17 +159,17 @@ namespace Integrators {
 
         /**
          * Suzuki composition
-         * @param baseMethod the method being composed into a higher order
+         * @param method the method being composed into a higher order
          * @param s the current multipler
          * @param outer size of the forward steps
          * @param central size of the backward step
          */
-        private void composeSuzuki (BaseMethod baseMethod, double s, double outer, double central) {
-            baseMethod(s * outer);
-            baseMethod(s * outer);
-            baseMethod(s * central);
-            baseMethod(s * outer);
-            baseMethod(s * outer);
+        private void composeSuzuki (BaseMethod method, double s, double outer, double central) {
+            method(s * outer);
+            method(s * outer);
+            method(s * central);
+            method(s * outer);
+            method(s * outer);
         }
 
         /**
