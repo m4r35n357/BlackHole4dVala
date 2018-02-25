@@ -9,7 +9,7 @@
     "end": 50,
     "step": 0.01,
     "integrator": "b2",
-    "stages": 5,
+    "scheme": "suzuki",
     "plotratio": 1
   }
 }

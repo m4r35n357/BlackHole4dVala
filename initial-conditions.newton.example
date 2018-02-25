@@ -7,7 +7,7 @@
     "end": 2000,
     "step": 1.0,
     "integrator": "b2",
-    "stages": 5,
+    "scheme": "suzuki",
     "plotratio": 1
   }
 }

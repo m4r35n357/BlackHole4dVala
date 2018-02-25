@@ -12,7 +12,6 @@
   "step" : 0.02,
   "plotratio" : 1,
   "integrator": "b2",
-  "stages": 5,
   "method": "dnewton",
   "maxIterations": 1000,
   "termination": "deltas",
