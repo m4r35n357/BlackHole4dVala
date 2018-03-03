@@ -13,8 +13,8 @@
 program Symplectic
     use Model
     implicit none
-    real(16), parameter :: D0=0.0, D05=0.5, D1=1.0, D4=4.0, D3=3.0, D5=5.0, D7=7.0, D9=9.0
-    real(16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
+    real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
+    real(kind=16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -52,8 +52,8 @@ program Symplectic
     end select
 contains
     subroutine evolve (nth_order_integrator)
-        real(16) :: time = D0
-        integer(16) :: counter = 0
+        real(kind=16) :: time = D0
+        integer(kind=16) :: counter = 0
         do
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
                 call plot(time)
@@ -66,7 +66,7 @@ contains
     end subroutine evolve
 
     subroutine compose_suzuki (base_method, s, forward, back)
-        real(16), intent(in) :: s, forward, back
+        real(kind=16), intent(in) :: s, forward, back
         call base_method(s * forward)
         call base_method(s * forward)
         call base_method(s * back)
@@ -74,20 +74,20 @@ contains
         call base_method(s * forward)
     end subroutine compose_suzuki
 
-    subroutine base_method_2 (s)
-        real(16), intent(in) :: s
+    subroutine stormer_verlet (s)
+        real(kind=16), intent(in) :: s
         call q_update(s * step * D05)
         call p_update(s * step)
         call q_update(s * step * D05)
-    end subroutine base_method_2
+    end subroutine stormer_verlet
 
     subroutine second_order_integrator ()
-        call base_method_2(D1)
+        call stormer_verlet(D1)
     end subroutine second_order_integrator
 
     subroutine base_method_4 (s)
-        real(16), intent(in) :: s
-        call compose_suzuki(base_method_2, s, z_fwd, z_back)
+        real(kind=16), intent(in) :: s
+        call compose_suzuki(stormer_verlet, s, z_fwd, z_back)
     end subroutine base_method_4
 
     subroutine fourth_order_integrator ()
@@ -95,7 +95,7 @@ contains
     end subroutine fourth_order_integrator
 
     subroutine base_method_6 (s)
-        real(16), intent(in) :: s
+        real(kind=16), intent(in) :: s
         call compose_suzuki(base_method_4, s, y_fwd, y_back)
     end subroutine base_method_6
 
@@ -104,7 +104,7 @@ contains
     end subroutine sixth_order_integrator
 
     subroutine base_method_8 (s)
-        real(16), intent(in) :: s
+        real(kind=16), intent(in) :: s
         call compose_suzuki(base_method_6, s, x_fwd, x_back)
     end subroutine base_method_8
 

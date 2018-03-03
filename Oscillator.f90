@@ -13,8 +13,8 @@
 module Model
     use iso_fortran_env
     implicit none
-    real(16), parameter :: MD0=0.0, MD05=0.5
-    real(16) :: x, Ux = MD0, k, h0
+    real(kind=16), parameter :: MD0=0.0, MD05=0.5
+    real(kind=16) :: x, Ux = MD0, k, h0
     logical :: carry_on = .true.
 contains
     subroutine init_model()
@@ -23,28 +23,28 @@ contains
         h0 = hamiltonian()
     end subroutine init_model
 
-    real(16) function hamiltonian ()
+    real(kind=16) function hamiltonian ()
         hamiltonian = MD05 * (Ux**2 + k * x**2)
     end function hamiltonian
 
     subroutine q_update(c)
-        real(16), intent(in) :: c
+        real(kind=16), intent(in) :: c
         x = x + c * Ux
     end subroutine q_update
 
     subroutine p_update(d)
-        real(16), intent(in) :: d
+        real(kind=16), intent(in) :: d
         Ux = Ux - d * k * x
     end subroutine p_update
 
-    real(16) function t_update(time, step, counter)
-        real(16), intent(in) :: time, step
-        integer(16), intent(in) :: counter
+    real(kind=16) function t_update(time, step, counter)
+        real(kind=16), intent(in) :: time, step
+        integer(kind=16), intent(in) :: counter
         t_update = step * counter
     end function t_update
 
     subroutine plot(time)
-        real(16), intent(in) :: time
+        real(kind=16), intent(in) :: time
         write (output_unit, '(A, 13(ES16.9, A))') '{"tau":',time,',"v4e":',hamiltonian()-h0,',"t":',time,',"x":',x,',"xP":',Ux,'}'
     end subroutine plot
 end module Model

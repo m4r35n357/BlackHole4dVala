@@ -28,21 +28,21 @@ namespace Generators {
         /**
          * Sets up and runs the solver
          *
-         * @param input the JSON IC generation data
+         * @param o the JSON IC generation data
          */
-        public abstract void generateInitialConditions (Json.Object input);
+        public abstract void generateInitialConditions (Json.Object o);
 
         /**
          * Writes the potential data to STDOUT for plotting
          *
-         * @param input the generated JSON simulation data
+         * @param o the generated JSON simulation data
          */
-        public abstract void printPotentials (Json.Object input);
+        public abstract void printPotentials (Json.Object o);
     }
 
     /**
     * Turns fixed parameters and other constraints into initial conditions data
-    * suitable as input to {@link Models.Bh3d}
+    * suitable as o to {@link Models.Bh3d}
     * (passing some items directly through to the output data),
     * alternatively takes the data and creates potential plots from it.
      */
@@ -188,31 +188,31 @@ namespace Generators {
         /**
          * These are the quantities to vary: E, L & Q
          */
-        private Vector initializeVariables (Json.Object input) {
+        private Vector initializeVariables (Json.Object o) {
             var initialValues = new Vector(3);
-            initialValues.set(X.E, input.has_member("E0") ? input.get_double_member("E0") : 1.0);
-            initialValues.set(X.L, input.has_member("L0") ? input.get_double_member("L0") : 5.0);
-            initialValues.set(X.Q, input.has_member("Q0") ? input.get_double_member("Q0") : 0.0);
+            initialValues.set(X.E, o.has_member("E0") ? o.get_double_member("E0") : 1.0);
+            initialValues.set(X.L, o.has_member("L0") ? o.get_double_member("L0") : 5.0);
+            initialValues.set(X.Q, o.has_member("Q0") ? o.get_double_member("Q0") : 0.0);
             return initialValues;
         }
 
         /**
          * These are the fixed quantities
          */
-        private Params initializeParams (Json.Object input, double rMin, double rMax) {
+        private Params initializeParams (Json.Object o, double rMin, double rMax) {
             return Params() {
                 mu2 = 1.0,
                 rMin = rMin,
                 rMax = rMax,
-                elevation = (1.0 - (input.has_member("elevation") ? (90.0 - input.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
-                a = input.has_member("spin") ? input.get_double_member("spin") : 0.0,
-                cross = input.has_member("cross") ? input.get_boolean_member("cross") : false,
-                start = input.has_member("start") ? input.get_double_member("start") : 0.0,
-                end = input.has_member("end") ? input.get_double_member("end") : 1000.0,
-                step = input.has_member("step") ? input.get_double_member("step") : 0.01,
-                plotratio = input.has_member("plotratio") ? input.get_int_member("plotratio") : 1,
-                integrator = input.has_member("integrator") ? input.get_string_member("integrator") : "sb2",
-                scheme = input.has_member("scheme") ? input.get_string_member("scheme") : "suzuki"
+                elevation = (1.0 - (o.has_member("elevation") ? (90.0 - o.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
+                a = o.has_member("spin") ? o.get_double_member("spin") : 0.0,
+                cross = o.has_member("cross") ? o.get_boolean_member("cross") : false,
+                start = o.has_member("start") ? o.get_double_member("start") : 0.0,
+                end = o.has_member("end") ? o.get_double_member("end") : 1000.0,
+                step = o.has_member("step") ? o.get_double_member("step") : 0.01,
+                plotratio = o.has_member("plotratio") ? o.get_int_member("plotratio") : 1,
+                integrator = o.has_member("integrator") ? o.get_string_member("integrator") : "b6",
+                scheme = o.has_member("scheme") ? o.get_string_member("scheme") : "suzuki"
             };
         }
 
@@ -220,13 +220,13 @@ namespace Generators {
          * {@inheritDoc}
          * @see IGenerator.generateInitialConditions
          */
-        public void generateInitialConditions (Json.Object input) {
-            var initialValues = initializeVariables(input);
+        public void generateInitialConditions (Json.Object o) {
+            var initialValues = initializeVariables(o);
             var nDim = initialValues.size;
 
             // choose a solver
             MultirootFsolver solver;
-            switch (input.has_member("method") ? input.get_string_member("method") : "dnewton") {
+            switch (o.has_member("method") ? o.get_string_member("method") : "dnewton") {
                 case "dnewton":
                     solver = new MultirootFsolver(MultirootFsolverTypes.dnewton, nDim);
                     break;
@@ -247,15 +247,15 @@ namespace Generators {
             // configure the solver
             MultirootFunction objectiveFunctionData;
             Params parameters;
-            if (input.has_member("r") && ! input.has_member("rMin") && ! input.has_member("rMax")) {
-                parameters = initializeParams(input, input.get_double_member("r"), input.get_double_member("r"));
+            if (o.has_member("r") && ! o.has_member("rMin") && ! o.has_member("rMax")) {
+                parameters = initializeParams(o, o.get_double_member("r"), o.get_double_member("r"));
                 objectiveFunctionData = MultirootFunction() {
                     f = sphericalOrbit,
                     n = initialValues.size,
                     params = &parameters
                 };
-            } else if (! input.has_member("r") && input.has_member("rMin") && input.has_member("rMax")) {
-                parameters = initializeParams(input, input.get_double_member("rMin"), input.get_double_member("rMax"));
+            } else if (! o.has_member("r") && o.has_member("rMin") && o.has_member("rMax")) {
+                parameters = initializeParams(o, o.get_double_member("rMin"), o.get_double_member("rMax"));
                 objectiveFunctionData = MultirootFunction() {
                     f = nonSphericalOrbit,
                     n = initialValues.size,
@@ -268,10 +268,10 @@ namespace Generators {
             solver.set(&objectiveFunctionData, initialValues);
 
             // run the solver
-            var epsabs = input.has_member("epsabs") ? input.get_double_member("epsabs") : 1.0e-12;
-            var epsrel = input.has_member("epsrel") ? input.get_double_member("epsrel") : 1.0e-12;
-            var maxIterations = input.has_member("maxIterations") ? input.get_int_member("maxIterations") : 1000;
-            var termination = input.has_member("termination") ? input.get_string_member("termination") : "deltas";
+            var epsabs = o.has_member("epsabs") ? o.get_double_member("epsabs") : 1.0e-12;
+            var epsrel = o.has_member("epsrel") ? o.get_double_member("epsrel") : 1.0e-12;
+            var maxIterations = o.has_member("maxIterations") ? o.get_int_member("maxIterations") : 1000;
+            var termination = o.has_member("termination") ? o.get_string_member("termination") : "deltas";
             bool continuing = true;
             var iterations = 0;
             do {
@@ -309,13 +309,13 @@ namespace Generators {
          * {@inheritDoc}
          * @see IGenerator.printPotentials
          */
-        public void printPotentials (Json.Object input) {
-            var a = input.get_double_member("a");
-            var mu2 = input.get_double_member("mu");
-            var E = input.get_double_member("E");
-            var L = input.get_double_member("L");
-            var Q = input.get_double_member("Q");
-            var rMax = input.get_double_member("r0") * 2.0;
+        public void printPotentials (Json.Object o) {
+            var a = o.get_double_member("a");
+            var mu2 = o.get_double_member("mu");
+            var E = o.get_double_member("E");
+            var L = o.get_double_member("L");
+            var Q = o.get_double_member("Q");
+            var rMax = o.get_double_member("r0") * 2.0;
             for (var x = 1; x < 1000; x++) {
                 var xValue = 1.0 * x / 1001;
                 stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",
@@ -397,28 +397,28 @@ namespace Generators {
          * {@inheritDoc}
          * @see IGenerator.generateInitialConditions
          */
-        public void generateInitialConditions (Json.Object input) {
+        public void generateInitialConditions (Json.Object o) {
             // generate output
-            printOutput(input.has_member("r") ? input.get_double_member("r") : 3.0,
-                        input.has_member("spin") ? input.get_double_member("spin") : 1.0,
-                        input.has_member("cross") ? input.get_boolean_member("cross") : false,
-                        input.has_member("start") ? input.get_double_member("start") : 0.0,
-                        input.has_member("end") ? input.get_double_member("end") : 1000.0,
-                        input.has_member("step") ? input.get_double_member("step") : 0.001,
-                        input.has_member("plotratio") ? input.get_int_member("plotratio") : 50,
-                        input.has_member("integrator") ? input.get_string_member("integrator") : "b2",
-                        input.has_member("scheme") ? input.get_string_member("scheme") : "suzuki");
+            printOutput(o.has_member("r") ? o.get_double_member("r") : 3.0,
+                        o.has_member("spin") ? o.get_double_member("spin") : 1.0,
+                        o.has_member("cross") ? o.get_boolean_member("cross") : false,
+                        o.has_member("start") ? o.get_double_member("start") : 0.0,
+                        o.has_member("end") ? o.get_double_member("end") : 1000.0,
+                        o.has_member("step") ? o.get_double_member("step") : 0.001,
+                        o.has_member("plotratio") ? o.get_int_member("plotratio") : 50,
+                        o.has_member("integrator") ? o.get_string_member("integrator") : "b6",
+                        o.has_member("scheme") ? o.get_string_member("scheme") : "suzuki");
         }
 
         /**
          * {@inheritDoc}
          * @see IGenerator.printPotentials
          */
-        public void printPotentials (Json.Object input) {
-            var a = input.get_double_member("a");
-            var E = input.get_double_member("E");
-            var L = input.get_double_member("L");
-            var Q = input.get_double_member("Q");
+        public void printPotentials (Json.Object o) {
+            var a = o.get_double_member("a");
+            var E = o.get_double_member("E");
+            var L = o.get_double_member("L");
+            var Q = o.get_double_member("Q");
             for (var x = 1; x <= 1001; x++) {
                 var xValue = 1.0 * x / 1001;
                 stdout.printf("{ \"x\" : %.6f, \"R\" : %.6f, \"y\" : %.6f, \"THETA\" : %.6f }\n",

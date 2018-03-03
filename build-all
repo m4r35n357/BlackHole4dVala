@@ -34,9 +34,14 @@ echo ""
 
 # compile vala files
 echo $C"Compiling Vala . . ."$NC
-#$valac --pkg json-glib-1.0 --pkg gsl $valafiles
-$valac symplectic.vapi json-parser.vapi KdS.vala models.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o KdS --pkg json-glib-1.0 --pkg gsl
-
+if [ 'x.' = "x$LD_LIBRARY_PATH" ]
+then
+	STATIC=''
+	$valac symplectic.vapi json-parser.vapi KdS.vala models.vala generators.vala -X symplectic.so -X json-parser.so -X -I. -o KdS --pkg json-glib-1.0 --pkg gsl
+else
+	$valac --pkg json-glib-1.0 --pkg gsl $valafiles
+	STATIC='-static'
+fi
 echo ""
 
 # compile raytracer
@@ -55,13 +60,6 @@ then
 else
 	echo 'Requesting FORTRAN default double precision'
 	gf='gfortran -Wall -O2 -fimplicit-none'
-fi
-
-if [ 'x.' = "x$LD_LIBRARY_PATH" ]
-then
-	STATIC=''
-else
-	STATIC='-static'
 fi
 rm -f model.mod KdS.o Newton.o Oscillator.o
 $gf -c KdS.f90
