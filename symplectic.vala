@@ -55,7 +55,7 @@ namespace Models {
 namespace Integrators {
 
     /**
-     * Symplectic integrator abstract superclass, leaves integration method selection to subclasses
+     * Symplectic integrator class
      */
     public class Symplectic : GLib.Object {
 
@@ -70,9 +70,19 @@ namespace Integrators {
         private delegate void BaseMethod (double s);
 
         /**
+         * Signature for composition scheme methods
+         */
+        private delegate void Composer (BaseMethod method, double s, double outer, double central);
+
+        /**
          * The integrator method
          */
         public Integrator integrator;
+
+        /**
+         * The composition scheme
+         */
+        private Composer composer;
 
         /**
          * The physical model
@@ -87,32 +97,35 @@ namespace Integrators {
         /**
          * Composition coefficients
          */
-        private double zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
-        private double yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
-        private double xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+        private double zOuter;
+        private double yOuter;
+        private double xOuter;
         private double zCentral;
         private double yCentral;
         private double xCentral;
 
         /**
-         * This constructor produces instances from its label argument according to the following table:
+         * This constructor produces instances from its label and scheme arguments according to the following tables:
          *
-         * || ''label'' || ''Subclass'' ||  ''Description'' ||
+         * || ''label'' || ''Integrator Order'' ||  ''Description'' ||
          * || "b1" || {@link firstOrder} || 1st Order, Symplectic, NOT Reversible ||
          * || "b2" || {@link secondOrder} || 2nd Order, Symplectic, Reversible ||
          * || "b4" || {@link fourthOrder} || 4th Order, Symplectic, Reversible ||
          * || "b6" || {@link sixthOrder} || 6th Order, Symplectic, Reversible ||
          * || "b8" || {@link eightthOrder} || 8th Order, Symplectic, Reversible ||
+         *
+         * || ''scheme'' || ''Composition Method'' ||  ''Description'' ||
+         * || "yoshida" || {@link composeYoshida} || Yoshida Composition ||
+         * || "suzuki" || {@link composeSuzuki} || Suzuki Composition ||
+         *
          * @param model the model
          * @param h the time step
          * @param label the integrator order
+         * @param scheme the composition scheme
          */
-        public Symplectic (Models.IModel model, double h, string label) {
+        public Symplectic (Models.IModel model, double h, string label, string scheme) {
             this.model = model;
             this.h = h;
-            zCentral = 1.0 - 4.0 * zOuter;
-            yCentral = 1.0 - 4.0 * yOuter;
-            xCentral = 1.0 - 4.0 * xOuter;
             switch (label) {
                 case "b1":
                     stderr.printf("1st Order (Euler-Cromer)\n");
@@ -123,21 +136,44 @@ namespace Integrators {
                     integrator = secondOrder;
                     break;
                 case "b4":
-                    stderr.printf("4th Order (Suzuki composition)\n");
+                    stderr.printf("4th Order (Composed)\n");
                     integrator = fourthOrder;
                     break;
                 case "b6":
-                    stderr.printf("6th Order (Suzuki composition)\n");
+                    stderr.printf("6th Order (Composed)\n");
                     integrator = sixthOrder;
                     break;
                 case "b8":
-                    stderr.printf("8th Order (Suzuki composition)\n");
+                    stderr.printf("8th Order (Composed)\n");
                     integrator = eightthOrder;
                     break;
                 default:
                     stderr.printf("Integrator not recognized: %s\n", label);
+                    assert_not_reached();
                     break;
             }
+            double scheme_root = 4.0;
+            switch (scheme) {
+                case "yoshida":
+                    stderr.printf("Yoshida Composition\n");
+                    composer = composeYoshida;
+                    scheme_root = 2.0;
+                    break;
+                case "suzuki":
+                    stderr.printf("Suzuki Composition\n");
+                    composer = composeSuzuki;
+                    break;
+                default:
+                    stderr.printf("Scheme not recognized: %s\n", scheme);
+                    assert_not_reached();
+                    break;
+            }
+            zOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 3.0)));
+            yOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 5.0)));
+            xOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 7.0)));
+            zCentral = 1.0 - scheme_root * zOuter;
+            yCentral = 1.0 - scheme_root * yOuter;
+            xCentral = 1.0 - scheme_root * xOuter;
         }
 
         /**
@@ -158,7 +194,42 @@ namespace Integrators {
         }
 
         /**
+         * Yoshida composition
+         *
+         * Performs the following calls to {@link BaseMethod} per iteration:
+         *
+         * {{{
+         * method(s * outer)
+         * method(s * central)
+         * method(s * outer)
+         * }}}
+         *
+         * where outer = 1 / (2 - 2^(1/X)), central = 1 - 2 * outer, and X = 3, 5 or 7
+         * @param method the method being composed into a higher order
+         * @param s the current multipler
+         * @param outer size of the forward steps
+         * @param central size of the backward step
+         */
+        private void composeYoshida (BaseMethod method, double s, double outer, double central) {
+            method(s * outer);
+            method(s * central);
+            method(s * outer);
+        }
+
+        /**
          * Suzuki composition
+         *
+         * Performs the following calls to {@link BaseMethod} per iteration:
+         *
+         * {{{
+         * method(s * outer)
+         * method(s * outer)
+         * method(s * central)
+         * method(s * outer)
+         * method(s * outer)
+         * }}}
+         *
+         * where outer = 1 / (4 - 4^(1/X)), central = 1 - 4 * outer, and X = 3, 5 or 7
          * @param method the method being composed into a higher order
          * @param s the current multipler
          * @param outer size of the forward steps
@@ -201,23 +272,12 @@ namespace Integrators {
         }
 
         /**
-         * Suzuki composition from 2nd order to 4th order.
+         * Composition from 2nd order to 4th order.
          *
-         * Performs the following calls to {@link base2} per iteration:
-         *
-         * {{{
-         * base2(s * zOuter)
-         * base2(s * zOuter)
-         * base2(s * zCentral)
-         * base2(s * zOuter)
-         * base2(s * zOuter)
-         * }}}
-         *
-         * where zOuter = 1 / (4 - 4**(1/3)), and zCentral = 1 - 4 * zOuter
          * @param s the current multipler
          */
         private void base4 (double s) {
-            composeSuzuki(base2, s, zOuter, zCentral);
+            composer(base2, s, zOuter, zCentral);
         }
 
         /**
@@ -230,23 +290,12 @@ namespace Integrators {
         }
 
         /**
-         * Suzuki composition from 4th order to 6th order.
+         * Composition from 4th order to 6th order.
          *
-         * Performs the following calls to {@link base4} per iteration:
-         *
-         * {{{
-         * base4(s * yOuter)
-         * base4(s * yOuter)
-         * base4(s * yCentral)
-         * base4(s * yOuter)
-         * base4(s * yOuter)
-         * }}}
-         *
-         * where yOuter = 1 / (4 - 4**(1/5)), and yCentral = 1 - 4 * yOuter
          * @param s the current multipler
          */
         private void base6 (double s) {
-            composeSuzuki(base4, s, yOuter, yCentral);
+            composer(base4, s, yOuter, yCentral);
         }
 
         /**
@@ -259,23 +308,12 @@ namespace Integrators {
         }
 
         /**
-         * Suzuki composition from 6th order to 8th order.
-         *
-         * Performs the following calls to {@link base6} per iteration:
-         *
-         * {{{
-         * base6(s * xOuter)
-         * base6(s * xOuter)
-         * base6(s * xCentral)
-         * base6(s * xOuter)
-         * base6(s * xOuter)
-         * }}}
-         *
-         * where xOuter = 1 / (4 - 4**(1/7)), and xCentral = 1 - 4 * xOuter
+         * Composition from 6th order to 8th order.
+
          * @param s the current multipler
          */
         private void base8 (double s) {
-            composeSuzuki(base6, s, xOuter, xCentral);
+            composer(base6, s, xOuter, xCentral);
         }
 
         /**
