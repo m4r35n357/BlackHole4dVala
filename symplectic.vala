@@ -205,7 +205,7 @@ namespace Integrators {
          * }}}
          *
          * where outer = 1 / (2 - 2^(1/X)), central = 1 - 2 * outer, and X = 3, 5 or 7
-         * @param method the method being composed into a higher order
+         * @param method the method being composed to a higher order
          * @param s the current multipler
          * @param outer size of the forward steps
          * @param central size of the backward step
@@ -230,7 +230,7 @@ namespace Integrators {
          * }}}
          *
          * where outer = 1 / (4 - 4^(1/X)), central = 1 - 4 * outer, and X = 3, 5 or 7
-         * @param method the method being composed into a higher order
+         * @param method the method being composed to a higher order
          * @param s the current multipler
          * @param outer size of the forward steps
          * @param central size of the backward step

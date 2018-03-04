@@ -75,7 +75,7 @@ echo ""
 # strip executables
 echo $C"Stripping Executables . . ."$NC
 case $opt in
-	fast)	strip KdS raytrace-commands kerr-image;;
+	fast)	strip KdS raytrace-commands kerr-image Fortran*;;
 esac
 
 ln KdS Simulate

@@ -55,7 +55,7 @@ contains
     subroutine plot(time)
         real(kind=16), intent(in) :: time
         write (output_unit, '(A, 13(ES16.9, A))') '{"tau":',time, ',"v4e":',hamiltonian() - h0,&
-            ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"Ur":',Ur,',"thP":',0.0,',"phP":',Uph,'}'
+            ',"t":', time,',"r":',r,',"th":',PI_2,',"ph":',ph, ',"tP":',1.0,',"rP":',Ur,',"thP":',0.0,',"phP":',Uph,'}'
     end subroutine plot
 end module Model
 
