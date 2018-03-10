@@ -14,7 +14,7 @@ program Symplectic
     use Model
     implicit none
     real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
-    real(kind=16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish
+    real(kind=16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish, c_1, c_3, d_1, d_3
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -31,6 +31,10 @@ program Symplectic
     x_back = D1 - D4 * x_fwd
     y_back = D1 - D4 * y_fwd
     z_back = D1 - D4 * z_fwd
+    d_1 = step * z_fwd
+    d_3 = step * z_back
+    c_1 = d_1 * D05
+    c_3 = (d_1 + d_3) * D05
     select case (integrator)
         case ("b2")
             write (error_unit, *) "2nd Order Base (Stormer-Verlet)"
@@ -65,6 +69,12 @@ contains
         end do
     end subroutine evolve
 
+    subroutine second_order_integrator ()
+        call q_update(step * D05)
+        call p_update(step)
+        call q_update(step * D05)
+    end subroutine second_order_integrator
+
     subroutine compose_suzuki (base_method, s, forward, back)
         real(kind=16), intent(in) :: s, forward, back
         call base_method(s * forward)
@@ -74,20 +84,19 @@ contains
         call base_method(s * forward)
     end subroutine compose_suzuki
 
-    subroutine stormer_verlet (s)
-        real(kind=16), intent(in) :: s
-        call q_update(s * step * D05)
-        call p_update(s * step)
-        call q_update(s * step * D05)
-    end subroutine stormer_verlet
-
-    subroutine second_order_integrator ()
-        call stormer_verlet(D1)
-    end subroutine second_order_integrator
-
     subroutine base_method_4 (s)
         real(kind=16), intent(in) :: s
-        call compose_suzuki(stormer_verlet, s, z_fwd, z_back)
+        call q_update(s * c_1)
+        call p_update(s * d_1)
+        call q_update(s * d_1)
+        call p_update(s * d_1)
+        call q_update(s * c_3)
+        call p_update(s * d_3)
+        call q_update(s * c_3)
+        call p_update(s * d_1)
+        call q_update(s * d_1)
+        call p_update(s * d_1)
+        call q_update(s * c_1)
     end subroutine base_method_4
 
     subroutine fourth_order_integrator ()
