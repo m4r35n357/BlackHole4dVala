@@ -64,25 +64,43 @@ class Symplectic(object):
             self.method = self.fourth_order
         elif order == 'fr4':
             print >> stderr, "4th order (Forest-Ruth)"
-            self.method = self.forest_ruth
+            self.method = self.fourth_order_forest_ruth
         elif order == 's4':
             print >> stderr, "4th order (Smith)"
-            self.method = self.smith
+            self.method = self.fourth_order_smith
         elif order == 'b6':
             print >> stderr, "6th order (Composed)"
             self.method = self.sixth_order
+        elif order == 'fr6':
+            print >> stderr, "6th order (Forest-Ruth) (Composed)"
+            self.scheme = self.yoshida
+            self.method = self.sixth_order_forest_ruth
         elif order == 's6':
             print >> stderr, "6th order (Smith) (Composed)"
+            self.scheme = self.suzuki
             self.method = self.sixth_order_smith
         elif order == 'b8':
             print >> stderr, "8th order (Composed)"
             self.method = self.eightth_order
+        elif order == 'fr8':
+            print >> stderr, "8th order (Forest-Ruth) (Composed)"
+            self.scheme = self.yoshida
+            self.method = self.eightth_order_forest_ruth
         elif order == 's8':
             print >> stderr, "8th order (Smith) (Composed)"
+            self.scheme = self.suzuki
             self.method = self.eightth_order_smith
         elif order == 'b10':
             print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
+        elif order == 'fr10':
+            print >> stderr, "10th order (Forest-Ruth) (Composed)"
+            self.scheme = self.yoshida
+            self.method = self.tenth_order_forest_ruth
+        elif order == 's10':
+            print >> stderr, "10th order (Smith) (Composed)"
+            self.scheme = self.suzuki
+            self.method = self.tenth_order_smith
         else:
             raise Exception(
                 '>>> Integrator must be b1, b2, b4, b6, b8, b10 or fr4, was "{found}" <<<'.format(found=order))
@@ -139,9 +157,6 @@ class Symplectic(object):
     def base4(self, s):
         self.scheme(self.stormer_verlet, s, self.z_outer, self.z_central)
 
-    def base4_smith(self, s):
-        self.scheme(self.smith, s, self.z_outer, self.z_central)
-
     def fourth_order(self):
         # noinspection PyTypeChecker
         self.base4(D1)
@@ -164,6 +179,32 @@ class Symplectic(object):
         # noinspection PyTypeChecker
         self.scheme(self.base8, D1, self.w_outer, self.w_central)
 
+    def fourth_order_forest_ruth(self):
+        # noinspection PyTypeChecker
+        self.forest_ruth(D1)
+
+    def base6_forest_ruth(self, s):
+        self.scheme(self.forest_ruth, s, self.y_outer, self.y_central)
+
+    def sixth_order_forest_ruth(self):
+        # noinspection PyTypeChecker
+        self.base6_smith(D1)
+
+    def base8_forest_ruth(self, s):
+        self.scheme(self.base6_forest_ruth, s, self.x_outer, self.x_central)
+
+    def eightth_order_forest_ruth(self):
+        # noinspection PyTypeChecker
+        self.base8_smith(D1)
+
+    def tenth_order_forest_ruth(self):
+        # noinspection PyTypeChecker
+        self.scheme(self.base8_forest_ruth, D1, self.w_outer, self.w_central)
+
+    def fourth_order_smith(self):
+        # noinspection PyTypeChecker
+        self.smith(D1)
+
     def base6_smith(self, s):
         self.scheme(self.smith, s, self.y_outer, self.y_central)
 
@@ -177,6 +218,10 @@ class Symplectic(object):
     def eightth_order_smith(self):
         # noinspection PyTypeChecker
         self.base8_smith(D1)
+
+    def tenth_order_smith(self):
+        # noinspection PyTypeChecker
+        self.scheme(self.base8_smith, D1, self.w_outer, self.w_central)
 
 
 print >> stderr, __name__ + " module loaded"
