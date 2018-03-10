@@ -70,19 +70,9 @@ namespace Integrators {
         private delegate void BaseMethod (double s);
 
         /**
-         * Signature for composition scheme methods
-         */
-        private delegate void Composer (BaseMethod method, double s, double outer, double central);
-
-        /**
          * The integrator method
          */
         public Integrator integrator;
-
-        /**
-         * The composition scheme
-         */
-        private Composer composer;
 
         /**
          * The physical model
@@ -97,12 +87,15 @@ namespace Integrators {
         /**
          * Composition coefficients
          */
-        private double zOuter;
         private double yOuter;
         private double xOuter;
-        private double zCentral;
         private double yCentral;
         private double xCentral;
+
+        /**
+         * Base method coefficients
+         */
+        private double[] c_d;
 
         /**
          * This constructor produces instances from its label and scheme arguments according to the following tables:
@@ -136,44 +129,28 @@ namespace Integrators {
                     integrator = secondOrder;
                     break;
                 case "b4":
-                    stderr.printf("4th Order (Composed)\n");
+                    stderr.printf("4th Order (Smith)\n");
                     integrator = fourthOrder;
                     break;
                 case "b6":
-                    stderr.printf("6th Order (Composed)\n");
+                    stderr.printf("6th Order (Suzuki Composition)\n");
                     integrator = sixthOrder;
                     break;
                 case "b8":
-                    stderr.printf("8th Order (Composed)\n");
+                    stderr.printf("8th Order (Suzuki Composition)\n");
                     integrator = eightthOrder;
                     break;
                 default:
                     stderr.printf("Integrator not recognized: %s\n", label);
                     assert_not_reached();
-                    break;
             }
-            double scheme_root = 4.0;
-            switch (scheme) {
-                case "yoshida":
-                    stderr.printf("Yoshida Composition\n");
-                    composer = composeYoshida;
-                    scheme_root = 2.0;
-                    break;
-                case "suzuki":
-                    stderr.printf("Suzuki Composition\n");
-                    composer = composeSuzuki;
-                    break;
-                default:
-                    stderr.printf("Scheme not recognized: %s\n", scheme);
-                    assert_not_reached();
-                    break;
-            }
-            zOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 3.0)));
-            yOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 5.0)));
-            xOuter = 1.0 / (scheme_root - pow(scheme_root, (1.0 / 7.0)));
-            zCentral = 1.0 - scheme_root * zOuter;
-            yCentral = 1.0 - scheme_root * yOuter;
-            xCentral = 1.0 - scheme_root * xOuter;
+            var zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
+            yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+            var zCentral = 1.0 - 4.0 * zOuter;
+            yCentral = 1.0 - 4.0 * yOuter;
+            xCentral = 1.0 - 4.0 * xOuter;
+            c_d = { 0.5 * h * zOuter, h * zOuter, h * zOuter, h * zOuter, 0.5 * h * (zOuter + zCentral), h * zCentral };
         }
 
         /**
@@ -182,8 +159,8 @@ namespace Integrators {
          * Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
-         * qUpdate(s * h)
-         * pUpdate(s * h)
+         * qUpdate(h)
+         * pUpdate(h)
          * }}}
          *
          * where h is the time step.
@@ -194,26 +171,22 @@ namespace Integrators {
         }
 
         /**
-         * Yoshida composition
+         * Stormer-Verlet 2nd order integrator.
          *
-         * Performs the following calls to {@link BaseMethod} per iteration:
+         * Performs the following calls on {@link Models.IModel} per iteration:
          *
          * {{{
-         * method(s * outer)
-         * method(s * central)
-         * method(s * outer)
+         * qUpdate(h/2)
+         * pUpdate(h)
+         * qUpdate(h/2)
          * }}}
          *
-         * where outer = 1 / (2 - 2^(1/X)), central = 1 - 2 * outer, and X = 3, 5 or 7
-         * @param method the method being composed to a higher order
-         * @param s the current multipler
-         * @param outer size of the forward steps
-         * @param central size of the backward step
+         * where h is the time step.
          */
-        private void composeYoshida (BaseMethod method, double s, double outer, double central) {
-            method(s * outer);
-            method(s * central);
-            method(s * outer);
+        private void secondOrder () {
+            model.qUpdate(h * 0.5);
+            model.pUpdate(h);
+            model.qUpdate(h * 0.5);
         }
 
         /**
@@ -244,40 +217,22 @@ namespace Integrators {
         }
 
         /**
-         * Stormer-Verlet base integrator.
-         *
-         * Performs the following calls on {@link Models.IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(s * h/2)
-         * pUpdate(s * h)
-         * qUpdate(s * h/2)
-         * }}}
-         *
-         * where h is the time step.
-         */
-        private void base2 (double s) {
-            model.qUpdate(h * s * 0.5);
-            model.pUpdate(h * s);
-            model.qUpdate(h * s * 0.5);
-        }
-
-        /**
-         * 2nd order integration step.
-         *
-         * Calls {@link base2} with s = 1.
-         */
-        private void secondOrder () {
-            base2(1.0);
-        }
-
-        /**
          * Composition from 2nd order to 4th order.
          *
          * @param s the current multipler
          */
         private void base4 (double s) {
-            composer(base2, s, zOuter, zCentral);
+            model.qUpdate(s * c_d[0]);
+            model.pUpdate(s * c_d[1]);
+            model.qUpdate(s * c_d[2]);
+            model.pUpdate(s * c_d[3]);
+            model.qUpdate(s * c_d[4]);
+            model.pUpdate(s * c_d[5]);
+            model.qUpdate(s * c_d[4]);
+            model.pUpdate(s * c_d[3]);
+            model.qUpdate(s * c_d[2]);
+            model.pUpdate(s * c_d[1]);
+            model.qUpdate(s * c_d[0]);
         }
 
         /**
@@ -295,7 +250,7 @@ namespace Integrators {
          * @param s the current multipler
          */
         private void base6 (double s) {
-            composer(base4, s, yOuter, yCentral);
+            composeSuzuki(base4, s, yOuter, yCentral);
         }
 
         /**
@@ -308,21 +263,12 @@ namespace Integrators {
         }
 
         /**
-         * Composition from 6th order to 8th order.
-
-         * @param s the current multipler
-         */
-        private void base8 (double s) {
-            composer(base6, s, xOuter, xCentral);
-        }
-
-        /**
          * 8th order integration step.
          *
          * Calls {@link base8} with s = 1.
          */
         private void eightthOrder () {
-            base8(1.0);
+            composeSuzuki(base6, 1.0, xOuter, xCentral);
         }
     }
 }

@@ -25,6 +25,7 @@ D7 = longfloat(7.0)
 D9 = longfloat(9.0)
 D05 = longfloat(0.5)
 
+
 class Symplectic(object):
     def __init__(self, model, h, order, scheme):
         self.model = model
@@ -39,52 +40,56 @@ class Symplectic(object):
             self.scheme_root = D4
         else:
             raise Exception('>>> Composition scheme must be yoshida or suzuki, was "{found}" <<<'.format(found=scheme))
+        self.w_outer = D1 / (self.scheme_root - self.scheme_root ** (D1 / D9))
+        self.x_outer = D1 / (self.scheme_root - self.scheme_root ** (D1 / D7))
+        self.y_outer = D1 / (self.scheme_root - self.scheme_root ** (D1 / D5))
+        self.z_outer = D1 / (self.scheme_root - self.scheme_root ** (D1 / D3))
+        self.w_central = D1 - self.scheme_root * self.w_outer
+        self.x_central = D1 - self.scheme_root * self.x_outer
+        self.y_central = D1 - self.scheme_root * self.y_outer
+        self.z_central = D1 - self.scheme_root * self.z_outer
+        self.c_d_stormer_verlet = [D05 * h, h]
+        self.c_d_forest_ruth = [D05 * h * self.z_outer, h * self.z_outer, D05 * h * (D1 - self.z_outer),
+                                h * (D1 - D2 * self.z_outer)]
+        self.c_d_smith = [D05 * h * self.z_outer, h * self.z_outer, h * self.z_outer, h * self.z_outer,
+                          D05 * h * (self.z_central + self.z_outer), h * self.z_central]
         if order == 'b1':
             print >> stderr, "1st order (Euler-Cromer)"
             self.method = self.euler_cromer
-        elif order == 'fr4':
-            print >> stderr, "4th order (Forest-Ruth)"
-            theta = D1 / (D2 - D2 ** (D1 / D3))
-            self.c_d = [D05 * h * theta, h * theta, D05 * h * (D1 - theta), h * (D1 - D2 * theta)]
-            self.method = self.forest_ruth
         elif order == 'b2':
             print >> stderr, "2nd order (Stormer-Verlet))"
             self.method = self.second_order
         elif order == 'b4':
             print >> stderr, "4th order (Composed)"
             self.method = self.fourth_order
+        elif order == 'fr4':
+            print >> stderr, "4th order (Forest-Ruth)"
+            self.method = self.forest_ruth
+        elif order == 's4':
+            print >> stderr, "4th order (Smith)"
+            self.method = self.smith
         elif order == 'b6':
             print >> stderr, "6th order (Composed)"
             self.method = self.sixth_order
+        elif order == 's6':
+            print >> stderr, "6th order (Smith) (Composed)"
+            self.method = self.sixth_order_smith
         elif order == 'b8':
             print >> stderr, "8th order (Composed)"
             self.method = self.eightth_order
+        elif order == 's8':
+            print >> stderr, "8th order (Smith) (Composed)"
+            self.method = self.eightth_order_smith
         elif order == 'b10':
             print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
         else:
-            raise Exception('>>> Integrator must be b1, b2, b4, b6, b8, b10 or fr4, was "{found}" <<<'.format(found=order))
-        self.w_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D9))
-        self.x_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D7))
-        self.y_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D5))
-        self.z_outer = D1 / (self.scheme_root - self.scheme_root**(D1 / D3))
-        self.w_central = D1 - self.scheme_root * self.w_outer
-        self.x_central = D1 - self.scheme_root * self.x_outer
-        self.y_central = D1 - self.scheme_root * self.y_outer
-        self.z_central = D1 - self.scheme_root * self.z_outer
+            raise Exception(
+                '>>> Integrator must be b1, b2, b4, b6, b8, b10 or fr4, was "{found}" <<<'.format(found=order))
 
     def euler_cromer(self):
         self.model.q_update(self.h)
         self.model.p_update(self.h)
-
-    def forest_ruth(self):
-        self.model.q_update(self.c_d[0])
-        self.model.p_update(self.c_d[1])
-        self.model.q_update(self.c_d[2])
-        self.model.p_update(self.c_d[3])
-        self.model.q_update(self.c_d[2])
-        self.model.p_update(self.c_d[1])
-        self.model.q_update(self.c_d[0])
 
     @staticmethod
     def yoshida(base_method, s, plus, minus):
@@ -101,15 +106,41 @@ class Symplectic(object):
         base_method(s * plus)
 
     def stormer_verlet(self, s):
-        self.model.q_update(self.h * s * D05)
-        self.model.p_update(self.h * s)
-        self.model.q_update(self.h * s * D05)
+        self.model.q_update(s * self.c_d_stormer_verlet[0])
+        self.model.p_update(s * self.c_d_stormer_verlet[1])
+        self.model.q_update(s * self.c_d_stormer_verlet[0])
+
+    def forest_ruth(self, s):
+        self.model.q_update(s * self.c_d_forest_ruth[0])
+        self.model.p_update(s * self.c_d_forest_ruth[1])
+        self.model.q_update(s * self.c_d_forest_ruth[2])
+        self.model.p_update(s * self.c_d_forest_ruth[3])
+        self.model.q_update(s * self.c_d_forest_ruth[2])
+        self.model.p_update(s * self.c_d_forest_ruth[1])
+        self.model.q_update(s * self.c_d_forest_ruth[0])
+
+    def smith(self, s):
+        self.model.q_update(s * self.c_d_smith[0])
+        self.model.p_update(s * self.c_d_smith[1])
+        self.model.q_update(s * self.c_d_smith[2])
+        self.model.p_update(s * self.c_d_smith[3])
+        self.model.q_update(s * self.c_d_smith[4])
+        self.model.p_update(s * self.c_d_smith[5])
+        self.model.q_update(s * self.c_d_smith[4])
+        self.model.p_update(s * self.c_d_smith[3])
+        self.model.q_update(s * self.c_d_smith[2])
+        self.model.p_update(s * self.c_d_smith[1])
+        self.model.q_update(s * self.c_d_smith[0])
 
     def second_order(self):
+        # noinspection PyTypeChecker
         self.stormer_verlet(D1)
 
     def base4(self, s):
         self.scheme(self.stormer_verlet, s, self.z_outer, self.z_central)
+
+    def base4_smith(self, s):
+        self.scheme(self.smith, s, self.z_outer, self.z_central)
 
     def fourth_order(self):
         # noinspection PyTypeChecker
@@ -132,6 +163,20 @@ class Symplectic(object):
     def tenth_order(self):
         # noinspection PyTypeChecker
         self.scheme(self.base8, D1, self.w_outer, self.w_central)
+
+    def base6_smith(self, s):
+        self.scheme(self.smith, s, self.y_outer, self.y_central)
+
+    def sixth_order_smith(self):
+        # noinspection PyTypeChecker
+        self.base6_smith(D1)
+
+    def base8_smith(self, s):
+        self.scheme(self.base6_smith, s, self.x_outer, self.x_central)
+
+    def eightth_order_smith(self):
+        # noinspection PyTypeChecker
+        self.base8_smith(D1)
 
 
 print >> stderr, __name__ + " module loaded"
