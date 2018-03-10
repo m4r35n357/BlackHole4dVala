@@ -14,7 +14,7 @@ program Symplectic
     use Model
     implicit none
     real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
-    real(kind=16) :: w_fwd, w_back, x_fwd, x_back, y_fwd, y_back, z_fwd, z_back, step, start, finish, c_1, c_3, d_1, d_3
+    real(kind=16) :: w1, w0, x1, x0, y1, y0, z1, z0, step, start, finish, c_1, c_3, d_1, d_3
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -23,68 +23,76 @@ program Symplectic
     write (error_unit, *) 'double precision is:', precision(D0), ' decimal places'
     read (input_unit, *) step, start, finish, plot_ratio, integrator
     call init_model()
-    w_fwd = D1 / (D4 - D4 ** (D1 / D9))
-    x_fwd = D1 / (D4 - D4 ** (D1 / D7))
-    y_fwd = D1 / (D4 - D4 ** (D1 / D5))
-    z_fwd = D1 / (D4 - D4 ** (D1 / D3))
-    w_back = D1 - D4 * w_fwd
-    x_back = D1 - D4 * x_fwd
-    y_back = D1 - D4 * y_fwd
-    z_back = D1 - D4 * z_fwd
-    d_1 = step * z_fwd
-    d_3 = step * z_back
+    w1 = D1 / (D4 - D4 ** (D1 / D9))
+    x1 = D1 / (D4 - D4 ** (D1 / D7))
+    y1 = D1 / (D4 - D4 ** (D1 / D5))
+    z1 = D1 / (D4 - D4 ** (D1 / D3))
+    w0 = D1 - D4 * w1
+    x0 = D1 - D4 * x1
+    y0 = D1 - D4 * y1
+    z0 = D1 - D4 * z1
+    d_1 = step * z1
+    d_3 = step * z0
     c_1 = d_1 * D05
     c_3 = (d_1 + d_3) * D05
     select case (integrator)
+        case ("b1")
+            write (error_unit, *) "1st Order (Euler-Cromer)"
+            call evolve(first_order)
         case ("b2")
-            write (error_unit, *) "2nd Order Base (Stormer-Verlet)"
-            call evolve(second_order_integrator)
+            write (error_unit, *) "2nd Order (Stormer-Verlet)"
+            call evolve(second_order)
         case ("b4")
-            write (error_unit, *) "4th Order (Suzuki composition)"
-            call evolve(fourth_order_integrator)
+            write (error_unit, *) "4th Order Base"
+            call evolve(fourth_order)
         case ("b6")
             write (error_unit, *) "6th Order (Suzuki composition)"
-            call evolve(sixth_order_integrator)
+            call evolve(sixth_order)
         case ("b8")
             write (error_unit, *) "8th Order (Suzuki composition)"
-            call evolve(eightth_order_integrator)
+            call evolve(eightth_order)
         case ("b10")
             write (error_unit, *) "10th Order (Suzuki composition)"
-            call evolve(tenth_order_integrator)
+            call evolve(tenth_order)
         case default
             error stop "Invalid integrator method"
     end select
 contains
-    subroutine evolve (nth_order_integrator)
+    subroutine evolve (nth_order)
         real(kind=16) :: time = D0
         integer(kind=16) :: counter = 0
         do
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
                 call plot(time)
             end if
-            call nth_order_integrator()
+            call nth_order()
             counter = counter + 1
             time = t_update(time, step, counter)
             if (.not. (time < finish) .or. .not. carry_on) exit
         end do
     end subroutine evolve
 
-    subroutine second_order_integrator ()
+    subroutine first_order()
+        call q_update(step)
+        call p_update(step)
+    end subroutine first_order
+
+    subroutine second_order ()
         call q_update(step * D05)
         call p_update(step)
         call q_update(step * D05)
-    end subroutine second_order_integrator
+    end subroutine second_order
 
-    subroutine compose_suzuki (base_method, s, forward, back)
+    subroutine compose (base, s, forward, back)
         real(kind=16), intent(in) :: s, forward, back
-        call base_method(s * forward)
-        call base_method(s * forward)
-        call base_method(s * back)
-        call base_method(s * forward)
-        call base_method(s * forward)
-    end subroutine compose_suzuki
+        call base(s * forward)
+        call base(s * forward)
+        call base(s * back)
+        call base(s * forward)
+        call base(s * forward)
+    end subroutine compose
 
-    subroutine base_method_4 (s)
+    subroutine base_4 (s)
         real(kind=16), intent(in) :: s
         call q_update(s * c_1)
         call p_update(s * d_1)
@@ -97,31 +105,31 @@ contains
         call q_update(s * d_1)
         call p_update(s * d_1)
         call q_update(s * c_1)
-    end subroutine base_method_4
+    end subroutine base_4
 
-    subroutine fourth_order_integrator ()
-        call base_method_4(D1)
-    end subroutine fourth_order_integrator
+    subroutine fourth_order ()
+        call base_4(D1)
+    end subroutine fourth_order
 
-    subroutine base_method_6 (s)
+    subroutine base_6 (s)
         real(kind=16), intent(in) :: s
-        call compose_suzuki(base_method_4, s, y_fwd, y_back)
-    end subroutine base_method_6
+        call compose(base_4, s, y1, y0)
+    end subroutine base_6
 
-    subroutine sixth_order_integrator ()
-        call base_method_6(D1)
-    end subroutine sixth_order_integrator
+    subroutine sixth_order ()
+        call base_6(D1)
+    end subroutine sixth_order
 
-    subroutine base_method_8 (s)
+    subroutine base_8 (s)
         real(kind=16), intent(in) :: s
-        call compose_suzuki(base_method_6, s, x_fwd, x_back)
-    end subroutine base_method_8
+        call compose(base_6, s, x1, x0)
+    end subroutine base_8
 
-    subroutine eightth_order_integrator ()
-        call base_method_8(D1)
-    end subroutine eightth_order_integrator
+    subroutine eightth_order ()
+        call base_8(D1)
+    end subroutine eightth_order
 
-    subroutine tenth_order_integrator ()
-        call compose_suzuki(base_method_8, D1, w_fwd, w_back)
-    end subroutine tenth_order_integrator
+    subroutine tenth_order ()
+        call compose(base_8, D1, w1, w0)
+    end subroutine tenth_order
 end program Symplectic

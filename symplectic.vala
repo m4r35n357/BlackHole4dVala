@@ -87,10 +87,10 @@ namespace Integrators {
         /**
          * Composition coefficients
          */
-        private double yOuter;
-        private double xOuter;
-        private double yCentral;
-        private double xCentral;
+        private double y1;
+        private double x1;
+        private double y0;
+        private double x0;
 
         /**
          * Base method coefficients
@@ -106,10 +106,6 @@ namespace Integrators {
          * || "b4" || {@link fourthOrder} || 4th Order, Symplectic, Reversible ||
          * || "b6" || {@link sixthOrder} || 6th Order, Symplectic, Reversible ||
          * || "b8" || {@link eightthOrder} || 8th Order, Symplectic, Reversible ||
-         *
-         * || ''scheme'' || ''Composition Method'' ||  ''Description'' ||
-         * || "yoshida" || {@link composeYoshida} || Yoshida Composition ||
-         * || "suzuki" || {@link composeSuzuki} || Suzuki Composition ||
          *
          * @param model the model
          * @param h the time step
@@ -144,13 +140,13 @@ namespace Integrators {
                     stderr.printf("Integrator not recognized: %s\n", label);
                     assert_not_reached();
             }
-            var zOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
-            yOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
-            xOuter = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
-            var zCentral = 1.0 - 4.0 * zOuter;
-            yCentral = 1.0 - 4.0 * yOuter;
-            xCentral = 1.0 - 4.0 * xOuter;
-            c_d = { 0.5 * h * zOuter, h * zOuter, h * zOuter, h * zOuter, 0.5 * h * (zOuter + zCentral), h * zCentral };
+            x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
+            x0 = 1.0 - 4.0 * x1;
+            y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            y0 = 1.0 - 4.0 * y1;
+            var z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
+            var z0 = 1.0 - 4.0 * z1;
+            c_d = { 0.5 * h * z1, h * z1, h * z1, h * z1, 0.5 * h * (z1 + z0), h * z0 };
         }
 
         /**
@@ -217,8 +213,25 @@ namespace Integrators {
         }
 
         /**
-         * Composition from 2nd order to 4th order.
+         * Fourth order symplectic base integrator.
          *
+         * Performs the following calls on {@link Models.IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h * x1 / 2)
+         * pUpdate(h * x1)
+         * qUpdate(h * x1)
+         * pUpdate(h * x1)
+         * qUpdate(h * (x1 + x0) / 2 )
+         * pUpdate(h * x0)
+         * qUpdate(h * (x1 + x0) / 2 )
+         * pUpdate(h * x1)
+         * qUpdate(h * x1)
+         * pUpdate(h * x1)
+         * qUpdate(h * x1 / 2)
+         * }}}
+         *
+         * where h is the time step, x1 = 1 / (4 - 4^(1/3)), and x0 = 1 - 4 * outer
          * @param s the current multipler
          */
         private void base4 (double s) {
@@ -250,7 +263,7 @@ namespace Integrators {
          * @param s the current multipler
          */
         private void base6 (double s) {
-            composeSuzuki(base4, s, yOuter, yCentral);
+            composeSuzuki(base4, s, y1, y0);
         }
 
         /**
@@ -264,11 +277,9 @@ namespace Integrators {
 
         /**
          * 8th order integration step.
-         *
-         * Calls {@link base8} with s = 1.
          */
         private void eightthOrder () {
-            composeSuzuki(base6, 1.0, xOuter, xCentral);
+            composeSuzuki(base6, 1.0, x1, x0);
         }
     }
 }
