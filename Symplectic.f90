@@ -14,7 +14,9 @@ program Symplectic
     use Model
     implicit none
     real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
-    real(kind=16) :: w1, w0, x1, x0, y1, y0, z1, z0, step, start, finish, c_1, c_3, d_1, d_3
+    real(kind=16) :: w1, w0, x1, x0, y1, y0, z1, z0, step, start, finish
+    real(kind=16), dimension(6) :: cd_4
+    real(kind=16), dimension(26) :: cd_6
     integer :: plot_ratio
     character (len=3) :: integrator
     character(len=32) :: arg
@@ -31,10 +33,38 @@ program Symplectic
     x0 = D1 - D4 * x1
     y0 = D1 - D4 * y1
     z0 = D1 - D4 * z1
-    d_1 = step * z1
-    d_3 = step * z0
-    c_1 = d_1 * D05
-    c_3 = (d_1 + d_3) * D05
+    cd_4(1) = step * z1 * D05
+    cd_4(2) = step * z1
+    cd_4(3) = step * z1
+    cd_4(4) = step * z1
+    cd_4(5) = step * (z1 + z0) * D05
+    cd_4(6) = step * z0
+    cd_6(1) = step * z1 * y1 * D05  !!
+    cd_6(2) = step * z1 * y1
+    cd_6(3) = step * z1 * y1
+    cd_6(4) = step * z1 * y1
+    cd_6(5) = step * (z1 * y1 + z0 * y1) * D05
+    cd_6(6) = step * z0 * y1  !
+    cd_6(7) = step * (z0 * y1 + z1 * y1) * D05
+    cd_6(8) = step * z1 * y1
+    cd_6(9) = step * z1 * y1
+    cd_6(10) = step * z1 * y1
+    cd_6(11) = step * z1 * y1  !!
+    cd_6(12) = step * z1 * y1
+    cd_6(13) = step * z1 * y1
+    cd_6(14) = step * z1 * y1
+    cd_6(15) = step * (z1 * y1 + z0 * y1) * D05
+    cd_6(16) = step * z0 * y1  !
+    cd_6(17) = step * (z0 * y1 + z1 * y1) * D05
+    cd_6(18) = step * z1 * y1
+    cd_6(19) = step * z1 * y1
+    cd_6(20) = step * z1 * y1
+    cd_6(21) = step * (z1 * y1 + z1 * y0) * D05  !!
+    cd_6(22) = step * z1 * y0
+    cd_6(23) = step * z1 * y0
+    cd_6(24) = step * z1 * y0
+    cd_6(25) = step * (z1 * y0 + z0 * y0) * D05
+    cd_6(26) = step * z0 * y0  !
     select case (integrator)
         case ("b1")
             write (error_unit, *) "1st Order (Euler-Cromer)"
@@ -43,10 +73,10 @@ program Symplectic
             write (error_unit, *) "2nd Order (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (error_unit, *) "4th Order Base"
+            write (error_unit, *) "4th Order (Smith)"
             call evolve(fourth_order)
         case ("b6")
-            write (error_unit, *) "6th Order (Suzuki composition)"
+            write (error_unit, *) "6th Order (Smith)"
             call evolve(sixth_order)
         case ("b8")
             write (error_unit, *) "8th Order (Suzuki composition)"
@@ -83,6 +113,20 @@ contains
         call q_update(step * D05)
     end subroutine second_order
 
+    subroutine fourth_order ()
+        call q_update(cd_4(1))
+        call p_update(cd_4(2))
+        call q_update(cd_4(3))
+        call p_update(cd_4(4))
+        call q_update(cd_4(5))
+        call p_update(cd_4(6))
+        call q_update(cd_4(5))
+        call p_update(cd_4(4))
+        call q_update(cd_4(3))
+        call p_update(cd_4(2))
+        call q_update(cd_4(1))
+    end subroutine fourth_order
+
     subroutine compose (base, s, forward, back)
         real(kind=16), intent(in) :: s, forward, back
         call base(s * forward)
@@ -92,28 +136,59 @@ contains
         call base(s * forward)
     end subroutine compose
 
-    subroutine base_4 (s)
-        real(kind=16), intent(in) :: s
-        call q_update(s * c_1)
-        call p_update(s * d_1)
-        call q_update(s * d_1)
-        call p_update(s * d_1)
-        call q_update(s * c_3)
-        call p_update(s * d_3)
-        call q_update(s * c_3)
-        call p_update(s * d_1)
-        call q_update(s * d_1)
-        call p_update(s * d_1)
-        call q_update(s * c_1)
-    end subroutine base_4
-
-    subroutine fourth_order ()
-        call base_4(D1)
-    end subroutine fourth_order
-
     subroutine base_6 (s)
         real(kind=16), intent(in) :: s
-        call compose(base_4, s, y1, y0)
+        call q_update(s * cd_6(1))
+        call p_update(s * cd_6(2))
+        call q_update(s * cd_6(3))
+        call p_update(s * cd_6(4))
+        call q_update(s * cd_6(5))
+        call p_update(s * cd_6(6))
+        call q_update(s * cd_6(7))
+        call p_update(s * cd_6(8))
+        call q_update(s * cd_6(9))
+        call p_update(s * cd_6(10))
+        call q_update(s * cd_6(11))
+        call p_update(s * cd_6(12))
+        call q_update(s * cd_6(13))
+        call p_update(s * cd_6(14))
+        call q_update(s * cd_6(15))
+        call p_update(s * cd_6(16))
+        call q_update(s * cd_6(17))
+        call p_update(s * cd_6(18))
+        call q_update(s * cd_6(19))
+        call p_update(s * cd_6(20))
+        call q_update(s * cd_6(21))
+        call p_update(s * cd_6(22))
+        call q_update(s * cd_6(23))
+        call p_update(s * cd_6(24))
+        call q_update(s * cd_6(25))
+        call p_update(s * cd_6(26))
+        call q_update(s * cd_6(25))
+        call p_update(s * cd_6(24))
+        call q_update(s * cd_6(23))
+        call p_update(s * cd_6(22))
+        call q_update(s * cd_6(21))
+        call p_update(s * cd_6(20))
+        call q_update(s * cd_6(19))
+        call p_update(s * cd_6(18))
+        call q_update(s * cd_6(17))
+        call p_update(s * cd_6(16))
+        call q_update(s * cd_6(15))
+        call p_update(s * cd_6(14))
+        call q_update(s * cd_6(13))
+        call p_update(s * cd_6(12))
+        call q_update(s * cd_6(11))
+        call p_update(s * cd_6(10))
+        call q_update(s * cd_6(9))
+        call p_update(s * cd_6(8))
+        call q_update(s * cd_6(7))
+        call p_update(s * cd_6(6))
+        call q_update(s * cd_6(5))
+        call p_update(s * cd_6(4))
+        call q_update(s * cd_6(3))
+        call p_update(s * cd_6(2))
+        call q_update(s * cd_6(1))
     end subroutine base_6
 
     subroutine sixth_order ()

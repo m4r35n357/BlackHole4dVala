@@ -87,15 +87,14 @@ namespace Integrators {
         /**
          * Composition coefficients
          */
-        private double y1;
         private double x1;
-        private double y0;
         private double x0;
 
         /**
          * Base method coefficients
          */
-        private double[] c_d;
+        private double[] cd_s4;
+        private double[] cd_s6;
 
         /**
          * This constructor produces instances from its label and scheme arguments according to the following tables:
@@ -142,11 +141,23 @@ namespace Integrators {
             }
             x1 = 1.0 / (4.0 - pow(4.0, (1.0 / 7.0)));
             x0 = 1.0 - 4.0 * x1;
-            y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
-            y0 = 1.0 - 4.0 * y1;
+            var y1 = 1.0 / (4.0 - pow(4.0, (1.0 / 5.0)));
+            var y0 = 1.0 - 4.0 * y1;
             var z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
             var z0 = 1.0 - 4.0 * z1;
-            c_d = { 0.5 * h * z1, h * z1, h * z1, h * z1, 0.5 * h * (z1 + z0), h * z0 };
+            var z0y0 = z0 * y0;
+            var z0y1 = z0 * y1;
+            var z1y0 = z1 * y0;
+            var z1y1 = z1 * y1;
+            cd_s4 = { 0.5 * h * z1, h * z1, h * z1, h * z1, 0.5 * h * (z1 + z0), h * z0 };
+            cd_s6 = { 0.5 * h * z1y1, h * z1y1, h * z1y1, h * z1y1,
+                      0.5 * h * (z1y1 + z0y1), h * z0y1,
+                      0.5 * h * (z0y1 + z1y1), h * z1y1, h * z1y1, h * z1y1,
+                      h * z1y1, h * z1y1, h * z1y1, h * z1y1,
+                      0.5 * h * (z1y1 + z0y1), h * z0y1,
+                      0.5 * h * (z0y1 + z1y1), h * z1y1, h * z1y1, h * z1y1,
+                      0.5 * h * (z1y1 + z1y0), h * z1y0, h * z1y0, h * z1y0, 0.5 * h * (z1y0 + z0y0), h * z0y0 };
+
         }
 
         /**
@@ -186,6 +197,39 @@ namespace Integrators {
         }
 
         /**
+         * Direct fourth order integrator (my own - Suzuki composition of Stormer-Verlet).
+         *
+         * Performs the following calls on {@link Models.IModel} per iteration:
+         *
+         * {{{
+         * qUpdate(h * x1 / 2)
+         * pUpdate(h * x1)
+         * qUpdate(h * x1)
+         * pUpdate(h * x1)
+         * qUpdate(h * (x1 + x0) / 2 )
+         * pUpdate(h * x0)
+         * qUpdate(h * (x1 + x0) / 2 )
+         * pUpdate(h * x1)
+         * qUpdate(h * x1)
+         * pUpdate(h * x1)
+         * qUpdate(h * x1 / 2)
+         * }}}
+         */
+        private void fourthOrder () {
+            model.qUpdate(cd_s4[0]);
+            model.pUpdate(cd_s4[1]);
+            model.qUpdate(cd_s4[2]);
+            model.pUpdate(cd_s4[3]);
+            model.qUpdate(cd_s4[4]);
+            model.pUpdate(cd_s4[5]);
+            model.qUpdate(cd_s4[4]);
+            model.pUpdate(cd_s4[3]);
+            model.qUpdate(cd_s4[2]);
+            model.pUpdate(cd_s4[1]);
+            model.qUpdate(cd_s4[0]);
+        }
+
+        /**
          * Suzuki composition
          *
          * Performs the following calls to {@link BaseMethod} per iteration:
@@ -213,57 +257,62 @@ namespace Integrators {
         }
 
         /**
-         * Fourth order symplectic base integrator.
-         *
-         * Performs the following calls on {@link Models.IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(h * x1 / 2)
-         * pUpdate(h * x1)
-         * qUpdate(h * x1)
-         * pUpdate(h * x1)
-         * qUpdate(h * (x1 + x0) / 2 )
-         * pUpdate(h * x0)
-         * qUpdate(h * (x1 + x0) / 2 )
-         * pUpdate(h * x1)
-         * qUpdate(h * x1)
-         * pUpdate(h * x1)
-         * qUpdate(h * x1 / 2)
-         * }}}
-         *
-         * where h is the time step, x1 = 1 / (4 - 4^(1/3)), and x0 = 1 - 4 * outer
-         * @param s the current multipler
-         */
-        private void base4 (double s) {
-            model.qUpdate(s * c_d[0]);
-            model.pUpdate(s * c_d[1]);
-            model.qUpdate(s * c_d[2]);
-            model.pUpdate(s * c_d[3]);
-            model.qUpdate(s * c_d[4]);
-            model.pUpdate(s * c_d[5]);
-            model.qUpdate(s * c_d[4]);
-            model.pUpdate(s * c_d[3]);
-            model.qUpdate(s * c_d[2]);
-            model.pUpdate(s * c_d[1]);
-            model.qUpdate(s * c_d[0]);
-        }
-
-        /**
-         * 4th order integration step.
-         *
-         * Calls {@link base4} with s = 1.
-         */
-        private void fourthOrder () {
-            base4(1.0);
-        }
-
-        /**
-         * Composition from 4th order to 6th order.
+         * Direct sixth order base method (my own - two Suzuki compositions of Stormer-Verlet).
          *
          * @param s the current multipler
          */
         private void base6 (double s) {
-            composeSuzuki(base4, s, y1, y0);
+            model.qUpdate(s * cd_s6[0]);
+            model.pUpdate(s * cd_s6[1]);
+            model.qUpdate(s * cd_s6[2]);
+            model.pUpdate(s * cd_s6[3]);
+            model.qUpdate(s * cd_s6[4]);
+            model.pUpdate(s * cd_s6[5]);
+            model.qUpdate(s * cd_s6[6]);
+            model.pUpdate(s * cd_s6[7]);
+            model.qUpdate(s * cd_s6[8]);
+            model.pUpdate(s * cd_s6[9]);
+            model.qUpdate(s * cd_s6[10]);
+            model.pUpdate(s * cd_s6[11]);
+            model.qUpdate(s * cd_s6[12]);
+            model.pUpdate(s * cd_s6[13]);
+            model.qUpdate(s * cd_s6[14]);
+            model.pUpdate(s * cd_s6[15]);
+            model.qUpdate(s * cd_s6[16]);
+            model.pUpdate(s * cd_s6[17]);
+            model.qUpdate(s * cd_s6[18]);
+            model.pUpdate(s * cd_s6[19]);
+            model.qUpdate(s * cd_s6[20]);
+            model.pUpdate(s * cd_s6[21]);
+            model.qUpdate(s * cd_s6[22]);
+            model.pUpdate(s * cd_s6[23]);
+            model.qUpdate(s * cd_s6[24]);
+            model.pUpdate(s * cd_s6[25]);
+            model.qUpdate(s * cd_s6[24]);
+            model.pUpdate(s * cd_s6[23]);
+            model.qUpdate(s * cd_s6[22]);
+            model.pUpdate(s * cd_s6[21]);
+            model.qUpdate(s * cd_s6[20]);
+            model.pUpdate(s * cd_s6[19]);
+            model.qUpdate(s * cd_s6[18]);
+            model.pUpdate(s * cd_s6[17]);
+            model.qUpdate(s * cd_s6[16]);
+            model.pUpdate(s * cd_s6[15]);
+            model.qUpdate(s * cd_s6[14]);
+            model.pUpdate(s * cd_s6[13]);
+            model.qUpdate(s * cd_s6[12]);
+            model.pUpdate(s * cd_s6[11]);
+            model.qUpdate(s * cd_s6[10]);
+            model.pUpdate(s * cd_s6[9]);
+            model.qUpdate(s * cd_s6[8]);
+            model.pUpdate(s * cd_s6[7]);
+            model.qUpdate(s * cd_s6[6]);
+            model.pUpdate(s * cd_s6[5]);
+            model.qUpdate(s * cd_s6[4]);
+            model.pUpdate(s * cd_s6[3]);
+            model.qUpdate(s * cd_s6[2]);
+            model.pUpdate(s * cd_s6[1]);
+            model.qUpdate(s * cd_s6[0]);
         }
 
         /**
