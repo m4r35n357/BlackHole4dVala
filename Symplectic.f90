@@ -15,6 +15,7 @@ program Symplectic
     implicit none
     real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
     real(kind=16) :: w1, w0, x1, x0, y1, y0, z1, z0, step, start, finish
+    real(kind=16), dimension(2) :: cd_2
     real(kind=16), dimension(6) :: cd_4
     real(kind=16), dimension(26) :: cd_6
     integer :: plot_ratio
@@ -33,6 +34,8 @@ program Symplectic
     x0 = D1 - D4 * x1
     y0 = D1 - D4 * y1
     z0 = D1 - D4 * z1
+    cd_2(1) = step * D05
+    cd_2(2) = step
     cd_4(1) = step * z1 * D05
     cd_4(2) = step * z1
     cd_4(3) = step * z1
@@ -108,9 +111,9 @@ contains
     end subroutine first_order
 
     subroutine second_order ()
-        call q_update(step * D05)
-        call p_update(step)
-        call q_update(step * D05)
+        call q_update(cd_2(1))
+        call p_update(cd_2(2))
+        call q_update(cd_2(1))
     end subroutine second_order
 
     subroutine fourth_order ()
