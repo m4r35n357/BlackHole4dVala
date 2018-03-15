@@ -29,13 +29,19 @@ def main():
     pyplot.grid(b=True, color='0.25', linestyle='-')
     ax1.set_xlabel(coordinate1, color='k')
     ax1.set_ylabel(coordinate2, color='b')
+    # ax1.set_xlim(-1.0, 2.0)
+    # ax1.set_ylim(-1.0, 2.0)
     n = 0
+    x = []
+    y = []
     while line:
         p = loads(line)
         if n % interval == 0:
-            ax1.plot(p[coordinate1], p[coordinate2], 'b.', markersize=2)
+            x.append(p[coordinate1])
+            y.append(p[coordinate2])
         line = stdin.readline()
         n += 1
+    ax1.plot(x, y, 'bo-', markersize=3)
     pyplot.show()
 
 if __name__ == "__main__":
