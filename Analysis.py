@@ -24,26 +24,25 @@ class Analysis(object):
     def __init__(self):
         self.c = 0.0
         self.d = 0.0
-
+        self.count = 0
 
     def q_update(self, c):
         self.c += c
-        print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"c":{:.9e},"d":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            0.0, 0.0, 0.0, 0.0, 0.0, self.c, self.d, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        self.count += 1
+        self.output()
 
     def p_update(self, d):
         self.d += d
-        print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"c":{:.9e},"d":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            0.0, 0.0, 0.0, 0.0, 0.0, self.c, self.d, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        self.count += 1
+        self.output()
 
-    def solve(self, method, h, start, end, tr):
-        tau = 0.0
-        while tau < end:
-            print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"c":{:.9e},"d":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-                0.0, 0.0, 0.0, 0.0, 0.0, self.c, self.d, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-            method()
-            tau += 1.0
+    def solve(self, method):
+        self.output()
+        method()
 
+    def output(self):
+        print '{{"count":{:d},"c":{:.9e},"d":{:.9e}}}'.format(
+            self.count, self.c, self.d)
 
 if __name__ == "__main__":
     print >> stderr, "Simulator: {}".format(argv[0])
@@ -51,7 +50,6 @@ if __name__ == "__main__":
     ic = loads(input_data, parse_float=longfloat)['IC']
     print >> stderr, input_data
     a = Analysis()
-    step = ic['step']
-    a.solve(Symplectic(a, step, ic['integrator'], ic['scheme']).method, step, ic['start'], ic['end'], ic['plotratio'])
+    a.solve(Symplectic(a, 1.0, ic['integrator'], ic['scheme']).method)
 else:
     print >> stderr, __name__ + " module loaded"
