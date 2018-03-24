@@ -130,15 +130,6 @@ contains
         call q_update(cd_4(1))
     end subroutine fourth_order
 
-    subroutine compose (base, s, forward, back)
-        real(kind=16), intent(in) :: s, forward, back
-        call base(s * forward)
-        call base(s * forward)
-        call base(s * back)
-        call base(s * forward)
-        call base(s * forward)
-    end subroutine compose
-
     subroutine base_6 (s)
         real(kind=16), intent(in) :: s
         call q_update(s * cd_6(1))
@@ -197,6 +188,15 @@ contains
     subroutine sixth_order ()
         call base_6(D1)
     end subroutine sixth_order
+
+    subroutine compose (base, s, forward, back)
+        real(kind=16), intent(in) :: s, forward, back
+        call base(s * forward)
+        call base(s * forward)
+        call base(s * back)
+        call base(s * forward)
+        call base(s * forward)
+    end subroutine compose
 
     subroutine base_8 (s)
         real(kind=16), intent(in) :: s

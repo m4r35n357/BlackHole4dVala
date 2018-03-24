@@ -286,8 +286,8 @@ class Symplectic(object):
 
     def sixth_order_smith(self):
         # noinspection PyTypeChecker
-        self.base6_smith(D1)
-        # self.smith_6(D1)
+        # self.base6_smith(D1)
+        self.smith_6(D1)
 
     def base8_smith(self, s):
         # self.scheme(self.base6_smith, s, self.x1, self.x0)

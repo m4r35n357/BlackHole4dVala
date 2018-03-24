@@ -128,7 +128,7 @@ namespace Integrators {
                     integrator = fourthOrder;
                     break;
                 case "b6":
-                    stderr.printf("6th Order (Suzuki Composition)\n");
+                    stderr.printf("6th Order (Smith)\n");
                     integrator = sixthOrder;
                     break;
                 case "b8":
@@ -145,19 +145,20 @@ namespace Integrators {
             var y0 = 1.0 - 4.0 * y1;
             var z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
             var z0 = 1.0 - 4.0 * z1;
-            var z0y0 = z0 * y0;
-            var z0y1 = z0 * y1;
-            var z1y0 = z1 * y0;
-            var z1y1 = z1 * y1;
-            cd_s4 = { 0.5 * h * z1, h * z1, h * z1, h * z1, 0.5 * h * (z1 + z0), h * z0 };
-            cd_s6 = { 0.5 * h * z1y1, h * z1y1, h * z1y1, h * z1y1,
-                      0.5 * h * (z1y1 + z0y1), h * z0y1,
-                      0.5 * h * (z0y1 + z1y1), h * z1y1, h * z1y1, h * z1y1,
-                      h * z1y1, h * z1y1, h * z1y1, h * z1y1,
-                      0.5 * h * (z1y1 + z0y1), h * z0y1,
-                      0.5 * h * (z0y1 + z1y1), h * z1y1, h * z1y1, h * z1y1,
-                      0.5 * h * (z1y1 + z1y0), h * z1y0, h * z1y0, h * z1y0, 0.5 * h * (z1y0 + z0y0), h * z0y0 };
-
+            cd_s4 = { 0.5 * h * z1,
+                      h * z1, h * z1, h * z1,
+                      0.5 * h * (z1 + z0), h * z0 };
+            cd_s6 = { 0.5 * h * z1 * y1,
+                      h * z1 * y1, h * z1 * y1, h * z1 * y1,
+                      0.5 * h * (z1 + z0) * y1, h * z0 * y1, 0.5 * h * (z0 + z1) * y1,
+                      h * z1 * y1, h * z1 * y1, h * z1 * y1,
+                      h * z1 * y1,
+                      h * z1 * y1, h * z1 * y1, h * z1 * y1,
+                      0.5 * h * (z1 + z0) * y1, h * z0 * y1, 0.5 * h * (z0 + z1) * y1,
+                      h * z1 * y1, h * z1 * y1, h * z1 * y1,
+                      0.5 * h * z1 * (y1 + y0),
+                      h * z1 * y0, h * z1 * y0, h * z1 * y0,
+                      0.5 * h * (z1 + z0) * y0, h * z0 * y0 };
         }
 
         /**
@@ -230,33 +231,6 @@ namespace Integrators {
         }
 
         /**
-         * Suzuki composition
-         *
-         * Performs the following calls to {@link BaseMethod} per iteration:
-         *
-         * {{{
-         * method(s * outer)
-         * method(s * outer)
-         * method(s * central)
-         * method(s * outer)
-         * method(s * outer)
-         * }}}
-         *
-         * where outer = 1 / (4 - 4^(1/X)), central = 1 - 4 * outer, and X = 3, 5 or 7
-         * @param method the method being composed to a higher order
-         * @param s the current multipler
-         * @param outer size of the forward steps
-         * @param central size of the backward step
-         */
-        private void composeSuzuki (BaseMethod method, double s, double outer, double central) {
-            method(s * outer);
-            method(s * outer);
-            method(s * central);
-            method(s * outer);
-            method(s * outer);
-        }
-
-        /**
          * Direct sixth order base method (my own - two Suzuki compositions of Stormer-Verlet).
          *
          * @param s the current multipler
@@ -325,10 +299,26 @@ namespace Integrators {
         }
 
         /**
-         * 8th order integration step.
+         * 8th order integration step using Suzuki composition from a 6th order base.
+         *
+         * Performs the following calls to {@link base6} per iteration:
+         *
+         * {{{
+         * base6(outer)
+         * base6(outer)
+         * base6(central)
+         * base6(outer)
+         * base6(outer)
+         * }}}
+         *
+         * where outer = 1 / (4 - 4^(1/7)), and central = 1 - 4 * outer
          */
         private void eightthOrder () {
-            composeSuzuki(base6, 1.0, x1, x0);
+            base6(x1);
+            base6(x1);
+            base6(x0);
+            base6(x1);
+            base6(x1);
         }
     }
 }
