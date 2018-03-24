@@ -52,10 +52,15 @@ ic_edit () {
 
 alias plot_graphics='$exe <$infile | ./plotBH.py $ic 2>/dev/null &'
 alias plot_errors='$exe <$infile | tee $data | ./plotErrors.py $ic tau 1 2>/dev/null &'
-alias plot_integrator='./Analysis.py <$ic >$data; ./plotXY.py 1 c d <$data &
-'
+alias plot_integrator='./Analysis.py <$ic >$data; ./plotXY.py 1 c d <$data &'
+alias plot_potential='./plotPotential.py <$pot &'
 
 alias benchmark='time $exe <$infile >$data'
+
+# Defaults
+build_mode_dynamic
+ic_gen_particle
+exe_python
 
 #set +x
 
