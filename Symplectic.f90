@@ -23,7 +23,7 @@ program Symplectic
     character(len=32) :: arg
     call get_command_argument(0, arg)
     write (error_unit, *) "Executable: ", trim(arg)
-    write (error_unit, *) 'double precision is:', precision(D0), ' decimal places'
+    write (error_unit, *) 'float precision is:', precision(D0), ' decimal places'
     read (input_unit, *) h, start, finish, plot_ratio, integrator
     call init_model()
     w1 = D1 / (D4 - D4 ** (D1 / D9))
@@ -76,10 +76,10 @@ program Symplectic
             write (error_unit, *) "2nd Order (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (error_unit, *) "4th Order (Smith)"
+            write (error_unit, *) "4th Order (Smith4)"
             call evolve(fourth_order)
         case ("b6")
-            write (error_unit, *) "6th Order (Smith)"
+            write (error_unit, *) "6th Order (Smith6)"
             call evolve(sixth_order)
         case ("b8")
             write (error_unit, *) "8th Order (Suzuki composition)"

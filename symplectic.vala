@@ -65,11 +65,6 @@ namespace Integrators {
         public delegate void Integrator ();
 
         /**
-         * Signature for composable base methods
-         */
-        private delegate void BaseMethod (double s);
-
-        /**
          * The integrator method
          */
         public Integrator integrator;
@@ -290,7 +285,7 @@ namespace Integrators {
         }
 
         /**
-         * 6th order integration step.
+         * 6th order integration step.  Delegates to a 6th order base.
          *
          * Calls {@link base6} with s = 1.
          */
@@ -302,16 +297,13 @@ namespace Integrators {
          * 8th order integration step using Suzuki composition from a 6th order base.
          *
          * Performs the following calls to {@link base6} per iteration:
-         *
          * {{{
-         * base6(outer)
-         * base6(outer)
-         * base6(central)
-         * base6(outer)
-         * base6(outer)
+         * base6(1 / (4 - 4^(1/7)))
+         * base6(1 / (4 - 4^(1/7)))
+         * base6(1 - 4 * 1 / (4 - 4^(1/7)))
+         * base6(1 / (4 - 4^(1/7)))
+         * base6(1 / (4 - 4^(1/7)))
          * }}}
-         *
-         * where outer = 1 / (4 - 4^(1/7)), and central = 1 - 4 * outer
          */
         private void eightthOrder () {
             base6(x1);

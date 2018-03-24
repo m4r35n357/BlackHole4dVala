@@ -111,22 +111,22 @@ class Symplectic(object):
         self.x0 = D1 - self.scheme_root * self.x1
         self.y0 = D1 - self.scheme_root * self.y1
         self.z0 = D1 - self.scheme_root * self.z1
-        self.z0y0 = self.z0 * self.y0
-        self.z0y1 = self.z0 * self.y1
-        self.z1y0 = self.z1 * self.y0
-        self.z1y1 = self.z1 * self.y1
         self.cd_sv = [D05 * h, h]
         self.cd_fr4 = [D05 * h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1), h * self.z0]
-        self.cd_s4 = [D05 * h * self.z1, h * self.z1, h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1),
-                      h * self.z0]
-        self.cd_s6 = [D05 * h * self.z1y1, h * self.z1y1, h * self.z1y1, h * self.z1y1,
-                      D05 * h * (self.z1y1 + self.z0y1), h * self.z0y1,
-                      D05 * h * (self.z0y1 + self.z1y1), h * self.z1y1, h * self.z1y1, h * self.z1y1,
-                      h * self.z1y1, h * self.z1y1, h * self.z1y1, h * self.z1y1,
-                      D05 * h * (self.z1y1 + self.z0y1), h * self.z0y1,
-                      D05 * h * (self.z0y1 + self.z1y1), h * self.z1y1, h * self.z1y1, h * self.z1y1,
-                      D05 * h * (self.z1y1 + self.z1y0), h * self.z1y0, h * self.z1y0, h * self.z1y0,
-                      D05 * h * (self.z1y0 + self.z0y0), h * self.z0y0]
+        self.cd_s4 = [D05 * h * self.z1,
+                      h * self.z1, h * self.z1, h * self.z1,
+                      D05 * h * (self.z1 + self.z0), h * self.z0]
+        self.cd_s6 = [D05 * h * self.z1 * self.y1,
+                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+                      D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
+                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+                      h * self.z1 * self.y1,
+                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+                      D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
+                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+                      D05 * h * self.z1 * (self.y1 + self.y0),
+                      h * self.z1 * self.y0, h * self.z1 * self.y0, h * self.z1 * self.y0,
+                      D05 * h * (self.z1 + self.z0) * self.y0, h * self.z0 * self.y0]
 
     def euler_cromer(self):
         self.model.q_update(self.h)
@@ -281,16 +281,11 @@ class Symplectic(object):
         # noinspection PyTypeChecker
         self.smith_4(D1)
 
-    def base6_smith(self, s):
-        self.scheme(self.smith_4, s, self.y1, self.y0)
-
     def sixth_order_smith(self):
         # noinspection PyTypeChecker
-        # self.base6_smith(D1)
         self.smith_6(D1)
 
     def base8_smith(self, s):
-        # self.scheme(self.base6_smith, s, self.x1, self.x0)
         self.scheme(self.smith_6, s, self.x1, self.x0)
 
     def eightth_order_smith(self):
