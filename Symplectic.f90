@@ -13,7 +13,7 @@
 program Symplectic
     use Model
     implicit none
-    real(kind=16), parameter :: D0 = 0.0, D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 =9.0
+    real(kind=16), parameter :: D05 = 0.5, D1 = 1.0, D4 = 4.0, D3 = 3.0, D5 = 5.0, D7 = 7.0, D9 = 9.0
     real(kind=16) :: w1, w0, x1, x0, y1, y0, z1, z0, h, start, finish
     real(kind=16), dimension(2) :: cd_2
     real(kind=16), dimension(6) :: cd_4
@@ -23,7 +23,7 @@ program Symplectic
     character(len=32) :: arg
     call get_command_argument(0, arg)
     write (error_unit, *) "Executable: ", trim(arg)
-    write (error_unit, *) 'float precision is:', precision(D0), ' decimal places'
+    write (error_unit, *) 'float precision is:', precision(D1), ' decimal places'
     read (input_unit, *) h, start, finish, plot_ratio, integrator
     call init_model()
     w1 = D1 / (D4 - D4 ** (D1 / D9))
@@ -69,9 +69,6 @@ program Symplectic
     cd_6(25) = h * (z0 + z1) * y0 * D05
     cd_6(26) = h * z0 * y0  !
     select case (integrator)
-        case ("b1")
-            write (error_unit, *) "1st Order (Euler-Cromer)"
-            call evolve(first_order)
         case ("b2")
             write (error_unit, *) "2nd Order (Stormer-Verlet)"
             call evolve(second_order)
@@ -92,7 +89,7 @@ program Symplectic
     end select
 contains
     subroutine evolve (nth_order)
-        real(kind=16) :: time = D0
+        real(kind=16) :: time = 0.0
         integer(kind=16) :: counter = 0
         do
             if ((time >= start) .and. (mod(counter, plot_ratio) == 0)) then
@@ -104,11 +101,6 @@ contains
             if (.not. (time < finish) .or. .not. carry_on) exit
         end do
     end subroutine evolve
-
-    subroutine first_order()
-        call q_update(h)
-        call p_update(h)
-    end subroutine first_order
 
     subroutine second_order ()
         call q_update(cd_2(1))

@@ -140,10 +140,13 @@ namespace Integrators {
             var y0 = 1.0 - 4.0 * y1;
             var z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
             var z0 = 1.0 - 4.0 * z1;
-            cd_s4 = { 0.5 * h * z1,
+            cd_s4 = {
+                      0.5 * h * z1,
                       h * z1, h * z1, h * z1,
-                      0.5 * h * (z1 + z0), h * z0 };
-            cd_s6 = { 0.5 * h * z1 * y1,
+                      0.5 * h * (z1 + z0), h * z0
+                    };
+            cd_s6 = {
+                      0.5 * h * z1 * y1,
                       h * z1 * y1, h * z1 * y1, h * z1 * y1,
                       0.5 * h * (z1 + z0) * y1, h * z0 * y1, 0.5 * h * (z0 + z1) * y1,
                       h * z1 * y1, h * z1 * y1, h * z1 * y1,
@@ -153,7 +156,8 @@ namespace Integrators {
                       h * z1 * y1, h * z1 * y1, h * z1 * y1,
                       0.5 * h * z1 * (y1 + y0),
                       h * z1 * y0, h * z1 * y0, h * z1 * y0,
-                      0.5 * h * (z1 + z0) * y0, h * z0 * y0 };
+                      0.5 * h * (z1 + z0) * y0, h * z0 * y0
+                    };
         }
 
         /**

@@ -16,6 +16,7 @@ from sys import stderr
 from numpy import longfloat
 
 D0 = longfloat(0.0)
+D05 = longfloat(0.5)
 D1 = longfloat(1.0)
 D2 = longfloat(2.0)
 D3 = longfloat(3.0)
@@ -23,7 +24,6 @@ D4 = longfloat(4.0)
 D5 = longfloat(5.0)
 D7 = longfloat(7.0)
 D9 = longfloat(9.0)
-D05 = longfloat(0.5)
 
 
 class Symplectic(object):
@@ -112,7 +112,7 @@ class Symplectic(object):
         self.y0 = D1 - self.scheme_root * self.y1
         self.z0 = D1 - self.scheme_root * self.z1
         self.cd_sv = [D05 * h, h]
-        self.cd_fr4 = [D05 * h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1), h * self.z0]
+        self.cd_f4 = [D05 * h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1), h * self.z0]
         self.cd_s4 = [D05 * h * self.z1,
                       h * self.z1, h * self.z1, h * self.z1,
                       D05 * h * (self.z1 + self.z0), h * self.z0]
@@ -152,13 +152,13 @@ class Symplectic(object):
         self.model.q_update(s * self.cd_sv[0])
 
     def forest_ruth_4(self, s):
-        self.model.q_update(s * self.cd_fr4[0])
-        self.model.p_update(s * self.cd_fr4[1])
-        self.model.q_update(s * self.cd_fr4[2])
-        self.model.p_update(s * self.cd_fr4[3])
-        self.model.q_update(s * self.cd_fr4[2])
-        self.model.p_update(s * self.cd_fr4[1])
-        self.model.q_update(s * self.cd_fr4[0])
+        self.model.q_update(s * self.cd_f4[0])
+        self.model.p_update(s * self.cd_f4[1])
+        self.model.q_update(s * self.cd_f4[2])
+        self.model.p_update(s * self.cd_f4[3])
+        self.model.q_update(s * self.cd_f4[2])
+        self.model.p_update(s * self.cd_f4[1])
+        self.model.q_update(s * self.cd_f4[0])
 
     def smith_4(self, s):
         self.model.q_update(s * self.cd_s4[0])
