@@ -55,11 +55,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.fourth_order_forest_ruth
-        elif order == 's4':
-            print >> stderr, "4th order (Smith)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.fourth_order_smith
         elif order == 'b6':
             print >> stderr, "6th order (Composed)"
             self.method = self.sixth_order
@@ -68,11 +63,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.sixth_order_forest_ruth
-        elif order == 's6':
-            print >> stderr, "6th order (Smith) (Composed)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.sixth_order_smith
         elif order == 'b8':
             print >> stderr, "8th order (Composed)"
             self.method = self.eightth_order
@@ -81,11 +71,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.eightth_order_forest_ruth
-        elif order == 's8':
-            print >> stderr, "8th order (Smith) (Composed)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.eightth_order_smith
         elif order == 'b10':
             print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
@@ -94,6 +79,21 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.tenth_order_forest_ruth
+        elif order == 's4':
+            print >> stderr, "4th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.fourth_order_smith
+        elif order == 's6':
+            print >> stderr, "6th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.sixth_order_smith
+        elif order == 's8':
+            print >> stderr, "8th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.eightth_order_smith
         elif order == 's10':
             print >> stderr, "10th order (Smith) (Composed)"
             self.scheme = self.suzuki
@@ -270,340 +270,34 @@ class Symplectic(object):
         # noinspection PyTypeChecker
         self.scheme(self.base8_forest_ruth, D1, self.w1, self.w0)
 
-    def smith_4(self, s):
-        self.model.q_update(s * self.cd_s4[0])
-        self.model.p_update(s * self.cd_s4[1])
-        self.model.q_update(s * self.cd_s4[2])
-        self.model.p_update(s * self.cd_s4[3])
-        self.model.q_update(s * self.cd_s4[4])
-        self.model.p_update(s * self.cd_s4[5])
-        self.model.q_update(s * self.cd_s4[4])
-        self.model.p_update(s * self.cd_s4[3])
-        self.model.q_update(s * self.cd_s4[2])
-        self.model.p_update(s * self.cd_s4[1])
-        self.model.q_update(s * self.cd_s4[0])
-
-    def smith_6(self, s):
-        self.model.q_update(s * self.cd_s6[0])
-        self.model.p_update(s * self.cd_s6[1])
-        self.model.q_update(s * self.cd_s6[2])
-        self.model.p_update(s * self.cd_s6[3])
-        self.model.q_update(s * self.cd_s6[4])
-        self.model.p_update(s * self.cd_s6[5])
-        self.model.q_update(s * self.cd_s6[6])
-        self.model.p_update(s * self.cd_s6[7])
-        self.model.q_update(s * self.cd_s6[8])
-        self.model.p_update(s * self.cd_s6[9])
-        self.model.q_update(s * self.cd_s6[10])
-        self.model.p_update(s * self.cd_s6[11])
-        self.model.q_update(s * self.cd_s6[12])
-        self.model.p_update(s * self.cd_s6[13])
-        self.model.q_update(s * self.cd_s6[14])
-        self.model.p_update(s * self.cd_s6[15])
-        self.model.q_update(s * self.cd_s6[16])
-        self.model.p_update(s * self.cd_s6[17])
-        self.model.q_update(s * self.cd_s6[18])
-        self.model.p_update(s * self.cd_s6[19])
-        self.model.q_update(s * self.cd_s6[20])
-        self.model.p_update(s * self.cd_s6[21])
-        self.model.q_update(s * self.cd_s6[22])
-        self.model.p_update(s * self.cd_s6[23])
-        self.model.q_update(s * self.cd_s6[24])
-        self.model.p_update(s * self.cd_s6[25])
-        self.model.q_update(s * self.cd_s6[24])
-        self.model.p_update(s * self.cd_s6[23])
-        self.model.q_update(s * self.cd_s6[22])
-        self.model.p_update(s * self.cd_s6[21])
-        self.model.q_update(s * self.cd_s6[20])
-        self.model.p_update(s * self.cd_s6[19])
-        self.model.q_update(s * self.cd_s6[18])
-        self.model.p_update(s * self.cd_s6[17])
-        self.model.q_update(s * self.cd_s6[16])
-        self.model.p_update(s * self.cd_s6[15])
-        self.model.q_update(s * self.cd_s6[14])
-        self.model.p_update(s * self.cd_s6[13])
-        self.model.q_update(s * self.cd_s6[12])
-        self.model.p_update(s * self.cd_s6[11])
-        self.model.q_update(s * self.cd_s6[10])
-        self.model.p_update(s * self.cd_s6[9])
-        self.model.q_update(s * self.cd_s6[8])
-        self.model.p_update(s * self.cd_s6[7])
-        self.model.q_update(s * self.cd_s6[6])
-        self.model.p_update(s * self.cd_s6[5])
-        self.model.q_update(s * self.cd_s6[4])
-        self.model.p_update(s * self.cd_s6[3])
-        self.model.q_update(s * self.cd_s6[2])
-        self.model.p_update(s * self.cd_s6[1])
-        self.model.q_update(s * self.cd_s6[0])
-
-    def smith_8(self, s):
-        self.model.q_update(s * self.cd_s8[0])
-        self.model.p_update(s * self.cd_s8[1])
-        self.model.q_update(s * self.cd_s8[2])
-        self.model.p_update(s * self.cd_s8[3])
-        self.model.q_update(s * self.cd_s8[4])
-        self.model.p_update(s * self.cd_s8[5])
-        self.model.q_update(s * self.cd_s8[6])
-        self.model.p_update(s * self.cd_s8[7])
-        self.model.q_update(s * self.cd_s8[8])
-        self.model.p_update(s * self.cd_s8[9])
-        self.model.q_update(s * self.cd_s8[10])
-        self.model.p_update(s * self.cd_s8[11])
-        self.model.q_update(s * self.cd_s8[12])
-        self.model.p_update(s * self.cd_s8[13])
-        self.model.q_update(s * self.cd_s8[14])
-        self.model.p_update(s * self.cd_s8[15])
-        self.model.q_update(s * self.cd_s8[16])
-        self.model.p_update(s * self.cd_s8[17])
-        self.model.q_update(s * self.cd_s8[18])
-        self.model.p_update(s * self.cd_s8[19])
-        self.model.q_update(s * self.cd_s8[20])
-        self.model.p_update(s * self.cd_s8[21])
-        self.model.q_update(s * self.cd_s8[22])
-        self.model.p_update(s * self.cd_s8[23])
-        self.model.q_update(s * self.cd_s8[24])
-        self.model.p_update(s * self.cd_s8[25])
-        self.model.q_update(s * self.cd_s8[26])
-        self.model.p_update(s * self.cd_s8[27])
-        self.model.q_update(s * self.cd_s8[28])
-        self.model.p_update(s * self.cd_s8[29])
-        self.model.q_update(s * self.cd_s8[30])
-        self.model.p_update(s * self.cd_s8[31])
-        self.model.q_update(s * self.cd_s8[32])
-        self.model.p_update(s * self.cd_s8[33])
-        self.model.q_update(s * self.cd_s8[34])
-        self.model.p_update(s * self.cd_s8[35])
-        self.model.q_update(s * self.cd_s8[36])
-        self.model.p_update(s * self.cd_s8[37])
-        self.model.q_update(s * self.cd_s8[38])
-        self.model.p_update(s * self.cd_s8[39])
-        self.model.q_update(s * self.cd_s8[40])
-        self.model.p_update(s * self.cd_s8[41])
-        self.model.q_update(s * self.cd_s8[42])
-        self.model.p_update(s * self.cd_s8[43])
-        self.model.q_update(s * self.cd_s8[44])
-        self.model.p_update(s * self.cd_s8[45])
-        self.model.q_update(s * self.cd_s8[46])
-        self.model.p_update(s * self.cd_s8[47])
-        self.model.q_update(s * self.cd_s8[48])
-        self.model.p_update(s * self.cd_s8[49])
-        self.model.q_update(s * self.cd_s8[50])
-        self.model.p_update(s * self.cd_s8[51])
-        self.model.q_update(s * self.cd_s8[52])
-        self.model.p_update(s * self.cd_s8[53])
-        self.model.q_update(s * self.cd_s8[54])
-        self.model.p_update(s * self.cd_s8[55])
-        self.model.q_update(s * self.cd_s8[56])
-        self.model.p_update(s * self.cd_s8[57])
-        self.model.q_update(s * self.cd_s8[58])
-        self.model.p_update(s * self.cd_s8[59])
-        self.model.q_update(s * self.cd_s8[60])
-        self.model.p_update(s * self.cd_s8[61])
-        self.model.q_update(s * self.cd_s8[62])
-        self.model.p_update(s * self.cd_s8[63])
-        self.model.q_update(s * self.cd_s8[64])
-        self.model.p_update(s * self.cd_s8[65])
-        self.model.q_update(s * self.cd_s8[66])
-        self.model.p_update(s * self.cd_s8[67])
-        self.model.q_update(s * self.cd_s8[68])
-        self.model.p_update(s * self.cd_s8[69])
-        self.model.q_update(s * self.cd_s8[70])
-        self.model.p_update(s * self.cd_s8[71])
-        self.model.q_update(s * self.cd_s8[72])
-        self.model.p_update(s * self.cd_s8[73])
-        self.model.q_update(s * self.cd_s8[74])
-        self.model.p_update(s * self.cd_s8[75])
-        self.model.q_update(s * self.cd_s8[76])
-        self.model.p_update(s * self.cd_s8[77])
-        self.model.q_update(s * self.cd_s8[78])
-        self.model.p_update(s * self.cd_s8[79])
-        self.model.q_update(s * self.cd_s8[80])
-        self.model.p_update(s * self.cd_s8[81])
-        self.model.q_update(s * self.cd_s8[82])
-        self.model.p_update(s * self.cd_s8[83])
-        self.model.q_update(s * self.cd_s8[84])
-        self.model.p_update(s * self.cd_s8[85])
-        self.model.q_update(s * self.cd_s8[86])
-        self.model.p_update(s * self.cd_s8[87])
-        self.model.q_update(s * self.cd_s8[88])
-        self.model.p_update(s * self.cd_s8[89])
-        self.model.q_update(s * self.cd_s8[90])
-        self.model.p_update(s * self.cd_s8[91])
-        self.model.q_update(s * self.cd_s8[92])
-        self.model.p_update(s * self.cd_s8[93])
-        self.model.q_update(s * self.cd_s8[94])
-        self.model.p_update(s * self.cd_s8[95])
-        self.model.q_update(s * self.cd_s8[96])
-        self.model.p_update(s * self.cd_s8[97])
-        self.model.q_update(s * self.cd_s8[98])
-        self.model.p_update(s * self.cd_s8[99])
-        self.model.q_update(s * self.cd_s8[100])
-        self.model.p_update(s * self.cd_s8[101])
-        self.model.q_update(s * self.cd_s8[102])
-        self.model.p_update(s * self.cd_s8[103])
-        self.model.q_update(s * self.cd_s8[104])
-        self.model.p_update(s * self.cd_s8[105])
-        self.model.q_update(s * self.cd_s8[106])
-        self.model.p_update(s * self.cd_s8[107])
-        self.model.q_update(s * self.cd_s8[108])
-        self.model.p_update(s * self.cd_s8[109])
-        self.model.q_update(s * self.cd_s8[110])
-        self.model.p_update(s * self.cd_s8[111])
-        self.model.q_update(s * self.cd_s8[112])
-        self.model.p_update(s * self.cd_s8[113])
-        self.model.q_update(s * self.cd_s8[114])
-        self.model.p_update(s * self.cd_s8[115])
-        self.model.q_update(s * self.cd_s8[116])
-        self.model.p_update(s * self.cd_s8[117])
-        self.model.q_update(s * self.cd_s8[118])
-        self.model.p_update(s * self.cd_s8[119])
-        self.model.q_update(s * self.cd_s8[120])
-        self.model.p_update(s * self.cd_s8[121])
-        self.model.q_update(s * self.cd_s8[122])
-        self.model.p_update(s * self.cd_s8[123])
-        self.model.q_update(s * self.cd_s8[124])
-        self.model.p_update(s * self.cd_s8[125])
-        self.model.q_update(s * self.cd_s8[124])
-        self.model.p_update(s * self.cd_s8[123])
-        self.model.q_update(s * self.cd_s8[122])
-        self.model.p_update(s * self.cd_s8[121])
-        self.model.q_update(s * self.cd_s8[120])
-        self.model.p_update(s * self.cd_s8[119])
-        self.model.q_update(s * self.cd_s8[118])
-        self.model.p_update(s * self.cd_s8[117])
-        self.model.q_update(s * self.cd_s8[116])
-        self.model.p_update(s * self.cd_s8[115])
-        self.model.q_update(s * self.cd_s8[114])
-        self.model.p_update(s * self.cd_s8[113])
-        self.model.q_update(s * self.cd_s8[112])
-        self.model.p_update(s * self.cd_s8[111])
-        self.model.q_update(s * self.cd_s8[110])
-        self.model.p_update(s * self.cd_s8[109])
-        self.model.q_update(s * self.cd_s8[108])
-        self.model.p_update(s * self.cd_s8[107])
-        self.model.q_update(s * self.cd_s8[106])
-        self.model.p_update(s * self.cd_s8[105])
-        self.model.q_update(s * self.cd_s8[104])
-        self.model.p_update(s * self.cd_s8[103])
-        self.model.q_update(s * self.cd_s8[102])
-        self.model.p_update(s * self.cd_s8[101])
-        self.model.q_update(s * self.cd_s8[100])
-        self.model.p_update(s * self.cd_s8[99])
-        self.model.q_update(s * self.cd_s8[98])
-        self.model.p_update(s * self.cd_s8[97])
-        self.model.q_update(s * self.cd_s8[96])
-        self.model.p_update(s * self.cd_s8[95])
-        self.model.q_update(s * self.cd_s8[94])
-        self.model.p_update(s * self.cd_s8[93])
-        self.model.q_update(s * self.cd_s8[92])
-        self.model.p_update(s * self.cd_s8[91])
-        self.model.q_update(s * self.cd_s8[90])
-        self.model.p_update(s * self.cd_s8[89])
-        self.model.q_update(s * self.cd_s8[88])
-        self.model.p_update(s * self.cd_s8[87])
-        self.model.q_update(s * self.cd_s8[86])
-        self.model.p_update(s * self.cd_s8[85])
-        self.model.q_update(s * self.cd_s8[84])
-        self.model.p_update(s * self.cd_s8[83])
-        self.model.q_update(s * self.cd_s8[82])
-        self.model.p_update(s * self.cd_s8[81])
-        self.model.q_update(s * self.cd_s8[80])
-        self.model.p_update(s * self.cd_s8[79])
-        self.model.q_update(s * self.cd_s8[78])
-        self.model.p_update(s * self.cd_s8[77])
-        self.model.q_update(s * self.cd_s8[76])
-        self.model.p_update(s * self.cd_s8[75])
-        self.model.q_update(s * self.cd_s8[74])
-        self.model.p_update(s * self.cd_s8[73])
-        self.model.q_update(s * self.cd_s8[72])
-        self.model.p_update(s * self.cd_s8[71])
-        self.model.q_update(s * self.cd_s8[70])
-        self.model.p_update(s * self.cd_s8[69])
-        self.model.q_update(s * self.cd_s8[68])
-        self.model.p_update(s * self.cd_s8[67])
-        self.model.q_update(s * self.cd_s8[66])
-        self.model.p_update(s * self.cd_s8[65])
-        self.model.q_update(s * self.cd_s8[64])
-        self.model.p_update(s * self.cd_s8[63])
-        self.model.q_update(s * self.cd_s8[62])
-        self.model.p_update(s * self.cd_s8[61])
-        self.model.q_update(s * self.cd_s8[60])
-        self.model.p_update(s * self.cd_s8[59])
-        self.model.q_update(s * self.cd_s8[58])
-        self.model.p_update(s * self.cd_s8[57])
-        self.model.q_update(s * self.cd_s8[56])
-        self.model.p_update(s * self.cd_s8[55])
-        self.model.q_update(s * self.cd_s8[54])
-        self.model.p_update(s * self.cd_s8[53])
-        self.model.q_update(s * self.cd_s8[52])
-        self.model.p_update(s * self.cd_s8[51])
-        self.model.q_update(s * self.cd_s8[50])
-        self.model.p_update(s * self.cd_s8[49])
-        self.model.q_update(s * self.cd_s8[48])
-        self.model.p_update(s * self.cd_s8[47])
-        self.model.q_update(s * self.cd_s8[46])
-        self.model.p_update(s * self.cd_s8[45])
-        self.model.q_update(s * self.cd_s8[44])
-        self.model.p_update(s * self.cd_s8[43])
-        self.model.q_update(s * self.cd_s8[42])
-        self.model.p_update(s * self.cd_s8[41])
-        self.model.q_update(s * self.cd_s8[40])
-        self.model.p_update(s * self.cd_s8[39])
-        self.model.q_update(s * self.cd_s8[38])
-        self.model.p_update(s * self.cd_s8[37])
-        self.model.q_update(s * self.cd_s8[36])
-        self.model.p_update(s * self.cd_s8[35])
-        self.model.q_update(s * self.cd_s8[34])
-        self.model.p_update(s * self.cd_s8[33])
-        self.model.q_update(s * self.cd_s8[32])
-        self.model.p_update(s * self.cd_s8[31])
-        self.model.q_update(s * self.cd_s8[30])
-        self.model.p_update(s * self.cd_s8[29])
-        self.model.q_update(s * self.cd_s8[28])
-        self.model.p_update(s * self.cd_s8[27])
-        self.model.q_update(s * self.cd_s8[26])
-        self.model.p_update(s * self.cd_s8[25])
-        self.model.q_update(s * self.cd_s8[24])
-        self.model.p_update(s * self.cd_s8[23])
-        self.model.q_update(s * self.cd_s8[22])
-        self.model.p_update(s * self.cd_s8[21])
-        self.model.q_update(s * self.cd_s8[20])
-        self.model.p_update(s * self.cd_s8[19])
-        self.model.q_update(s * self.cd_s8[18])
-        self.model.p_update(s * self.cd_s8[17])
-        self.model.q_update(s * self.cd_s8[16])
-        self.model.p_update(s * self.cd_s8[15])
-        self.model.q_update(s * self.cd_s8[14])
-        self.model.p_update(s * self.cd_s8[13])
-        self.model.q_update(s * self.cd_s8[12])
-        self.model.p_update(s * self.cd_s8[11])
-        self.model.q_update(s * self.cd_s8[10])
-        self.model.p_update(s * self.cd_s8[9])
-        self.model.q_update(s * self.cd_s8[8])
-        self.model.p_update(s * self.cd_s8[7])
-        self.model.q_update(s * self.cd_s8[6])
-        self.model.p_update(s * self.cd_s8[5])
-        self.model.q_update(s * self.cd_s8[4])
-        self.model.p_update(s * self.cd_s8[3])
-        self.model.q_update(s * self.cd_s8[2])
-        self.model.p_update(s * self.cd_s8[1])
-        self.model.q_update(s * self.cd_s8[0])
+    def smith(self, s):
+        size = len(self.coefficients)
+        for i in range(size):
+            step = self.model.q_update if i % 2 == 0 else self.model.p_update
+            step(s * self.coefficients[i])
+        for i in range(size -2, -1, -1):
+            step = self.model.q_update if i % 2 == 0 else self.model.p_update
+            step(s * self.coefficients[i])
 
     def fourth_order_smith(self):
+        self.coefficients = self.cd_s4
         # noinspection PyTypeChecker
-        self.smith_4(D1)
+        self.smith(D1)
 
     def sixth_order_smith(self):
+        self.coefficients = self.cd_s6
         # noinspection PyTypeChecker
-        self.smith_6(D1)
+        self.smith(D1)
 
     def eightth_order_smith(self):
+        self.coefficients = self.cd_s8
         # noinspection PyTypeChecker
-        self.smith_8(D1)
+        self.smith(D1)
 
     def tenth_order_smith(self):
+        self.coefficients = self.cd_s8
         # noinspection PyTypeChecker
-        self.scheme(self.smith_8, D1, self.w1, self.w0)
+        self.scheme(self.smith, D1, self.w1, self.w0)
 
 
 print >> stderr, __name__ + " module loaded"
