@@ -55,11 +55,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.fourth_order_forest_ruth
-        elif order == 's4':
-            print >> stderr, "4th order (Smith)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.fourth_order_smith
         elif order == 'b6':
             print >> stderr, "6th order (Composed)"
             self.method = self.sixth_order
@@ -68,11 +63,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.sixth_order_forest_ruth
-        elif order == 's6':
-            print >> stderr, "6th order (Smith) (Composed)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.sixth_order_smith
         elif order == 'b8':
             print >> stderr, "8th order (Composed)"
             self.method = self.eightth_order
@@ -81,11 +71,6 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.eightth_order_forest_ruth
-        elif order == 's8':
-            print >> stderr, "8th order (Smith) (Composed)"
-            self.scheme = self.suzuki
-            self.scheme_root = D4
-            self.method = self.eightth_order_smith
         elif order == 'b10':
             print >> stderr, "10th order (Composed)"
             self.method = self.tenth_order
@@ -94,6 +79,21 @@ class Symplectic(object):
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.tenth_order_forest_ruth
+        elif order == 's4':
+            print >> stderr, "4th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.fourth_order_smith
+        elif order == 's6':
+            print >> stderr, "6th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.sixth_order_smith
+        elif order == 's8':
+            print >> stderr, "8th order (Smith)"
+            self.scheme = self.suzuki
+            self.scheme_root = D4
+            self.method = self.eightth_order_smith
         elif order == 's10':
             print >> stderr, "10th order (Smith) (Composed)"
             self.scheme = self.suzuki
@@ -111,26 +111,94 @@ class Symplectic(object):
         self.x0 = D1 - self.scheme_root * self.x1
         self.y0 = D1 - self.scheme_root * self.y1
         self.z0 = D1 - self.scheme_root * self.z1
-        self.cd_sv = [D05 * h, h]
-        self.cd_f4 = [D05 * h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1), h * self.z0]
-        self.cd_s4 = [D05 * h * self.z1,
-                      h * self.z1, h * self.z1, h * self.z1,
-                      D05 * h * (self.z1 + self.z0), h * self.z0]
-        self.cd_s6 = [D05 * h * self.z1 * self.y1,
-                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
-                      D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
-                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
-                      h * self.z1 * self.y1,
-                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
-                      D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
-                      h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
-                      D05 * h * self.z1 * (self.y1 + self.y0),
-                      h * self.z1 * self.y0, h * self.z1 * self.y0, h * self.z1 * self.y0,
-                      D05 * h * (self.z1 + self.z0) * self.y0, h * self.z0 * self.y0]
+        self.cd_sv = [
+            D05 * h, h
+        ]
+        self.cd_f4 = [
+            D05 * h * self.z1, h * self.z1, D05 * h * (self.z0 + self.z1), h * self.z0
+        ]
+        self.cd_s4 = [
+            D05 * h * self.z1, h * self.z1, h * self.z1, h * self.z1, D05 * h * (self.z1 + self.z0), h * self.z0
+        ]
+        self.cd_s6 = [
+            D05 * h * self.z1 * self.y1,
+            h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+            D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
+            h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+            h * self.z1 * self.y1,
+            h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+            D05 * h * (self.z1 + self.z0) * self.y1, h * self.z0 * self.y1, D05 * h * (self.z0 + self.z1) * self.y1,
+            h * self.z1 * self.y1, h * self.z1 * self.y1, h * self.z1 * self.y1,
+            D05 * h * self.z1 * (self.y1 + self.y0),
+            h * self.z1 * self.y0, h * self.z1 * self.y0, h * self.z1 * self.y0,
+            D05 * h * (self.z1 + self.z0) * self.y0, h * self.z0 * self.y0
+        ]
+        self.cd_s8 = [
+            D05 * h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * self.z1 * (self.y1 + self.y0) * self.x1,
+            h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y0 * self.x1, h * self.z0 * self.y0 * self.x1, D05 * h * (self.z0 + self.z1) * self.y0 * self.x1,
+            h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1,
+            D05 * h * self.z1 * (self.y1 + self.y0) * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * self.z1 * (self.y1 + self.y0) * self.x1,
+            h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y0 * self.x1, h * self.z0 * self.y0 * self.x1, D05 * h * (self.z0 + self.z1) * self.y0 * self.x1,
+            h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1, h * self.z1 * self.y0 * self.x1,
+            D05 * h * self.z1 * (self.y1 + self.y0) * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x1, h * self.z0 * self.y1 * self.x1, D05 * h * (self.z0 + self.z1) * self.y1 * self.x1,
+            h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1, h * self.z1 * self.y1 * self.x1,
+            D05 * h * self.z1 * self.y1 * (self.x1 + self.x0),
+            h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x0, h * self.z0 * self.y1 * self.x0, D05 * h * (self.z0 + self.z1) * self.y1 * self.x0,
+            h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0,
+            h * self.z1 * self.y1 * self.x0,
+            h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0,
+            D05 * h * (self.z1 + self.z0) * self.y1 * self.x0, h * self.z0 * self.y1 * self.x0, D05 * h * (self.z0 + self.z1) * self.y1 * self.x0,
+            h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0, h * self.z1 * self.y1 * self.x0,
+            D05 * h * self.z1 * (self.y1 + self.y0) * self.x0,
+            h * self.z1 * self.y0 * self.x0, h * self.z1 * self.y0 * self.x0, h * self.z1 * self.y0 * self.x0,
+            D05 * h * (self.z1 + self.z0) * self.y0 * self.x0, h * self.z0 * self.y0 * self.x0
+        ]
 
     def euler_cromer(self):
         self.model.q_update(self.h)
         self.model.p_update(self.h)
+
+    def stormer_verlet(self, s):
+        self.model.q_update(s * self.cd_sv[0])
+        self.model.p_update(s * self.cd_sv[1])
+        self.model.q_update(s * self.cd_sv[0])
+
+    def second_order(self):
+        # noinspection PyTypeChecker
+        self.stormer_verlet(D1)
 
     @staticmethod
     def yoshida(base_method, s, plus, minus):
@@ -146,10 +214,30 @@ class Symplectic(object):
         base_method(s * plus)
         base_method(s * plus)
 
-    def stormer_verlet(self, s):
-        self.model.q_update(s * self.cd_sv[0])
-        self.model.p_update(s * self.cd_sv[1])
-        self.model.q_update(s * self.cd_sv[0])
+    def base4(self, s):
+        self.scheme(self.stormer_verlet, s, self.z1, self.z0)
+
+    def base6(self, s):
+        self.scheme(self.base4, s, self.y1, self.y0)
+
+    def base8(self, s):
+        self.scheme(self.base6, s, self.x1, self.x0)
+
+    def fourth_order(self):
+        # noinspection PyTypeChecker
+        self.base4(D1)
+
+    def sixth_order(self):
+        # noinspection PyTypeChecker
+        self.base6(D1)
+
+    def eightth_order(self):
+        # noinspection PyTypeChecker
+        self.base8(D1)
+
+    def tenth_order(self):
+        # noinspection PyTypeChecker
+        self.scheme(self.base8, D1, self.w1, self.w0)
 
     def forest_ruth_4(self, s):
         self.model.q_update(s * self.cd_f4[0])
@@ -159,101 +247,6 @@ class Symplectic(object):
         self.model.q_update(s * self.cd_f4[2])
         self.model.p_update(s * self.cd_f4[1])
         self.model.q_update(s * self.cd_f4[0])
-
-    def smith_4(self, s):
-        self.model.q_update(s * self.cd_s4[0])
-        self.model.p_update(s * self.cd_s4[1])
-        self.model.q_update(s * self.cd_s4[2])
-        self.model.p_update(s * self.cd_s4[3])
-        self.model.q_update(s * self.cd_s4[4])
-        self.model.p_update(s * self.cd_s4[5])
-        self.model.q_update(s * self.cd_s4[4])
-        self.model.p_update(s * self.cd_s4[3])
-        self.model.q_update(s * self.cd_s4[2])
-        self.model.p_update(s * self.cd_s4[1])
-        self.model.q_update(s * self.cd_s4[0])
-
-    def smith_6(self, s):
-        self.model.q_update(s * self.cd_s6[0])
-        self.model.p_update(s * self.cd_s6[1])
-        self.model.q_update(s * self.cd_s6[2])
-        self.model.p_update(s * self.cd_s6[3])
-        self.model.q_update(s * self.cd_s6[4])
-        self.model.p_update(s * self.cd_s6[5])
-        self.model.q_update(s * self.cd_s6[6])
-        self.model.p_update(s * self.cd_s6[7])
-        self.model.q_update(s * self.cd_s6[8])
-        self.model.p_update(s * self.cd_s6[9])
-        self.model.q_update(s * self.cd_s6[10])
-        self.model.p_update(s * self.cd_s6[11])
-        self.model.q_update(s * self.cd_s6[12])
-        self.model.p_update(s * self.cd_s6[13])
-        self.model.q_update(s * self.cd_s6[14])
-        self.model.p_update(s * self.cd_s6[15])
-        self.model.q_update(s * self.cd_s6[16])
-        self.model.p_update(s * self.cd_s6[17])
-        self.model.q_update(s * self.cd_s6[18])
-        self.model.p_update(s * self.cd_s6[19])
-        self.model.q_update(s * self.cd_s6[20])
-        self.model.p_update(s * self.cd_s6[21])
-        self.model.q_update(s * self.cd_s6[22])
-        self.model.p_update(s * self.cd_s6[23])
-        self.model.q_update(s * self.cd_s6[24])
-        self.model.p_update(s * self.cd_s6[25])
-        self.model.q_update(s * self.cd_s6[24])
-        self.model.p_update(s * self.cd_s6[23])
-        self.model.q_update(s * self.cd_s6[22])
-        self.model.p_update(s * self.cd_s6[21])
-        self.model.q_update(s * self.cd_s6[20])
-        self.model.p_update(s * self.cd_s6[19])
-        self.model.q_update(s * self.cd_s6[18])
-        self.model.p_update(s * self.cd_s6[17])
-        self.model.q_update(s * self.cd_s6[16])
-        self.model.p_update(s * self.cd_s6[15])
-        self.model.q_update(s * self.cd_s6[14])
-        self.model.p_update(s * self.cd_s6[13])
-        self.model.q_update(s * self.cd_s6[12])
-        self.model.p_update(s * self.cd_s6[11])
-        self.model.q_update(s * self.cd_s6[10])
-        self.model.p_update(s * self.cd_s6[9])
-        self.model.q_update(s * self.cd_s6[8])
-        self.model.p_update(s * self.cd_s6[7])
-        self.model.q_update(s * self.cd_s6[6])
-        self.model.p_update(s * self.cd_s6[5])
-        self.model.q_update(s * self.cd_s6[4])
-        self.model.p_update(s * self.cd_s6[3])
-        self.model.q_update(s * self.cd_s6[2])
-        self.model.p_update(s * self.cd_s6[1])
-        self.model.q_update(s * self.cd_s6[0])
-
-    def second_order(self):
-        # noinspection PyTypeChecker
-        self.stormer_verlet(D1)
-
-    def base4(self, s):
-        self.scheme(self.stormer_verlet, s, self.z1, self.z0)
-
-    def fourth_order(self):
-        # noinspection PyTypeChecker
-        self.base4(D1)
-
-    def base6(self, s):
-        self.scheme(self.base4, s, self.y1, self.y0)
-
-    def sixth_order(self):
-        # noinspection PyTypeChecker
-        self.base6(D1)
-
-    def base8(self, s):
-        self.scheme(self.base6, s, self.x1, self.x0)
-
-    def eightth_order(self):
-        # noinspection PyTypeChecker
-        self.base8(D1)
-
-    def tenth_order(self):
-        # noinspection PyTypeChecker
-        self.scheme(self.base8, D1, self.w1, self.w0)
 
     def fourth_order_forest_ruth(self):
         # noinspection PyTypeChecker
@@ -277,24 +270,34 @@ class Symplectic(object):
         # noinspection PyTypeChecker
         self.scheme(self.base8_forest_ruth, D1, self.w1, self.w0)
 
+    def smith(self, s):
+        size = len(self.coefficients)
+        for i in range(size):
+            step = self.model.q_update if i % 2 == 0 else self.model.p_update
+            step(s * self.coefficients[i])
+        for i in range(size -2, -1, -1):
+            step = self.model.q_update if i % 2 == 0 else self.model.p_update
+            step(s * self.coefficients[i])
+
     def fourth_order_smith(self):
+        self.coefficients = self.cd_s4
         # noinspection PyTypeChecker
-        self.smith_4(D1)
+        self.smith(D1)
 
     def sixth_order_smith(self):
+        self.coefficients = self.cd_s6
         # noinspection PyTypeChecker
-        self.smith_6(D1)
-
-    def base8_smith(self, s):
-        self.scheme(self.smith_6, s, self.x1, self.x0)
+        self.smith(D1)
 
     def eightth_order_smith(self):
+        self.coefficients = self.cd_s8
         # noinspection PyTypeChecker
-        self.base8_smith(D1)
+        self.smith(D1)
 
     def tenth_order_smith(self):
+        self.coefficients = self.cd_s8
         # noinspection PyTypeChecker
-        self.scheme(self.base8_smith, D1, self.w1, self.w0)
+        self.scheme(self.smith, D1, self.w1, self.w0)
 
 
 print >> stderr, __name__ + " module loaded"
