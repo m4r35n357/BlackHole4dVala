@@ -200,13 +200,13 @@ program Symplectic
             write (error_unit, *) "2nd Order (Stormer-Verlet)"
             call evolve(second_order)
         case ("b4")
-            write (error_unit, *) "4th Order (Smith4)"
+            write (error_unit, *) "4th Order (Smith)"
             call evolve(fourth_order)
         case ("b6")
-            write (error_unit, *) "6th Order (Smith6)"
+            write (error_unit, *) "6th Order (Smith)"
             call evolve(sixth_order)
         case ("b8")
-            write (error_unit, *) "8th Order (Smith8)"
+            write (error_unit, *) "8th Order (Smith)"
             call evolve(eightth_order)
         case ("b10")
             write (error_unit, *) "10th Order (Suzuki composition)"
@@ -235,24 +235,24 @@ contains
         call q_update(cd_2(1))
     end subroutine second_order
 
-    subroutine smith (c_d, s)
-        real(kind=16), dimension(:) :: c_d
+    subroutine smith (cd, s)
+        real(kind=16), dimension(:) :: cd
         real(kind=16), intent(in) :: s
         integer :: array_size
-        integer :: n
-        array_size = size(c_d)
-        do n = 1, array_size
-            if (mod(n, 2) == 0) then
-                call p_update(s * c_d(n))
+        integer :: i
+        array_size = size(cd)
+        do i = 1, array_size
+            if (mod(i, 2) == 0) then
+                call p_update(cd(i) * s)
             else
-                call q_update(s * c_d(n))
+                call q_update(cd(i) * s)
             end if
         end do
-        do n = array_size - 1, 1, -1
-            if (mod(n, 2) == 0) then
-                call p_update(s * c_d(n))
+        do i = array_size - 1, 1, -1
+            if (mod(i, 2) == 0) then
+                call p_update(cd(i) * s)
             else
-                call q_update(s * c_d(n))
+                call q_update(cd(i) * s)
             end if
         end do
     end subroutine smith

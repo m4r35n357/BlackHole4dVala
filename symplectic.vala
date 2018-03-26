@@ -80,12 +80,9 @@ namespace Integrators {
         private double h;
 
         /**
-         * Base method coefficients
+         * Composition coefficients
          */
         private double[] cd;
-        private double[] cd_s4;
-        private double[] cd_s6;
-        private double[] cd_s8;
 
         /**
          * This constructor produces instances from its label and scheme arguments according to the following tables:
@@ -147,7 +144,7 @@ namespace Integrators {
                     };
                     break;
                 case "b8":
-                    stderr.printf("8th Order (Suzuki Composition)\n");
+                    stderr.printf("8th Order (Smith)\n");
                     integrator = smith;
                     cd = {
                       0.5 * h * z1 * y1 * x1,
