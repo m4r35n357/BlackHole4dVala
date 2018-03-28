@@ -153,13 +153,7 @@ contains
         end do
     end subroutine evolve
 
-    subroutine second_order ()
-        call q_update(cd_2(1))
-        call p_update(cd_2(2))
-        call q_update(cd_2(1))
-    end subroutine second_order
-
-    subroutine smith (cd, s)
+    subroutine updates (cd, s)
         real(kind=16), dimension(:) :: cd
         real(kind=16), intent(in) :: s
         integer :: array_size
@@ -179,25 +173,29 @@ contains
                 call q_update(cd(i) * s)
             end if
         end do
-    end subroutine smith
+    end subroutine updates
+
+    subroutine second_order ()
+        call updates(cd_2, D1)
+    end subroutine second_order
 
     subroutine fourth_order ()
-        call smith(cd_4, D1)
+        call updates(cd_4, D1)
     end subroutine fourth_order
 
     subroutine sixth_order ()
-        call smith(cd_6, D1)
+        call updates(cd_6, D1)
     end subroutine sixth_order
 
     subroutine eightth_order ()
-        call smith(cd_8, D1)
+        call updates(cd_8, D1)
     end subroutine eightth_order
 
     subroutine tenth_order ()
-        call smith(cd_8, w1)
-        call smith(cd_8, w1)
-        call smith(cd_8, w0)
-        call smith(cd_8, w1)
-        call smith(cd_8, w1)
+        call updates(cd_8, w1)
+        call updates(cd_8, w1)
+        call updates(cd_8, w0)
+        call updates(cd_8, w1)
+        call updates(cd_8, w1)
     end subroutine tenth_order
 end program Symplectic

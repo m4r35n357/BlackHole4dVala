@@ -90,9 +90,9 @@ namespace Integrators {
          * || ''label'' || ''Integrator Order'' ||  ''Description'' ||
          * || "b1" || {@link firstOrder} || 1st Order, Symplectic, NOT Reversible ||
          * || "b2" || {@link secondOrder} || 2nd Order, Symplectic, Reversible ||
-         * || "b4" || {@link smith} || 4th Order, Symplectic, Reversible ||
-         * || "b6" || {@link smith} || 6th Order, Symplectic, Reversible ||
-         * || "b8" || {@link smith} || 8th Order, Symplectic, Reversible ||
+         * || "b4" || {@link updates} || 4th Order, Symplectic, Reversible ||
+         * || "b6" || {@link updates} || 6th Order, Symplectic, Reversible ||
+         * || "b8" || {@link updates} || 8th Order, Symplectic, Reversible ||
          *
          * @param model the model
          * @param h the time step
@@ -119,7 +119,7 @@ namespace Integrators {
                     break;
                 case "b4":
                     stderr.printf("4th Order (Smith)\n");
-                    integrator = smith;
+                    integrator = updates;
                     cd = {
                       0.5 * h * z1,
                       h * z1, h * z1, h * z1,
@@ -128,7 +128,7 @@ namespace Integrators {
                     break;
                 case "b6":
                     stderr.printf("6th Order (Smith)\n");
-                    integrator = smith;
+                    integrator = updates;
                     cd = {
                       0.5 * h * z1 * y1,
                       h * z1 * y1, h * z1 * y1, h * z1 * y1,
@@ -145,7 +145,7 @@ namespace Integrators {
                     break;
                 case "b8":
                     stderr.printf("8th Order (Smith)\n");
-                    integrator = smith;
+                    integrator = updates;
                     cd = {
                       0.5 * h * z1 * y1 * x1,
                       h * z1 * y1 * x1, h * z1 * y1 * x1, h * z1 * y1 * x1,
@@ -257,7 +257,7 @@ namespace Integrators {
          * qUpdate(cd[0])
          * }}}
          */
-        private void smith () {
+        private void updates () {
             var size = cd.length;
             for (int i = 0; i < size; i++) {
                 if (i % 2 == 0) {
