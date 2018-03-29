@@ -27,98 +27,84 @@ program Symplectic
     write (error_unit, *) 'float precision is:', precision(D1), ' decimal places'
     read (input_unit, *) h, start, finish, plot_ratio, integrator
     call init_model()
-    w1 = D1 / (D4 - D4 ** (D1 / D9))
-    x1 = D1 / (D4 - D4 ** (D1 / D7))
-    y1 = D1 / (D4 - D4 ** (D1 / D5))
-    z1 = D1 / (D4 - D4 ** (D1 / D3))
-    w0 = D1 - D4 * w1
-    x0 = D1 - D4 * x1
-    y0 = D1 - D4 * y1
-    z0 = D1 - D4 * z1
     cd_2(1) = h * D05
     cd_2(2) = h
+    z1 = D1 / (D4 - D4 ** (D1 / D3))
+    z0 = D1 - D4 * z1
     cd_4(1) = h * z1 * D05  !!
     cd_4(2:4) = h * z1
     cd_4(5) = h * (z0 + z1) * D05
     cd_4(6) = h * z0  !
+    y1 = D1 / (D4 - D4 ** (D1 / D5))
+    y0 = D1 - D4 * y1
     cd_6(1) = h * z1 * y1 * D05  !!
     cd_6(2:4) = h * z1 * y1
-    cd_6(5) = h * (z0 + z1) * y1 * D05
+    cd_6(5:7:2) = h * (z0 + z1) * y1 * D05
     cd_6(6) = h * z0 * y1  !
-    cd_6(7) = h * (z0 + z1) * y1 * D05
     cd_6(8:14) = h * z1 * y1
-    cd_6(15) = h * (z0 + z1) * y1 * D05
+    cd_6(15:17:2) = h * (z0 + z1) * y1 * D05
     cd_6(16) = h * z0 * y1  !
-    cd_6(17) = h * (z0 + z1) * y1 * D05
     cd_6(18:20) = h * z1 * y1
     cd_6(21) = h * z1 * (y1 + y0) * D05  !!
     cd_6(22:24) = h * z1 * y0
     cd_6(25) = h * (z0 + z1) * y0 * D05
     cd_6(26) = h * z0 * y0  !
+    x1 = D1 / (D4 - D4 ** (D1 / D7))
+    x0 = D1 - D4 * x1
     cd_8(1) = h * z1 * y1 * x1 * D05  !!
     cd_8(2:4) = h * z1 * y1 * x1
-    cd_8(5) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(5:7:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(6) = h * z0 * y1 * x1  !
-    cd_8(7) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(8:14) = h * z1 * y1 * x1
-    cd_8(15) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(15:17:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(16) = h * z0 * y1 * x1  !
-    cd_8(17) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(18:20) = h * z1 * y1 * x1
     cd_8(21) = h * z1 * (y1 + y0) * x1 * D05  !!
     cd_8(22:24) = h * z1 * y0 * x1
-    cd_8(25) = h * (z0 + z1) * y0 * x1 * D05
+    cd_8(25:27:2) = h * (z0 + z1) * y0 * x1 * D05
     cd_8(26) = h * z0 * y0 * x1  !
-    cd_8(27) = h * (z0 + z1) * y0 * x1 * D05
     cd_8(28:30) = h * z1 * y0 * x1
     cd_8(31) = h * z1 * (y1 + y0) * x1 * D05  !!
     cd_8(32:34) = h * z1 * y1 * x1
-    cd_8(35) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(35:37:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(36) = h * z0 * y1 * x1  !
-    cd_8(37) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(38:44) = h * z1 * y1 * x1  !!
-    cd_8(45) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(45:47:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(46) = h * z0 * y1 * x1  !
-    cd_8(47) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(48:54) = h * z1 * y1 * x1  !!
-    cd_8(55) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(55:57:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(56) = h * z0 * y1 * x1  !
-    cd_8(57) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(58:64) = h * z1 * y1 * x1  !!
-    cd_8(65) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(65:67:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(66) = h * z0 * y1 * x1  !
-    cd_8(67) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(68:70) = h * z1 * y1 * x1
     cd_8(71) = h * z1 * (y1 + y0) * x1 * D05  !!
     cd_8(72:74) = h * z1 * y0 * x1
-    cd_8(75) = h * (z0 + z1) * y0 * x1 * D05
+    cd_8(75:77:2) = h * (z0 + z1) * y0 * x1 * D05
     cd_8(76) = h * z0 * y0 * x1  !
-    cd_8(77) = h * (z0 + z1) * y0 * x1 * D05
     cd_8(78:80) = h * z1 * y0 * x1
     cd_8(81) = h * z1 * (y1 + y0) * x1 * D05  !!
     cd_8(82:84) = h * z1 * y1 * x1
-    cd_8(85) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(85:87:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(86) = h * z0 * y1 * x1  !
-    cd_8(87) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(88:94) = h * z1 * y1 * x1  !!
-    cd_8(95) = h * (z0 + z1) * y1 * x1 * D05
+    cd_8(95:97:2) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(96) = h * z0 * y1 * x1  !
-    cd_8(97) = h * (z0 + z1) * y1 * x1 * D05
     cd_8(98:100) = h * z1 * y1 * x1
     cd_8(101) = h * z1 * y1 * (x1 + x0) * D05  !!
     cd_8(102:104) = h * z1 * y1 * x0
-    cd_8(105) = h * (z0 + z1) * y1 * x0 * D05
+    cd_8(105:107:2) = h * (z0 + z1) * y1 * x0 * D05
     cd_8(106) = h * z0 * y1 * x0  !
-    cd_8(107) = h * (z0 + z1) * y1 * x0 * D05
     cd_8(108:114) = h * z1 * y1 * x0  !!
-    cd_8(115) = h * (z0 + z1) * y1 * x0 * D05
+    cd_8(115:117:2) = h * (z0 + z1) * y1 * x0 * D05
     cd_8(116) = h * z0 * y1 * x0  !
-    cd_8(117) = h * (z0 + z1) * y1 * x0 * D05
     cd_8(118:120) = h * z1 * y1 * x0
     cd_8(121) = h * z1 * (y1 + y0) * x0 * D05  !!
     cd_8(122:124) = h * z1 * y0 * x0
     cd_8(125) = h * (z0 + z1) * y0 * x0 * D05
     cd_8(126) = h * z0 * y0 * x0  !
+    w1 = D1 / (D4 - D4 ** (D1 / D9))
+    w0 = D1 - D4 * w1
     select case (integrator)
         case ("b2")
             write (error_unit, *) "2nd Order (Stormer-Verlet)"
@@ -154,7 +140,7 @@ contains
     end subroutine evolve
 
     subroutine updates (cd, s)
-        real(kind=16), dimension(:) :: cd
+        real(kind=16), intent(in), dimension(:) :: cd
         real(kind=16), intent(in) :: s
         integer :: array_size
         integer :: i

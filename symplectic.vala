@@ -65,11 +65,6 @@ namespace Integrators {
         public delegate void Integrator ();
 
         /**
-         * The integrator method
-         */
-        public Integrator integrator;
-
-        /**
          * The physical model
          */
         private Models.IModel model;
@@ -88,11 +83,10 @@ namespace Integrators {
          * This constructor produces instances from its label and scheme arguments according to the following tables:
          *
          * || ''label'' || ''Integrator Order'' ||  ''Description'' ||
-         * || "b1" || {@link firstOrder} || 1st Order, Symplectic, NOT Reversible ||
-         * || "b2" || {@link secondOrder} || 2nd Order, Symplectic, Reversible ||
-         * || "b4" || {@link updates} || 4th Order, Symplectic, Reversible ||
-         * || "b6" || {@link updates} || 6th Order, Symplectic, Reversible ||
-         * || "b8" || {@link updates} || 8th Order, Symplectic, Reversible ||
+         * || "b2" || {@link integrator} || 2nd Order, Symplectic, Reversible ||
+         * || "b4" || {@link integrator} || 4th Order, Symplectic, Reversible ||
+         * || "b6" || {@link integrator} || 6th Order, Symplectic, Reversible ||
+         * || "b8" || {@link integrator} || 8th Order, Symplectic, Reversible ||
          *
          * @param model the model
          * @param h the time step
@@ -109,17 +103,12 @@ namespace Integrators {
             var z1 = 1.0 / (4.0 - pow(4.0, (1.0 / 3.0)));
             var z0 = 1.0 - 4.0 * z1;
             switch (label) {
-                case "b1":
-                    stderr.printf("1st Order (Euler-Cromer)\n");
-                    integrator = firstOrder;
-                    break;
                 case "b2":
                     stderr.printf("2nd Order (Stormer-Verlet)\n");
-                    integrator = secondOrder;
+                    cd = { 0.5 * h, h };
                     break;
                 case "b4":
                     stderr.printf("4th Order (Smith)\n");
-                    integrator = updates;
                     cd = {
                       0.5 * h * z1,
                       h * z1, h * z1, h * z1,
@@ -128,7 +117,6 @@ namespace Integrators {
                     break;
                 case "b6":
                     stderr.printf("6th Order (Smith)\n");
-                    integrator = updates;
                     cd = {
                       0.5 * h * z1 * y1,
                       h * z1 * y1, h * z1 * y1, h * z1 * y1,
@@ -145,7 +133,6 @@ namespace Integrators {
                     break;
                 case "b8":
                     stderr.printf("8th Order (Smith)\n");
-                    integrator = updates;
                     cd = {
                       0.5 * h * z1 * y1 * x1,
                       h * z1 * y1 * x1, h * z1 * y1 * x1, h * z1 * y1 * x1,
@@ -207,42 +194,6 @@ namespace Integrators {
         }
 
         /**
-         * Euler-Cromer 1st order integrator.
-         *
-         * Performs the following calls on {@link Models.IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(h)
-         * pUpdate(h)
-         * }}}
-         *
-         * where h is the time step.
-         */
-        private void firstOrder () {
-            model.qUpdate(h);
-            model.pUpdate(h);
-        }
-
-        /**
-         * Stormer-Verlet 2nd order integrator.
-         *
-         * Performs the following calls on {@link Models.IModel} per iteration:
-         *
-         * {{{
-         * qUpdate(h/2)
-         * pUpdate(h)
-         * qUpdate(h/2)
-         * }}}
-         *
-         * where h is the time step.
-         */
-        private void secondOrder () {
-            model.qUpdate(h * 0.5);
-            model.pUpdate(h);
-            model.qUpdate(h * 0.5);
-        }
-
-        /**
          * Direct integrator.
          *
          * Performs the following calls on {@link Models.IModel} per iteration:
@@ -257,7 +208,7 @@ namespace Integrators {
          * qUpdate(cd[0])
          * }}}
          */
-        private void updates () {
+        public void integrator () {
             var size = cd.length;
             for (int i = 0; i < size; i++) {
                 if (i % 2 == 0) {

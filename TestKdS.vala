@@ -275,25 +275,25 @@ void add_test_solve_symplectic_start_non_0_b8() {
 void main (string[] args) {
     Test.init(ref args);
 
-    add_test_solve_symp_polar_b1();
+    //add_test_solve_symp_polar_b1();
     add_test_solve_symp_polar_b2();
     add_test_solve_symp_polar_b4();
     add_test_solve_symp_polar_b6();
     add_test_solve_symp_polar_b8();
 
-    add_test_solve_symp_light_b1();
+    //add_test_solve_symp_light_b1();
     add_test_solve_symp_light_b2();
     add_test_solve_symp_light_b4();
     add_test_solve_symp_light_b6();
     add_test_solve_symp_light_b8();
 
-    add_test_solve_symplectic_start_0_b1();
+    //add_test_solve_symplectic_start_0_b1();
     add_test_solve_symplectic_start_0_b2();
     add_test_solve_symplectic_start_0_b4();
     add_test_solve_symplectic_start_0_b6();
     add_test_solve_symplectic_start_0_b8();
 
-    add_test_solve_symplectic_start_non_0_b1();
+    //add_test_solve_symplectic_start_non_0_b1();
     add_test_solve_symplectic_start_non_0_b2();
     add_test_solve_symplectic_start_non_0_b4();
     add_test_solve_symplectic_start_non_0_b6();
