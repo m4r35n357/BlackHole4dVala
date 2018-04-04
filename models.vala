@@ -287,10 +287,12 @@ namespace Models {
          * @param x0 the initial displacement in x
          * @param y0 the initial displacement in y
          */
-        public HenonHeiles (double x0, double y0) {
+        public HenonHeiles (double x0, double Ux0, double y0, double Uy0) {
             stderr.printf("Henon-Heiles Potential\n");
             this.x = x0;
+            this.Ux = Ux0;
             this.y = y0;
+            this.Uy = Uy0;
             H0 = H();
         }
 

@@ -57,7 +57,10 @@ public static void main (string[] args) {
                     model.solve(new Integrators.Symplectic(model, step, type, scheme).integrator, step, start, end, plotratio);
                     break;
                 case "HenonHeiles":
-                    var model = new Models.HenonHeiles(o.get_double_member("x0"), o.get_double_member("y0"));
+                    var model = new Models.HenonHeiles(o.get_double_member("x0"),
+                                                        o.get_double_member("Ux0"),
+                                                        o.get_double_member("y0"),
+                                                        o.get_double_member("Uy0"));
                     model.solve(new Integrators.Symplectic(model, step, type, scheme).integrator, step, start, end, plotratio);
                     break;
                 case "NBody":

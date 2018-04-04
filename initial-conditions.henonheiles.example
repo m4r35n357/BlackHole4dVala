@@ -1,0 +1,16 @@
+{
+  "Simulator": "HenonHeiles",
+  "IC": {
+    "x0": 0.56,
+    "Ux0": 0.0,
+    "y0": 0.0,
+    "Uy0": 0.0,
+    "start": 0,
+    "end": 50,
+    "step": 0.01,
+    "integrator": "b4",
+    "scheme": "suzuki",
+    "plotratio": 1
+  }
+}
+
