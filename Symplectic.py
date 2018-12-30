@@ -12,18 +12,19 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from sys import stderr
-from numpy import longfloat
 
-D0 = longfloat(0.0)
-D05 = longfloat(0.5)
-D1 = longfloat(1.0)
-D2 = longfloat(2.0)
-D3 = longfloat(3.0)
-D4 = longfloat(4.0)
-D5 = longfloat(5.0)
-D7 = longfloat(7.0)
-D9 = longfloat(9.0)
+from sys import stderr
+from taylor import to_mpfr
+
+D0 = to_mpfr(0.0)
+D05 = to_mpfr(0.5)
+D1 = to_mpfr(1.0)
+D2 = to_mpfr(2.0)
+D3 = to_mpfr(3.0)
+D4 = to_mpfr(4.0)
+D5 = to_mpfr(5.0)
+D7 = to_mpfr(7.0)
+D9 = to_mpfr(9.0)
 
 
 class Symplectic(object):
@@ -32,70 +33,70 @@ class Symplectic(object):
         self.model = model
         self.h = h
         if scheme == 'yoshida':
-            print >> stderr, "Yoshida composition"
+            print("Yoshida composition", file=stderr)
             self.scheme = self.yoshida
             self.scheme_root = D2
         elif scheme == 'suzuki':
-            print >> stderr, "Suzuki composition"
+            print("Suzuki composition", file=stderr)
             self.scheme = self.suzuki
             self.scheme_root = D4
         else:
             raise Exception('>>> Composition scheme must be yoshida or suzuki, was "{found}" <<<'.format(found=scheme))
         if order == 'b1':
-            print >> stderr, "1st order (Euler-Cromer)"
+            print("1st order (Euler-Cromer)", file=stderr)
             self.method = self.euler_cromer
         elif order == 'b2':
-            print >> stderr, "2nd order (Stormer-Verlet))"
+            print("2nd order (Stormer-Verlet))", file=stderr)
             self.method = self.second_order
         elif order == 'b4':
-            print >> stderr, "4th order (Composed)"
+            print("4th order (Composed)", file=stderr)
             self.method = self.fourth_order
         elif order == 'f4':
-            print >> stderr, "4th order (Forest-Ruth)"
+            print("4th order (Forest-Ruth)", file=stderr)
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.fourth_order_forest_ruth
         elif order == 'b6':
-            print >> stderr, "6th order (Composed)"
+            print("6th order (Composed)", file=stderr)
             self.method = self.sixth_order
         elif order == 'f6':
-            print >> stderr, "6th order (Forest-Ruth) (Composed)"
+            print("6th order (Forest-Ruth) (Composed)", file=stderr)
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.sixth_order_forest_ruth
         elif order == 'b8':
-            print >> stderr, "8th order (Composed)"
+            print("8th order (Composed)", file=stderr)
             self.method = self.eightth_order
         elif order == 'f8':
-            print >> stderr, "8th order (Forest-Ruth) (Composed)"
+            print("8th order (Forest-Ruth) (Composed)", file=stderr)
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.eightth_order_forest_ruth
         elif order == 'b10':
-            print >> stderr, "10th order (Composed)"
+            print("10th order (Composed)", file=stderr)
             self.method = self.tenth_order
         elif order == 'f10':
-            print >> stderr, "10th order (Forest-Ruth) (Composed)"
+            print("10th order (Forest-Ruth) (Composed)", file=stderr)
             self.scheme = self.yoshida
             self.scheme_root = D2
             self.method = self.tenth_order_forest_ruth
         elif order == 's4':
-            print >> stderr, "4th order (Smith)"
+            print("4th order (Smith)", file=stderr)
             self.scheme = self.suzuki
             self.scheme_root = D4
             self.method = self.fourth_order_smith
         elif order == 's6':
-            print >> stderr, "6th order (Smith)"
+            print("6th order (Smith)", file=stderr)
             self.scheme = self.suzuki
             self.scheme_root = D4
             self.method = self.sixth_order_smith
         elif order == 's8':
-            print >> stderr, "8th order (Smith)"
+            print("8th order (Smith)", file=stderr)
             self.scheme = self.suzuki
             self.scheme_root = D4
             self.method = self.eightth_order_smith
         elif order == 's10':
-            print >> stderr, "10th order (Smith) (Composed)"
+            print("10th order (Smith) (Composed)", file=stderr)
             self.scheme = self.suzuki
             self.scheme_root = D4
             self.method = self.tenth_order_smith
@@ -197,7 +198,6 @@ class Symplectic(object):
         self.model.q_update(s * self.cd_sv[0])
 
     def second_order(self):
-        # noinspection PyTypeChecker
         self.stormer_verlet(D1)
 
     @staticmethod
@@ -224,19 +224,15 @@ class Symplectic(object):
         self.scheme(self.base6, s, self.x1, self.x0)
 
     def fourth_order(self):
-        # noinspection PyTypeChecker
         self.base4(D1)
 
     def sixth_order(self):
-        # noinspection PyTypeChecker
         self.base6(D1)
 
     def eightth_order(self):
-        # noinspection PyTypeChecker
         self.base8(D1)
 
     def tenth_order(self):
-        # noinspection PyTypeChecker
         self.scheme(self.base8, D1, self.w1, self.w0)
 
     def forest_ruth_4(self, s):
@@ -249,25 +245,21 @@ class Symplectic(object):
         self.model.q_update(s * self.cd_f4[0])
 
     def fourth_order_forest_ruth(self):
-        # noinspection PyTypeChecker
         self.forest_ruth_4(D1)
 
     def base6_forest_ruth(self, s):
         self.scheme(self.forest_ruth_4, s, self.y1, self.y0)
 
     def sixth_order_forest_ruth(self):
-        # noinspection PyTypeChecker
         self.base6_forest_ruth(D1)
 
     def base8_forest_ruth(self, s):
         self.scheme(self.base6_forest_ruth, s, self.x1, self.x0)
 
     def eightth_order_forest_ruth(self):
-        # noinspection PyTypeChecker
         self.base8_forest_ruth(D1)
 
     def tenth_order_forest_ruth(self):
-        # noinspection PyTypeChecker
         self.scheme(self.base8_forest_ruth, D1, self.w1, self.w0)
 
     def smith(self, s):
@@ -281,23 +273,19 @@ class Symplectic(object):
 
     def fourth_order_smith(self):
         self.coefficients = self.cd_s4
-        # noinspection PyTypeChecker
         self.smith(D1)
 
     def sixth_order_smith(self):
         self.coefficients = self.cd_s6
-        # noinspection PyTypeChecker
         self.smith(D1)
 
     def eightth_order_smith(self):
         self.coefficients = self.cd_s8
-        # noinspection PyTypeChecker
         self.smith(D1)
 
     def tenth_order_smith(self):
         self.coefficients = self.cd_s8
-        # noinspection PyTypeChecker
         self.scheme(self.smith, D1, self.w1, self.w0)
 
 
-print >> stderr, __name__ + " module loaded"
+print(__name__ + " module loaded", file=stderr)

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#  Example: ./Analysis.py <analysis.json | ./plotXY.py 1 c d
+
 """
 Copyright (c) 2014-2018, Ian Smith (m4r35n357)
 All rights reserved.
@@ -13,11 +16,12 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from json import loads
-from numpy import longfloat, pi, sqrt, cos, sin
-from sys import stdin, stderr, argv
 
-from Symplectic import Symplectic, D1, D2, D0, D3
+from gmpy2 import get_context, mpfr
+get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
+from json import loads
+from sys import stdin, stderr, argv
+from Symplectic import Symplectic
 
 
 class Analysis(object):
@@ -41,15 +45,14 @@ class Analysis(object):
         method()
 
     def output(self):
-        print '{{"count":{:d},"c":{:.9e},"d":{:.9e}}}'.format(
-            self.count, self.c, self.d)
+        print('{{"count":{:d},"c":{:.9e},"d":{:.9e}}}'.format(self.count, self.c, self.d))
 
 if __name__ == "__main__":
-    print >> stderr, "Simulator: {}".format(argv[0])
+    print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = stdin.read()
-    ic = loads(input_data, parse_float=longfloat)['IC']
-    print >> stderr, input_data
+    ic = loads(input_data, parse_float=mpfr)['IC']
+    print(input_data, file=stderr)
     a = Analysis()
     a.solve(Symplectic(a, 1.0, ic['integrator'], ic['scheme']).method)
 else:
-    print >> stderr, __name__ + " module loaded"
+    print(__name__ + " module loaded", file=stderr)

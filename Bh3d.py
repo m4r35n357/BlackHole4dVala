@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Copyright (c) 2014-2018, Ian Smith (m4r35n357)
 All rights reserved.
@@ -13,11 +13,13 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from json import loads
-from numpy import longfloat, pi, sqrt, cos, sin
-from sys import stdin, stderr, argv
 
+from json import loads
+from sys import stdin, stderr, argv
+from gmpy2 import get_context, mpfr, sqrt, sin, cos, acos
+get_context().precision = 236  # Set this BEFORE importing any Taylor Series stuff!
 from Symplectic import Symplectic, D1, D2, D0, D3
+from taylor import to_mpfr
 
 
 class BhSymp(object):
@@ -38,7 +40,7 @@ class BhSymp(object):
         self.K = q + self.X2 * (l - self.aE)**2
         self.t = self.ph = D0
         self.r = r0
-        self.th = (longfloat(90.0) - th0) * longfloat(pi) / longfloat(180.0)
+        self.th = (to_mpfr(90.0) - th0) * acos(to_mpfr(-1)) / to_mpfr(180.0)
         self.cross = xh
         self.refresh()
         self.Ur = - sqrt(self.r_potential if self.r_potential >= D0 else -self.r_potential)
@@ -97,17 +99,17 @@ class BhSymp(object):
         er = ur**2 - self.r_potential / self.S**2
         eth = uth**2 - self.th_potential / self.S**2
         v4e = self.v4_error(ut, ur, uth, uph)
-        print '{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph, ut, ur, uth, uph)
+        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
+            mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph, ut, ur, uth, uph))
 
 
 if __name__ == "__main__":
-    print >> stderr, "Simulator: {}".format(argv[0])
+    print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = stdin.read()
-    ic = loads(input_data, parse_float=longfloat)['IC']
-    print >> stderr, input_data
+    ic = loads(input_data, parse_float=mpfr)['IC']
+    print(input_data, file=stderr)
     bh = BhSymp(ic['lambda'], ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])
     step = ic['step']
     bh.solve(Symplectic(bh, step, ic['integrator'], ic['scheme']).method, step, ic['start'], ic['end'], ic['plotratio'])
 else:
-    print >> stderr, __name__ + " module loaded"
+    print(__name__ + " module loaded", file=stderr)
