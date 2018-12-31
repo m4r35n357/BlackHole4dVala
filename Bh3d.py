@@ -16,9 +16,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 from json import loads
 from sys import stdin, stderr, argv
-from gmpy2 import get_context, mpfr, sqrt, sin, cos, acos
+from gmpy2 import get_context, mpfr, acos, sqrt
 get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
 from Symplectic import Symplectic, D1, D2, D0, D3
+from dual import Dual, make_mpfr
 
 
 class BhSymp(object):
@@ -34,56 +35,53 @@ class BhSymp(object):
         self.aE = a * e
         self.aL = a * l
         self.X2 = (D1 + self.a2l_3)**2
-        self.two_EX2 = D2 * e * self.X2
-        self.two_aE = D2 * a * e
         self.K = q + self.X2 * (l - self.aE)**2
         self.t = self.ph = D0
-        self.r = r0
-        self.th = (mpfr("90.0") - th0) * acos(mpfr("-1")) / mpfr("180.0")
+        self.r = Dual.from_number(r0, variable=True)
+        self.th = Dual.from_number((make_mpfr(90.0) - th0) * acos(make_mpfr(-1)) / make_mpfr(180.0), variable=True)
         self.cross = xh
         self.refresh()
-        self.Ur = - sqrt(self.r_potential if self.r_potential >= D0 else -self.r_potential)
-        self.Uth = - sqrt(self.th_potential if self.th_potential >= D0 else -self.th_potential)
+        self.Ur = - sqrt(self.r_potential.val if self.r_potential.val >= D0 else - self.r_potential.val)
+        self.Uth = - sqrt(self.th_potential.val if self.th_potential.val >= D0 else - self.th_potential.val)
 
     def refresh(self):
-        self.r2 = self.r**2
+        self.r2 = self.r.sqr
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
         self.d_r = (D1 - self.l_3 * self.r2) * self.ra2 - D2 * self.r
-        self.r_potential = self.X2 * self.P**2 - self.d_r * (self.mu2 * self.r2 + self.K)
-        self.sth = sin(self.th)
-        self.cth = cos(self.th)
-        self.sth2 = self.sth**2
+        self.r_potential = self.X2 * self.P.sqr - self.d_r * (self.mu2 * self.r2 + self.K)
+        self.sth2 = self.th.sin.sqr
         self.cth2 = D1 - self.sth2
         self.T = self.aE * self.sth2 - self.L
         self.d_th = D1 + self.a2l_3 * self.cth2
-        self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
-        p_dr = self.P / self.d_r
-        t_dth = self.T / self.d_th
-        self.S = self.r2 + self.a2 * self.cth2
-        self.Ut = (p_dr * self.ra2 - t_dth * self.a) * self.X2
-        self.Uph = (p_dr * self.a - t_dth / self.sth2) * self.X2
+        self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T.sqr / self.sth2
+        p_dr = self.P.val / self.d_r.val
+        t_dth = self.T.val / self.d_th.val
+        self.S = self.r2.val + self.a2 * self.cth2.val
+        self.Ut = (p_dr * self.ra2.val - t_dth * self.a) * self.X2
+        self.Uph = (p_dr * self.a - t_dth / self.sth2.val) * self.X2
 
     def v4_error(self, ut, ur, uth, uph):
         sx2 = self.S * self.X2
-        return self.mu2 + self.sth2 * self.d_th / sx2 * (self.a * ut - self.ra2 * uph)**2 + self.S / self.d_r * ur**2 \
-               + self.S / self.d_th * uth**2 - self.d_r / sx2 * (ut - self.a * self.sth2 * uph)**2
+        return (self.mu2 + self.sth2.val * self.d_th.val / sx2 * (self.a * ut - self.ra2.val * uph)**2
+                + self.S / self.d_r.val * ur**2 + self.S / self.d_th.val * uth**2
+                - self.d_r.val / sx2 * (ut - self.a * self.sth2.val * uph)**2)
 
     def q_update(self, c):
         self.t += c * self.Ut
-        self.r += c * self.Ur
-        self.th += c * self.Uth
+        self.r.val += c * self.Ur
+        self.th.val += c * self.Uth
         self.ph += c * self.Uph
         self.refresh()
 
     def p_update(self, d):
-        self.Ur += d * (self.r * (self.two_EX2 * self.P - self.mu2 * self.d_r) - (self.r * (D1 - self.l_3 * (self.r2 + self.ra2)) - D1) * (self.K + self.mu2 * self.r2))
-        self.Uth += d * (self.cth * (self.sth * self.a2 * (self.mu2 * self.d_th - self.l_3 * (self.K - self.a2mu2 * self.cth2)) + self.X2 * self.T / self.sth * (self.T / self.sth2 - self.two_aE)))
+        self.Ur += 0.5 * d * self.r_potential.der
+        self.Uth += 0.5 * d * self.th_potential.der
 
     def solve(self, method, h, start, end, tr):
         mino = tau = 0.0
         i = 0
-        while (tau < end) and (self.cross or self.d_r > D0):
+        while (tau < end) and (self.cross or self.d_r.val > D0):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
             method()
@@ -93,10 +91,11 @@ class BhSymp(object):
         self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
 
     def plot(self, mino, tau, ut, ur, uth, uph):
-        er = ur**2 - self.r_potential / self.S**2
-        eth = uth**2 - self.th_potential / self.S**2
+        er = ur**2 - self.r_potential.val / self.S**2
+        eth = uth**2 - self.th_potential.val / self.S**2
         v4e = self.v4_error(ut, ur, uth, uph)
-        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph))
+        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
+            mino, tau, v4e, er, eth, self.t, self.r.val, self.th.val, self.ph))
 
 
 if __name__ == "__main__":

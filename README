@@ -36,6 +36,7 @@ export exe='./FortranKdS'
 export exe='./FortranNewton'
 export exe='./Simulate'
 export exe='./Bh3d.py'
+export exe='./Newton.py'
 export exe='nc.openbsd pi 1234'
 
 
