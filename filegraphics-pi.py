@@ -72,8 +72,8 @@ def main():
         raise Exception('>>> ERROR! Please supply a parameter file name <<<')
     parameters = loads(open(argv[1]).read())['IC']
     interval = parameters['plotratio']
-    m = parameters['M']
-    a = parameters['a']
+    m = parameters['M'] if 'M' in parameters else 1.0
+    a = parameters['Lfac'] if 'Lfac' in parameters else parameters['a'] if 'a' in parameters else 1.0
     a2 = a**2
     # Setup display and initialise pi3d
     display = Display.create(x=0, y=0, frames_per_second=0)

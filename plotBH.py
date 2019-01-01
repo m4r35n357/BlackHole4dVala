@@ -70,7 +70,7 @@ def log_error(e):
 
 
 def main():
-    print "Geodesic Plotter: {}".format(argv)
+    print("Geodesic Plotter: {}".format(argv))
     if len(argv) < 2:
         raise Exception('>>> ERROR! Please supply a parameter file name <<<')
     parameters = loads(open(argv[1]).read())['IC']
@@ -162,9 +162,9 @@ def main():
         e_cum += e
         e_pk = e_pk if e_pk > e else e
         data_line = stdin.readline()
-    print " {}: Errors - Peak: {:.1f}, Average: {:.1f}".format(argv[0], log_error(e_pk), log_error(e_cum / count))
+    print(" {}: Errors - Peak: {:.1f}, Average: {:.1f}".format(argv[0], log_error(e_pk), log_error(e_cum / count)))
 
 if __name__ == "__main__":
     main()
 else:
-    print >> stderr, __name__ + " module loaded"
+    print(__name__ + " module loaded", file=stderr)

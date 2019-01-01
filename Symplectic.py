@@ -265,11 +265,9 @@ class Symplectic(object):
     def smith(self, s):
         size = len(self.coefficients)
         for i in range(size):
-            step = self.model.q_update if i % 2 == 0 else self.model.p_update
-            step(s * self.coefficients[i])
-        for i in range(size -2, -1, -1):
-            step = self.model.q_update if i % 2 == 0 else self.model.p_update
-            step(s * self.coefficients[i])
+            (self.model.q_update if i % 2 == 0 else self.model.p_update)(s * self.coefficients[i])
+        for i in range(size - 2, -1, -1):
+            (self.model.q_update if i % 2 == 0 else self.model.p_update)(s * self.coefficients[i])
 
     def fourth_order_smith(self):
         self.coefficients = self.cd_s4

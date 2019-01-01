@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 from json import loads
 from sys import stdin, stderr, argv
 from gmpy2 import get_context, mpfr, sqrt, sin, cos, acos
-get_context().precision = 236  # Set this BEFORE importing any Taylor Series stuff!
+get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
 from Symplectic import Symplectic, D1, D2, D0, D3
 from taylor import to_mpfr
 
