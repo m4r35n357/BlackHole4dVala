@@ -47,14 +47,14 @@ class BhSymp(object):
 
     def refresh(self):
         self.r2 = self.r**2
-        self.sth = sin(self.th)
-        self.cth = cos(self.th)
-        self.sth2 = self.sth**2
-        self.cth2 = D1 - self.sth2
         self.ra2 = self.r2 + self.a2
         self.P = self.ra2 * self.E - self.aL
         self.d_r = (D1 - self.l_3 * self.r2) * self.ra2 - D2 * self.r
         self.r_potential = self.X2 * self.P**2 - self.d_r * (self.mu2 * self.r2 + self.K)
+        self.sth = sin(self.th)
+        self.cth = cos(self.th)
+        self.sth2 = self.sth**2
+        self.cth2 = D1 - self.sth2
         self.T = self.aE * self.sth2 - self.L
         self.d_th = D1 + self.a2l_3 * self.cth2
         self.th_potential = self.d_th * (self.K - self.a2mu2 * self.cth2) - self.X2 * self.T**2 / self.sth2
