@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #  Example: ./Analysis.py <analysis.json | ./plotXY.py 1 c d
 

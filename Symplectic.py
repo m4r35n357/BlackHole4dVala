@@ -14,17 +14,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 """
 
 from sys import stderr
-from taylor import to_mpfr
+from gmpy2 import mpfr
 
-D0 = to_mpfr(0.0)
-D05 = to_mpfr(0.5)
-D1 = to_mpfr(1.0)
-D2 = to_mpfr(2.0)
-D3 = to_mpfr(3.0)
-D4 = to_mpfr(4.0)
-D5 = to_mpfr(5.0)
-D7 = to_mpfr(7.0)
-D9 = to_mpfr(9.0)
+D0 = mpfr("0.0")
+D05 = mpfr("0.5")
+D1 = mpfr("1.0")
+D2 = mpfr("2.0")
+D3 = mpfr("3.0")
+D4 = mpfr("4.0")
+D5 = mpfr("5.0")
+D7 = mpfr("7.0")
+D9 = mpfr("9.0")
 
 
 class Symplectic(object):

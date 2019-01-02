@@ -19,7 +19,6 @@ from sys import stdin, stderr, argv
 from gmpy2 import get_context, mpfr, sqrt, sin, cos, acos
 get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
 from Symplectic import Symplectic, D1, D2, D0, D3
-from taylor import to_mpfr
 
 
 class BhSymp(object):
@@ -40,7 +39,7 @@ class BhSymp(object):
         self.K = q + self.X2 * (l - self.aE)**2
         self.t = self.ph = D0
         self.r = r0
-        self.th = (to_mpfr(90.0) - th0) * acos(to_mpfr(-1)) / to_mpfr(180.0)
+        self.th = (mpfr("90.0") - th0) * acos(mpfr("-1")) / mpfr("180.0")
         self.cross = xh
         self.refresh()
         self.Ur = - sqrt(self.r_potential if self.r_potential >= D0 else -self.r_potential)

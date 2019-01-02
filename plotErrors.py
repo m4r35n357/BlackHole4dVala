@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Copyright (c) 2014, 2015, 2016, Ian Smith (m4r35n357)
