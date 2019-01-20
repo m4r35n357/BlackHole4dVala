@@ -82,24 +82,21 @@ class BhSymp(object):
 
     def solve(self, method, h, start, end, tr):
         mino = tau = 0.0
-        i = plot_count = 0
+        i = 0
         while (tau < end) and (self.cross or self.d_r > D0):
             if tau >= start and i % tr == 0:
                 self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
-                plot_count += 1
             method()
             i += 1
             mino = h * i
             tau += h * self.S
         self.plot(mino, tau, self.Ut / self.S, self.Ur / self.S, self.Uth / self.S, self.Uph / self.S)
-        return i, plot_count
 
     def plot(self, mino, tau, ut, ur, uth, uph):
         er = ur**2 - self.r_potential / self.S**2
         eth = uth**2 - self.th_potential / self.S**2
         v4e = self.v4_error(ut, ur, uth, uph)
-        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph, ut, ur, uth, uph))
+        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(mino, tau, v4e, er, eth, self.t, self.r, self.th, self.ph))
 
 
 if __name__ == "__main__":

@@ -44,20 +44,18 @@ class Newton(object):
 
     def solve(self, method, h, start, end, tr):
         t = 0.0
-        i = plot_count = 0
+        i = 0
         while t < end:
             if t >= start and i % tr == 0:
                 self.plot(t)
-                plot_count += 1
             method()
             i += 1
             t = h * i
         self.plot(t)
-        return i, plot_count
 
     def plot(self, time):
-        print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e},"tP":{:.9e},"rP":{:.9e},"thP":{:.9e},"phP":{:.9e}}}'.format(
-            time, self.h() - self.H0, time, self.r, self.PI_2, self.ph, D1, self.rDot, D0, self.phDot))
+        print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
+            time, self.h() - self.H0, time, self.r, self.PI_2, self.ph))
 
 
 if __name__ == "__main__":
