@@ -53,6 +53,7 @@ namespace Generators {
          */
         private struct Params {
             public double a;
+            public double q;
             public double mu2;
             public double rMin;
             public double rMax;
@@ -164,6 +165,7 @@ namespace Generators {
             stdout.printf("  \"IC\" : {\n");
             stdout.printf("    \"M\" : %.17g,\n", 1.0);
             stdout.printf("    \"a\" : %.17g,\n", p->a);
+            stdout.printf("    \"q\" : %.17g,\n", p->q);
             stdout.printf("    \"lambda\" : %.17g,\n", 0.0);
             stdout.printf("    \"mu\" : %.17g,\n", p->mu2);
             stdout.printf("    \"E\" : %.17g,\n", s.x.get(X.E));
@@ -206,6 +208,7 @@ namespace Generators {
                 rMax = rMax,
                 elevation = (1.0 - (o.has_member("elevation") ? (90.0 - o.get_double_member("elevation")) / 180.0 : 0.5)) * PI,
                 a = o.has_member("spin") ? o.get_double_member("spin") : 0.0,
+                q = o.has_member("charge") ? o.get_double_member("charge") : 0.0,
                 cross = o.has_member("cross") ? o.get_boolean_member("cross") : false,
                 start = o.has_member("start") ? o.get_double_member("start") : 0.0,
                 end = o.has_member("end") ? o.get_double_member("end") : 1000.0,
@@ -356,7 +359,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, bool cross, double start, double end, double step, int64 plotratio, string integrator, string scheme) {
+        private void printOutput (double r, double a, double q, bool cross, double start, double end, double step, int64 plotratio, string integrator, string scheme) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -373,6 +376,7 @@ namespace Generators {
             stdout.printf("  \"IC\" : {\n");
             stdout.printf("    \"M\" : %.17g,\n", 1.0);
             stdout.printf("    \"a\" : %.17g,\n", a);
+            stdout.printf("    \"q\" : %.17g,\n", q);
             stdout.printf("    \"lambda\" : %.17g,\n", 0.0);
             stdout.printf("    \"mu\" : %.17g,\n", 0.0);
             stdout.printf("    \"E\" : %.17g,\n", E);
@@ -401,6 +405,7 @@ namespace Generators {
             // generate output
             printOutput(o.has_member("r") ? o.get_double_member("r") : 3.0,
                         o.has_member("spin") ? o.get_double_member("spin") : 1.0,
+                        o.has_member("charge") ? o.get_double_member("charge") : 0.0,
                         o.has_member("cross") ? o.get_boolean_member("cross") : false,
                         o.has_member("start") ? o.get_double_member("start") : 0.0,
                         o.has_member("end") ? o.get_double_member("end") : 1000.0,
