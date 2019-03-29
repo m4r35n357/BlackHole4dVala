@@ -62,6 +62,7 @@ namespace Generators {
             public double start;
             public double end;
             public double step;
+            public double tol;
             public int64 plotratio;
             public string integrator;
             public string scheme;
@@ -180,6 +181,7 @@ namespace Generators {
             stdout.printf("    \"start\" : %.17g,\n", p->start);
             stdout.printf("    \"end\" : %.17g,\n", p->end);
             stdout.printf("    \"step\" : %.17g,\n", p->step);
+            stdout.printf("    \"tol\" : %.1e,\n", p->tol);
             stdout.printf("    \"plotratio\" : %.1d,\n", (int)p->plotratio);
             stdout.printf("    \"integrator\" : \"%s\",\n", p->integrator);
             stdout.printf("    \"scheme\" : \"%s\"\n", p->scheme);
@@ -213,6 +215,7 @@ namespace Generators {
                 start = o.has_member("start") ? o.get_double_member("start") : 0.0,
                 end = o.has_member("end") ? o.get_double_member("end") : 1000.0,
                 step = o.has_member("step") ? o.get_double_member("step") : 0.01,
+                tol =  o.has_member("tol") ? o.get_double_member("tol") : 1.0e-15,
                 plotratio = o.has_member("plotratio") ? o.get_int_member("plotratio") : 1,
                 integrator = o.has_member("integrator") ? o.get_string_member("integrator") : "b6",
                 scheme = o.has_member("scheme") ? o.get_string_member("scheme") : "suzuki"
@@ -359,7 +362,7 @@ namespace Generators {
         /**
          * Write the initial conditions file to STDOUT and potential data to STDERR for plotting
          */
-        private void printOutput (double r, double a, double q, bool cross, double start, double end, double step, int64 plotratio, string integrator, string scheme) {
+        private void printOutput (double r, double a, double q, bool cross, double start, double end, double step, double tol, int64 plotratio, string integrator, string scheme) {
             var E = 1.0;
             var L = L(r,a);
             var Q = Q(r,a);
@@ -390,6 +393,7 @@ namespace Generators {
             stdout.printf("    \"start\" : %.17g,\n", start);
             stdout.printf("    \"end\" : %.17g,\n", end);
             stdout.printf("    \"step\" : %.17g,\n", step);
+            stdout.printf("    \"tol\" : %.1e,\n", tol);
             stdout.printf("    \"plotratio\" : %.1d,\n", (int)plotratio);
             stdout.printf("    \"integrator\" : \"%s\",\n", integrator);
             stdout.printf("    \"scheme\" : \"%s\"\n", scheme);
@@ -410,6 +414,7 @@ namespace Generators {
                         o.has_member("start") ? o.get_double_member("start") : 0.0,
                         o.has_member("end") ? o.get_double_member("end") : 1000.0,
                         o.has_member("step") ? o.get_double_member("step") : 0.001,
+                        o.has_member("tol") ? o.get_double_member("tol") : 1.0e-15,
                         o.has_member("plotratio") ? o.get_int_member("plotratio") : 50,
                         o.has_member("integrator") ? o.get_string_member("integrator") : "b6",
                         o.has_member("scheme") ? o.get_string_member("scheme") : "suzuki");
