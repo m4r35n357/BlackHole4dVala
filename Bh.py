@@ -115,78 +115,78 @@ class Dual:
 
 class Kerr(object):
 
-    def __init__(self, m, a, q, mu2, e, lz, cc, r0, th0, tol):
+    def __init__(self, m, a, q, μ2, e, lz, cc, r_0, θ_0, tol):
         self.rs = 2 * m
         self.a = a
         self.q = q
-        self.mu2 = mu2
+        self.μ2 = μ2
         self.t = make_mpfr(0)
-        self.r = Dual.from_number(r0)
-        self.th = Dual.from_number(th0 + acos(make_mpfr(0)))
-        self.phi = make_mpfr(0)
+        self.r = Dual.from_number(r_0)
+        self.θ = Dual.from_number((make_mpfr(90.0) - θ_0) * acos(make_mpfr(-1)) / make_mpfr(180.0))
+        self.φ = make_mpfr(0)
         self.p_t = Dual.from_number(- e)
         self.p_r = Dual.from_number(make_mpfr(0))
-        self.p_th = (cc - self.th.cos.sqr * (a**2 * (mu2 - e**2) + (lz / self.th.sin).sqr)).sqrt
-        self.p_phi = Dual.from_number(lz)
+        self.p_θ = (cc - self.θ.cos.sqr * (a**2 * (μ2 - e**2) + (lz / self.θ.sin).sqr)).sqrt
+        self.p_φ = Dual.from_number(lz)
         self.r_prev = self.r.val + 0.001
-        self.th_prev = self.th.val + 0.001
+        self.θ_prev = self.θ.val + 0.001
         self.p_r_prev = self.p_r.val + 0.001
-        self.p_th_prev = self.p_th.val + 0.001
-        self.tol = tol
-        self.h0 = self.h(self.r, self.th, self.p_t, self.p_r, self.p_th, self.p_phi).val
+        self.p_θ_prev = self.p_θ.val + 0.001
+        self.ε = tol
+        self.h0 = self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).val
 
-    def h(self, r, th, p_t, p_r, p_th, p_phi):  # MTW p.900 equation 33.35
-        delta = r.sqr - self.rs * r + self.a**2 + self.q
-        return D05 * (- ((r.sqr + self.a**2) * p_t + self.a * p_phi).sqr / delta + delta * p_r.sqr + p_th.sqr
-                      + ((p_phi + self.a * th.sin.sqr * p_t) / th.sin).sqr) / (r.sqr + self.a**2 * th.cos.sqr)
+    def h(self, r, θ, p_t, p_r, p_θ, p_φ):  # MTW p.900 equation 33.35
+        Δ = r.sqr - self.rs * r + self.a**2 + self.q
+        return D05 * (- ((r.sqr + self.a**2) * p_t + self.a * p_φ).sqr / Δ + Δ * p_r.sqr + p_θ.sqr
+                      + ((p_φ + self.a * θ.sin.sqr * p_t) / θ.sin).sqr) / (r.sqr + self.a**2 * θ.cos.sqr)
 
     def q_t_update(self, h):
-        return self.t + D05 * h * self.h(self.r, self.th, self.p_t.var, self.p_r, self.p_th, self.p_phi).der
+        return self.t + D05 * h * self.h(self.r, self.θ, self.p_t.var, self.p_r, self.p_θ, self.p_φ).der
 
     def q_r_implicit(self, h, r):
-        return self.r.val - r + D05 * h * self.h(Dual.from_number(r), self.th, self.p_t, self.p_r.var, self.p_th, self.p_phi).der
+        return self.r.val - r + D05 * h * self.h(Dual.from_number(r), self.θ, self.p_t, self.p_r.var, self.p_θ, self.p_φ).der
 
-    def q_th_implicit(self, h, th):
-        return self.th.val - th + D05 * h * self.h(self.r, Dual.from_number(th), self.p_t, self.p_r, self.p_th.var, self.p_phi).der
+    def q_θ_implicit(self, h, θ):
+        return self.θ.val - θ + D05 * h * self.h(self.r, Dual.from_number(θ), self.p_t, self.p_r, self.p_θ.var, self.p_φ).der
 
-    def q_phi_update(self, h):
-        return self.phi + D05 * h * self.h(self.r, self.th, self.p_t, self.p_r, self.p_th, self.p_phi.var).der
+    def q_φ_update(self, h):
+        return self.φ + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ.var).der
 
     def q_update_1(self, h):
-        r = secant(self.q_r_implicit, self.r.val, self.r_prev, h, self.tol)
-        th = secant(self.q_th_implicit, self.th.val, self.th_prev, h, self.tol)
+        r = secant(self.q_r_implicit, self.r.val, self.r_prev, h, self.ε)
+        θ = secant(self.q_θ_implicit, self.θ.val, self.θ_prev, h, self.ε)
         self.r_prev = self.r.val
-        self.th_prev = self.th.val
+        self.θ_prev = self.θ.val
         self.t = self.q_t_update(h)
         self.r = Dual.from_number(r)
-        self.th = Dual.from_number(th)
-        self.phi = self.q_phi_update(h)
+        self.θ = Dual.from_number(θ)
+        self.φ = self.q_φ_update(h)
 
     def q_update_2(self, h):
-        r = self.r.val + D05 * h * self.h(self.r, self.th, self.p_t, self.p_r.var, self.p_th, self.p_phi).der
-        th = self.th.val + D05 * h * self.h(self.r, self.th, self.p_t, self.p_r, self.p_th.var, self.p_phi).der
+        r = self.r.val + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r.var, self.p_θ, self.p_φ).der
+        θ = self.θ.val + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ.var, self.p_φ).der
         self.t = self.q_t_update(h)
         self.r = Dual.from_number(r)
-        self.th = Dual.from_number(th)
-        self.phi = self.q_phi_update(h)
+        self.θ = Dual.from_number(θ)
+        self.φ = self.q_φ_update(h)
 
     def p_r_implicit(self, h, p_r):
         r_var = self.r.var
-        return self.p_r.val - p_r - D05 * h * (self.h(r_var, self.th, self.p_t, self.p_r, self.p_th, self.p_phi).der
-                                             + self.h(r_var, self.th, self.p_t, Dual.from_number(p_r), self.p_th, self.p_phi).der)
+        return self.p_r.val - p_r - D05 * h * (self.h(r_var, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).der
+                                             + self.h(r_var, self.θ, self.p_t, Dual.from_number(p_r), self.p_θ, self.p_φ).der)
 
-    def p_th_implicit(self, h, p_th):
-        th_var = self.th.var
-        return self.p_th.val - p_th - D05 * h * (self.h(self.r, th_var, self.p_t, self.p_r, self.p_th, self.p_phi).der
-                                               + self.h(self.r, th_var, self.p_t, self.p_r, Dual.from_number(p_th), self.p_phi).der)
+    def p_θ_implicit(self, h, p_θ):
+        θ_var = self.θ.var
+        return self.p_θ.val - p_θ - D05 * h * (self.h(self.r, θ_var, self.p_t, self.p_r, self.p_θ, self.p_φ).der
+                                             + self.h(self.r, θ_var, self.p_t, self.p_r, Dual.from_number(p_θ), self.p_φ).der)
 
     def p_update(self, h):
-        pr = secant(self.p_r_implicit, self.p_r.val, self.p_r_prev, h, self.tol)
-        pth = secant(self.p_th_implicit, self.p_th.val, self.p_th_prev, h, self.tol)
+        pr = secant(self.p_r_implicit, self.p_r.val, self.p_r_prev, h, self.ε)
+        pθ = secant(self.p_θ_implicit, self.p_θ.val, self.p_θ_prev, h, self.ε)
         self.p_r_prev = self.p_r.val
-        self.p_th_prev = self.p_th.val
+        self.p_θ_prev = self.p_θ.val
         self.p_r = Dual.from_number(pr)
-        self.p_th = Dual.from_number(pth)
+        self.p_θ = Dual.from_number(pθ)
 
     def stormer_verlet(self, h):
         self.q_update_1(h)
@@ -194,29 +194,29 @@ class Kerr(object):
         self.q_update_2(h)
 
     def solve(self, h, start, end, tr):
-        tau = 0.0
+        τ = 0.0
         i = 0
-        while tau < end:
-            if tau >= start and i % tr == 0:
-                self.plot(tau)
+        while τ < end:
+            if τ >= start and i % tr == 0:
+                self.plot(τ)
             self.stormer_verlet(h)
             i += 1
-            tau = h * i
-        self.plot(tau)
+            τ = h * i
+        self.plot(τ)
 
-    def plot(self, tau):
-        h = self.h(self.r, self.th, self.p_t, self.p_r, self.p_th, self.p_phi).val
+    def plot(self, τ):
+        h = self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).val
         print('{{"tau":{:.9e},"v4e":{:.9e},"H":{:.9e},"E":{:.9e},"L":{:.9e},"Q":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            tau, h - self.h0, h, - self.p_t.val, self.p_phi.val,
-            (self.p_th.sqr + self.th.cos.sqr * (self.a**2 * (self.mu2 - self.p_t.sqr) + (self.p_phi / self.th.sin).sqr)).val,
-            self.t, self.r.val, self.th.val, self.phi))
+            τ, h - self.h0, h, - self.p_t.val, self.p_φ.val,
+            (self.p_θ.sqr + self.θ.cos.sqr * (self.a**2 * (self.μ2 - self.p_t.sqr) + (self.p_φ / self.θ.sin).sqr)).val,
+            self.t, self.r.val, self.θ.val, self.φ))
 
 
-def secant(f, a, b, h, tol, limit=101):
+def secant(f, a, b, h, ε, limit=101):
     f_a = f(h, a)
     f_b = f(h, b)
     counter = c = f_c = 1
-    while abs(f_c) > tol:
+    while abs(f_c) > ε:
         if counter == limit:
             raise RuntimeError("{}\n Giving up after {} iterations, value {}, previous {}".format(f, counter - 1, a, b))
         c = (b * f_a - a * f_b) / (f_a - f_b)
