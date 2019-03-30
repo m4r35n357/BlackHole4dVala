@@ -51,13 +51,11 @@ export ic=initial-conditions.json
 export data=/tmp/data
 export pot=/tmp/potential
 export icgen=./GenParticle
-
-cp icgenParticle-data.example $icdata
-cp icgenLight-data.example $icdata
+cp icgen.particle.example $icdata
 
 ... or for light
 export icgen=./GenLight
-cp icgenLight-data.example $icdata
+cp icgen.light.example $icdata
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
