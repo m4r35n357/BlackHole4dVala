@@ -2,7 +2,7 @@
 import copy
 from json import loads
 from sys import argv, stdin, stderr
-import numpy as np
+# import numpy as np
 from gmpy2 import mpfr, get_context, sin, acos, cos
 get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
 from Symplectic import D1, D2
@@ -57,7 +57,10 @@ def nelder_mead(f, x_start,
                 x0[i] += c / (len(res)-1)
 
         # reflection
-        xr = x0 + alpha*(x0 - res[-1][0])
+        worst = res[-1][0]
+        xr = [0.0, 0.0, 0.0]
+        for i in range(dim):
+            xr[i] = x0[i] + alpha*(x0[i] - worst[i])
         rscore = f(xr)
         if res[0][1] <= rscore < res[-2][1]:
             del res[-1]
@@ -66,7 +69,10 @@ def nelder_mead(f, x_start,
 
         # expansion
         if rscore < res[0][1]:
-            xe = x0 + gamma*(x0 - res[-1][0])
+            worst = res[-1][0]
+            xe = [0.0, 0.0, 0.0]
+            for i in range(dim):
+                xe[i] = x0[i] + gamma * (x0[i] - worst[i])
             escore = f(xe)
             if escore < rscore:
                 del res[-1]
@@ -78,7 +84,10 @@ def nelder_mead(f, x_start,
                 continue
 
         # contraction
-        xc = x0 + rho*(x0 - res[-1][0])
+        worst = res[-1][0]
+        xc = [0.0, 0.0, 0.0]
+        for i in range(dim):
+            xc[i] = x0[i] + rho*(x0[i] - worst[i])
         cscore = f(xc)
         if cscore < res[-1][1]:
             del res[-1]
@@ -140,5 +149,5 @@ if __name__ == "__main__":
         potentials = Potentials(ic['spin'], ic['r'], ic['r'], ic['elevation'])
         f = potentials.f_spherical
         print('SPHERICAL')
-    print(nelder_mead(f, np.array([0.9, 1.5, 8.0])))
+    print(nelder_mead(f, [0.9, 1.5, 8.0]))
 
