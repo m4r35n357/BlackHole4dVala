@@ -1,29 +1,21 @@
-#!/usr/bin/env python3
-
-import copy
-from json import loads
-from sys import argv, stderr
-from gmpy2 import mpfr, get_context, sin, acos, cos
-get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
-from Symplectic import D1, D2
-from dual import Dual, make_mpfr
-
+from copy import copy
+from sys import stderr
 
 def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterations=0, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
 
     # initial simplex
-    nt = nr = ne = nc = ns = 0
     dim = len(x_0)
+    assert dim == len(x_δ)
     prev_best = f(x_0)
     no_improvement = 0
     results = [[x_0, prev_best]]
     for i in range(dim):
-        x = copy.copy(x_0)
+        x = copy(x_0)
         x[i] += x_δ[i]
         score = f(x)
         results.append([x, score])
+    iterations = nt = nr = ne = nc = ns = 0
 
-    iterations = 0
     while True:
         nt += 1
 
@@ -37,7 +29,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
         iterations += 1
 
         # break after no_improvement iterations with no improvement
-        # print('...best so far:', best)
+        print('...best so far:', best, file=stderr)
         if best < prev_best - stuck_threshold:
             no_improvement = 0
             prev_best = best
@@ -105,47 +97,4 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
             reduced.append([xs, score])
         results = reduced
 
-
-class Potentials(object):
-    def __init__(self, a, r_min, r_max, elevation):
-        self.a = a
-        self.a2 = a**2
-        self.μ2 = make_mpfr(1)
-        self.r_min = make_mpfr(r_min)
-        self.r_max = make_mpfr(r_max)
-        self.θ = make_mpfr((D1 - (make_mpfr(90) - elevation) / make_mpfr(180)) * acos(make_mpfr(-1)))
-
-    def f_r(self, r, e, l, q):
-        r2 =r.sqr
-        ra2 = r2 + self.a2
-        return (ra2 * e - self.a * l).sqr - (ra2 - D2 * r) * (self.μ2 * r2 + q + (l - self.a * e)**2)
-
-    def f_θ(self, θ, e, l, q):
-        return q - cos(θ)**2 * (self.a2 * (self.μ2 - e**2) + (l / sin(θ))**2)
-
-    def f_spherical(self, x):
-        E, L, Q = x
-        r_potential = self.f_r(Dual.from_number(self.r_max, variable=True), E, L, Q)
-        return r_potential.val**2 + r_potential.der**2 + self.f_θ(self.θ, E, L, Q)**2
-
-    def f_nonspherical(self, x):
-        E, L, Q = x
-        r_min_potential = self.f_r(Dual.from_number(self.r_min), E, L, Q).val
-        r_max_potential = self.f_r(Dual.from_number(self.r_max), E, L, Q).val
-        return r_min_potential**2 + r_max_potential**2 + self.f_θ(self.θ, E, L, Q)**2
-
-
-if __name__ == "__main__":
-    # Example: ./NelderMead.py icgen-data.json 1.0 5.0 0.0 1.0 1.0 1.0
-    print("Generator: {}".format(argv[0]), file=stderr)
-    input_data = open(argv[1]).read()
-    ic = loads(input_data, parse_float=mpfr)
-    print(input_data, file=stderr)
-    if ic.get('rMax'):
-        potentials = Potentials(ic['spin'], ic['rMin'], ic['rMax'], ic['elevation'])
-        func = potentials.f_nonspherical
-    else:
-        potentials = Potentials(ic['spin'], ic['r'], ic['r'], ic['elevation'])
-        func = potentials.f_spherical
-    print(nelder_mead(func, [make_mpfr(argv[2]), make_mpfr(argv[3]), make_mpfr(argv[4])], [make_mpfr(argv[5]), make_mpfr(argv[6]), make_mpfr(argv[7])]))
-
+print(__name__ + " module loaded", file=stderr)

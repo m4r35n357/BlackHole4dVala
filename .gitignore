@@ -22,7 +22,8 @@ Fortran*
 TestKdS
 raytrace-commands
 Simulate
-Gen*
+GenParticle
+GenLight
 kerr-image
 kerr-image-ian
 !kerr-image.c
