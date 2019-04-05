@@ -2,12 +2,10 @@
 import copy
 from json import loads
 from sys import argv, stdin, stderr
-import math
 import numpy as np
-from gmpy2 import mpfr, get_context, sqrt, sin, acos, cos
-
+from gmpy2 import mpfr, get_context, sin, acos, cos
 get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
-from Symplectic import D0, D1, D2
+from Symplectic import D1, D2
 from dual import Dual, make_mpfr
 
 
@@ -41,7 +39,7 @@ def nelder_mead(f, x_start,
         iters += 1
 
         # break after no_improvement iterations with no improvement
-        print('...best so far:', best)
+        # print('...best so far:', best)
 
         if best < prev_best - no_improve_thr:
             no_improvement = 0
@@ -97,10 +95,6 @@ def nelder_mead(f, x_start,
         res = nres
 
 
-def f(x):
-    return math.sin(x[0]) * math.cos(x[1]) * (1. / (abs(x[2]) + 1))
-
-
 class Potentials(object):
     def __init__(self, a, r_min, r_max, elevation):
         self.a = a
@@ -109,7 +103,6 @@ class Potentials(object):
         self.r_min = make_mpfr(r_min)
         self.r_max = make_mpfr(r_max)
         self.θ = make_mpfr((D1 - (make_mpfr(90) - elevation) / make_mpfr(180)) * acos(make_mpfr(-1)))
-        # print("THETA: {}".format(self.θ))
 
     def f_r(self, r, E, L, Q):
         r2 =r.sqr
@@ -120,29 +113,23 @@ class Potentials(object):
         return Q - cos(θ)**2 * (self.a2 * (self.μ2 - E**2) + (L / sin(θ))**2)
 
     def f_spherical(self, x):
-        print(x)
-        E = x[0]
-        L = x[1]
-        Q = x[2]
+        E, L, Q = x
         r_potential = self.f_r(Dual.from_number(self.r_max, variable=True), E, L, Q)
         return r_potential.val**2 + r_potential.der**2 + self.f_θ(self.θ, E, L, Q)**2
 
     def f_nonspherical(self, x):
-        E = x[0]
-        L = x[1]
-        Q = x[2]
-        print("{} {} {}".format(E, L, Q))
+        E, L, Q = x
         r_min_potential = self.f_r(Dual.from_number(self.r_min), E, L, Q).val
         r_max_potential = self.f_r(Dual.from_number(self.r_max), E, L, Q).val
         return r_min_potential**2 + r_max_potential**2 + self.f_θ(self.θ, E, L, Q)**2
 
 
 if __name__ == "__main__":
-    # test
-    print(nelder_mead(f, np.array([0., 0., 0.])))
-
     print("Generator: {}".format(argv[0]), file=stderr)
-    input_data = stdin.read()
+    if argv[1]:
+        input_data = open(argv[1]).read()
+    else:
+        input_data = stdin.read()
     ic = loads(input_data, parse_float=mpfr)
     print(input_data, file=stderr)
     if ic.get('rMax'):
