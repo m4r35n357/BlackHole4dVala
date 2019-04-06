@@ -1,5 +1,6 @@
-from copy import copy
 from sys import stderr
+from copy import copy
+from json import dumps
 
 def replace_worst(data, new):
     del data[-1]
@@ -19,6 +20,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
         score = f(x)
         results.append([x, score])
     iterations = no_improvement = nt = nr = ne = nc = ns = 0
+    latest = ""
 
     while True:
         nt += 1
@@ -30,10 +32,10 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
         # break after max_iter
         if max_iterations and iterations >= max_iterations:
             return results[0], nt - 1, nr, ne, nc, ns
-        iterations += 1
 
         # break after no_improvement iterations with no improvement
-        print('...best so far:', best, file=stderr)
+        # print(dumps(dict(step = iterations, data = results, type = latest)), file=stderr)
+        print('{} {} {}'.format(iterations, results, latest), file=stderr)
         if best < prev_best - stuck_threshold:
             no_improvement = 0
             prev_best = best
@@ -41,6 +43,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
             no_improvement += 1
         if no_improvement >= stuck_break:
             return results[0], nt - 1, nr, ne, nc, ns
+        iterations += 1
 
         # 2. centroid
         x0 = [0.0] * dim
@@ -54,6 +57,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
         if results[0][1] <= r_score < results[-2][1]:
             nr += 1
             replace_worst(results, [xr, r_score])
+            latest = "reflection"
             continue
 
         # 4. expand
@@ -62,6 +66,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
             e_score = f(xe)
             ne += 1
             replace_worst(results, [xe, e_score] if e_score < r_score else [xr, r_score])
+            latest = "expansion" + ("(e)" if e_score < r_score else "(r)")
             continue
 
         # 5. contract
@@ -70,6 +75,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
         if c_score < results[-1][1]:
             nc += 1
             replace_worst(results, [xc, c_score])
+            latest = "contraction"
             continue
 
         # 6. shrink
@@ -81,5 +87,7 @@ def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterat
             ns += 1
             reduced.append([xs, score])
         results = reduced
+        latest = "reduction"
+
 
 print(__name__ + " module loaded", file=stderr)
