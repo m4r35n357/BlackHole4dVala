@@ -25,27 +25,26 @@ from dual import Dual, make_mpfr
 class Newton(object):
     def __init__(self, g, m, l_fac, r0):
         zero = make_mpfr(0)
-        self.PI_2 = acos(zero)
+        self.π_2 = acos(zero)
         self.g = Dual.from_number(g)
         self.m = Dual.from_number(m)
-        self.q_phi = Dual.from_number(zero)
-        self.p_phi = Dual.from_number(l_fac * m * sqrt(r0))
+        self.q_φ = Dual.from_number(zero)
+        self.p_φ = Dual.from_number(l_fac * m * sqrt(r0))
         self.q_r = Dual.from_number(r0)
         self.p_r = Dual.from_number(zero)
-        self.h0 = self.h(self.q_r, self.p_r, self.p_phi).val
+        self.h0 = self.h(self.q_r, self.p_r, self.p_φ).val
 
-    def h(self, q_r, p_r, p_phi):  # ph absent from Hamiltonian
-        return (p_r**2 + p_phi**2 / q_r**2) / (2 * self.m) - self.g * self.m / q_r
+    def h(self, q_r, p_r, p_φ):  # ph absent from Hamiltonian
+        return (p_r**2 + p_φ**2 / q_r**2) / (2 * self.m) - self.g * self.m / q_r
 
     def q_update(self, c):
-        q_r = c * self.h(self.q_r, self.p_r.var, self.p_phi).der
-        q_ph = c * self.h(self.q_r, self.p_r, self.p_phi.var).der
+        q_r = c * self.h(self.q_r, self.p_r.var, self.p_φ).der
+        q_φ = c * self.h(self.q_r, self.p_r, self.p_φ.var).der
         self.q_r = Dual.from_number(self.q_r.val + q_r)  # only update after all coordinates done!
-        self.q_phi = Dual.from_number(self.q_phi.val + q_ph)
+        self.q_φ = Dual.from_number(self.q_φ.val + q_φ)
 
     def p_update(self, d):  # no self.p_ph update because ph absent from Hamiltonian
-        p_r = d * self.h(self.q_r.var, self.p_r, self.p_phi).der
-        self.p_r = Dual.from_number(self.p_r.val - p_r)  # only update after all momenta done!
+        self.p_r = Dual.from_number(self.p_r.val - d * self.h(self.q_r.var, self.p_r, self.p_φ).der)
 
     def solve(self, method, h, start, end, tr):
         t = 0.0
@@ -60,10 +59,12 @@ class Newton(object):
 
     def plot(self, time):
         print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            time, self.h(self.q_r, self.p_r, self.p_phi).val - self.h0, time, self.q_r.val, self.PI_2, self.q_phi.val))
+            time, self.h(self.q_r, self.p_r, self.p_φ).val - self.h0, time, self.q_r.val, self.π_2, self.q_φ.val))
 
 
 if __name__ == "__main__":
+    # ./Newton.py <initial-conditions.newton.json | ./filegraphics-pi.py initial-conditions.newton.json
+    # ./Newton.py <initial-conditions.newton.json | ./plotErrors.py initial-conditions.newton.json t 1
     print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
