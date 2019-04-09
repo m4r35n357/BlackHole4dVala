@@ -1,91 +1,94 @@
+
 from sys import stderr
 from copy import copy
-from json import dumps
+from collections import namedtuple
+
+Point = namedtuple('PointType', ['x', 'f'])
 
 def replace_worst(data, new):
     del data[-1]
     data.append(new)
 
-def nelder_mead(f, x_0, x_δ, stuck_threshold=10e-12, stuck_break=10, max_iterations=0, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
+def nelder_mead(f, x_0, x_δ, ε=10e-12, stuck_break=100, max_iterations=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
 
     # initial simplex
     dim = len(x_0)
     assert dim == len(x_δ)
     dimensions = range(dim)
     prev_best = f(x_0)
-    results = [[x_0, prev_best]]
+    results = [Point(x=x_0, f=prev_best)]
     for i in dimensions:
         x = copy(x_0)
         x[i] += x_δ[i]
-        score = f(x)
-        results.append([x, score])
-    iterations = no_improvement = nt = nr = ne = nc = ns = 0
+        s_score = f(x)
+        results.append(Point(x=x, f=s_score))
+    iterations = stuck_counter = nt = nr = ne = nc = ns = 0
     latest = ""
 
     while True:
         nt += 1
 
         # 1. order
-        results.sort(key=lambda z: z[1])
-        best = results[0][1]
+        results.sort(key=lambda z: z.f)
+        best = results[0]
+        worst = results[-1]
+        second_worst = results[-2]
+        best_value = best.f
 
-        # break after max_iter
+        data = '{} {} {}'.format(iterations, results, latest)
         if max_iterations and iterations >= max_iterations:
-            return results[0], nt - 1, nr, ne, nc, ns
-
-        # break after no_improvement iterations with no improvement
-        # print(dumps(dict(step = iterations, data = results, type = latest)), file=stderr)
-        print('{} {} {}'.format(iterations, results, latest), file=stderr)
-        if best < prev_best - stuck_threshold:
-            no_improvement = 0
-            prev_best = best
+            raise RuntimeWarning("UNFINISHED! " + data)
+        print(data, file=stderr)
+        if best_value < prev_best:
+            stuck_counter = 0
+            prev_best = best_value
         else:
-            no_improvement += 1
-        if no_improvement >= stuck_break:
-            return results[0], nt - 1, nr, ne, nc, ns
+            stuck_counter += 1
+        if sum((best.x[i] - worst.x[i])**2 for i in dimensions) < ε and (best.f - worst.f)**2 < ε:
+            return best, nt - 1, nr, ne, nc, ns
+        if stuck_counter >= stuck_break:
+            raise RuntimeWarning("STUCK for {} steps!".format(stuck_counter) + data)
         iterations += 1
 
         # 2. centroid
-        x0 = [0.0] * dim
+        centroid = [0.0] * dim
         for result in results[:-1]:
-            for i, c in enumerate(result[0]):
-                x0[i] += c / (len(results)-1)
+            for i, c in enumerate(result.x):
+                centroid[i] += c / (len(results)-1)
 
         # 3. reflect
-        xr = [x0[i] + α * (x0[i] - results[-1][0][i]) for i in dimensions]
+        xr = [centroid[i] + α * (centroid[i] - worst.x[i]) for i in dimensions]
         r_score = f(xr)
-        if results[0][1] <= r_score < results[-2][1]:
+        if best[1] <= r_score < second_worst[1]:
             nr += 1
-            replace_worst(results, [xr, r_score])
+            replace_worst(results, Point(x=xr, f=r_score))
             latest = "reflection"
             continue
 
         # 4. expand
-        if r_score < results[0][1]:
-            xe = [x0[i] + γ * (x0[i] - results[-1][0][i]) for i in dimensions]
+        if r_score < best[1]:
+            xe = [centroid[i] + γ * (centroid[i] - worst.x[i]) for i in dimensions]
             e_score = f(xe)
             ne += 1
-            replace_worst(results, [xe, e_score] if e_score < r_score else [xr, r_score])
+            replace_worst(results, Point(x=xe, f=e_score) if e_score < r_score else Point(x=xr, f=r_score))
             latest = "expansion" + ("(e)" if e_score < r_score else "(r)")
             continue
 
         # 5. contract
-        xc = [x0[i] + ρ * (x0[i] - results[-1][0][i]) for i in dimensions]
+        xc = [centroid[i] + ρ * (centroid[i] - worst.x[i]) for i in dimensions]
         c_score = f(xc)
-        if c_score < results[-1][1]:
+        if c_score < worst.f:
             nc += 1
-            replace_worst(results, [xc, c_score])
+            replace_worst(results, Point(x=xc, f=c_score))
             latest = "contraction"
             continue
 
         # 6. shrink
-        x1 = results[0][0]
         reduced = []
-        for result in results:
-            xs = [x1[i] + σ * (result[0][i] - x1[i]) for i in dimensions]
-            score = f(xs)
+        for vertex in results[1:]:
+            xs = [best.vertices[i] + σ * (results[vertex][i] - best.vertices[i]) for i in dimensions]
             ns += 1
-            reduced.append([xs, score])
+            reduced.append(Point(x=xs, f=f(xs)))
         results = reduced
         latest = "reduction"
 
