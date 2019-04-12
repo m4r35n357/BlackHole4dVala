@@ -51,5 +51,5 @@ if __name__ == "__main__":
         potentials = Potentials(ic['spin'], ic['r'], ic['r'], ic['elevation'])
         func = potentials.f_spherical
     print(nelder_mead(func, [make_mpfr(argv[2]), make_mpfr(argv[3]), make_mpfr(argv[4])],
-                            [make_mpfr(argv[5]), make_mpfr(argv[6]), make_mpfr(argv[7])]))
+                            [make_mpfr(argv[5]), make_mpfr(argv[6]), make_mpfr(argv[7])], 1.0e-9))
 

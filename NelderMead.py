@@ -3,14 +3,13 @@ from sys import stderr
 from copy import copy
 from collections import namedtuple
 
-Point = namedtuple('PointType', ['x', 'f'])
+Point = namedtuple('Vertex', ['x', 'f'])
 
 def replace_worst(data, new):
     del data[-1]
     data.append(new)
 
-def nelder_mead(f, x_0, x_δ, ε=10e-12, stuck_break=100, max_iterations=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
-
+def nelder_mead(f, x_0, x_δ, ε, stuck_break=100, max_iterations=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
     dim = len(x_0)
     assert dim == len(x_δ)
     dimensions = range(dim)
@@ -25,12 +24,15 @@ def nelder_mead(f, x_0, x_δ, ε=10e-12, stuck_break=100, max_iterations=1000, �
 
     while True:
         nt += 1
-
         simplex.sort(key=lambda z: z.f)
         best = simplex[0]
         worst = simplex[-1]
         second_worst = simplex[-2]
         best_value = best.f
+        centroid = [0.0] * dim
+        for vertex in simplex[:-1]:
+            for i, c in enumerate(vertex.x):
+                centroid[i] += c / dim
 
         data = '{} {} {}'.format(iterations, simplex, latest)
         if best_value < prev_best:
@@ -43,14 +45,9 @@ def nelder_mead(f, x_0, x_δ, ε=10e-12, stuck_break=100, max_iterations=1000, �
         if max_iterations and iterations >= max_iterations:
             raise RuntimeError("UNFINISHED! " + data)
         print(data, file=stderr)
-        if sum((best.x[i] - worst.x[i])**2 for i in dimensions) < ε and (best.f - worst.f)**2 < ε:
+        if max([abs(best.x[i] - centroid[i]) for i in dimensions]) < ε and abs(best.f - worst.f) < ε:
             return best, nt - 1, nr, ne, nc, ns
         iterations += 1
-
-        centroid = [0.0] * dim
-        for result in simplex[:-1]:
-            for i, c in enumerate(result.x):
-                centroid[i] += c / (len(simplex)-1)
 
         xr = [centroid[i] + α * (centroid[i] - worst.x[i]) for i in dimensions]
         r_score = f(xr)
@@ -83,6 +80,5 @@ def nelder_mead(f, x_0, x_δ, ε=10e-12, stuck_break=100, max_iterations=1000, �
             reduced.append(Point(x=xs, f=f(xs)))
         simplex = reduced
         latest = "reduction"
-
 
 print(__name__ + " module loaded", file=stderr)
