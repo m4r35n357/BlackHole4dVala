@@ -1,4 +1,3 @@
-
 from sys import stderr
 from copy import copy
 from collections import namedtuple
@@ -19,11 +18,10 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_break=100, max_iterations=1000, α=1.0, 
         x = copy(x_0)
         x[i] += x_δ[i]
         simplex.append(Point(x=x, f=f(x)))
-    iterations = stuck_counter = nt = nr = ne = nc = ns = 0
+    iterations = stuck_counter = nr = ne = nc = ns = 0
     latest = ""
 
     while True:
-        nt += 1
         simplex.sort(key=lambda z: z.f)
         best = simplex[0]
         worst = simplex[-1]
@@ -40,13 +38,13 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_break=100, max_iterations=1000, α=1.0, 
             prev_best = best_value
         else:
             stuck_counter += 1
-        if stuck_counter >= stuck_break:
+        if stuck_counter > stuck_break:
             raise RuntimeError("STUCK for {} steps! ".format(stuck_counter) + data)
-        if max_iterations and iterations >= max_iterations:
+        if iterations > max_iterations:
             raise RuntimeError("UNFINISHED! " + data)
         print(data, file=stderr)
         if max([abs(best.x[i] - centroid[i]) for i in dimensions]) < ε and abs(best.f - worst.f) < ε:
-            return best, nt - 1, nr, ne, nc, ns
+            return best, iterations, nr, ne, nc, ns
         iterations += 1
 
         xr = [centroid[i] + α * (centroid[i] - worst.x[i]) for i in dimensions]
