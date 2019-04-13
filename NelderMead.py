@@ -1,82 +1,74 @@
 from sys import stderr
 from copy import copy
-from collections import namedtuple
 
-Point = namedtuple('Vertex', ['x', 'f'])
-
-def replace_worst(data, new):
-    del data[-1]
-    data.append(new)
-
-def nelder_mead(f, x_0, x_δ, ε, stuck_break=100, max_iterations=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
-    dim = len(x_0)
-    assert dim == len(x_δ)
-    dimensions = range(dim)
-    prev_best = f(x_0)
-    simplex = [Point(x=x_0, f=prev_best)]
-    for i in dimensions:
+def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
+    n = len(x_0)
+    assert n == len(x_δ)
+    dim = range(n)
+    best = f(x_0)
+    s = [[x_0, best]]
+    for i in dim:
         x = copy(x_0)
         x[i] += x_δ[i]
-        simplex.append(Point(x=x, f=f(x)))
-    iterations = stuck_counter = nr = ne = nc = ns = 0
+        s.append([x, f(x)])
+    count = stuck_count = nr = ne = nc = ns = 0
     latest = ""
 
     while True:
-        simplex.sort(key=lambda z: z.f)
-        best = simplex[0]
-        worst = simplex[-1]
-        second_worst = simplex[-2]
-        best_value = best.f
-        centroid = [0.0] * dim
-        for vertex in simplex[:-1]:
-            for i, c in enumerate(vertex.x):
-                centroid[i] += c / dim
+        s.sort(key=lambda z: z[1])
+        c = [0.0] * n
+        for v in s[:-1]:
+            for i, x in enumerate(v[0]):
+                c[i] += x / n
 
-        data = '{} {} {}'.format(iterations, simplex, latest)
-        if best_value < prev_best:
-            stuck_counter = 0
-            prev_best = best_value
+        data = '{} {} {}'.format(count, s, latest)
+        if s[0][1] < best:
+            stuck_count = 0
+            best = s[0][1]
         else:
-            stuck_counter += 1
-        if stuck_counter > stuck_break:
-            raise RuntimeError("STUCK for {} steps! ".format(stuck_counter) + data)
-        if iterations > max_iterations:
-            raise RuntimeError("UNFINISHED! " + data)
+            stuck_count += 1
+        if stuck_count > stuck_limit:
+            raise RuntimeError("STUCK for {} steps! ".format(stuck_count) + data)
+        if count > limit:
+            raise RuntimeError("ABANDONED after {} steps! ".format(count) + data)
         print(data, file=stderr)
-        if max([abs(best.x[i] - centroid[i]) for i in dimensions]) < ε and abs(best.f - worst.f) < ε:
-            return best, iterations, nr, ne, nc, ns
-        iterations += 1
+        if max([abs(s[0][0][i] - c[i]) for i in dim]) < ε and abs(s[0][1] - s[-1][1]) < ε:
+            return s[0], count, nr, ne, nc, ns
+        count += 1
 
-        xr = [centroid[i] + α * (centroid[i] - worst.x[i]) for i in dimensions]
-        r_score = f(xr)
-        if best.f <= r_score < second_worst.f:
+        xr = [c[i] + α * (c[i] - s[-1][0][i]) for i in dim]
+        fr = f(xr)
+        if s[0][1] <= fr < s[-2][1]:
             nr += 1
-            replace_worst(simplex, Point(x=xr, f=r_score))
+            del s[-1]
+            s.append([xr, fr])
             latest = "reflection"
             continue
 
-        if r_score < best.f:
-            xe = [centroid[i] + γ * (centroid[i] - worst.x[i]) for i in dimensions]
-            e_score = f(xe)
+        if fr < s[0][1]:
+            xe = [c[i] + γ * (c[i] - s[-1][0][i]) for i in dim]
+            fe = f(xe)
             ne += 1
-            replace_worst(simplex, Point(x=xe, f=e_score) if e_score < r_score else Point(x=xr, f=r_score))
-            latest = "expansion" + ("(e)" if e_score < r_score else "(r)")
+            del s[-1]
+            s.append([xe, fe] if fe < fr else [xr, fr])
+            latest = "expansion" + ("(e)" if fe < fr else "(r)")
             continue
 
-        xc = [centroid[i] + ρ * (centroid[i] - worst.x[i]) for i in dimensions]
-        c_score = f(xc)
-        if c_score < worst.f:
+        xc = [c[i] + ρ * (c[i] - s[-1][0][i]) for i in dim]
+        fc = f(xc)
+        if fc < s[-1][1]:
             nc += 1
-            replace_worst(simplex, Point(x=xc, f=c_score))
+            del s[-1]
+            s.append([xc, fc])
             latest = "contraction"
             continue
 
         reduced = []
-        for vertex in simplex[1:]:
-            xs = [best.x[i] + σ * (vertex.x[i] - best.x[i]) for i in dimensions]
+        for v in s[1:]:
+            xs = [s[0][0][i] + σ * (v[0][i] - s[0][0][i]) for i in dim]
             ns += 1
-            reduced.append(Point(x=xs, f=f(xs)))
-        simplex = reduced
+            reduced.append([xs, f(xs)])
+        s = reduced
         latest = "reduction"
 
 print(__name__ + " module loaded", file=stderr)
