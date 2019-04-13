@@ -63,11 +63,11 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
             latest = "contraction"
             continue
 
-        reduced = []
+        reduced = [s[0]]
         for v in s[1:]:
             xs = [s[0][0][i] + σ * (v[0][i] - s[0][0][i]) for i in dim]
-            ns += 1
             reduced.append([xs, f(xs)])
+        ns += 1
         s = reduced
         latest = "reduction"
 
