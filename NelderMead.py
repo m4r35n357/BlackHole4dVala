@@ -1,5 +1,4 @@
 from sys import stderr
-from copy import copy
 
 def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
     n = len(x_0)
@@ -8,9 +7,9 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
     best = f(x_0)
     s = [[x_0, best]]
     for i in dim:
-        x = copy(x_0)
-        x[i] += x_δ[i]
-        s.append([x, f(x)])
+        v = [x for x in x_0]
+        v[i] += x_δ[i]
+        s.append([v, f(v)])
     count = stuck_count = nr = ne = nc = ns = 0
     latest = ""
 
