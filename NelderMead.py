@@ -88,26 +88,6 @@ def secant(f, a, b, ε, limit=101):
         counter += 1
     return c, counter - 1
 
-def false_position(f, a, b, ε, limit=101):
-    f_a = f(a)
-    f_b = f(b)
-    counter = delta = c = f_c = 1
-    while abs(f_c) > ε or abs(delta) > ε:
-        if counter == limit:
-            raise RuntimeError("{}\n Giving up after {} iterations, a: {}, b: {}".format(f, counter - 1, a, b))
-        c = (b * f_a - a * f_b) / (f_a - f_b)
-        f_c = f(c)
-        if f_a * f_c >= 0.0:
-            a = c
-            f_a = f_c
-        else:
-            b = c
-            f_b = f_c
-        delta = b - a
-        print(c, f_c, delta, file=stderr)
-        counter += 1
-    return c, counter - 1
-
 def bisect(f, a, b, ε, limit=101):
     f_a = f(a)
     counter = delta = c = f_c = 1

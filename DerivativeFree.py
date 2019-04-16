@@ -1,5 +1,5 @@
 from sys import argv
-from NelderMead import secant, false_position, bisect
+from NelderMead import secant,  bisect
 
 
 def polynomial(x):
@@ -11,14 +11,12 @@ if __name__ == "__main__":
     value = float(argv[1])
     variation = float(argv[2])
     try:
+        print("SECANT")
         print(secant(polynomial, value - variation, value + variation, tol))
     except RuntimeError as e:
         print(e)
     try:
-        print(false_position(polynomial, value - variation, value + variation, tol))
-    except RuntimeError as e:
-        print(e)
-    try:
+        print("BISECTION")
         print(bisect(polynomial, value - variation, value + variation, tol))
     except RuntimeError as e:
         print(e)
