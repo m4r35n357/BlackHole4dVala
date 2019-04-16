@@ -70,4 +70,39 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
         s = reduced
         latest = "reduction"
 
+def secant(f, a, b, ε, limit=101):
+    f_a = f(a)
+    f_b = f(b)
+    counter = delta = c = f_c = 1
+    while abs(f_c) > ε or abs(delta) > ε:
+        if counter == limit:
+            raise RuntimeError("{}\n Giving up after {} iterations, value: {}, previous: {}".format(f, counter - 1, b, a))
+        c = (b * f_a - a * f_b) / (f_a - f_b)
+        f_c = f(c)
+        b = a
+        f_b = f_a
+        a = c
+        f_a = f_c
+        delta = b - a
+        print(c, f_c, delta, file=stderr)
+        counter += 1
+    return c, counter - 1
+
+def bisect(f, a, b, ε, limit=101):
+    f_a = f(a)
+    counter = delta = c = f_c = 1
+    while abs(f_c) > ε or abs(delta) > ε:
+        if counter == limit:
+            raise RuntimeError("{}\n Giving up after {} iterations, a: {}, b: {}".format(f, counter - 1, a, b))
+        c = (a + b) / 2
+        f_c = f(c)
+        if f_a * f_c > 0.0:
+            a = c
+        else:
+            b = c
+        delta = b - a
+        print(c, f_c, delta, file=stderr)
+        counter += 1
+    return c, counter - 1
+
 print(__name__ + " module loaded", file=stderr)
