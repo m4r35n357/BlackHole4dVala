@@ -30,7 +30,6 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
             raise RuntimeError("STUCK for {} steps! ".format(stuck_count) + data)
         if count > limit:
             raise RuntimeError("ABANDONED after {} steps! ".format(count) + data)
-        print(data, file=stderr)
         if max([abs(s[0][0][i] - c[i]) for i in dim]) < ε and abs(s[0][1] - s[-1][1]) < ε:
             return s[0], count, nr, ne, nc, ns
         count += 1
@@ -76,7 +75,7 @@ def secant(f, a, b, ε, limit=101):
     counter = delta = c = f_c = 1
     while abs(f_c) > ε or abs(delta) > ε:
         if counter == limit:
-            raise RuntimeError("{}\n Giving up after {} iterations, value: {}, previous: {}".format(f, counter - 1, b, a))
+            raise RuntimeError("{}\n After {} iterations, current: {}, previous: {}".format(f, counter - 1, b, a))
         c = (b * f_a - a * f_b) / (f_a - f_b)
         f_c = f(c)
         b = a
@@ -84,16 +83,15 @@ def secant(f, a, b, ε, limit=101):
         a = c
         f_a = f_c
         delta = b - a
-        print(c, f_c, delta, file=stderr)
         counter += 1
-    return c, counter - 1
+    return c, f_c, delta, counter - 1
 
 def bisect(f, a, b, ε, limit=101):
     f_a = f(a)
     counter = delta = c = f_c = 1
     while abs(f_c) > ε or abs(delta) > ε:
         if counter == limit:
-            raise RuntimeError("{}\n Giving up after {} iterations, a: {}, b: {}".format(f, counter - 1, a, b))
+            raise RuntimeError("{}\n After {} iterations, a: {}, b: {}".format(f, counter - 1, a, b))
         c = (a + b) / 2
         f_c = f(c)
         if f_a * f_c > 0.0:
@@ -101,8 +99,7 @@ def bisect(f, a, b, ε, limit=101):
         else:
             b = c
         delta = b - a
-        print(c, f_c, delta, file=stderr)
         counter += 1
-    return c, counter - 1
+    return c, f_c, delta, counter - 1
 
 print(__name__ + " module loaded", file=stderr)
