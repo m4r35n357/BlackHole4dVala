@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # ./Newton.py <initial-conditions.newton.json | ./filegraphics-pi.py initial-conditions.newton.json
     # ./Newton.py <initial-conditions.newton.json | ./plotErrors.py initial-conditions.newton.json t 1
     print("Simulator: {}".format(argv[0]), file=stderr)
-    input_data = stdin.read()
+    input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
     print(input_data, file=stderr)
     bh = Newton(ic['g'], ic['m'], ic['Lfac'], ic['r0'])

@@ -1,6 +1,6 @@
 from sys import stderr
 
-def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
+def nelder_mead(f, x_0, x_δ, ε, stuck=100, limit=1000, α=1.0, γ=2.0, ρ=-0.5, σ=0.5):
     n = len(x_0)
     assert n == len(x_δ)
     dim = range(n)
@@ -26,12 +26,14 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
             best = s[0][1]
         else:
             stuck_count += 1
-        if stuck_count > stuck_limit:
+        if stuck and stuck_count > stuck:
             raise RuntimeError("STUCK for {} steps! ".format(stuck_count) + data)
-        if count > limit:
+        if limit and count > limit:
             raise RuntimeError("ABANDONED after {} steps! ".format(count) + data)
-        if max([abs(s[0][0][i] - c[i]) for i in dim]) < ε and abs(s[0][1] - s[-1][1]) < ε:
-            return s[0], count, nr, ne, nc, ns
+        if ε and max([abs(s[0][0][i] - c[i]) for i in dim]) < ε and abs(s[0][1] - s[-1][1]) < ε:
+                return s[0], count, nr, ne, nc, ns
+        else:
+            print(s[0], count, nr, ne, nc, ns, file=stderr)
         count += 1
 
         xr = [c[i] + α * (c[i] - s[-1][0][i]) for i in dim]
@@ -72,34 +74,34 @@ def nelder_mead(f, x_0, x_δ, ε, stuck_limit=100, limit=1000, α=1.0, γ=2.0, �
 def secant(f, a, b, ε, limit=101):
     f_a = f(a)
     f_b = f(b)
-    counter = delta = c = f_c = 1
-    while abs(f_c) > ε or abs(delta) > ε:
-        if counter == limit:
-            raise RuntimeError("{}\n After {} iterations, current: {}, previous: {}".format(f, counter - 1, b, a))
+    count = δx = c = f_c = 1
+    while abs(f_c) > ε or abs(δx) > ε:
+        if count == limit:
+            raise RuntimeError("{}\n After {} iterations, current: {}, previous: {}".format(f, count - 1, b, a))
         c = (b * f_a - a * f_b) / (f_a - f_b)
         f_c = f(c)
         b = a
         f_b = f_a
         a = c
         f_a = f_c
-        delta = b - a
-        counter += 1
-    return c, f_c, delta, counter - 1
+        δx = b - a
+        count += 1
+    return c, f_c, δx, count - 1
 
 def bisect(f, a, b, ε, limit=101):
     f_a = f(a)
-    counter = delta = c = f_c = 1
-    while abs(f_c) > ε or abs(delta) > ε:
-        if counter == limit:
-            raise RuntimeError("{}\n After {} iterations, a: {}, b: {}".format(f, counter - 1, a, b))
+    count = δx = c = f_c = 1
+    while abs(f_c) > ε or abs(δx) > ε:
+        if count == limit:
+            raise RuntimeError("{}\n After {} iterations, a: {}, b: {}".format(f, count - 1, a, b))
         c = (a + b) / 2
         f_c = f(c)
         if f_a * f_c > 0.0:
             a = c
         else:
             b = c
-        delta = b - a
-        counter += 1
-    return c, f_c, delta, counter - 1
+        δx = b - a
+        count += 1
+    return c, f_c, δx, count - 1
 
 print(__name__ + " module loaded", file=stderr)

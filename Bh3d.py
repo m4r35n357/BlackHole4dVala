@@ -95,7 +95,7 @@ class BhSymp(object):
 
 if __name__ == "__main__":
     print("Simulator: {}".format(argv[0]), file=stderr)
-    input_data = stdin.read()
+    input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
     print(input_data, file=stderr)
     bh = BhSymp(ic['a'], ic['mu'], ic['E'], ic['L'], ic['Q'], ic['r0'], ic['th0'], ic['cross'])

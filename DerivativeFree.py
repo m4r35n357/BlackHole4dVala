@@ -16,7 +16,7 @@ if __name__ == "__main__":
         print("SECANT")
         start = timer()
         for run in range(n):
-            result = secant(polynomial, value - variation, value + variation, tol)
+            result = secant(f=polynomial, a=value-variation, b=value+variation, ε=tol)
         end = timer()
         print("{:8.3f} {}".format(end - start, result))
     except RuntimeError as e:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         print("BISECTION")
         start = timer()
         for run in range(n):
-            result = bisect(polynomial, value - variation, value + variation, tol)
+            result = bisect(f=polynomial, a=value-variation, b=value+variation, ε=tol)
         end = timer()
         print("{:8.3f} {}".format(end - start, result))
     except RuntimeError as e:

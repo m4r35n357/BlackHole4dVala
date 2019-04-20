@@ -215,8 +215,8 @@ class Kerr(object):
 def secant(f, a, b, h, ε, limit=101):
     f_a = f(h, a)
     f_b = f(h, b)
-    counter = c = f_c = 1
-    while abs(f_c) > ε:
+    counter = delta = c = f_c = 1
+    while abs(f_c) > ε or abs(delta) > ε:
         if counter == limit:
             raise RuntimeError("{}\n Giving up after {} iterations, value {}, previous {}".format(f, counter - 1, a, b))
         c = (b * f_a - a * f_b) / (f_a - f_b)
@@ -225,12 +225,13 @@ def secant(f, a, b, h, ε, limit=101):
         f_b = f_a
         a = c
         f_a = f_c
+        delta = b - a
         counter += 1
     return c
 
 if __name__ == "__main__":
     print("Simulator: {}".format(argv[0]), file=stderr)
-    input_data = stdin.read()
+    input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
     print(input_data, file=stderr)
     step = ic['step']

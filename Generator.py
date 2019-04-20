@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from json import loads
-from sys import argv, stderr
+from sys import argv, stderr, stdin
 from gmpy2 import mpfr, get_context, sin, acos, cos
-get_context().precision = 53  # Set this BEFORE importing any mathematical stuff!
+get_context().precision = 113  # Set this BEFORE importing any mathematical stuff!
 from Symplectic import D1, D2
 from NelderMead import nelder_mead
 from dual import Dual, make_mpfr
@@ -41,15 +41,17 @@ class Potentials(object):
 if __name__ == "__main__":
     # Example: ./Generator.py icgen-data.json 1.0 5.0 0.0 1.0 1.0 1.0
     print("Generator: {}".format(argv[0]), file=stderr)
-    input_data = open(argv[1]).read()
+    input_data = open(argv[1]).read() if len(argv) == 8 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)
     print(input_data, file=stderr)
     if ic.get('rMax'):
         potentials = Potentials(ic['spin'], ic['rMin'], ic['rMax'], ic['elevation'])
-        func = potentials.f_nonspherical
+        shape = potentials.f_nonspherical
     else:
         potentials = Potentials(ic['spin'], ic['r'], ic['r'], ic['elevation'])
-        func = potentials.f_spherical
-    print(nelder_mead(func, [make_mpfr(argv[2]), make_mpfr(argv[3]), make_mpfr(argv[4])],
-                            [make_mpfr(argv[5]), make_mpfr(argv[6]), make_mpfr(argv[7])], 1.0e-9))
+        shape = potentials.f_spherical
+    print(nelder_mead(f=shape,
+                      x_0=[make_mpfr(argv[2]), make_mpfr(argv[3]), make_mpfr(argv[4])],
+                      x_δ=[make_mpfr(argv[5]), make_mpfr(argv[6]), make_mpfr(argv[7])],
+                      ε=make_mpfr(1.0e-9), α=make_mpfr(1.0), γ=make_mpfr(2.0), ρ=make_mpfr(-0.5), σ=make_mpfr(0.5)))
 
