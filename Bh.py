@@ -37,7 +37,7 @@ class Dual:
         self.der = derivative
 
     @classmethod
-    def from_number(cls, value, variable=False):
+    def get(cls, value, variable=False):
         return cls(make_mpfr(value), make_mpfr(1) if variable else make_mpfr(0))
 
     def __str__(self):
@@ -115,118 +115,118 @@ class Dual:
 
 class Kerr(object):
 
-    def __init__(self, m, a, q, μ2, e, lz, cc, r_0, θ_0, tol):
+    def __init__(self, m, a, q, μ2, e, lz, cc, r0, θ0, ε):
         self.rs = 2 * m
         self.a = a
         self.q = q
         self.μ2 = μ2
-        self.t = make_mpfr(0)
-        self.r = Dual.from_number(r_0)
-        self.θ = Dual.from_number((make_mpfr(90.0) - θ_0) * acos(make_mpfr(-1)) / make_mpfr(180.0))
-        self.φ = make_mpfr(0)
-        self.p_t = Dual.from_number(- e)
-        self.p_r = Dual.from_number(make_mpfr(0))
-        self.p_θ = (cc - self.θ.cos.sqr * (a**2 * (μ2 - e**2) + (lz / self.θ.sin).sqr)).sqrt
-        self.p_φ = Dual.from_number(lz)
-        self.r_prev = self.r.val + 0.001
-        self.θ_prev = self.θ.val + 0.001
-        self.p_r_prev = self.p_r.val + 0.001
-        self.p_θ_prev = self.p_θ.val + 0.001
-        self.ε = tol
-        self.h0 = self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).val
+        self.qt = make_mpfr(0)
+        self.qr = Dual.get(r0)
+        self.qθ = Dual.get((make_mpfr(90.0) - θ0) * acos(make_mpfr(-1)) / make_mpfr(180.0))
+        self.qφ = make_mpfr(0)
+        self.pt = Dual.get(- e)
+        self.pr = Dual.get(make_mpfr(0))
+        self.pθ = (cc - self.qθ.cos.sqr * (a**2 * (μ2 - e**2) + (lz / self.qθ.sin).sqr)).sqrt
+        self.pφ = Dual.get(lz)
+        self.qr_prev = self.qr.val + 0.001
+        self.qθ_prev = self.qθ.val + 0.001
+        self.pr_prev = self.pr.val + 0.001
+        self.pθ_prev = self.pθ.val + 0.001
+        self.ε = ε
+        self.h0 = self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ, self.pφ).val
 
-    def h(self, r, θ, p_t, p_r, p_θ, p_φ):  # MTW p.900 equation 33.35
-        Δ = r.sqr - self.rs * r + self.a**2 + self.q
-        return D05 * (- ((r.sqr + self.a**2) * p_t + self.a * p_φ).sqr / Δ + Δ * p_r.sqr + p_θ.sqr
-                      + ((p_φ + self.a * θ.sin.sqr * p_t) / θ.sin).sqr) / (r.sqr + self.a**2 * θ.cos.sqr)
+    def h(self, qr, qθ, pt, pr, pθ, pφ):  # MTW p.900 equation 33.35
+        Δ = qr.sqr - self.rs * qr + self.a**2 + self.q
+        return D05 * (- ((qr.sqr + self.a**2) * pt + self.a * pφ).sqr / Δ + Δ * pr.sqr + pθ.sqr
+                      + ((pφ + self.a * qθ.sin.sqr * pt) / qθ.sin).sqr) / (qr.sqr + self.a**2 * qθ.cos.sqr)
 
-    def q_t_update(self, h):
-        return self.t + D05 * h * self.h(self.r, self.θ, self.p_t.var, self.p_r, self.p_θ, self.p_φ).der
+    def qt_update(self, δτ):
+        return self.qt + D05 * δτ * self.h(self.qr, self.qθ, self.pt.var, self.pr, self.pθ, self.pφ).der
 
-    def q_r_implicit(self, h, r):
-        return self.r.val - r + D05 * h * self.h(Dual.from_number(r), self.θ, self.p_t, self.p_r.var, self.p_θ, self.p_φ).der
+    def qr_implicit(self, δτ, r):
+        return self.qr.val - r + D05 * δτ * self.h(Dual.get(r), self.qθ, self.pt, self.pr.var, self.pθ, self.pφ).der
 
-    def q_θ_implicit(self, h, θ):
-        return self.θ.val - θ + D05 * h * self.h(self.r, Dual.from_number(θ), self.p_t, self.p_r, self.p_θ.var, self.p_φ).der
+    def qθ_implicit(self, δτ, θ):
+        return self.qθ.val - θ + D05 * δτ * self.h(self.qr, Dual.get(θ), self.pt, self.pr, self.pθ.var, self.pφ).der
 
-    def q_φ_update(self, h):
-        return self.φ + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ.var).der
+    def qφ_update(self, δτ):
+        return self.qφ + D05 * δτ * self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ, self.pφ.var).der
 
-    def q_update_1(self, h):
-        r = secant(self.q_r_implicit, self.r.val, self.r_prev, h, self.ε)
-        θ = secant(self.q_θ_implicit, self.θ.val, self.θ_prev, h, self.ε)
-        self.r_prev = self.r.val
-        self.θ_prev = self.θ.val
-        self.t = self.q_t_update(h)
-        self.r = Dual.from_number(r)
-        self.θ = Dual.from_number(θ)
-        self.φ = self.q_φ_update(h)
+    def q_update_1(self, δτ):
+        qr = secant(self.qr_implicit, self.qr.val, self.qr_prev, δτ, self.ε)
+        qθ = secant(self.qθ_implicit, self.qθ.val, self.qθ_prev, δτ, self.ε)
+        self.qr_prev = self.qr.val
+        self.qθ_prev = self.qθ.val
+        self.qt = self.qt_update(δτ)
+        self.qr = Dual.get(qr)
+        self.qθ = Dual.get(qθ)
+        self.qφ = self.qφ_update(δτ)
 
-    def q_update_2(self, h):
-        r = self.r.val + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r.var, self.p_θ, self.p_φ).der
-        θ = self.θ.val + D05 * h * self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ.var, self.p_φ).der
-        self.t = self.q_t_update(h)
-        self.r = Dual.from_number(r)
-        self.θ = Dual.from_number(θ)
-        self.φ = self.q_φ_update(h)
+    def q_update_2(self, δτ):
+        qr = self.qr.val + D05 * δτ * self.h(self.qr, self.qθ, self.pt, self.pr.var, self.pθ, self.pφ).der
+        qθ = self.qθ.val + D05 * δτ * self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ.var, self.pφ).der
+        self.qt = self.qt_update(δτ)
+        self.qr = Dual.get(qr)
+        self.qθ = Dual.get(qθ)
+        self.qφ = self.qφ_update(δτ)
 
-    def p_r_implicit(self, h, p_r):
-        r_var = self.r.var
-        return self.p_r.val - p_r - D05 * h * (self.h(r_var, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).der
-                                             + self.h(r_var, self.θ, self.p_t, Dual.from_number(p_r), self.p_θ, self.p_φ).der)
+    def pr_implicit(self, δτ, pr):
+        qr = self.qr.var
+        return self.pr.val - pr - D05 * δτ * (self.h(qr, self.qθ, self.pt, self.pr, self.pθ, self.pφ).der
+                                            + self.h(qr, self.qθ, self.pt, Dual.get(pr), self.pθ, self.pφ).der)
 
-    def p_θ_implicit(self, h, p_θ):
-        θ_var = self.θ.var
-        return self.p_θ.val - p_θ - D05 * h * (self.h(self.r, θ_var, self.p_t, self.p_r, self.p_θ, self.p_φ).der
-                                             + self.h(self.r, θ_var, self.p_t, self.p_r, Dual.from_number(p_θ), self.p_φ).der)
+    def pθ_implicit(self, δτ, pθ):
+        qθ = self.qθ.var
+        return self.pθ.val - pθ - D05 * δτ * (self.h(self.qr, qθ, self.pt, self.pr, self.pθ, self.pφ).der
+                                            + self.h(self.qr, qθ, self.pt, self.pr, Dual.get(pθ), self.pφ).der)
 
-    def p_update(self, h):
-        pr = secant(self.p_r_implicit, self.p_r.val, self.p_r_prev, h, self.ε)
-        pθ = secant(self.p_θ_implicit, self.p_θ.val, self.p_θ_prev, h, self.ε)
-        self.p_r_prev = self.p_r.val
-        self.p_θ_prev = self.p_θ.val
-        self.p_r = Dual.from_number(pr)
-        self.p_θ = Dual.from_number(pθ)
+    def p_update(self, δτ):
+        pr = secant(self.pr_implicit, self.pr.val, self.pr_prev, δτ, self.ε)
+        pθ = secant(self.pθ_implicit, self.pθ.val, self.pθ_prev, δτ, self.ε)
+        self.pr_prev = self.pr.val
+        self.pθ_prev = self.pθ.val
+        self.pr = Dual.get(pr)
+        self.pθ = Dual.get(pθ)
 
-    def stormer_verlet(self, h):
-        self.q_update_1(h)
-        self.p_update(h)
-        self.q_update_2(h)
+    def stormer_verlet(self, δτ):
+        self.q_update_1(δτ)
+        self.p_update(δτ)
+        self.q_update_2(δτ)
 
-    def solve(self, h, start, end, tr):
+    def solve(self, δτ, start, end, tr):
         τ = 0.0
         i = 0
         while τ < end:
             if τ >= start and i % tr == 0:
                 self.plot(τ)
-            self.stormer_verlet(h)
+            self.stormer_verlet(δτ)
             i += 1
-            τ = h * i
+            τ = δτ * i
         self.plot(τ)
 
     def plot(self, τ):
-        h = self.h(self.r, self.θ, self.p_t, self.p_r, self.p_θ, self.p_φ).val
+        h = self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ, self.pφ).val
         print('{{"tau":{:.9e},"v4e":{:.9e},"H":{:.9e},"E":{:.9e},"L":{:.9e},"Q":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            τ, h - self.h0, h, - self.p_t.val, self.p_φ.val,
-            (self.p_θ.sqr + self.θ.cos.sqr * (self.a**2 * (self.μ2 - self.p_t.sqr) + (self.p_φ / self.θ.sin).sqr)).val,
-            self.t, self.r.val, self.θ.val, self.φ))
+            τ, h - self.h0, h, - self.pt.val, self.pφ.val,
+            (self.pθ.sqr + self.qθ.cos.sqr * (self.a**2 * (self.μ2 - self.pt.sqr) + (self.pφ / self.qθ.sin).sqr)).val,
+            self.qt, self.qr.val, self.qθ.val, self.qφ))
 
 
 def secant(f, a, b, h, ε, limit=101):
     f_a = f(h, a)
     f_b = f(h, b)
-    counter = delta = c = f_c = 1
-    while abs(f_c) > ε or abs(delta) > ε:
-        if counter == limit:
-            raise RuntimeError("{}\n Giving up after {} iterations, value {}, previous {}".format(f, counter - 1, a, b))
+    count = δx = c = f_c = 1
+    while abs(f_c) > ε or abs(δx) > ε:
+        if count == limit:
+            raise RuntimeError("{}\n Giving up after {} iterations, value {}, previous {}".format(f, count - 1, a, b))
         c = (b * f_a - a * f_b) / (f_a - f_b)
         f_c = f(h, c)
         b = a
         f_b = f_a
         a = c
         f_a = f_c
-        delta = b - a
-        counter += 1
+        δx = b - a
+        count += 1
     return c
 
 if __name__ == "__main__":
