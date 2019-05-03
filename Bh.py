@@ -157,17 +157,17 @@ class Kerr(object):
         qθ = secant(self.qθ_implicit, self.qθ.val, self.qθ_prev, δτ, self.ε)
         self.qr_prev = self.qr.val
         self.qθ_prev = self.qθ.val
-        self.qt = self.qt_update(δτ)
         self.qr = Dual.get(qr)
         self.qθ = Dual.get(qθ)
+        self.qt = self.qt_update(δτ)
         self.qφ = self.qφ_update(δτ)
 
     def q_update_2(self, δτ):
         qr = self.qr.val + D05 * δτ * self.h(self.qr, self.qθ, self.pt, self.pr.var, self.pθ, self.pφ).der
         qθ = self.qθ.val + D05 * δτ * self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ.var, self.pφ).der
-        self.qt = self.qt_update(δτ)
         self.qr = Dual.get(qr)
         self.qθ = Dual.get(qθ)
+        self.qt = self.qt_update(δτ)
         self.qφ = self.qφ_update(δτ)
 
     def pr_implicit(self, δτ, pr):
@@ -194,7 +194,7 @@ class Kerr(object):
         self.q_update_2(δτ)
 
     def solve(self, δτ, start, end, tr):
-        τ = 0.0
+        τ = make_mpfr(0.0)
         i = 0
         while τ < end:
             if τ >= start and i % tr == 0:
