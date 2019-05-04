@@ -36,6 +36,7 @@ export exe='./FortranKdS'
 export exe='./FortranNewton'
 export exe='./Simulate'
 export exe='./Bh3d.py'
+export exe='./Newton.py'
 export exe='nc.openbsd pi 1234'
 
 
@@ -59,7 +60,8 @@ cp icgen.light.example $icdata
 
 vi $icdata; jq . $icdata
 $icgen <$icdata >$ic; $icgen <$ic >$pot; ls -lAh $ic $pot
-vi $ic; jq . $ic; jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.cross, .IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
+vi $ic; jq . $ic
+jq '.IC.step, .IC.start, .IC.end, .IC.plotratio, .IC.integrator, .IC.stages' <$ic | while read parameter; do echo -n "$parameter "; done >ictest; echo "" >>ictest; jq '.IC.cross, .IC.lambda, .IC.a, .IC.mu, .IC.E, .IC.L, .IC.Q, .IC.r0, .IC.th0' <$ic | while read parameter; do echo -n "$parameter "; done >>ictest; echo "" >>ictest
 
 $exe <$ic | ./plotBH.py $ic 2>/dev/null &
 $exe <$ic | ./filegraphics-pi.py $ic

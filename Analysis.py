@@ -48,6 +48,7 @@ class Analysis(object):
         print('{{"count":{:d},"c":{:.9e},"d":{:.9e}}}'.format(self.count, self.c, self.d))
 
 if __name__ == "__main__":
+    #  ./Analysis.py <initial-conditions.json | ./plotXY.py 1 c d
     print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']

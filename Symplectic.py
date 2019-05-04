@@ -102,7 +102,7 @@ class Symplectic(object):
             self.method = self.tenth_order_smith
         else:
             raise Exception(
-                '>>> Integrator must be [bfs]1, [bfs]2, [bfs]4, [bfs]6, [bfs]8, or [bfs]10, was "{found}" <<<'.format(
+                '>>> Integrator must be b1, b2, [bfs]4, [bfs]6, [bfs]8, or [bfs]10, was "{found}" <<<'.format(
                     found=order))
         self.w1 = D1 / (self.scheme_root - self.scheme_root ** (D1 / D9))
         self.x1 = D1 / (self.scheme_root - self.scheme_root ** (D1 / D7))

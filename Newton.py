@@ -18,29 +18,33 @@ from json import loads
 from sys import stdin, stderr, argv
 from gmpy2 import get_context, mpfr, sqrt, acos
 get_context().precision = 113  # Set this BEFORE importing any Taylor Series stuff!
-from Symplectic import Symplectic, D1, D0
+from Symplectic import Symplectic
+from dual import Dual, make_mpfr
 
 
 class Newton(object):
-    def __init__(self, l_fac, r0):
-        self.PI_2 = acos(D0)
-        self.ph = self.phDot = D0
-        self.r = r0
-        self.L = l_fac * sqrt(r0)
-        self.L2 = self.L**2
-        self.rDot = - sqrt(r0 - self.L2) / self.r
-        self.H0 = self.h()
+    def __init__(self, g, m, l_fac, r0):
+        zero = make_mpfr(0)
+        self.π_2 = acos(zero)
+        self.g = Dual.from_number(g)
+        self.m = Dual.from_number(m)
+        self.q_φ = Dual.from_number(zero)
+        self.p_φ = Dual.from_number(l_fac * m * sqrt(r0))
+        self.q_r = Dual.from_number(r0)
+        self.p_r = Dual.from_number(zero)
+        self.h0 = self.h(self.q_r, self.p_r, self.p_φ).val
 
-    def h(self):
-        return 0.5 * (self.rDot**2 + self.L2 / (self.r**2)) - D1 / self.r
+    def h(self, q_r, p_r, p_φ):  # ph absent from Hamiltonian
+        return (p_r**2 + p_φ**2 / q_r**2) / (2 * self.m) - self.g * self.m / q_r
 
     def q_update(self, c):
-        self.r += c * self.rDot
-        self.phDot = self.L / self.r**2
-        self.ph += c * self.phDot
+        q_r = c * self.h(self.q_r, self.p_r.var, self.p_φ).der
+        q_φ = c * self.h(self.q_r, self.p_r, self.p_φ.var).der
+        self.q_r = Dual.from_number(self.q_r.val + q_r)  # only update after all coordinates done!
+        self.q_φ = Dual.from_number(self.q_φ.val + q_φ)
 
-    def p_update(self, d):
-        self.rDot -= d * (D1 - self.L2 / self.r) / self.r**2
+    def p_update(self, d):  # no self.p_ph update because ph absent from Hamiltonian
+        self.p_r = Dual.from_number(self.p_r.val - d * self.h(self.q_r.var, self.p_r, self.p_φ).der)
 
     def solve(self, method, h, start, end, tr):
         t = 0.0
@@ -55,16 +59,19 @@ class Newton(object):
 
     def plot(self, time):
         print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            time, self.h() - self.H0, time, self.r, self.PI_2, self.ph))
+            time, self.h(self.q_r, self.p_r, self.p_φ).val - self.h0, time, self.q_r.val, self.π_2, self.q_φ.val))
 
 
 if __name__ == "__main__":
+    # ./Newton.py <initial-conditions.newton.json | ./filegraphics-pi.py initial-conditions.newton.json
+    # ./Newton.py <initial-conditions.newton.json | ./plotErrors.py initial-conditions.newton.json t 1
     print("Simulator: {}".format(argv[0]), file=stderr)
-    input_data = stdin.read()
+    input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
     print(input_data, file=stderr)
-    bh = Newton(ic['Lfac'], ic['r0'])
+    bh = Newton(ic['g'], ic['m'], ic['Lfac'], ic['r0'])
     step = ic['step']
-    bh.solve(Symplectic(bh, step, ic['integrator'], ic['scheme']).method, step, ic['start'], ic['end'], ic['plotratio'])
+    integrator = Symplectic(bh, step, ic['integrator'], ic['scheme'])
+    bh.solve(integrator.method, step, ic['start'], ic['end'], ic['plotratio'])
 else:
     print(__name__ + " module loaded", file=stderr)
