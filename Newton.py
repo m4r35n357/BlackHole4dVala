@@ -28,26 +28,26 @@ class Newton(object):
         self.π_2 = acos(zero)
         self.g = Dual.from_number(g)
         self.m = Dual.from_number(m)
-        self.q_φ = Dual.from_number(zero)
-        self.p_φ = Dual.from_number(l_fac * m * sqrt(r0))
-        self.q_r = Dual.from_number(r0)
-        self.p_r = Dual.from_number(zero)
-        self.h0 = self.h(self.q_r, self.p_r, self.p_φ).val
+        self.qφ = Dual.from_number(zero)
+        self.pφ = Dual.from_number(l_fac * m * sqrt(r0))
+        self.qr = Dual.from_number(r0)
+        self.pr = Dual.from_number(zero)
+        self.h0 = self.h(self.qr, self.pr, self.pφ).val
 
-    def h(self, q_r, p_r, p_φ):  # ph absent from Hamiltonian
-        return (p_r**2 + p_φ**2 / q_r**2) / (2 * self.m) - self.g * self.m / q_r
+    def h(self, qr, pr, pφ):  # ph absent from Hamiltonian
+        return (pr**2 + pφ**2 / qr**2) / (2 * self.m) - self.g * self.m / qr
 
     def q_update(self, c):
-        q_r = c * self.h(self.q_r, self.p_r.var, self.p_φ).der
-        q_φ = c * self.h(self.q_r, self.p_r, self.p_φ.var).der
-        self.q_r = Dual.from_number(self.q_r.val + q_r)  # only update after all coordinates done!
-        self.q_φ = Dual.from_number(self.q_φ.val + q_φ)
+        qr = c * self.h(self.qr, self.pr.var, self.pφ).der
+        qφ = c * self.h(self.qr, self.pr, self.pφ.var).der
+        self.qr = Dual.from_number(self.qr.val + qr)  # only update after all coordinates done!
+        self.qφ = Dual.from_number(self.qφ.val + qφ)
 
     def p_update(self, d):  # no self.p_ph update because ph absent from Hamiltonian
-        self.p_r = Dual.from_number(self.p_r.val - d * self.h(self.q_r.var, self.p_r, self.p_φ).der)
+        self.pr = Dual.from_number(self.pr.val - d * self.h(self.qr.var, self.pr, self.pφ).der)
 
     def solve(self, method, h, start, end, tr):
-        t = 0.0
+        t = make_mpfr(0.0)
         i = 0
         while t < end:
             if t >= start and i % tr == 0:
@@ -59,7 +59,7 @@ class Newton(object):
 
     def plot(self, time):
         print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            time, self.h(self.q_r, self.p_r, self.p_φ).val - self.h0, time, self.q_r.val, self.π_2, self.q_φ.val))
+            time, self.h(self.qr, self.pr, self.pφ).val - self.h0, time, self.qr.val, self.π_2, self.qφ.val))
 
 
 if __name__ == "__main__":
