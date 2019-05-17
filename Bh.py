@@ -206,10 +206,9 @@ class Kerr(object):
 
     def plot(self, τ):
         h = self.h(self.qr, self.qθ, self.pt, self.pr, self.pθ, self.pφ).val
-        print('{{"tau":{:.9e},"v4e":{:.9e},"H":{:.9e},"E":{:.9e},"L":{:.9e},"Q":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            τ, h - self.h0, h, - self.pt.val, self.pφ.val,
-            (self.pθ.sqr + self.qθ.cos.sqr * (self.a**2 * (self.μ2 - self.pt.sqr) + (self.pφ / self.qθ.sin).sqr)).val,
-            self.qt, self.qr.val, self.qθ.val, self.qφ))
+        print(f'{{"tau":{τ:.9e},"v4e":{h - self.h0:.9e},"H":{h:.9e},"E":{- self.pt.val:.9e},"L":{self.pφ.val:.9e},'
+              f'"Q":{(self.pθ.sqr + self.qθ.cos.sqr * (self.a**2 * (self.μ2 - self.pt.sqr) + (self.pφ / self.qθ.sin).sqr)).val:.9e},'
+              f'"t":{self.qt:.9e},"r":{self.qr.val:.9e},"th":{self.qθ.val:.9e},"ph":{self.qφ:.9e}}}')
 
 
 def secant(f, a, b, h, ε, limit=101):

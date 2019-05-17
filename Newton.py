@@ -24,30 +24,29 @@ from dual import Dual, make_mpfr
 
 class Newton(object):
     def __init__(self, g, m, l_fac, r0):
-        zero = make_mpfr(0)
-        self.π_2 = acos(zero)
-        self.g = Dual.from_number(g)
-        self.m = Dual.from_number(m)
-        self.qφ = Dual.from_number(zero)
-        self.pφ = Dual.from_number(l_fac * m * sqrt(r0))
-        self.qr = Dual.from_number(r0)
-        self.pr = Dual.from_number(zero)
+        self.π_2 = acos(make_mpfr(0))
+        self.m = m
+        self.gm = g * m
+        self.qφ = make_mpfr(0)
+        self.pφ = Dual.get(l_fac * m * sqrt(r0))
+        self.qr = Dual.get(r0)
+        self.pr = Dual.get(make_mpfr(0))
         self.h0 = self.h(self.qr, self.pr, self.pφ).val
 
-    def h(self, qr, pr, pφ):  # ph absent from Hamiltonian
-        return (pr**2 + pφ**2 / qr**2) / (2 * self.m) - self.g * self.m / qr
+    def h(self, qr, pr, pφ):  # NOTE: qφ absent from Hamiltonian
+        return (pr**2 + pφ**2 / qr**2) / (2 * self.m) - self.gm / qr
 
     def q_update(self, c):
         qr = c * self.h(self.qr, self.pr.var, self.pφ).der
         qφ = c * self.h(self.qr, self.pr, self.pφ.var).der
-        self.qr = Dual.from_number(self.qr.val + qr)  # only update after all coordinates done!
-        self.qφ = Dual.from_number(self.qφ.val + qφ)
+        self.qr = Dual.get(self.qr.val + qr)  # only update after all coordinates done!
+        self.qφ = self.qφ + qφ
 
-    def p_update(self, d):  # no self.p_ph update because ph absent from Hamiltonian
-        self.pr = Dual.from_number(self.pr.val - d * self.h(self.qr.var, self.pr, self.pφ).der)
+    def p_update(self, d):  # no pφ update because qφ absent from Hamiltonian
+        self.pr = Dual.get(self.pr.val - d * self.h(self.qr.var, self.pr, self.pφ).der)
 
     def solve(self, method, h, start, end, tr):
-        t = make_mpfr(0.0)
+        t = make_mpfr(0)
         i = 0
         while t < end:
             if t >= start and i % tr == 0:
@@ -57,9 +56,9 @@ class Newton(object):
             t = h * i
         self.plot(t)
 
-    def plot(self, time):
-        print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            time, self.h(self.qr, self.pr, self.pφ).val - self.h0, time, self.qr.val, self.π_2, self.qφ.val))
+    def plot(self, t):
+        print(f'{{"tau":{t:.9e},"v4e":{self.h(self.qr, self.pr, self.pφ).val - self.h0:.9e},',
+              f'"t":{t:.9e},"r":{self.qr.val:.9e},"th":{self.π_2:.9e},"ph":{self.qφ:.9e}}}')
 
 
 if __name__ == "__main__":
