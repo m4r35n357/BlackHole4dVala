@@ -229,6 +229,7 @@ def secant(f, a, b, h, ε, limit=101):
     return c
 
 if __name__ == "__main__":
+    #  Example: ./Bh.py initial-conditions.json  | ./filegraphics-pi.py initial-conditions.json
     print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']

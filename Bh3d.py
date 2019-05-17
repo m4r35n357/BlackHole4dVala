@@ -23,7 +23,7 @@ from dual import Dual, make_mpfr
 
 
 class BhSymp(object):
-    def __init__(self, a, μ2, e, lz, cc, r_0, θ_0, xh):
+    def __init__(self, a, μ2, e, lz, cc, r0, θ0, xh):
         self.a = a
         self.μ2 = μ2
         self.E = e
@@ -34,8 +34,8 @@ class BhSymp(object):
         self.aL = a * lz
         self.K = cc + (lz - self.aE)**2
         self.t = make_mpfr(0)
-        self.r = Dual.get(r_0, variable=True)
-        self.θ = Dual.get((make_mpfr(90.0) - θ_0) * acos(make_mpfr(-1)) / make_mpfr(180.0), variable=True)
+        self.r = Dual.get(r0, variable=True)
+        self.θ = Dual.get((make_mpfr(90) - θ0) * acos(make_mpfr(-1)) / make_mpfr(180), variable=True)
         self.φ = make_mpfr(0)
         self.cross = xh
         self.refresh()
@@ -91,6 +91,7 @@ class BhSymp(object):
 
 
 if __name__ == "__main__":
+    #  Example: ./Bh3d.py initial-conditions.json  | ./filegraphics-pi.py initial-conditions.json
     print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']
