@@ -23,7 +23,7 @@ from dual import Dual, make_mpfr
 
 
 class BhSymp(object):
-    def __init__(self, a, μ2, e, lz, cc, r_0, θ_0, xh):
+    def __init__(self, a, μ2, e, lz, cc, r0, θ0, xh):
         self.a = a
         self.μ2 = μ2
         self.E = e
@@ -34,13 +34,13 @@ class BhSymp(object):
         self.aL = a * lz
         self.K = cc + (lz - self.aE)**2
         self.t = make_mpfr(0)
-        self.r = Dual.from_number(r_0, variable=True)
-        self.θ = Dual.from_number((make_mpfr(90.0) - θ_0) * acos(make_mpfr(-1)) / make_mpfr(180.0), variable=True)
+        self.r = Dual.get(r0, variable=True)
+        self.θ = Dual.get((make_mpfr(90) - θ0) * acos(make_mpfr(-1)) / make_mpfr(180), variable=True)
         self.φ = make_mpfr(0)
         self.cross = xh
         self.refresh()
-        self.u_r = - sqrt(self.R.val if self.R.val >= D0 else - self.R.val)
-        self.u_θ = - sqrt(self.Θ.val if self.Θ.val >= D0 else - self.Θ.val)
+        self.ur = - sqrt(self.R.val if self.R.val >= D0 else - self.R.val)
+        self.uθ = - sqrt(self.Θ.val if self.Θ.val >= D0 else - self.Θ.val)
 
     def refresh(self):
         r2 = self.r.sqr
@@ -54,46 +54,44 @@ class BhSymp(object):
         self.Θ = self.K - self.a2μ2 * cos2θ - T.sqr / self.sin2θ
         P_Δ = P.val / self.Δ.val
         self.Σ = r2.val + self.a2 * cos2θ.val
-        self.u_t = P_Δ * self.ra2.val - T.val * self.a
-        self.u_φ = P_Δ * self.a - T.val / self.sin2θ.val
+        self.ut = P_Δ * self.ra2.val - T.val * self.a
+        self.uφ = P_Δ * self.a - T.val / self.sin2θ.val
 
-    def p4_error(self, u_t, u_r, u_θ, u_φ):
-        return (self.μ2 + self.sin2θ.val / self.Σ * (self.a * u_t - self.ra2.val * u_φ)**2
-                + self.Σ / self.Δ.val * u_r**2 + self.Σ * u_θ**2
-                - self.Δ.val / self.Σ * (u_t - self.a * self.sin2θ.val * u_φ)**2)
+    def p4_error(self, ut, ur, uθ, uφ):
+        return (self.μ2 + self.sin2θ.val / self.Σ * (self.a * ut - self.ra2.val * uφ)**2 + self.Σ / self.Δ.val * ur**2
+                + self.Σ * uθ**2 - self.Δ.val / self.Σ * (ut - self.a * self.sin2θ.val * uφ)**2)
 
     def q_update(self, c):
-        self.t += c * self.u_t
-        self.r.val += c * self.u_r
-        self.θ.val += c * self.u_θ
-        self.φ += c * self.u_φ
+        self.t += c * self.ut
+        self.r.val += c * self.ur
+        self.θ.val += c * self.uθ
+        self.φ += c * self.uφ
         self.refresh()
 
     def p_update(self, d):
-        self.u_r += 0.5 * d * self.R.der
-        self.u_θ += 0.5 * d * self.Θ.der
+        self.ur += 0.5 * d * self.R.der
+        self.uθ += 0.5 * d * self.Θ.der
 
     def solve(self, method, h, start, end, tr):
         mino = τ = 0.0
         i = 0
         while (τ < end) and (self.cross or self.Δ.val > D0):
             if τ >= start and i % tr == 0:
-                self.plot(mino, τ, self.u_t / self.Σ, self.u_r / self.Σ, self.u_θ / self.Σ, self.u_φ / self.Σ)
+                self.plot(mino, τ, self.ut / self.Σ, self.ur / self.Σ, self.uθ / self.Σ, self.uφ / self.Σ)
             method()
             i += 1
             mino = h * i
             τ += h * self.Σ
-        self.plot(mino, τ, self.u_t / self.Σ, self.u_r / self.Σ, self.u_θ / self.Σ, self.u_φ / self.Σ)
+        self.plot(mino, τ, self.ut / self.Σ, self.ur / self.Σ, self.uθ / self.Σ, self.uφ / self.Σ)
 
-    def plot(self, mino, τ, u_t, u_r, u_θ, u_φ):
-        er = u_r**2 - self.R.val / self.Σ**2
-        eθ = u_θ**2 - self.Θ.val / self.Σ**2
-        v4e = self.p4_error(u_t, u_r, u_θ, u_φ)
-        print('{{"mino":{:.9e},"tau":{:.9e},"v4e":{:.9e},"ER":{:.9e},"ETh":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            mino, τ, v4e, er, eθ, self.t, self.r.val, self.θ.val, self.φ))
+    def plot(self, mino, τ, ut, ur, uθ, uφ):
+        print(f'{{"mino":{mino:.9e},"tau":{τ:.9e},"v4e":{self.p4_error(ut, ur, uθ, uφ):.9e},'
+              f'"ER":{ur**2 - self.R.val / self.Σ**2:.9e},"ETh":{uθ**2 - self.Θ.val / self.Σ**2:.9e},'
+              f'"t":{self.t:.9e},"r":{self.r.val:.9e},"th":{self.θ.val:.9e},"ph":{self.φ:.9e}}}')
 
 
 if __name__ == "__main__":
+    #  Example: ./Bh3d.py initial-conditions.json  | ./filegraphics-pi.py initial-conditions.json
     print("Simulator: {}".format(argv[0]), file=stderr)
     input_data = open(argv[1]).read() if len(argv) == 2 else stdin.read()
     ic = loads(input_data, parse_float=mpfr)['IC']

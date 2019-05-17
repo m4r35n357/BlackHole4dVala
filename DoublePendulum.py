@@ -30,10 +30,10 @@ class DoublePendulum(object):
         self.m1 = m1
         self.l2 = l2
         self.m2 = m2
-        self.th1 = Dual.from_number(th1_0)
-        self.pth1 = Dual.from_number(pth1_0)
-        self.th2 = Dual.from_number(th2_0)
-        self.pth2 = Dual.from_number(pth2_0)
+        self.th1 = Dual.get(th1_0)
+        self.pth1 = Dual.get(pth1_0)
+        self.th2 = Dual.get(th2_0)
+        self.pth2 = Dual.get(pth2_0)
         self.h0 = self.h(self.th1, self.pth1, self.th2, self.pth2).val
         self.tol = tol
 
@@ -44,38 +44,38 @@ class DoublePendulum(object):
                - (self.m1 + self.m2) * self.g * self.l1 * th1.cos - self.m2 * self.g * self.l2 * th2.cos
 
     def qth1_update(self, c, th1):
-        return self.th1.val - th1 + 0.5 * c * self.h(Dual.from_number(th1), self.pth1.var, self.th2, self.pth2).der
+        return self.th1.val - th1 + 0.5 * c * self.h(Dual.get(th1), self.pth1.var, self.th2, self.pth2).der
 
     def qth2_update(self, c, th2):
-        return self.th2.val - th2 + 0.5 * c * self.h(self.th1, self.pth1, Dual.from_number(th2), self.pth2.var).der
+        return self.th2.val - th2 + 0.5 * c * self.h(self.th1, self.pth1, Dual.get(th2), self.pth2.var).der
 
     def q_update_1(self, c):
         th1 = secant(self.qth1_update, self.th1.val, c, self.tol)
         th2 = secant(self.qth2_update, self.th2.val, c, self.tol)
-        self.th1 = Dual.from_number(th1)
-        self.th2 = Dual.from_number(th2)
+        self.th1 = Dual.get(th1)
+        self.th2 = Dual.get(th2)
 
     def q_update_2(self, c):
         th1 = self.th1.val + 0.5 * c * self.h(self.th1, self.pth1.var, self.th2, self.pth2).der
         th2 = self.th2.val + 0.5 * c * self.h(self.th1, self.pth1, self.th2, self.pth2.var).der
-        self.th1 = Dual.from_number(th1)
-        self.th2 = Dual.from_number(th2)
+        self.th1 = Dual.get(th1)
+        self.th2 = Dual.get(th2)
 
     def pth1_update(self, d, pth1):
         th1_var = self.th1.var
         return self.pth1.val - pth1 - 0.5 * d * (self.h(th1_var, self.pth1, self.th2, self.pth2).der
-                                               + self.h(th1_var, Dual.from_number(pth1), self.th2, self.pth2).der)
+                                               + self.h(th1_var, Dual.get(pth1), self.th2, self.pth2).der)
 
     def pth2_update(self, d, pth2):
         th2_var = self.th2.var
         return self.pth2.val - pth2 - 0.5 * d * (self.h(self.th1, self.pth1, th2_var, self.pth2).der
-                                               + self.h(self.th1, self.pth1, th2_var, Dual.from_number(pth2)).der)
+                                               + self.h(self.th1, self.pth1, th2_var, Dual.get(pth2)).der)
 
     def p_update(self, d):
         pth1 = secant(self.pth1_update, self.pth1.val, d, self.tol)
         pth2 = secant(self.pth2_update, self.pth2.val, d, self.tol)
-        self.pth1 = Dual.from_number(pth1)
-        self.pth2 = Dual.from_number(pth2)
+        self.pth1 = Dual.get(pth1)
+        self.pth2 = Dual.get(pth2)
 
     def stormer_verlet(self, h):
         self.q_update_1(h)
@@ -134,16 +134,16 @@ class DoublePendulum(object):
         k4[3] = self.h(
             self.th1 + k2[2], self.pth1 + k1[2], self.th2 + k4[2], (self.pth2 + k3[2]).var).der
 
-        self.th1 = Dual.from_number(self.th1.val + h * (k2[0] + 2 * (k2[1] + k2[2]) + k2[3]) / 6)
-        self.pth1 = Dual.from_number(self.pth1.val - h * (k1[0] + 2 * (k1[1] + k1[2]) + k1[3]) / 6)
-        self.th2 = Dual.from_number(self.th2.val + h * (k4[0] + 2 * (k4[1] + k4[2]) + k4[3]) / 6)
-        self.pth2 = Dual.from_number(self.pth2.val - h * (k3[0] + 2 * (k3[1] + k3[2]) + k3[3]) / 6)
+        self.th1 = Dual.get(self.th1.val + h * (k2[0] + 2 * (k2[1] + k2[2]) + k2[3]) / 6)
+        self.pth1 = Dual.get(self.pth1.val - h * (k1[0] + 2 * (k1[1] + k1[2]) + k1[3]) / 6)
+        self.th2 = Dual.get(self.th2.val + h * (k4[0] + 2 * (k4[1] + k4[2]) + k4[3]) / 6)
+        self.pth2 = Dual.get(self.pth2.val - h * (k3[0] + 2 * (k3[1] + k3[2]) + k3[3]) / 6)
 
     def euler(self, h):
-        self.th1 = Dual.from_number(self.th1.val + h * self.h(self.pth1, self.pth1.var, self.th2, self.pth2).der)
-        self.pth1 = Dual.from_number(self.pth1.val - h * self.h(self.th1.var, self.pth1, self.th2, self.pth2).der)
-        self.th2 = Dual.from_number(self.th2.val + h * self.h(self.th1, self.pth1, self.th2, self.pth2.var).der)
-        self.pth2 = Dual.from_number(self.pth2.val - h * self.h(self.th1, self.pth1, self.th2.var, self.pth2).der)
+        self.th1 = Dual.get(self.th1.val + h * self.h(self.pth1, self.pth1.var, self.th2, self.pth2).der)
+        self.pth1 = Dual.get(self.pth1.val - h * self.h(self.th1.var, self.pth1, self.th2, self.pth2).der)
+        self.th2 = Dual.get(self.th2.val + h * self.h(self.th1, self.pth1, self.th2, self.pth2.var).der)
+        self.pth2 = Dual.get(self.pth2.val - h * self.h(self.th1, self.pth1, self.th2.var, self.pth2).der)
 
     def solve(self, h, start, end, tr):
         t = 0.0

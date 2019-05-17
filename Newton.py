@@ -24,30 +24,29 @@ from dual import Dual, make_mpfr
 
 class Newton(object):
     def __init__(self, g, m, l_fac, r0):
-        zero = make_mpfr(0)
-        self.π_2 = acos(zero)
-        self.g = Dual.from_number(g)
-        self.m = Dual.from_number(m)
-        self.q_φ = Dual.from_number(zero)
-        self.p_φ = Dual.from_number(l_fac * m * sqrt(r0))
-        self.q_r = Dual.from_number(r0)
-        self.p_r = Dual.from_number(zero)
-        self.h0 = self.h(self.q_r, self.p_r, self.p_φ).val
+        self.π_2 = acos(make_mpfr(0))
+        self.m = m
+        self.gm = g * m
+        self.qφ = make_mpfr(0)
+        self.pφ = Dual.get(l_fac * m * sqrt(r0))
+        self.qr = Dual.get(r0)
+        self.pr = Dual.get(make_mpfr(0))
+        self.h0 = self.h(self.qr, self.pr, self.pφ).val
 
-    def h(self, q_r, p_r, p_φ):  # ph absent from Hamiltonian
-        return (p_r**2 + p_φ**2 / q_r**2) / (2 * self.m) - self.g * self.m / q_r
+    def h(self, qr, pr, pφ):  # NOTE: qφ absent from Hamiltonian
+        return (pr**2 + pφ**2 / qr**2) / (2 * self.m) - self.gm / qr
 
     def q_update(self, c):
-        q_r = c * self.h(self.q_r, self.p_r.var, self.p_φ).der
-        q_φ = c * self.h(self.q_r, self.p_r, self.p_φ.var).der
-        self.q_r = Dual.from_number(self.q_r.val + q_r)  # only update after all coordinates done!
-        self.q_φ = Dual.from_number(self.q_φ.val + q_φ)
+        qr = c * self.h(self.qr, self.pr.var, self.pφ).der
+        qφ = c * self.h(self.qr, self.pr, self.pφ.var).der
+        self.qr = Dual.get(self.qr.val + qr)  # only update after all coordinates done!
+        self.qφ = self.qφ + qφ
 
-    def p_update(self, d):  # no self.p_ph update because ph absent from Hamiltonian
-        self.p_r = Dual.from_number(self.p_r.val - d * self.h(self.q_r.var, self.p_r, self.p_φ).der)
+    def p_update(self, d):  # no pφ update because qφ absent from Hamiltonian
+        self.pr = Dual.get(self.pr.val - d * self.h(self.qr.var, self.pr, self.pφ).der)
 
     def solve(self, method, h, start, end, tr):
-        t = 0.0
+        t = make_mpfr(0)
         i = 0
         while t < end:
             if t >= start and i % tr == 0:
@@ -57,9 +56,9 @@ class Newton(object):
             t = h * i
         self.plot(t)
 
-    def plot(self, time):
-        print('{{"tau":{:.9e},"v4e":{:.9e},"t":{:.9e},"r":{:.9e},"th":{:.9e},"ph":{:.9e}}}'.format(
-            time, self.h(self.q_r, self.p_r, self.p_φ).val - self.h0, time, self.q_r.val, self.π_2, self.q_φ.val))
+    def plot(self, t):
+        print(f'{{"tau":{t:.9e},"v4e":{self.h(self.qr, self.pr, self.pφ).val - self.h0:.9e},',
+              f'"t":{t:.9e},"r":{self.qr.val:.9e},"th":{self.π_2:.9e},"ph":{self.qφ:.9e}}}')
 
 
 if __name__ == "__main__":
