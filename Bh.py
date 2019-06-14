@@ -18,6 +18,7 @@ from json import loads
 from sys import stdin, stderr, argv
 from gmpy2 import get_context, mpfr, sqrt, sin, cos, acos
 get_context().precision = 236  # Set this BEFORE importing or defining any Taylor Series / Dual Number stuff!
+from dual import Dual
 
 #  ./Bh.py <initial-conditions.json | ./filegraphics-pi.py initial-conditions.json &
 #  ./Bh.py <initial-conditions.json | ./plotErrors.py initial-conditions.json tau 1 &
@@ -28,89 +29,6 @@ D05 = mpfr('0.5')
 # noinspection PyArgumentList
 def make_mpfr(x):
     return mpfr(str(x)) if isinstance(x, float) else mpfr(x) if isinstance(x, (int, str)) else x
-
-
-class Dual:
-
-    def __init__(self, value, derivative):
-        self.val = value
-        self.der = derivative
-
-    @classmethod
-    def get(cls, value, variable=False):
-        return cls(make_mpfr(value), make_mpfr(1) if variable else make_mpfr(0))
-
-    def __str__(self):
-        return "{:+.6e} {:+.6e}".format(self.val, self.der)
-
-    def __abs__(self):
-        return self.sqr.sqrt
-
-    def __pos__(self):
-        return Dual(self.val, self.der)
-
-    def __neg__(self):
-        return Dual(- self.val, - self.der)
-
-    def __add__(self, other):
-        if isinstance(other, Dual):
-            return Dual(self.val + other.val, self.der + other.der)
-        else:
-            return Dual(self.val + other, self.der)
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __sub__(self, other):
-        if isinstance(other, Dual):
-            return Dual(self.val - other.val, self.der - other.der)
-        else:
-            return Dual(self.val - other, self.der)
-
-    def __rsub__(self, other):
-        return Dual(- self.val + other, - self.der)
-
-    def __mul__(self, other):
-        if isinstance(other, Dual):
-            return Dual(self.val * other.val, self.der * other.val + self.val * other.der)
-        else:
-            return Dual(self.val * other, self.der * other)
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
-    def __truediv__(self, other):
-        if isinstance(other, Dual):
-            return Dual(self.val / other.val, (self.der * other.val - self.val * other.der) / other.val**2)
-        else:
-            return Dual(self.val / other, self.der / other)
-
-    def __rtruediv__(self, other):
-        return Dual(other / self.val, - other * self.der / self.val**2)
-
-    def __pow__(self, a):
-        return Dual(self.val**a, a * self.val**(a - 1) * self.der)
-
-    @property
-    def var(self):
-        return Dual(self.val, make_mpfr(1))
-
-    @property
-    def sqr(self):
-        return Dual(self.val**2, 2 * self.der * self.val)
-
-    @property
-    def sqrt(self):
-        sqrt_val = sqrt(self.val)
-        return Dual(sqrt_val, self.der / (2 * sqrt_val))
-
-    @property
-    def sin(self):
-        return Dual(sin(self.val), self.der * cos(self.val))
-
-    @property
-    def cos(self):
-        return Dual(cos(self.val), - self.der * sin(self.val))
 
 
 class Kerr(object):
